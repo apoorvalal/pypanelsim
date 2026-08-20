@@ -23,6 +23,7 @@ classifiers = [
 ]
 
 [project.urls]
+Documentation = "https://github.com/apoorvalal/pypanelsim#readme"
 Repository = "https://github.com/apoorvalal/pypanelsim"
 
 [dependency-groups]
@@ -44,4 +45,3 @@ line-length = 88
 
 [tool.ruff.lint]
 select = ["B", "E", "F", "I", "RUF", "UP"]
-

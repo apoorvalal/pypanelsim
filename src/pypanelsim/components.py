@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
+from types import MappingProxyType
 from typing import Any, Protocol, runtime_checkable
 
 import numpy as np
@@ -172,6 +173,13 @@ class StaggeredAdoption:
     """Assign absorbing treatment from a mapping of unit to adoption period."""
 
     adoption_times: Mapping[int, int]
+
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self,
+            "adoption_times",
+            MappingProxyType(dict(self.adoption_times)),
+        )
 
     def assign(
         self, dimensions: PanelDimensions, rng: np.random.Generator

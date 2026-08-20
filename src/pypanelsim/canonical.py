@@ -11,6 +11,7 @@ import numpy as np
 from .components import (
     ComponentDraw,
     LinearRampEffect,
+    OutcomeModel,
     PanelDimensions,
     SimulationContext,
     SingleCohortAssignment,
@@ -62,6 +63,11 @@ class CanonicalPanelConfig:
 def _validate_overlap(overlap: float) -> None:
     if not np.isfinite(overlap) or overlap < 0.0:
         raise ValueError("overlap must be finite and nonnegative")
+
+
+def _validate_noise_variance(noise_variance: float) -> None:
+    if not np.isfinite(noise_variance) or noise_variance < 0.0:
+        raise ValueError("noise_variance must be finite and nonnegative")
 
 
 def _stationary_ar1(
@@ -167,6 +173,7 @@ class ClassicFactorOutcome:
 
     def __post_init__(self) -> None:
         _validate_overlap(self.overlap)
+        _validate_noise_variance(self.noise_variance)
 
     def generate(
         self, context: SimulationContext, rng: np.random.Generator
@@ -199,6 +206,7 @@ class WeakFactorOutcome:
 
     def __post_init__(self) -> None:
         _validate_overlap(self.overlap)
+        _validate_noise_variance(self.noise_variance)
 
     def generate(
         self, context: SimulationContext, rng: np.random.Generator
@@ -273,6 +281,7 @@ class SyntheticControlOutcome:
     def __post_init__(self) -> None:
         if not np.isfinite(self.active_share) or not 0.0 < self.active_share <= 1.0:
             raise ValueError("active_share must lie in (0, 1]")
+        _validate_noise_variance(self.noise_variance)
 
     def generate(
         self, context: SimulationContext, rng: np.random.Generator
@@ -325,6 +334,7 @@ class FactorSyntheticOutcome:
 
     def __post_init__(self) -> None:
         _validate_overlap(self.overlap)
+        _validate_noise_variance(self.noise_variance)
 
     def generate(
         self, context: SimulationContext, rng: np.random.Generator
@@ -392,6 +402,7 @@ class TimeSeriesOutcome:
     def __post_init__(self) -> None:
         if not np.isfinite(self.coefficient) or abs(self.coefficient) >= 1.0:
             raise ValueError("coefficient must lie strictly between -1 and 1")
+        _validate_noise_variance(self.noise_variance)
 
     def generate(
         self, context: SimulationContext, rng: np.random.Generator
@@ -481,6 +492,7 @@ class MixedFactorOutcome:
 
     def __post_init__(self) -> None:
         _validate_overlap(self.overlap)
+        _validate_noise_variance(self.noise_variance)
 
     def generate(
         self, context: SimulationContext, rng: np.random.Generator
@@ -543,7 +555,7 @@ def _canonical_simulator(
     *,
     name: str,
     config: CanonicalPanelConfig,
-    outcome_model: object,
+    outcome_model: OutcomeModel,
 ) -> PanelSimulator:
     return PanelSimulator(
         name=name,

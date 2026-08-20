@@ -44,6 +44,15 @@ def test_staggered_adoption_and_linear_effect_use_unit_event_time() -> None:
     np.testing.assert_allclose(effect.values[3], [0, 0, 0, 0, 0.5, 1.0])
 
 
+def test_staggered_assignment_copies_its_configuration() -> None:
+    adoption = {1: 2}
+    assignment = StaggeredAdoption(adoption)
+    adoption[2] = 3
+
+    draw = assignment.assign(PanelDimensions(4, 5), np.random.default_rng(2))
+    np.testing.assert_array_equal(np.flatnonzero(draw.values[:, -1]), [1])
+
+
 def test_constant_effect_is_zero_outside_treatment() -> None:
     dimensions = PanelDimensions(3, 4)
     treatment = StaggeredAdoption({2: 1}).assign(dimensions, np.random.default_rng(4))

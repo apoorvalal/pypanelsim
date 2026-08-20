@@ -137,6 +137,8 @@ def test_invalid_canonical_arguments_fail_with_actionable_messages() -> None:
         pps.synthetic_control(active_share=0.0, config=SMALL)
     with pytest.raises(ValueError, match="coefficient"):
         pps.time_series(coefficient=1.0, config=SMALL)
+    with pytest.raises(ValueError, match="noise_variance"):
+        pps.ClassicFactorOutcome(noise_variance=-1.0)
     with pytest.raises(ValueError, match="even number"):
         pps.mixed_factor(
             config=pps.CanonicalPanelConfig(
