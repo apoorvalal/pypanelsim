@@ -128,4 +128,3 @@ The convenience functions preserve the NumPy draw order of the extracted
 match that implementation cell for cell. The R reference uses a different
 random-number generator, so cross-language comparisons must use distributional
 properties or Monte Carlo uncertainty rather than identical seeded panels.
-

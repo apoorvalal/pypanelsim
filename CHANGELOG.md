@@ -12,4 +12,3 @@
 - Preserve exact seeded NumPy output from the extracted canonical generators.
 - Add a named simulator registry, repeated-draw seed spawning, tests, examples,
   and architecture and migration documentation.
-

@@ -178,4 +178,3 @@ binary treatment. Missing outcomes can be represented by a separate custom
 metadata mask, but the core outcome matrices must remain finite. A future
 missing-data extension should add an explicit observation mask instead of
 using `NaN` as an implicit contract.
-

@@ -37,4 +37,3 @@ uv build
 Changes to canonical probability laws or draw order require a versioned
 regression test and a clear changelog entry. Parameter-only extensions should
 remain backward compatible when possible.
-

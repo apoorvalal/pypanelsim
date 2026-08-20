@@ -41,4 +41,3 @@ jobs:
       - name: Build distributions
         if: matrix.python == '3.12'
         run: uv build
-

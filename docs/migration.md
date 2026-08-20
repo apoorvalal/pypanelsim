@@ -102,4 +102,3 @@ Custom designs no longer need to edit a canonical generator module. Implement
 an assignment, outcome, or effect protocol and compose it with
 `PanelSimulator`. Project-specific named designs can be stored in a
 `DGPRegistry` without changing the package registry.
-
