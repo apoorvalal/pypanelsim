@@ -11,11 +11,12 @@ uv run ruff check .
 uv run pytest
 uv run python examples/custom_dgp.py
 uv run python examples/estimator_interop.py
+uv run python examples/assignment_mechanisms.py
 uv build
 ```
 
-The source tree contains no crabbymetrics import. NumPy is the only runtime
-dependency declared in `pyproject.toml`.
+The source tree contains no crabbymetrics import. NumPy and Matplotlib are the
+runtime dependencies declared in `pyproject.toml`.
 
 The wheel was installed into a fresh temporary `uv` environment. A smoke test
 then created a registered classic-factor design, generated a `(200, 50)` panel,

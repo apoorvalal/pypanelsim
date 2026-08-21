@@ -1,0 +1,94 @@
+project:
+  type: website
+  output-dir: ../docs
+  resources:
+    - .nojekyll
+  render:
+    - index.qmd
+    - getting-started.qmd
+    - assignment.qmd
+    - interoperability.qmd
+    - architecture.md
+    - canonical-designs.md
+    - migration.md
+    - validation.md
+    - api.qmd
+    - reference/core.qmd
+    - reference/assignment.qmd
+    - reference/canonical.qmd
+    - reference/registry.qmd
+    - vignettes/balancing-reproduction.qmd
+
+website:
+  title: "pypanelsim"
+  description: "Composable synthetic panel data with explicit assignment and causal truth."
+  site-url: "https://apoorvalal.github.io/pypanelsim"
+  repo-url: "https://github.com/apoorvalal/pypanelsim"
+  repo-actions: [edit, issue]
+  search: true
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: getting-started.qmd
+        text: Get started
+      - href: assignment.qmd
+        text: Assignment
+      - href: api.qmd
+        text: API
+      - text: Vignettes
+        menu:
+          - href: vignettes/balancing-reproduction.qmd
+            text: Balancing reproduction
+          - href: interoperability.qmd
+            text: Estimator interoperability
+    right:
+      - icon: github
+        href: "https://github.com/apoorvalal/pypanelsim"
+        aria-label: GitHub repository
+  sidebar:
+    style: docked
+    contents:
+      - section: "Use pypanelsim"
+        contents:
+          - getting-started.qmd
+          - assignment.qmd
+          - interoperability.qmd
+      - section: "Concepts"
+        contents:
+          - architecture.md
+          - canonical-designs.md
+          - migration.md
+          - validation.md
+      - section: "API reference"
+        contents:
+          - api.qmd
+          - reference/core.qmd
+          - reference/assignment.qmd
+          - reference/canonical.qmd
+          - reference/registry.qmd
+      - section: "Vignettes"
+        contents:
+          - vignettes/balancing-reproduction.qmd
+
+format:
+  html:
+    theme:
+      light: cosmo
+      dark: darkly
+    css: styles.css
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-copy: true
+    code-fold: show
+    code-overflow: wrap
+    anchor-sections: true
+    fig-responsive: true
+
+execute:
+  freeze: auto
+  warning: false
+  message: false
+
+jupyter: python3

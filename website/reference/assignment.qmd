@@ -1,0 +1,173 @@
+---
+title: "Assignment, feature, and effect API"
+subtitle: "Configuration, probability laws, metadata, and validation"
+---
+
+```{python}
+import inspect
+
+import numpy as np
+import pypanelsim as pps
+
+
+def show_signature(object_):
+    print(f"{object_.__name__}{inspect.signature(object_)}")
+```
+
+## `GaussianUnitFeatures`
+
+```{python}
+show_signature(pps.GaussianUnitFeatures)
+```
+
+Draws independent standard-normal `observables` and `unobservables` matrices.
+
+| Parameter | Default | Contract |
+|---|---:|---|
+| `n_observables` | `2` | Nonnegative feature count |
+| `n_unobservables` | `2` | Nonnegative latent-feature count |
+
+Metadata includes `kind="gaussian_unit_features"`, `observable_names`, and
+`unobservable_names`. A zero count returns an `(n_units, 0)` matrix without
+consuming draws for that block.
+
+## `SingleCohortAssignment`
+
+```{python}
+show_signature(pps.SingleCohortAssignment)
+```
+
+Creates one deterministic absorbing cohort.
+
+| Parameter | Default | Contract |
+|---|---:|---|
+| `n_treated` | `40` | Between one and `n_units` |
+| `adoption_period` | `40` | Zero-based valid period |
+| `treated_units` | `None` | Optional unique tuple of exactly `n_treated` valid positions |
+
+When positions are omitted, the last `n_treated` rows are treated. The model
+does not consume random draws. Metadata records the positions and adoption
+period.
+
+## `RandomizedSingleCohortAssignment`
+
+```{python}
+show_signature(pps.RandomizedSingleCohortAssignment)
+```
+
+Samples a fixed number of units without replacement, then treats them from a
+common adoption period onward.
+
+| Parameter | Contract |
+|---|---|
+| `n_treated` | Positive and no larger than the eligible count |
+| `adoption_period` | Zero-based valid period |
+| `eligible_units` | Optional unique valid positions; default is every unit |
+
+For eligible set $E$, each eligible unit has marginal probability
+$n_{treated}/|E|$. Metadata contains `treated_units`, `eligible_units`,
+`adoption_period`, and the unit-aligned `propensity_scores` vector.
+
+## `BinaryLogitAssignment`
+
+```{python}
+show_signature(pps.BinaryLogitAssignment)
+```
+
+Draws independent eventual-treatment indicators using
+
+$$
+P(D_i=1\mid X_i,U_i)=
+\Lambda(\alpha+X_i^\top\beta+U_i^\top\gamma).
+$$
+
+| Parameter | Default | Contract |
+|---|---:|---|
+| `adoption_period` | Required | Zero-based valid period |
+| `intercept` | `0.0` | Finite scalar |
+| `observable_coefficients` | `()` | One finite coefficient per observed feature |
+| `unobservable_coefficients` | `()` | One finite coefficient per latent feature |
+
+The coefficient counts must exactly match `AssignmentContext`. Unlike fixed-size
+randomization, the treated count is random and all-treated or all-control draws
+are possible in small/extreme designs. Metadata contains the linear predictor,
+sigmoid probabilities, realized treated units, coefficient vectors, and adoption
+period.
+
+## `StaggeredAdoption`
+
+```{python}
+show_signature(pps.StaggeredAdoption)
+```
+
+Accepts a mapping `{unit_position: adoption_period}` and constructs absorbing
+treatment. Units absent from the mapping are never treated. The mapping is
+copied at construction. Invalid unit or time positions raise `ValueError`.
+
+## `GeneralizedPropensityAssignment`
+
+```{python}
+show_signature(pps.GeneralizedPropensityAssignment)
+```
+
+Maps each unit to one adoption cohort or never treated. For $G$ supplied
+adoption periods, coefficient rows correspond to those periods in caller order.
+Never treated is category `G` with normalized logit zero.
+
+| Parameter | Shape | Contract |
+|---|---|---|
+| `adoption_periods` | `(G,)` | Nonempty, unique, valid zero-based periods |
+| `intercepts` | `(G,)` | Finite; omitted means zeros |
+| `observable_coefficients` | `(G,K_x)` | Finite; omitted means zeros |
+| `unobservable_coefficients` | `(G,K_u)` | Finite; omitted means zeros |
+
+Probabilities use a stable row-wise softmax. One uniform draw maps each unit to a
+category; treatment is one from the realized adoption period onward.
+
+Metadata keys:
+
+| Key | Shape or value |
+|---|---|
+| `generalized_propensity_scores` | `(N,G+1)`; rows sum to one |
+| `cohort_linear_predictors` | `(N,G)` |
+| `assigned_categories` | `(N,)`; `G` denotes never treated |
+| `adoption_times` | `(N,)`; never treated uses `n_periods` |
+| `adoption_periods` | `(G,)` |
+| `never_treated_category` | Integer `G` |
+| coefficient/intercept keys | Normalized NumPy arrays used in the draw |
+
+## `ConstantEffect`
+
+```{python}
+show_signature(pps.ConstantEffect)
+```
+
+Returns `value * context.treatment`. `value` defaults to `1.0` and must be
+finite. Metadata records `kind="constant"` and the value.
+
+## `LinearRampEffect`
+
+```{python}
+show_signature(pps.LinearRampEffect)
+```
+
+For adoption time $G_i$, returns
+
+$$
+\tau_{it}=s\max(t-G_i+1,0)W_{it}.
+$$
+
+`slope` defaults to `0.2` and must be finite. The effect supports staggered
+absorbing adoption because event time is unit specific. Nonabsorbing treatment
+raises through `context.adoption_times`.
+
+## `CallableOutcomeModel`
+
+```{python}
+show_signature(pps.CallableOutcomeModel)
+```
+
+Adapts a plain callable `(SimulationContext, Generator) -> matrix | ComponentDraw`
+to `OutcomeModel`. Matrix results are wrapped in `ComponentDraw` with
+`kind=name`; a returned `ComponentDraw` is preserved. Final shape and finiteness
+remain the simulator's responsibility.

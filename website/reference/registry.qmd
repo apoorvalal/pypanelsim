@@ -1,0 +1,74 @@
+---
+title: "Registry API"
+subtitle: "Stable names for simulator factories"
+---
+
+```{python}
+import inspect
+
+import pypanelsim as pps
+
+print(f"DGPRegistry{inspect.signature(pps.DGPRegistry)}")
+```
+
+## `DGPRegistry`
+
+`DGPRegistry` maps normalized public names to callables that return
+`PanelSimulator` objects.
+
+### `register`
+
+```{python}
+print(f"register{inspect.signature(pps.DGPRegistry.register)}")
+```
+
+- `name` must start with a lowercase letter and otherwise contain only lowercase
+  letters, digits, and underscores.
+- `factory` must be callable.
+- duplicate registration raises `ValueError` unless `replace=True`.
+- the registry does not invoke or introspect the factory at registration time.
+
+### `create`
+
+```{python}
+print(f"create{inspect.signature(pps.DGPRegistry.create)}")
+```
+
+Looks up `name` and forwards keyword arguments to the factory. An unknown name
+raises `KeyError` with the available names. Type and parameter errors from the
+selected factory propagate to the caller.
+
+### Inspection
+
+```{python}
+for name in ("names", "__contains__", "__iter__", "__len__"):
+    print(f"{name}{inspect.signature(getattr(pps.DGPRegistry, name))}")
+```
+
+`names()` returns sorted names. Membership, iteration, and `len()` provide the
+standard container interface.
+
+## Example
+
+```{python}
+registry = pps.DGPRegistry()
+
+
+def small_factor(*, overlap=0.0):
+    config = pps.CanonicalPanelConfig(
+        n_control=24,
+        n_treated=6,
+        n_pre=16,
+        n_post=4,
+    )
+    return pps.classic_factor_design(config=config, overlap=overlap)
+
+
+registry.register("small_factor", small_factor)
+simulator = registry.create("small_factor", overlap=1.0)
+panel = simulator.simulate(seed=12)
+print(registry.names(), panel.shape)
+```
+
+The package-level `canonical_registry` is prepopulated with the six canonical
+designs. Project-specific registries avoid mutating that global namespace.

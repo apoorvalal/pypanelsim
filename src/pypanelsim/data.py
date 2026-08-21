@@ -34,6 +34,19 @@ def _readonly_ids(value: Any, *, length: int, name: str) -> NDArray[Any]:
     return array
 
 
+def _readonly_unit_covariates(value: Any | None, *, n_units: int) -> FloatMatrix:
+    if value is None:
+        array = np.empty((n_units, 0), dtype=float)
+    else:
+        array = np.array(value, dtype=float, copy=True)
+    if array.ndim != 2 or array.shape[0] != n_units:
+        raise ValueError("unit_covariates must have shape (n_units, n_covariates)")
+    if not np.all(np.isfinite(array)):
+        raise ValueError("unit_covariates must contain only finite values")
+    array.setflags(write=False)
+    return array
+
+
 def _freeze_value(value: Any) -> Any:
     if isinstance(value, np.ndarray):
         array = np.array(value, copy=True)
@@ -68,6 +81,8 @@ class PanelDataset:
     unit_ids: NDArray[Any] | None = None
     time_ids: NDArray[Any] | None = None
     metadata: Mapping[str, Any] = field(default_factory=dict)
+    unit_covariates: FloatMatrix | None = None
+    unit_covariate_names: Sequence[str] | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.name, str) or not self.name.strip():
@@ -90,6 +105,31 @@ class PanelDataset:
             )
 
         n_units, n_periods = shape
+        unit_covariates = _readonly_unit_covariates(
+            self.unit_covariates, n_units=n_units
+        )
+        if self.unit_covariate_names is None:
+            unit_covariate_names = tuple(
+                f"x{index + 1}" for index in range(unit_covariates.shape[1])
+            )
+        else:
+            unit_covariate_names = tuple(self.unit_covariate_names)
+        if len(unit_covariate_names) != unit_covariates.shape[1]:
+            raise ValueError("unit_covariate_names must match the unit covariate count")
+        if any(not isinstance(name, str) or not name for name in unit_covariate_names):
+            raise ValueError("unit_covariate_names must contain non-empty strings")
+        if len(set(unit_covariate_names)) != len(unit_covariate_names):
+            raise ValueError("unit_covariate_names must be unique")
+        reserved = {
+            "unit",
+            "time",
+            "outcome",
+            "treatment",
+            "untreated_outcome",
+            "treatment_effect",
+        }
+        if reserved.intersection(unit_covariate_names):
+            raise ValueError("unit_covariate_names cannot use reserved panel names")
         unit_ids = (
             np.arange(n_units, dtype=np.int64)
             if self.unit_ids is None
@@ -105,6 +145,8 @@ class PanelDataset:
         object.__setattr__(self, "treatment", treatment)
         object.__setattr__(self, "untreated_outcome", untreated)
         object.__setattr__(self, "treatment_effect", effect)
+        object.__setattr__(self, "unit_covariates", unit_covariates)
+        object.__setattr__(self, "unit_covariate_names", unit_covariate_names)
         object.__setattr__(
             self,
             "unit_ids",
@@ -225,6 +267,8 @@ class PanelDataset:
             "untreated_outcome": self.untreated_outcome.reshape(-1),
             "treatment_effect": self.treatment_effect.reshape(-1),
         }
+        for index, name in enumerate(self.unit_covariate_names):
+            columns[name] = np.repeat(self.unit_covariates[:, index], self.n_periods)
         if copy:
             return {name: np.array(value, copy=True) for name, value in columns.items()}
         for value in columns.values():

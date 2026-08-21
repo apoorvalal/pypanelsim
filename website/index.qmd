@@ -1,0 +1,72 @@
+---
+title: "pypanelsim"
+subtitle: "Composable assignment, untreated outcomes, and treatment effects for panel simulations"
+page-layout: full
+execute:
+  enabled: false
+---
+
+::: {.hero-banner}
+# Synthetic panels with causal structure you can inspect
+
+`pypanelsim` generates balanced panel data while keeping assignment, untreated
+potential outcomes, treatment effects, observed covariates, and latent unit
+features explicit. Every draw is reproducible, validated, and estimator-neutral.
+:::
+
+## Start with a canonical design
+
+```python
+import pypanelsim as pps
+
+panel = pps.classic_factor(overlap=1.0, seed=42)
+y, w = panel.as_arrays()
+
+print(panel.shape)       # (200, 50)
+print(panel.true_att)    # 1.1
+```
+
+## Or compose the assignment law
+
+```python
+simulator = pps.PanelSimulator(
+    name="observed_selection",
+    dimensions=pps.PanelDimensions(120, 48),
+    feature_model=pps.GaussianUnitFeatures(2, 2),
+    assignment=pps.BinaryLogitAssignment(
+        adoption_period=32,
+        intercept=-1.1,
+        observable_coefficients=(1.2, -0.8),
+        unobservable_coefficients=(0.0, 0.0),
+    ),
+    outcome_model=my_outcome_model,
+    effect_model=pps.LinearRampEffect(0.12),
+)
+```
+
+The same shared features reach assignment and the untreated-outcome model.
+Observed features are exposed to downstream estimators; latent features remain
+simulation truth.
+
+## Documentation map
+
+| Goal | Page |
+|---|---|
+| Install and draw a first panel | [Get started](getting-started.qmd) |
+| Randomization, logit selection, and cohort GPS | [Assignment mechanisms](assignment.qmd) |
+| Understand component order and RNG semantics | [Architecture](architecture.md) |
+| Inspect every public object and function | [API reference](api.qmd) |
+| Reproduce 398 estimator-design RMSE cells | [Balancing reproduction](vignettes/balancing-reproduction.qmd) |
+| Pass panels to crabbymetrics or PyFixest | [Estimator interoperability](interoperability.qmd) |
+
+## Installation
+
+```bash
+uv add "pypanelsim @ git+ssh://git@github.com/apoorvalal/pypanelsim.git"
+```
+
+Install the documentation and estimator interoperability stack with:
+
+```bash
+uv sync --extra docs
+```

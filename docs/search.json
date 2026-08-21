@@ -1,0 +1,1201 @@
+[
+  {
+    "objectID": "vignettes/balancing-reproduction.html",
+    "href": "vignettes/balancing-reproduction.html",
+    "title": "Balancing estimators in synthetic panels",
+    "section": "",
+    "text": "Show code\nfrom __future__ import annotations\n\nimport csv\nimport inspect\nimport math\nfrom pathlib import Path\n\nimport crabbymetrics as cm\nimport matplotlib as mpl\nimport matplotlib.pyplot as plt\nimport numpy as np\nimport pandas as pd\n\nfrom pypanelsim import (\n    BinaryLogitAssignment,\n    CanonicalPanelConfig,\n    ConstantEffect,\n    GaussianUnitFeatures,\n    GeneralizedPropensityAssignment,\n    LinearRampEffect,\n    PanelDataset,\n    PanelDimensions,\n    PanelSimulator,\n    RandomizedSingleCohortAssignment,\n    SingleCohortAssignment,\n    StaggeredAdoption,\n    available_canonical_designs,\n    classic_factor,\n    classic_factor_design,\n    factor_synthetic,\n    make_canonical,\n    mixed_factor,\n    synthetic_control,\n    time_series,\n    weak_factor,\n)\nfrom balancing_support.outcome_models import (\n    arima_surface,\n    generalized_synthetic_control_surface,\n    interactive_fixed_effects_surface,\n    mcpanel_surface,\n    panel_var_surface,\n    two_way_fe_surface,\n)\n\nVIGNETTE = Path.cwd()\nROOT = VIGNETTE.parents[1]\nREFERENCE = VIGNETTE / \"reference\" / \"r_slide_rmse.csv\"\nRESULTS = VIGNETTE / \"results\"\n\nr_results = pd.read_csv(REFERENCE)\npython_results = pd.read_csv(RESULTS / \"python_rmse.csv\")\ncomparison = pd.read_csv(RESULTS / \"r_python_rmse_comparison.csv\")\n\nFRAME_ORDER = [\n    \"u-balance\",\n    \"outcome\",\n    \"d-balance\",\n    \"aug-d-balance (residual)\",\n    \"aug-d-balance (individual)\",\n    \"aug-d-balance (residual individual)\",\n    \"aug-d-balance\",\n]\nOUTCOME_ORDER = [\"arima\", \"fe\", \"gsynth\", \"ife\", \"MCPanel\", \"VAR\"]\n\nmpl.rcParams.update(\n    {\n        \"figure.dpi\": 115,\n        \"axes.spines.top\": False,\n        \"axes.spines.right\": False,\n        \"font.size\": 10,\n    }\n)",
+    "crumbs": [
+      "Home",
+      "Vignettes",
+      "Balancing estimators in synthetic panels"
+    ]
+  },
+  {
+    "objectID": "vignettes/balancing-reproduction.html#overview",
+    "href": "vignettes/balancing-reproduction.html#overview",
+    "title": "Balancing estimators in synthetic panels",
+    "section": "1 Overview",
+    "text": "1 Overview\nThis study compares estimators of the average treatment effect on the treated (ATT) in five synthetic panel families: classic factors, weak factors, mixed factors, sparse synthetic controls, and autoregressive outcomes. Each canonical panel contains 160 never-treated units, 40 treated units, 40 pre-treatment periods, and 10 post-treatment periods. All treated units adopt in the first post-treatment period. Their treatment effects increase from 0.2 to 2.0, which gives a true ATT of 1.1.\nThe estimators reconstruct untreated post-treatment outcomes in three ways. An outcome-model estimator uses a fitted untreated-outcome surface. Unit balancing weights control units so their pre-treatment outcomes match the treated units. Double balancing combines those donor weights with weights on pre-treatment periods in an augmented difference-in-differences score. The experiments vary factor-loading overlap, factor strength, donor sparsity, persistence, and integration to change which source of information is useful.\nThe estimator ranking changes across these designs. Unit balancing is competitive in several good-overlap and synthetic-control settings. Double balancing has substantially lower RMSE under poor factor-loading overlap and persistent integrated dynamics. No outcome model or balancing configuration minimizes RMSE in every design.\nThe reproduction uses three validation standards:\n\nOn the same fixed panel, the R quadratic-program reference and crabbymetrics.AugmentedBalancing agree to numerical precision across 48 estimator configurations.\nOn a second fixed panel, Python FE, IFE, MCPanel, generalized synthetic-control, and panel-VAR surfaces agree with their R reference surfaces within specified cell tolerances.\nIndependent R and Python Monte Carlo runs compare the full 398-cell slide grid. Differences are reported in units of combined Monte Carlo standard errors.\n\nOf the 398 Monte Carlo cells, 390 are within three combined Monte Carlo standard errors. Every FE, IFE, generalized synthetic-control, and VAR cell is within that boundary. The eight exceptions consist of five correlated MCPanel cells in the poor-overlap classic-factor setting and three ARIMA cells in the low-persistence time-series settings. These two outcome-model-specific patterns are documented below.\n\n\nShow code\nmax_standardized = comparison[\"standardized_difference\"].abs().max()\nwithin_three = int(comparison[\"within_three_mcse\"].sum())\nsummary_claims = pd.DataFrame(\n    {\n        \"check\": [\n            \"Same-panel estimator cases\",\n            \"Same-panel outcome-model surfaces\",\n            \"Matched Monte Carlo cells\",\n            \"Cells within three combined MCSE\",\n            \"R replications per matched cell\",\n            \"Python replications per matched cell\",\n            \"Largest absolute standardized RMSE difference\",\n        ],\n        \"result\": [\n            48,\n            5,\n            len(comparison),\n            within_three,\n            200,\n            200,\n            f\"{max_standardized:.3f}\",\n        ],\n    }\n)\nsummary_claims\n\n\n\n\n\n\n\n\n\ncheck\nresult\n\n\n\n\n0\nSame-panel estimator cases\n48\n\n\n1\nSame-panel outcome-model surfaces\n5\n\n\n2\nMatched Monte Carlo cells\n398\n\n\n3\nCells within three combined MCSE\n390\n\n\n4\nR replications per matched cell\n200\n\n\n5\nPython replications per matched cell\n200\n\n\n6\nLargest absolute standardized RMSE difference\n3.743",
+    "crumbs": [
+      "Home",
+      "Vignettes",
+      "Balancing estimators in synthetic panels"
+    ]
+  },
+  {
+    "objectID": "vignettes/balancing-reproduction.html#sources-and-implementation-contracts",
+    "href": "vignettes/balancing-reproduction.html#sources-and-implementation-contracts",
+    "title": "Balancing estimators in synthetic panels",
+    "section": "2 Sources and implementation contracts",
+    "text": "2 Sources and implementation contracts\nThe visual reference is drafts/slides.pdf, with source in overleaf_v2/acic_2024_deck.tex. The executable contracts come from:\n\ncode/ziyi/formal simulation DGP.R for panel generation;\ncode/ziyi/classic_did_framework.R for estimator composition;\ncode/ziyi/support/sdid_unit.R and sdid_time.R for ridge balancing;\ncode/ziyi/support/scm.R for the penalized-SCM donor loss;\noutput/simulation/*/estimation.RData for the exact slide Monte Carlo draws; and\ncode/apoorva/00_acic_tabfig.R for the slide aggregation rule, \\(\\operatorname{RMSE}=\\sqrt{\\operatorname{mean}(\\widehat\\tau-\\tau)^2}\\).\n\nThe reproduced ATT heatmaps appear on deck pages 27-28 for classic factors, 33-36 for synthetic controls, 41-44 for time series, 48-49 for weak factors, and 54-55 for mixed factors.\nThe Python comparison is exact for the balancing estimator and its penalties. It also implements all outcome-model columns in the R heatmaps: FE, IFE, MCPanel, generalized synthetic control, panel VAR, and the time-series-only ARIMA column. The Monte Carlo comparison uses the same probability laws and replication indices 1 through 200, but NumPy and R do not use the same seeded random streams. Therefore, Monte Carlo equality is evaluated relative to simulation uncertainty, not bitwise equality.\nSeveral details in the executable R source determine the numerical results:\n\n\n\n\n\n\n\n\nComponent\nExecutable R contract\nWhy it matters\n\n\n\n\nFactor scale\nDivide each realized factor path by its sample SD\nFixes the realized signal scale and signal-to-noise ratio\n\n\nSynthetic donors\nSample active donors without replacement with weights 1 for favored donors and 0.1 for other donors\nChanges the donor support in each replication\n\n\nTime-series mean\nSet the treated innovation mean to 0.25\nSeparates the innovation mean from the unconditional AR level mean\n\n\nMixed factors\nGenerate two half-panels and restart the seed for the second half\nPreserves the dependence structure of the archived experiment\n\n\nUnit balancing\nUse optimized unit weights and uniform pre-period weights in the augmented score\nRetains the time correction when time weights are not optimized\n\n\nPeriod targets\nFit one time-weight vector for each post period\nAllows the time target to change over the post-treatment path\n\n\nIFE controls\nRank 2 and force 3; tolerance \\(10^{-5}\\) for classic and weak factors and \\(10^{-4}\\) otherwise\nMatches the archived fect calls\n\n\nMCPanel\nUnit and time effects with fixed nuclear-norm penalty 0.002\nMatches lambda_L=0.002 with cross-validation disabled\n\n\nPanel VAR\nUse 2 lags for classic and weak factors, 1 for mixed factors and SCM, and 4 for time-series panels\nThe archived scripts do not use one common lag order\n\n\nARIMA\nFit an automatic univariate time-series model to each unit\nThis column appears only in the time-series DGP\n\n\nMonte Carlo size\nUse 200 successful replications per cell\nMakes the reported RMSE comparable to the archived R experiment\n\n\n\nThese are part of the statistical specification. They are not interchangeable implementation details.",
+    "crumbs": [
+      "Home",
+      "Vignettes",
+      "Balancing estimators in synthetic panels"
+    ]
+  },
+  {
+    "objectID": "vignettes/balancing-reproduction.html#exact-same-panel-estimator-parity",
+    "href": "vignettes/balancing-reproduction.html#exact-same-panel-estimator-parity",
+    "title": "Balancing estimators in synthetic panels",
+    "section": "3 Exact same-panel estimator parity",
+    "text": "3 Exact same-panel estimator parity\nThe fixture generator in crabbymetrics/tests/fixtures/generate_r_augmented_balancing_reference.R uses R and quadprog to fit all combinations of:\n\nbalance: unit, time, or double;\nunit_target: cohort or individual;\ntime_target: all post periods or one post period at a time;\nbalance_on: raw outcomes or outcome-model residuals; and\nunit_loss: SDID ridge or penalized SCM.\n\nThe following code sends the identical panel and outcome-model surface to Python.\n\n\nShow code\nfixture_dir = VIGNETTE / \"reference\"\npanel_fixture = np.genfromtxt(\n    fixture_dir / \"r_augmented_balancing_panel.csv\",\n    delimiter=\",\",\n    names=True,\n)\nn_units = int(panel_fixture[\"unit\"].max()) + 1\nn_periods = int(panel_fixture[\"period\"].max()) + 1\ny_fixture = panel_fixture[\"outcome\"].reshape(n_units, n_periods)\nw_fixture = panel_fixture[\"treatment\"].reshape(n_units, n_periods)\nm_fixture = panel_fixture[\"outcome_model\"].reshape(n_units, n_periods)\n\nwith (fixture_dir / \"r_augmented_balancing_results.csv\").open(newline=\"\") as stream:\n    r_cases = list(csv.DictReader(stream))\n\nparity_rows = []\nfor case in r_cases:\n    model = cm.AugmentedBalancing(\n        balance=case[\"balance\"],\n        unit_target=case[\"unit_target\"],\n        time_target=case[\"time_target\"],\n        balance_on=case[\"balance_on\"],\n        unit_loss=case[\"unit_loss\"],\n        unit_penalty=float(case[\"unit_penalty\"]),\n        max_iterations=10_000,\n    )\n    model.fit(y_fixture, w_fixture, m_fixture)\n    python_att = float(model.summary()[\"att\"])\n    parity_rows.append(\n        {\n            \"balance\": case[\"balance\"],\n            \"unit target\": case[\"unit_target\"],\n            \"time target\": case[\"time_target\"],\n            \"fit weights on\": case[\"balance_on\"],\n            \"unit loss\": case[\"unit_loss\"],\n            \"R ATT\": float(case[\"att\"]),\n            \"Python ATT\": python_att,\n            \"absolute difference\": abs(python_att - float(case[\"att\"])),\n        }\n    )\n\nparity = pd.DataFrame(parity_rows)\nassert len(parity) == 48\nassert parity[\"absolute difference\"].max() &lt; 1e-8\nparity.sort_values(\"absolute difference\", ascending=False).head(8)\n\n\n\n\n\n\n\n\n\nbalance\nunit target\ntime target\nfit weights on\nunit loss\nR ATT\nPython ATT\nabsolute difference\n\n\n\n\n46\ntime\nindividual\nperiod\nresidual\npenalized_scm\n-0.288866\n-0.288866\n1.763330e-10\n\n\n43\ntime\ncohort\nperiod\nresidual\npenalized_scm\n-0.288866\n-0.288866\n1.763330e-10\n\n\n22\ntime\nindividual\nperiod\nresidual\nridge\n-0.288866\n-0.288866\n1.763330e-10\n\n\n19\ntime\ncohort\nperiod\nresidual\nridge\n-0.288866\n-0.288866\n1.763330e-10\n\n\n20\ndouble\ncohort\nperiod\nresidual\nridge\n-0.387698\n-0.387698\n1.727165e-10\n\n\n23\ndouble\nindividual\nperiod\nresidual\nridge\n-0.420909\n-0.420909\n1.680384e-10\n\n\n47\ndouble\nindividual\nperiod\nresidual\npenalized_scm\n-0.538620\n-0.538620\n1.630306e-10\n\n\n44\ndouble\ncohort\nperiod\nresidual\npenalized_scm\n-0.562813\n-0.562813\n1.482283e-10\n\n\n\n\n\n\n\nThe maximum absolute ATT difference is:\n\n\nShow code\nf\"{parity['absolute difference'].max():.3e}\"\n\n\n'1.763e-10'\n\n\nThis is numerical parity. It is separate from the Monte Carlo comparison.\n\n3.1 Same-panel outcome-model parity\nThe R fixture in scripts/export_r_outcome_model_reference.R fits FE, fixed-rank IFE, MCPanel, generalized synthetic control, and panel VAR to one deterministic panel. The Python functions below receive the same outcome and treatment matrices.\n\n\nShow code\noutcome_panel = pd.read_csv(VIGNETTE / \"reference\" / \"r_outcome_model_panel.csv\")\noutcome_reference = pd.read_csv(VIGNETTE / \"reference\" / \"r_outcome_model_surfaces.csv\")\nn_outcome_units = int(outcome_panel[\"unit\"].max()) + 1\nn_outcome_periods = int(outcome_panel[\"period\"].max()) + 1\noutcome_fixture = outcome_panel[\"outcome\"].to_numpy().reshape(\n    n_outcome_units, n_outcome_periods\n)\ntreatment_fixture = outcome_panel[\"treatment\"].to_numpy().reshape(\n    n_outcome_units, n_outcome_periods\n)\n\noutcome_functions = {\n    \"fe\": two_way_fe_surface,\n    \"ife\": interactive_fixed_effects_surface,\n    \"MCPanel\": mcpanel_surface,\n    \"gsynth\": generalized_synthetic_control_surface,\n    \"VAR\": panel_var_surface,\n}\noutcome_parity_rows = []\nfor model_name, function in outcome_functions.items():\n    reference_surface = (\n        outcome_reference[outcome_reference[\"model\"].eq(model_name)][\"counterfactual\"]\n        .to_numpy()\n        .reshape(n_outcome_units, n_outcome_periods)\n    )\n    python_surface = function(outcome_fixture, treatment_fixture)\n    outcome_parity_rows.append(\n        {\n            \"outcome model\": model_name,\n            \"maximum absolute cell difference\": np.max(\n                np.abs(python_surface - reference_surface)\n            ),\n        }\n    )\noutcome_parity = pd.DataFrame(outcome_parity_rows)\nassert outcome_parity.loc[\n    ~outcome_parity[\"outcome model\"].eq(\"MCPanel\"),\n    \"maximum absolute cell difference\",\n].max() &lt; 1e-8\nassert outcome_parity.loc[\n    outcome_parity[\"outcome model\"].eq(\"MCPanel\"),\n    \"maximum absolute cell difference\",\n].max() &lt; 5e-4\noutcome_parity\n\n\n\n\n\n\n\n\n\noutcome model\nmaximum absolute cell difference\n\n\n\n\n0\nfe\n2.606115e-11\n\n\n1\nife\n1.762146e-12\n\n\n2\nMCPanel\n4.355381e-04\n\n\n3\ngsynth\n2.042810e-14\n\n\n4\nVAR\n2.297273e-11\n\n\n\n\n\n\n\nThe MCPanel cell tolerance is \\(5\\times10^{-4}\\) because the R and Rust SVD solvers stop after slightly different relative-objective updates. FE, IFE, generalized synthetic control, and VAR use a \\(10^{-8}\\) cell tolerance. ARIMA is checked by its API and Monte Carlo contracts because the historical fable version is not installed in this environment.",
+    "crumbs": [
+      "Home",
+      "Vignettes",
+      "Balancing estimators in synthetic panels"
+    ]
+  },
+  {
+    "objectID": "vignettes/balancing-reproduction.html#r-and-python-monte-carlo-results",
+    "href": "vignettes/balancing-reproduction.html#r-and-python-monte-carlo-results",
+    "title": "Balancing estimators in synthetic panels",
+    "section": "4 R and Python Monte Carlo results",
+    "text": "4 R and Python Monte Carlo results\n\n4.1 Plot construction\nEach row below contains the complete R heatmap and the complete Python heatmap for one setting. The two panels have the same rows, columns, blanks, and color scale. The slide aggregation leaves unit-only and unaugmented double balancing blank outside the FE column because those two estimators do not use an outcome model.\nColor follows the slide rule: direct RMSE from 0 to 3 on the reversed Spectral palette. Values above 3 and unavailable cells are gray. Printed labels retain the uncensored RMSE values.\n\n\nShow code\ndef _matrix_for(data, setting, outcomes):\n    selected = data[data[\"setting\"].eq(setting)]\n    matrix = (\n        selected.pivot_table(index=\"frame\", columns=\"outcome\", values=\"rmse\", aggfunc=\"first\")\n        .reindex(index=FRAME_ORDER, columns=outcomes)\n    )\n    matrix.loc[[\"u-balance\", \"d-balance\"], [name for name in outcomes if name != \"fe\"]] = np.nan\n    return matrix\n\n\ndef _draw_heatmap(ax, matrix, title, *, show_y=True):\n    values = matrix.to_numpy(dtype=float)\n    color_values = np.ma.masked_where(\n        ~np.isfinite(values) | (values &lt; 0) | (values &gt; 3),\n        values,\n    )\n    palette = mpl.colormaps[\"Spectral_r\"].copy()\n    palette.set_bad(\"#8c8c8c\")\n    image = ax.imshow(\n        color_values,\n        aspect=\"auto\",\n        cmap=palette,\n        vmin=0,\n        vmax=3,\n    )\n    ax.set_title(title, fontsize=10, loc=\"left\")\n    ax.set_xticks(range(matrix.shape[1]), matrix.columns, rotation=35, ha=\"right\")\n    if show_y:\n        ax.set_yticks(range(matrix.shape[0]), matrix.index)\n    else:\n        ax.set_yticks(range(matrix.shape[0]), [])\n    for row in range(values.shape[0]):\n        for column in range(values.shape[1]):\n            value = values[row, column]\n            if np.isfinite(value):\n                ax.text(column, row, f\"{value:.3g}\", ha=\"center\", va=\"center\", fontsize=8)\n    return image\n\n\ndef plot_family(family, settings, title):\n    fig, axes = plt.subplots(\n        len(settings),\n        2,\n        figsize=(15.5, max(3.4, 3.2 * len(settings))),\n        gridspec_kw={\"width_ratios\": [1, 1]},\n        squeeze=False,\n        constrained_layout=True,\n    )\n    for row, setting in enumerate(settings):\n        r_setting = r_results[(r_results[\"family\"] == family) & (r_results[\"setting\"] == setting)]\n        available = [name for name in OUTCOME_ORDER if name in set(r_setting[\"outcome\"])]\n        r_full = _matrix_for(r_setting, setting, available)\n        p_setting = python_results[\n            (python_results[\"family\"] == family) & (python_results[\"setting\"] == setting)\n        ]\n        p_full = _matrix_for(p_setting, setting, available)\n        image = _draw_heatmap(\n            axes[row, 0],\n            r_full,\n            f\"R reference | {setting}\",\n            show_y=True,\n        )\n        _draw_heatmap(\n            axes[row, 1],\n            p_full,\n            f\"Python reproduction | {setting}\",\n            show_y=False,\n        )\n    fig.colorbar(\n        image,\n        ax=axes,\n        orientation=\"horizontal\",\n        fraction=0.025,\n        pad=0.08,\n        label=\"RMSE (values above 3 are gray)\",\n    )\n    fig.suptitle(title, fontsize=14)\n    plt.show()\n\n\n\n\n4.2 Classic factor designs\n\n\nShow code\nplot_family(\"classic_factor\", [\"NN=200;a=0\", \"NN=200;a=1\"], \"Classic factor model\")\n\n\n\n\n\nClassic factor designs. Poor loading overlap changes the ranking sharply.\n\n\n\n\n\n\n4.3 Weak-factor designs\n\n\nShow code\nplot_family(\"weak_factor\", [\"NN=200;a=0\", \"NN=200;a=1\"], \"Weak factor model\")\n\n\n\n\n\nWeak-factor designs. Double balancing dominates unit-only balancing under poor overlap.\n\n\n\n\n\n\n4.4 Mixed-factor designs\n\n\nShow code\nplot_family(\"mixed_factor\", [\"NN=200;a=0\", \"NN=200;a=1\"], \"Mixed factor model\")\n\n\n\n\n\nMixed-factor designs. Group-specific factor paths make unit-only balancing fragile under poor overlap.\n\n\n\n\n\n\n4.5 Synthetic-control designs and donor losses\n\n\nShow code\nplot_family(\n    \"synthetic_control\",\n    [\n        \"NN=200;active=0.1;unitb=ridge\",\n        \"NN=200;active=0.1;unitb=penSCM\",\n        \"NN=200;active=0.5;unitb=ridge\",\n        \"NN=200;active=0.5;unitb=penSCM\",\n    ],\n    \"Synthetic-control model\",\n)\n\n\n\n\n\nSynthetic-control designs for ridge and penalized-SCM unit losses.\n\n\n\n\n\n\n4.6 Time-series designs\n\n\nShow code\nplot_family(\n    \"time_series\",\n    [\n        \"NN=200;a=0.2;I=0\",\n        \"NN=200;a=0.2;I=1\",\n        \"NN=200;a=0.9;I=0\",\n        \"NN=200;a=0.9;I=1\",\n    ],\n    \"Time-series model\",\n)\n\n\n\n\n\nStationary and integrated AR designs. Persistence and integration produce the largest RMSE scale.\n\n\n\n\n\n\n4.7 Unit and double balancing in difficult designs\nThe following table isolates four settings in which double balancing reduces RMSE relative to unit balancing. Ratios above one favor double balancing.\n\n\nShow code\nranking_cases = [\n    (\"classic_factor\", \"NN=200;a=1\", \"Classic factor, poor overlap\"),\n    (\"weak_factor\", \"NN=200;a=1\", \"Weak factor, poor overlap\"),\n    (\"mixed_factor\", \"NN=200;a=1\", \"Mixed factor, poor overlap\"),\n    (\"time_series\", \"NN=200;a=0.9;I=1\", \"Integrated AR, phi=0.9\"),\n]\n\nranking_rows = []\nfor family, setting, label in ranking_cases:\n    for language, data, value_column in [\n        (\"R\", comparison, \"r_rmse\"),\n        (\"Python\", comparison, \"python_rmse\"),\n    ]:\n        selected = data[(data[\"family\"] == family) & (data[\"setting\"] == setting)]\n        unit = float(selected.loc[selected[\"frame\"] == \"u-balance\", value_column].iloc[0])\n        double = float(selected.loc[selected[\"frame\"] == \"d-balance\", value_column].iloc[0])\n        ranking_rows.append(\n            {\n                \"DGP\": label,\n                \"language\": language,\n                \"unit-only RMSE\": unit,\n                \"double RMSE\": double,\n                \"unit/double ratio\": unit / double,\n            }\n        )\npd.DataFrame(ranking_rows).round(3)\n\n\n\n\n\n\n\n\n\nDGP\nlanguage\nunit-only RMSE\ndouble RMSE\nunit/double ratio\n\n\n\n\n0\nClassic factor, poor overlap\nR\n2.393\n0.615\n3.894\n\n\n1\nClassic factor, poor overlap\nPython\n2.472\n0.677\n3.649\n\n\n2\nWeak factor, poor overlap\nR\n2.164\n1.079\n2.006\n\n\n3\nWeak factor, poor overlap\nPython\n2.160\n1.059\n2.041\n\n\n4\nMixed factor, poor overlap\nR\n2.899\n1.791\n1.619\n\n\n5\nMixed factor, poor overlap\nPython\n2.909\n1.807\n1.610\n\n\n6\nIntegrated AR, phi=0.9\nR\n11.136\n8.148\n1.367\n\n\n7\nIntegrated AR, phi=0.9\nPython\n12.078\n8.938\n1.351",
+    "crumbs": [
+      "Home",
+      "Vignettes",
+      "Balancing estimators in synthetic panels"
+    ]
+  },
+  {
+    "objectID": "vignettes/balancing-reproduction.html#between-language-monte-carlo-agreement",
+    "href": "vignettes/balancing-reproduction.html#between-language-monte-carlo-agreement",
+    "title": "Balancing estimators in synthetic panels",
+    "section": "5 Between-language Monte Carlo agreement",
+    "text": "5 Between-language Monte Carlo agreement\nFor independent Monte Carlo estimates \\(\\widehat r_R\\) and \\(\\widehat r_P\\), define\n\\[\nz_{R-P}=\\frac{\\widehat r_P-\\widehat r_R}\n{\\sqrt{\\widehat{\\operatorname{MCSE}}(\\widehat r_P)^2+\n\\widehat{\\operatorname{MCSE}}(\\widehat r_R)^2}}.\n\\]\nFor errors \\(e_s\\) and \\(r=\\sqrt{S^{-1}\\sum_s e_s^2}\\), the delta-method standard error used here is\n\\[\n\\widehat{\\operatorname{MCSE}}(r)=\n\\frac{\\operatorname{sd}(e_s^2)}{2r\\sqrt{S}}.\n\\]\n\n\nShow code\nfig, ax = plt.subplots(figsize=(11, 4.5), constrained_layout=True)\nordered = comparison.sort_values(\"standardized_difference\")\ncolors = ordered[\"family\"].astype(\"category\").cat.codes\nax.scatter(np.arange(len(ordered)), ordered[\"standardized_difference\"], c=colors, cmap=\"tab10\", s=28)\nax.axhline(3, color=\"black\", linestyle=\"--\", linewidth=1)\nax.axhline(-3, color=\"black\", linestyle=\"--\", linewidth=1)\nax.axhline(0, color=\"0.5\", linewidth=0.8)\nax.set_xlabel(\"Matched RMSE cell, ordered by standardized difference\")\nax.set_ylabel(\"Python minus R, in combined MCSE units\")\nax.set_title(\"R and Python RMSE differences relative to combined Monte Carlo uncertainty\", loc=\"left\")\nplt.show()\n\n\n\n\n\n\n\n\n\n\n\nShow code\ncomparison.reindex(comparison[\"standardized_difference\"].abs().sort_values(ascending=False).index)[\n    [\n        \"family\",\n        \"setting\",\n        \"frame\",\n        \"outcome\",\n        \"r_rmse\",\n        \"python_rmse\",\n        \"difference\",\n        \"combined_mcse\",\n        \"standardized_difference\",\n    ]\n].head(12).round(4)\n\n\n\n\n\n\n\n\n\nfamily\nsetting\nframe\noutcome\nr_rmse\npython_rmse\ndifference\ncombined_mcse\nstandardized_difference\n\n\n\n\n32\nclassic_factor\nNN=200;a=1\naug-d-balance (individual)\nMCPanel\n1.5295\n1.6981\n0.1686\n0.0450\n3.7431\n\n\n27\nclassic_factor\nNN=200;a=1\naug-d-balance\nMCPanel\n1.5812\n1.7378\n0.1565\n0.0447\n3.4988\n\n\n37\nclassic_factor\nNN=200;a=1\naug-d-balance (residual individual)\nMCPanel\n2.3545\n2.5063\n0.1518\n0.0464\n3.2728\n\n\n48\nclassic_factor\nNN=200;a=1\noutcome\nMCPanel\n2.3819\n2.5324\n0.1505\n0.0462\n3.2541\n\n\n262\ntime_series\nNN=200;a=0.2;I=1\naug-d-balance (residual individual)\narima\n0.5284\n0.6506\n0.1223\n0.0377\n3.2418\n\n\n42\nclassic_factor\nNN=200;a=1\naug-d-balance (residual)\nMCPanel\n2.2426\n2.3862\n0.1435\n0.0449\n3.1980\n\n\n268\ntime_series\nNN=200;a=0.2;I=1\naug-d-balance (residual)\narima\n0.5335\n0.6536\n0.1202\n0.0377\n3.1900\n\n\n243\ntime_series\nNN=200;a=0.2;I=0\noutcome\narima\n0.0948\n0.0763\n-0.0185\n0.0059\n-3.1119\n\n\n336\ntime_series\nNN=200;a=0.9;I=1\nd-balance\nfe\n8.1484\n8.9383\n0.7899\n0.2670\n2.9588\n\n\n315\ntime_series\nNN=200;a=0.9;I=1\naug-d-balance\nfe\n8.1484\n8.9383\n0.7899\n0.2670\n2.9588\n\n\n333\ntime_series\nNN=200;a=0.9;I=1\naug-d-balance (residual)\nfe\n8.1466\n8.9365\n0.7900\n0.2670\n2.9588\n\n\n34\nclassic_factor\nNN=200;a=1\naug-d-balance (individual)\nfe\n0.5193\n0.5882\n0.0689\n0.0233\n2.9527\n\n\n\n\n\n\n\n\n\nShow code\nagreement_by_outcome = (\n    comparison.assign(\n        absolute_standardized_difference=comparison[\"standardized_difference\"].abs(),\n        absolute_relative_difference=comparison[\"relative_difference\"].abs(),\n    )\n    .groupby(\"outcome\", as_index=False)\n    .agg(\n        cells=(\"outcome\", \"size\"),\n        within_three_mcse=(\"within_three_mcse\", \"sum\"),\n        maximum_absolute_standardized_difference=(\n            \"absolute_standardized_difference\",\n            \"max\",\n        ),\n        median_absolute_relative_difference=(\"absolute_relative_difference\", \"median\"),\n    )\n    .set_index(\"outcome\")\n    .reindex([name for name in OUTCOME_ORDER if name in set(comparison[\"outcome\"])])\n    .reset_index()\n)\nagreement_by_outcome.round(3)\n\n\n\n\n\n\n\n\n\noutcome\ncells\nwithin_three_mcse\nmaximum_absolute_standardized_difference\nmedian_absolute_relative_difference\n\n\n\n\n0\narima\n20\n17\n3.242\n0.013\n\n\n1\nfe\n98\n98\n2.959\n0.029\n\n\n2\ngsynth\n70\n70\n2.367\n0.034\n\n\n3\nife\n70\n70\n2.324\n0.048\n\n\n4\nMCPanel\n70\n65\n3.743\n0.023\n\n\n5\nVAR\n70\n70\n2.488\n0.032\n\n\n\n\n\n\n\n\n\nShow code\nagreement_by_setting = (\n    comparison.assign(\n        absolute_standardized_difference=comparison[\"standardized_difference\"].abs()\n    )\n    .groupby([\"family\", \"setting\"], as_index=False)\n    .agg(\n        cells=(\"outcome\", \"size\"),\n        within_three_mcse=(\"within_three_mcse\", \"sum\"),\n        maximum_absolute_standardized_difference=(\n            \"absolute_standardized_difference\",\n            \"max\",\n        ),\n    )\n    .sort_values(\"maximum_absolute_standardized_difference\", ascending=False)\n)\nagreement_by_setting.round(3)\n\n\n\n\n\n\n\n\n\nfamily\nsetting\ncells\nwithin_three_mcse\nmaximum_absolute_standardized_difference\n\n\n\n\n1\nclassic_factor\nNN=200;a=1\n27\n22\n3.743\n\n\n9\ntime_series\nNN=200;a=0.2;I=1\n32\n30\n3.242\n\n\n8\ntime_series\nNN=200;a=0.2;I=0\n32\n31\n3.112\n\n\n11\ntime_series\nNN=200;a=0.9;I=1\n32\n32\n2.959\n\n\n13\nweak_factor\nNN=200;a=1\n27\n27\n2.189\n\n\n5\nsynthetic_control\nNN=200;active=0.1;unitb=ridge\n27\n27\n1.473\n\n\n4\nsynthetic_control\nNN=200;active=0.1;unitb=penSCM\n27\n27\n1.376\n\n\n0\nclassic_factor\nNN=200;a=0\n27\n27\n1.374\n\n\n12\nweak_factor\nNN=200;a=0\n27\n27\n1.335\n\n\n10\ntime_series\nNN=200;a=0.9;I=0\n32\n32\n1.270\n\n\n2\nmixed_factor\nNN=200;a=0\n27\n27\n1.243\n\n\n6\nsynthetic_control\nNN=200;active=0.5;unitb=penSCM\n27\n27\n0.771\n\n\n7\nsynthetic_control\nNN=200;active=0.5;unitb=ridge\n27\n27\n0.771\n\n\n3\nmixed_factor\nNN=200;a=1\n27\n27\n0.720\n\n\n\n\n\n\n\n\n5.1 Discrepancy diagnosis\nThe same-panel checks identify the source of a difference before the Monte Carlo results are interpreted:\n\nFE, IFE, generalized synthetic control, and panel VAR agree cell by cell to \\(10^{-8}\\). A Monte Carlo difference in these columns is not an estimator-algebra difference.\nMCPanel agrees to \\(5\\times10^{-4}\\) on the fixed panel. Its remaining numerical difference comes from the stopping sequence used by the Rcpp and Rust SVD routines.\nARIMA does not have a same-panel historical-fable fixture. The Python search contains the true DGP models but searches fewer ARMA specifications than fable::ARIMA. A persistent ARIMA-column difference is therefore an outcome-model search difference.\nThe R and Python simulations use independent random streams. The standardized difference accounts for the reported Monte Carlo error from both runs.\nCells in one setting reuse the same 200 panels. Their standardized differences are correlated, so a cluster of adjacent cells is one setting-level diagnostic rather than a set of independent tests.\n\nA standardized difference near zero is expected under the common probability law. The two tables above show both the most extreme cells and the outcome-model-level pattern. This makes a package-algorithm difference visible instead of attributing every difference to random simulation noise.",
+    "crumbs": [
+      "Home",
+      "Vignettes",
+      "Balancing estimators in synthetic panels"
+    ]
+  },
+  {
+    "objectID": "vignettes/balancing-reproduction.html#pypanelsim-simulation-api",
+    "href": "vignettes/balancing-reproduction.html#pypanelsim-simulation-api",
+    "title": "Balancing estimators in synthetic panels",
+    "section": "6 pypanelsim simulation API",
+    "text": "6 pypanelsim simulation API\npypanelsim is a separate estimator-neutral package with NumPy and Matplotlib as its runtime dependencies. This documentation environment installs crabbymetrics only through the optional docs extra. The simulation package itself does not import crabbymetrics or contain the outcome-model estimators used later in this report.\nThe simulation pipeline separates four required objects and one optional shared-feature stage:\n\n\n\n\n\n\n\nAbstraction\nContract\n\n\n\n\nPanelDimensions\nDefines only the rectangular (n_units, n_periods) shape\n\n\nUnit-feature model\nOptionally draws observed covariates and latent unit factors before assignment\n\n\nAssignment model\nReturns binary treatment; built-ins support fixed, randomized, sigmoid-selected, and generalized-propensity cohort assignment\n\n\nOutcome model\nReturns untreated outcomes conditional on dimensions and realized treatment\n\n\nEffect model\nReturns realized effects that are zero outside treated cells\n\n\nPanelSimulator\nComposes the three components and returns a validated PanelDataset\n\n\n\nThe component interfaces use structural typing. A new design can provide a plain class with the documented assign() or generate() method without inheriting from a package base class. Randomness enters through an explicit NumPy generator shared in pipeline order.\n\n\nShow code\nfor object_ in [\n    PanelDimensions,\n    PanelSimulator,\n    GaussianUnitFeatures,\n    SingleCohortAssignment,\n    RandomizedSingleCohortAssignment,\n    BinaryLogitAssignment,\n    StaggeredAdoption,\n    GeneralizedPropensityAssignment,\n    ConstantEffect,\n    LinearRampEffect,\n]:\n    print(object_.__name__, inspect.signature(object_))\n\n\nPanelDimensions (n_units: 'int' = 200, n_periods: 'int' = 50) -&gt; None\nPanelSimulator (name: 'str', dimensions: 'PanelDimensions', assignment: 'AssignmentModel', outcome_model: 'OutcomeModel', effect_model: 'EffectModel', feature_model: 'UnitFeatureModel | None' = None) -&gt; None\nGaussianUnitFeatures (n_observables: 'int' = 2, n_unobservables: 'int' = 2) -&gt; None\nSingleCohortAssignment (n_treated: 'int' = 40, adoption_period: 'int' = 40, treated_units: 'tuple[int, ...] | None' = None) -&gt; None\nRandomizedSingleCohortAssignment (n_treated: 'int', adoption_period: 'int', eligible_units: 'Sequence[int] | None' = None) -&gt; None\nBinaryLogitAssignment (adoption_period: 'int', intercept: 'float' = 0.0, observable_coefficients: 'Sequence[float]' = (), unobservable_coefficients: 'Sequence[float]' = ()) -&gt; None\nStaggeredAdoption (adoption_times: 'Mapping[int, int]') -&gt; None\nGeneralizedPropensityAssignment (adoption_periods: 'Sequence[int]', intercepts: 'Sequence[float]' = (), observable_coefficients: 'Sequence[Sequence[float]]' = (), unobservable_coefficients: 'Sequence[Sequence[float]]' = ()) -&gt; None\nConstantEffect (value: 'float' = 1.0) -&gt; None\nLinearRampEffect (slope: 'float' = 0.2) -&gt; None\n\n\n\n6.1 Common data contract\n\n\nShow code\nprint(inspect.signature(CanonicalPanelConfig))\nprint(inspect.signature(PanelDataset))\n\n\n(n_control: 'int' = 160, n_treated: 'int' = 40, n_pre: 'int' = 40, n_post: 'int' = 10, effect_slope: 'float' = 0.2, noise_variance: 'float' = 0.36) -&gt; None\n(outcome: 'FloatMatrix', treatment: 'FloatMatrix', untreated_outcome: 'FloatMatrix', treatment_effect: 'FloatMatrix', name: 'str', unit_ids: 'NDArray[Any] | None' = None, time_ids: 'NDArray[Any] | None' = None, metadata: 'Mapping[str, Any]' = &lt;factory&gt;, unit_covariates: 'FloatMatrix | None' = None, unit_covariate_names: 'Sequence[str] | None' = None) -&gt; None\n\n\nCanonicalPanelConfig has six fields:\n\n\n\n\n\n\n\n\nField\nDefault\nMeaning\n\n\n\n\nn_control\n160\nNumber of never-treated units\n\n\nn_treated\n40\nNumber of treated units\n\n\nn_pre\n40\nNumber of pre-treatment periods\n\n\nn_post\n10\nNumber of post-treatment periods\n\n\neffect_slope\n0.2\nIncrease in the treatment effect per post period\n\n\nnoise_variance\n0.36\nVariance of the common idiosyncratic error\n\n\n\nEvery generator returns an immutable PanelDataset object. The canonical factories order controls first, but the generic simulation contract does not require that order. Arrays have shape (n_units, n_periods).\n\n\n\n\n\n\n\nAttribute\nMeaning\n\n\n\n\noutcome\nObserved \\(Y=Y(0)+\\tau D\\)\n\n\nuntreated_outcome\nLatent \\(Y(0)\\)\n\n\ntreatment\nAbsorbing treatment matrix\n\n\ntreatment_effect\nCell-level effect matrix\n\n\ncontrol_units, treated_units\nInteger row indices\n\n\nadoption_times\nUnit-specific first-treatment positions; never-treated units use the panel horizon\n\n\nname\nDGP identifier\n\n\nmetadata\nRead-only components such as factors, loadings, paths, and donor weights\n\n\nunit_covariates, unit_covariate_names\nObserved time-invariant assignment features available to estimators\n\n\ntrue_att\nMean effect over treated cells; 1.1 under the canonical design\n\n\n\nas_arrays() returns the standard wide outcome and treatment matrices for a downstream estimator. as_long_dict() returns flat unit, time, outcome, treatment, untreated-outcome, and treatment-effect columns for pandas, Polars, or Arrow without adding those libraries as simulation dependencies. Both return read-only data by default; copy=True requests writable copies.\n\n\nShow code\ncanonical = classic_factor(overlap=1.0, seed=17)\nprint(canonical.outcome.shape)\nprint(canonical.true_att)\nprint(sorted(canonical.metadata))\nprint([array.shape for array in canonical.as_arrays()])\n\n\n(200, 50)\n1.1\n['assignment', 'effect', 'outcome', 'simulator']\n[(200, 50), (200, 50)]\n\n\n\n\n6.2 Generator signatures\n\n\nShow code\ngenerators = [\n    classic_factor,\n    weak_factor,\n    mixed_factor,\n    synthetic_control,\n    time_series,\n    factor_synthetic,\n]\npd.DataFrame(\n    {\n        \"function\": [function.__name__ for function in generators],\n        \"signature\": [str(inspect.signature(function)) for function in generators],\n    }\n)\n\n\n\n\n\n\n\n\n\nfunction\nsignature\n\n\n\n\n0\nclassic_factor\n(*, overlap: 'float' = 0.0, config: 'Canonical...\n\n\n1\nweak_factor\n(*, overlap: 'float' = 0.0, config: 'Canonical...\n\n\n2\nmixed_factor\n(*, overlap: 'float' = 0.0, config: 'Canonical...\n\n\n3\nsynthetic_control\n(*, active_share: 'float' = 0.1, config: 'Cano...\n\n\n4\ntime_series\n(*, coefficient: 'float' = 0.2, integrated: 'b...\n\n\n5\nfactor_synthetic\n(*, overlap: 'float' = 0.0, config: 'Canonical...\n\n\n\n\n\n\n\n\n\n6.3 Canonical settings\nThe canonical functions are concise one-draw wrappers around reusable simulator factories. Named creation is also available through the package registry.\n\n\nShow code\nprint(available_canonical_designs())\nsimulator = make_canonical(\"classic_factor\", overlap=1.0)\nprint(inspect.signature(classic_factor_design))\nprint(simulator)\n\n\n('classic_factor', 'factor_synthetic', 'mixed_factor', 'synthetic_control', 'time_series', 'weak_factor')\n(*, overlap: 'float' = 0.0, config: 'CanonicalPanelConfig | None' = None) -&gt; 'PanelSimulator'\nPanelSimulator(name='classic_factor', dimensions=PanelDimensions(n_units=200, n_periods=50), assignment=SingleCohortAssignment(n_treated=40, adoption_period=40, treated_units=None), outcome_model=ClassicFactorOutcome(overlap=1.0, noise_variance=0.36), effect_model=LinearRampEffect(slope=0.2), feature_model=None)\n\n\n\n\n\n\n\n\n\n\n\nFunction\nMain setting parameter\nSlide settings\nExecutable-source contract\n\n\n\n\nclassic_factor\noverlap\n0, 1\nTwo standardized drift factors; loading means \\(-a\\) for controls and \\(a\\) for treated units\n\n\nweak_factor\noverlap\n0, 1\nFive drift and five cyclical factors, each with sample SD 0.2\n\n\nmixed_factor\noverlap\n0, 1\nOne 100-unit drift half-panel with all treated units and one 100-control cyclical half-panel; both restart the seed\n\n\nsynthetic_control\nactive_share\n0.1, 0.5\nEqual active weights; favored donors have sampling weight 1 and other donors 0.1\n\n\ntime_series\ncoefficient, integrated\n\\(\\phi\\in\\{0.2,0.9\\}\\), \\(I\\in\\{0,1\\}\\)\nTreated innovation mean 0.25; control innovation mean 0\n\n\nfactor_synthetic\noverlap\narchived mixture\nEqual mixture of factor and SCM components; retained for the archived experiment output\n\n\n\nThe slide prose and executable R source differ in three places. The library follows the executable source because that source generated the stored results:\n\nFactors are divided by their realized sample standard deviation, not by fixed constants 7.5 and 0.7.\nSynthetic active donors are sampled with unequal probabilities, not selected as the exact top set.\nThe AR function receives innovation mean 0.25. It does not receive recursion intercept \\(0.25/(1-\\phi)\\).\n\n\n\n6.4 Custom dimensions\n\n\nShow code\nsmall = CanonicalPanelConfig(n_control=24, n_treated=6, n_pre=20, n_post=5)\ndraw = synthetic_control(active_share=0.25, config=small, seed=203)\nprint(draw.outcome.shape)\nprint(draw.metadata[\"outcome\"][\"active_donors\"])\nprint(draw.metadata[\"outcome\"][\"donor_weights\"].sum())\n\n\n(30, 25)\n[ 5  6 14 15 16 18]\n1.0\n\n\nThe Python seed contract is reproducibility within Python. It is not a claim that NumPy seed 203 equals R seed 203 cell by cell.\nFor repeated experiments, PanelSimulator.iter_simulations(replications, seed=...) uses child SeedSequence streams. This avoids treating adjacent integer seeds as the independence mechanism. The reproduction keeps the original integer replication indices because they are part of the archived R comparison contract.",
+    "crumbs": [
+      "Home",
+      "Vignettes",
+      "Balancing estimators in synthetic panels"
+    ]
+  },
+  {
+    "objectID": "vignettes/balancing-reproduction.html#outcome-model-reproduction-api",
+    "href": "vignettes/balancing-reproduction.html#outcome-model-reproduction-api",
+    "title": "Balancing estimators in synthetic panels",
+    "section": "7 Outcome-model reproduction API",
+    "text": "7 Outcome-model reproduction API\nThe functions in scripts/outcome_models.py accept two same-shaped NumPy arrays. outcome contains units in rows and periods in columns. treatment is a binary, absorbing-treatment matrix. Each function returns a finite array of the same shape that estimates the untreated-outcome surface. A function never uses a treated post-treatment outcome as an observed response during fitting.\n\n\nShow code\noutcome_model_functions = [\n    two_way_fe_surface,\n    interactive_fixed_effects_surface,\n    mcpanel_surface,\n    generalized_synthetic_control_surface,\n    panel_var_surface,\n    arima_surface,\n]\npd.DataFrame(\n    {\n        \"function\": [function.__name__ for function in outcome_model_functions],\n        \"signature\": [str(inspect.signature(function)) for function in outcome_model_functions],\n    }\n)\n\n\n\n\n\n\n\n\n\nfunction\nsignature\n\n\n\n\n0\ntwo_way_fe_surface\n(outcome: 'np.ndarray', treatment: 'np.ndarray...\n\n\n1\ninteractive_fixed_effects_surface\n(outcome: 'np.ndarray', treatment: 'np.ndarray...\n\n\n2\nmcpanel_surface\n(outcome: 'np.ndarray', treatment: 'np.ndarray...\n\n\n3\ngeneralized_synthetic_control_surface\n(outcome: 'np.ndarray', treatment: 'np.ndarray...\n\n\n4\npanel_var_surface\n(outcome: 'np.ndarray', treatment: 'np.ndarray...\n\n\n5\narima_surface\n(outcome: 'np.ndarray', treatment: 'np.ndarray...\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFunction\nR column\nStatistical operation\nArchived experiment settings\n\n\n\n\ntwo_way_fe_surface\nfe\nAlternating projection on additive unit and period effects over untreated cells\nNo tuning parameter\n\n\ninteractive_fixed_effects_surface\nife\nMissing-cell EM with a rank-constrained interactive fixed-effects M-step\nRank 2, force 3; family-specific tolerance and iteration budget\n\n\nmcpanel_surface\nMCPanel\nNuclear-norm matrix completion with additive unit and period effects\nlambda_l=0.002, tolerance \\(10^{-5}\\), 1,000 iterations\n\n\ngeneralized_synthetic_control_surface\ngsynth\nEstimate common factors on never-treated controls, then estimate treated loadings on pre-treatment data\nRank 2, force 3\n\n\npanel_var_surface\nVAR\nPooled autoregression with additive unit and period effects, followed by recursive treated-unit forecasts\nLag orders 2, 2, 1, 1, and 4 by DGP family\n\n\narima_surface\narima\nSelect a univariate autoregression or integrated autoregression for each unit, then forecast treated periods\nConditional AIC; integration order 0 or 1; AR order 0 through 2\n\n\n\nThe family-specific runner settings are:\n\n\n\nDGP family\nIFE tolerance\nIFE maximum iterations\nVAR lags\n\n\n\n\nClassic factor\n\\(10^{-5}\\)\n2,000\n2\n\n\nWeak factor\n\\(10^{-5}\\)\n2,000\n2\n\n\nMixed factor\n\\(10^{-4}\\)\n4,000\n1\n\n\nSynthetic control\n\\(10^{-4}\\)\n4,000\n1\n\n\nTime series\n\\(10^{-4}\\)\n4,000\n4\n\n\n\npanel_var_surface sets the first \\(p\\) fitted periods to zero, as the R code does after predictions with unavailable lags. For a treated unit, its first post-treatment prediction uses observed pre-treatment lags. Later predictions use earlier counterfactual predictions recursively.\nThe ARIMA function has a narrower automatic model search than the historical fable::ARIMA call. It includes the true AR(1) and ARIMA(1,1,0) laws used by the DGP, but it does not search moving-average or seasonal terms. The Monte Carlo comparison therefore reports the ARIMA column separately from the same-input parity tests.",
+    "crumbs": [
+      "Home",
+      "Vignettes",
+      "Balancing estimators in synthetic panels"
+    ]
+  },
+  {
+    "objectID": "vignettes/balancing-reproduction.html#crabbymetrics.augmentedbalancing-api",
+    "href": "vignettes/balancing-reproduction.html#crabbymetrics.augmentedbalancing-api",
+    "title": "Balancing estimators in synthetic panels",
+    "section": "8 crabbymetrics.AugmentedBalancing API",
+    "text": "8 crabbymetrics.AugmentedBalancing API\n\n8.1 Constructor and fit\n\n\nShow code\nprint(inspect.signature(cm.AugmentedBalancing))\n\n\n(balance='double', unit_target='cohort', time_target='all', balance_on='raw', unit_loss='ridge', unit_penalty=0.0001, zeta_omega=None, zeta_lambda=None, max_iterations=1000)\n\n\n\n\n\n\n\n\n\n\nConstructor parameter\nDefault\nAccepted values and meaning\n\n\n\n\nbalance\n\"double\"\n\"none\", \"unit\", \"time\", or \"double\"; selects the optimized weight dimensions\n\n\nunit_target\n\"cohort\"\n\"cohort\" for one donor vector per treatment cohort or \"individual\" for one vector per treated unit\n\n\ntime_target\n\"all\"\n\"all\" for one mean-post target or \"period\" for one target per post period\n\n\nbalance_on\n\"raw\"\n\"raw\" fits weights on \\(Y\\); \"residual\" fits them on \\(Y-\\hat m\\)\n\n\nunit_loss\n\"ridge\"\n\"ridge\" for SDID simplex ridge or \"penalized_scm\" for the R donor-distance loss\n\n\nunit_penalty\n0.0001\nNonnegative penalized-SCM distance coefficient\n\n\nzeta_omega\nNone\nOptional nonnegative unit-ridge scale; None uses the R data-dependent rule\n\n\nzeta_lambda\nNone\nOptional nonnegative time-ridge scale; None uses the R data-dependent rule\n\n\nmax_iterations\n1000\nPositive active-set iteration budget\n\n\n\nUse:\nmodel = cm.AugmentedBalancing(...)\nmodel.fit(y, w, outcome_model=None)\n\ny is a finite balanced outcome matrix with units in rows and periods in columns.\nw is a same-shaped binary absorbing-treatment matrix.\noutcome_model is an optional same-shaped untreated-outcome surface fitted without treated post-treatment outcomes. If omitted, it is zero.\n\nAll three arrays must be two-dimensional. y and outcome_model must be finite. w must be binary and absorbing. Each treated cohort must have at least one pre-treatment period, and the panel must contain a never-treated donor. Invalid constructor choices, invalid arrays, unsupported treatment paths, and solver failures raise ValueError. predict(), treatment_effect(), and summary() raise ValueError before a successful fit.\n\n\n8.2 Counterfactual formula\nLet \\(C\\) be never-treated controls, \\(P\\) be pre-treatment periods, and \\(\\hat m\\) be the supplied outcome model. Define residuals \\(R=Y-\\hat m\\). For treated unit \\(i\\) and post period \\(t\\),\n\\[\n\\widehat Y_{it}(0)\n=\n\\hat m_{it}\n+\\sum_{j\\in C}\\hat\\omega_jR_{jt}\n+\\sum_{s\\in P}\\hat\\lambda_sR_{is}\n-\\sum_{j\\in C}\\sum_{s\\in P}\\hat\\omega_j\\hat\\lambda_sR_{js}.\n\\]\nThe balance choice controls which weights are optimized:\n\n\n\nbalance\nUnit weights \\(\\omega\\)\nTime weights \\(\\lambda\\)\n\n\n\n\n\"none\"\nNot used\nNot used; returns \\(\\hat m\\)\n\n\n\"unit\"\nOptimized\nUniform over pre periods\n\n\n\"time\"\nUniform over controls\nOptimized\n\n\n\"double\"\nOptimized\nOptimized\n\n\n\nWith balance=\"unit\", the estimator retains the time correction and uses uniform pre-period weights.\n\n\n8.3 Targets\n\nunit_target=\"cohort\" fits one donor vector to the treated-cohort mean.\nunit_target=\"individual\" fits one donor vector per treated unit.\ntime_target=\"all\" fits one pre-period vector to the control post-period mean.\ntime_target=\"period\" fits one pre-period vector for each post period.\n\nThe R “individual double” row maps to unit_target=\"individual\", time_target=\"period\".\n\n\n8.4 Weight-fitting data\n\nbalance_on=\"raw\" fits weights with \\(Y\\).\nbalance_on=\"residual\" fits weights with \\(R=Y-\\hat m\\).\n\nIn both cases, the final augmentation formula is applied to residuals \\(R\\). balance_on changes the weight-fitting problem, not the final algebra.\n\n\n8.5 Unit losses and penalties\nunit_loss=\"ridge\" implements the SDID simplex ridge problem with a profiled intercept. If zeta_omega and zeta_lambda are omitted, the R defaults are\n\\[\n\\zeta_\\omega=(N_{\\text{target}}T_{\\text{post}})^{1/4}\\hat\\sigma,\n\\qquad\n\\zeta_\\lambda=10^{-6}\\hat\\sigma,\n\\]\nwhere \\(\\hat\\sigma\\) is the sample SD of control first differences in the selected balancing data. For individual unit targets, \\(N_{\\text{target}}=1\\).\nunit_loss=\"penalized_scm\" implements penSCM from the R source. It standardizes the donor matrix by its sample SD and adds the linear donor-distance penalty. unit_penalty=1e-4 is the R default. Time weights remain SDID ridge weights.\nThe internal active-set solver handles simplex boundary solutions directly. It can represent exact zero weights, unlike a softmax parameterization.\n\n\n8.6 R-frame map\n\n\n\nR frame\nPython configuration\n\n\n\n\noutcome\nbalance=\"none\", supply outcome_model\n\n\nu-balance\nbalance=\"unit\", omit outcome_model\n\n\nt-balance\nbalance=\"time\", omit outcome_model\n\n\nd-balance\nbalance=\"double\", omit outcome_model\n\n\naug-u-balance\nbalance=\"unit\", supply outcome_model\n\n\naug-t-balance\nbalance=\"time\", supply outcome_model\n\n\naug-d-balance\nbalance=\"double\", supply outcome_model\n\n\nresidual variant\nadd balance_on=\"residual\"\n\n\nindividual unit variant\nadd unit_target=\"individual\"\n\n\nindividual time variant\nadd time_target=\"period\"\n\n\nindividual double variant\nset both individual target options\n\n\nR ridge loss\nunit_loss=\"ridge\"\n\n\nR penSCM loss\nunit_loss=\"penalized_scm\"\n\n\n\n\n\n8.7 Fitted outputs\n\n\nShow code\nexample_panel = classic_factor(overlap=1.0, seed=91)\nexample_model = cm.AugmentedBalancing(\n    balance=\"double\",\n    unit_target=\"individual\",\n    time_target=\"period\",\n    balance_on=\"residual\",\n)\nexample_model.fit(\n    example_panel.outcome,\n    example_panel.treatment,\n    np.zeros_like(example_panel.outcome),\n)\nexample_summary = example_model.summary()\npd.DataFrame(\n    {\n        \"key\": sorted(example_summary),\n        \"type or shape\": [\n            np.asarray(example_summary[key]).shape\n            if hasattr(example_summary[key], \"shape\")\n            else type(example_summary[key]).__name__\n            for key in sorted(example_summary)\n        ],\n    }\n)\n\n\n\n\n\n\n\n\n\nkey\ntype or shape\n\n\n\n\n0\natt\nfloat\n\n\n1\nbalance\nstr\n\n\n2\nbalance_on\nstr\n\n\n3\ncohorts\nlist\n\n\n4\ncontrol_units\nlist\n\n\n5\nconverged\nbool\n\n\n6\ncounterfactual\n(200, 50)\n\n\n7\nevent_study\ndict\n\n\n8\ngroup_means\ndict\n\n\n9\noutcome_model\n(200, 50)\n\n\n10\npre_rmse\nfloat\n\n\n11\ntarget_cohorts\nlist\n\n\n12\ntarget_units\nlist\n\n\n13\ntime_target\nstr\n\n\n14\ntime_target_cohorts\nlist\n\n\n15\ntime_target_periods\nlist\n\n\n16\ntime_weights\n(10, 50)\n\n\n17\ntreated_units\nlist\n\n\n18\ntreatment_effect\n(200, 50)\n\n\n19\nunit_loss\nstr\n\n\n20\nunit_penalty\nfloat\n\n\n21\nunit_target\nstr\n\n\n22\nunit_weights\n(40, 200)\n\n\n23\nzeta_lambda\n(10,)\n\n\n24\nzeta_omega\n(40,)\n\n\n\n\n\n\n\npredict() returns the fitted counterfactual surface. treatment_effect() returns \\(Y-\\widehat Y(0)\\) for treated units. summary()[\"att\"] is the simple mean over treated cells. Weight arrays include explicit target mappings:\n\ntarget_units and target_cohorts identify unit-weight rows;\ntime_target_periods uses -1 for an all-post target and a zero-based period for period-specific targets;\ntime_target_cohorts identifies the cohort for each time-weight row; and\nzeta_omega and zeta_lambda report fitted ridge scales. zeta_omega is zero when penalized SCM is used.\n\n\n\n\n\n\n\n\nMethod\nReturn contract\n\n\n\n\nfit(y, w, outcome_model=None)\nFits in place and returns None\n\n\npredict()\nFull counterfactual array with the same shape as y\n\n\ntreatment_effect()\nFull \\(Y-\\widehat Y(0)\\) array with the same shape as y\n\n\nsummary()\nDictionary with the ATT, surfaces, diagnostics, weights, targets, cohorts, and configuration",
+    "crumbs": [
+      "Home",
+      "Vignettes",
+      "Balancing estimators in synthetic panels"
+    ]
+  },
+  {
+    "objectID": "vignettes/balancing-reproduction.html#reproduction-workflow",
+    "href": "vignettes/balancing-reproduction.html#reproduction-workflow",
+    "title": "Balancing estimators in synthetic panels",
+    "section": "9 Reproduction workflow",
+    "text": "9 Reproduction workflow\nThe exact R summary is regenerated without the unavailable outcome packages:\nRscript scripts/export_r_slide_results.R\nThe Python Monte Carlo run is:\nuv run python -m website.vignettes.balancing_support.run_balancing_experiments --replications 200 --workers 16\nAdd --output-directory website/vignettes/results to overwrite the vignette’s cached Python summaries. A normal documentation render reads those summaries and does not rerun the 2,800 panel draws.\nThe runner stores every replication in results/python_replications.csv, then derives results/python_rmse.csv. The comparison table is rebuilt with:\nuv run python -m website.vignettes.balancing_support.compare_r_python\nRender the complete site and all executable documentation with:\nuv sync --extra docs\nuv run quarto render website",
+    "crumbs": [
+      "Home",
+      "Vignettes",
+      "Balancing estimators in synthetic panels"
+    ]
+  },
+  {
+    "objectID": "vignettes/balancing-reproduction.html#scope-and-limitations",
+    "href": "vignettes/balancing-reproduction.html#scope-and-limitations",
+    "title": "Balancing estimators in synthetic panels",
+    "section": "10 Scope and limitations",
+    "text": "10 Scope and limitations\n\nSame-panel parity tests the numerical estimator implementation. It does not test random-number-generator parity.\nThe Monte Carlo comparison tests common probability laws with independent language-specific random streams. Differences are therefore evaluated with combined Monte Carlo standard errors.\nThe Monte Carlo comparison covers all 398 displayed R/Python cells. FE, IFE, MCPanel, generalized synthetic control, and VAR also have same-panel R parity fixtures. ARIMA has a Monte Carlo check but no historical-fable same-panel fixture in this environment.\nThe experiments compare point-estimator RMSE under a common-adoption design. They do not evaluate interval coverage, staggered adoption, or treatment-effect heterogeneity beyond the common linear post-treatment path.",
+    "crumbs": [
+      "Home",
+      "Vignettes",
+      "Balancing estimators in synthetic panels"
+    ]
+  },
+  {
+    "objectID": "vignettes/balancing-reproduction.html#conclusions",
+    "href": "vignettes/balancing-reproduction.html#conclusions",
+    "title": "Balancing estimators in synthetic panels",
+    "section": "11 Conclusions",
+    "text": "11 Conclusions\n\nUnit-only balancing is effective in several good-overlap and synthetic-control settings.\nNo single balancing or outcome-model configuration is uniformly best.\nDouble balancing materially reduces RMSE under poor factor-loading overlap and under persistent integrated dynamics.\nIndividual unit and post-period targets can help, but they are different estimators and require many more weight fits.\nOutcome-model performance remains DGP-specific. The R and Python heatmaps show that gsynth, ife, MCPanel, VAR, and arima have different strengths. A horizontal-ridge result cannot stand in for those columns.\n\nThese conclusions rest on an exact same-panel R test, executable R DGP contracts, 200 successful draws in every Monte Carlo cell, and a between-language comparison scaled by combined Monte Carlo uncertainty.",
+    "crumbs": [
+      "Home",
+      "Vignettes",
+      "Balancing estimators in synthetic panels"
+    ]
+  },
+  {
+    "objectID": "reference/canonical.html",
+    "href": "reference/canonical.html",
+    "title": "Canonical design API",
+    "section": "",
+    "text": "Code\nimport inspect\n\nimport pandas as pd\nimport pypanelsim as pps",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Canonical design API"
+    ]
+  },
+  {
+    "objectID": "reference/canonical.html#canonicalpanelconfig",
+    "href": "reference/canonical.html#canonicalpanelconfig",
+    "title": "Canonical design API",
+    "section": "1 CanonicalPanelConfig",
+    "text": "1 CanonicalPanelConfig\n\n\nCode\nprint(f\"CanonicalPanelConfig{inspect.signature(pps.CanonicalPanelConfig)}\")\n\n\nCanonicalPanelConfig(n_control: 'int' = 160, n_treated: 'int' = 40, n_pre: 'int' = 40, n_post: 'int' = 10, effect_slope: 'float' = 0.2, noise_variance: 'float' = 0.36) -&gt; None\n\n\n\n\n\n\n\n\n\n\nField\nDefault\nContract\n\n\n\n\nn_control\n160\nPositive never-treated count\n\n\nn_treated\n40\nPositive treated count\n\n\nn_pre\n40\nPositive common pre-period count\n\n\nn_post\n10\nPositive post-period count\n\n\neffect_slope\n0.2\nFinite event-time slope\n\n\nnoise_variance\n0.36\nFinite nonnegative observation-noise variance\n\n\n\nProperties n_units, n_periods, and dimensions derive the generic panel shape. Canonical factories put controls first, treated units last, and begin treatment at n_pre.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Canonical design API"
+    ]
+  },
+  {
+    "objectID": "reference/canonical.html#reusable-design-factories",
+    "href": "reference/canonical.html#reusable-design-factories",
+    "title": "Canonical design API",
+    "section": "2 Reusable design factories",
+    "text": "2 Reusable design factories\nEach factory returns a configured PanelSimulator and accepts config=CanonicalPanelConfig(...) for dimension changes.\n\n\nCode\nfactories = [\n    pps.classic_factor_design,\n    pps.weak_factor_design,\n    pps.synthetic_control_design,\n    pps.factor_synthetic_design,\n    pps.time_series_design,\n    pps.mixed_factor_design,\n]\npd.DataFrame(\n    {\n        \"factory\": [function.__name__ for function in factories],\n        \"signature\": [str(inspect.signature(function)) for function in factories],\n    }\n)\n\n\n\n\n\n\n\n\n\nfactory\nsignature\n\n\n\n\n0\nclassic_factor_design\n(*, overlap: 'float' = 0.0, config: 'Canonical...\n\n\n1\nweak_factor_design\n(*, overlap: 'float' = 0.0, config: 'Canonical...\n\n\n2\nsynthetic_control_design\n(*, active_share: 'float' = 0.1, config: 'Cano...\n\n\n3\nfactor_synthetic_design\n(*, overlap: 'float' = 0.0, config: 'Canonical...\n\n\n4\ntime_series_design\n(*, coefficient: 'float' = 0.2, integrated: 'b...\n\n\n5\nmixed_factor_design\n(*, overlap: 'float' = 0.0, config: 'Canonical...\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFactory\nUntreated-outcome law\nMain parameter validation\n\n\n\n\nclassic_factor_design\nTwo standardized drifting factors\noverlap &gt;= 0\n\n\nweak_factor_design\nFive weak drift and five weak cyclical factors\noverlap &gt;= 0\n\n\nsynthetic_control_design\nSparse convex donor signal\n0 &lt; active_share &lt;= 1\n\n\nfactor_synthetic_design\nEqual factor/donor mixture\noverlap &gt;= 0\n\n\ntime_series_design\nUnit AR(1) or integrated AR(1) paths\nabs(coefficient) &lt; 1\n\n\nmixed_factor_design\nDrift half-panel plus cyclical half-panel\noverlap &gt;= 0; treated count below half of units\n\n\n\nSee canonical design laws for draw order and exact probability specifications.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Canonical design API"
+    ]
+  },
+  {
+    "objectID": "reference/canonical.html#one-draw-functions",
+    "href": "reference/canonical.html#one-draw-functions",
+    "title": "Canonical design API",
+    "section": "3 One-draw functions",
+    "text": "3 One-draw functions\nThe one-draw functions construct the corresponding simulator and call simulate(seed=..., rng=...).\n\n\nCode\ndraw_functions = [\n    pps.classic_factor,\n    pps.weak_factor,\n    pps.synthetic_control,\n    pps.factor_synthetic,\n    pps.time_series,\n    pps.mixed_factor,\n]\npd.DataFrame(\n    {\n        \"function\": [function.__name__ for function in draw_functions],\n        \"signature\": [str(inspect.signature(function)) for function in draw_functions],\n    }\n)\n\n\n\n\n\n\n\n\n\nfunction\nsignature\n\n\n\n\n0\nclassic_factor\n(*, overlap: 'float' = 0.0, config: 'Canonical...\n\n\n1\nweak_factor\n(*, overlap: 'float' = 0.0, config: 'Canonical...\n\n\n2\nsynthetic_control\n(*, active_share: 'float' = 0.1, config: 'Cano...\n\n\n3\nfactor_synthetic\n(*, overlap: 'float' = 0.0, config: 'Canonical...\n\n\n4\ntime_series\n(*, coefficient: 'float' = 0.2, integrated: 'b...\n\n\n5\nmixed_factor\n(*, overlap: 'float' = 0.0, config: 'Canonical...\n\n\n\n\n\n\n\nPassing both seed and rng raises ValueError. A fixed seed preserves the extracted canonical NumPy draw order for a fixed compatible NumPy version.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Canonical design API"
+    ]
+  },
+  {
+    "objectID": "reference/canonical.html#canonical-outcome-components",
+    "href": "reference/canonical.html#canonical-outcome-components",
+    "title": "Canonical design API",
+    "section": "4 Canonical outcome components",
+    "text": "4 Canonical outcome components\nThese classes can also be composed outside the canonical factories:\n\n\nCode\noutcome_components = [\n    pps.ClassicFactorOutcome,\n    pps.WeakFactorOutcome,\n    pps.SyntheticControlOutcome,\n    pps.FactorSyntheticOutcome,\n    pps.TimeSeriesOutcome,\n    pps.MixedFactorOutcome,\n]\npd.DataFrame(\n    {\n        \"component\": [component.__name__ for component in outcome_components],\n        \"signature\": [str(inspect.signature(component)) for component in outcome_components],\n    }\n)\n\n\n\n\n\n\n\n\n\ncomponent\nsignature\n\n\n\n\n0\nClassicFactorOutcome\n(overlap: 'float' = 0.0, noise_variance: 'floa...\n\n\n1\nWeakFactorOutcome\n(overlap: 'float' = 0.0, noise_variance: 'floa...\n\n\n2\nSyntheticControlOutcome\n(active_share: 'float' = 0.1, noise_variance: ...\n\n\n3\nFactorSyntheticOutcome\n(overlap: 'float' = 0.0, noise_variance: 'floa...\n\n\n4\nTimeSeriesOutcome\n(coefficient: 'float' = 0.2, integrated: 'bool...\n\n\n5\nMixedFactorOutcome\n(overlap: 'float' = 0.0, noise_variance: 'floa...\n\n\n\n\n\n\n\nAll implement generate(context, rng) -&gt; ComponentDraw. Factor components store unit-aligned loadings and factor paths in metadata. Synthetic designs add active donors and donor weights. Time-series designs store the latent process before observation noise. Metadata arrays are diagnostic truth and become read-only in the final dataset.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Canonical design API"
+    ]
+  },
+  {
+    "objectID": "reference/canonical.html#named-construction",
+    "href": "reference/canonical.html#named-construction",
+    "title": "Canonical design API",
+    "section": "5 Named construction",
+    "text": "5 Named construction\n\n\nCode\nprint(f\"make_canonical{inspect.signature(pps.make_canonical)}\")\nprint(f\"available_canonical_designs{inspect.signature(pps.available_canonical_designs)}\")\nprint(pps.available_canonical_designs())\n\n\nmake_canonical(name: 'str', /, **kwargs: 'object') -&gt; 'PanelSimulator'\navailable_canonical_designs() -&gt; 'tuple[str, ...]'\n('classic_factor', 'factor_synthetic', 'mixed_factor', 'synthetic_control', 'time_series', 'weak_factor')\n\n\nmake_canonical(name, **kwargs) delegates to the global canonical registry. Unknown names and invalid factory parameters raise ValueError/TypeError from the registry or selected factory.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Canonical design API"
+    ]
+  },
+  {
+    "objectID": "reference/canonical.html#compatibility-aliases",
+    "href": "reference/canonical.html#compatibility-aliases",
+    "title": "Canonical design API",
+    "section": "6 Compatibility aliases",
+    "text": "6 Compatibility aliases\nPanelConfig aliases CanonicalPanelConfig; PanelData aliases PanelDataset. They remain for migration from the extracted panel_dgps module. New code should use the explicit canonical and dataset names.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Canonical design API"
+    ]
+  },
+  {
+    "objectID": "reference/core.html",
+    "href": "reference/core.html",
+    "title": "Core API",
+    "section": "",
+    "text": "Code\nimport inspect\n\nimport numpy as np\nimport pandas as pd\nimport pypanelsim as pps\n\n\ndef signature(object_):\n    return f\"{object_.__name__}{inspect.signature(object_)}\"",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Core API"
+    ]
+  },
+  {
+    "objectID": "reference/core.html#paneldimensions",
+    "href": "reference/core.html#paneldimensions",
+    "title": "Core API",
+    "section": "1 PanelDimensions",
+    "text": "1 PanelDimensions\n\n\n\nCode\nprint(signature(pps.PanelDimensions))\n\n\nPanelDimensions(n_units: 'int' = 200, n_periods: 'int' = 50) -&gt; None\n\n\n\nImmutable rectangular panel dimensions.\n\n\n\nParameter\nType\nDefault\nValidation\n\n\n\n\nn_units\nint\n200\nStrictly positive\n\n\nn_periods\nint\n50\nStrictly positive\n\n\n\nThe object intentionally carries no assumptions about unit order, treatment cohorts, or pre/post periods.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Core API"
+    ]
+  },
+  {
+    "objectID": "reference/core.html#componentdraw",
+    "href": "reference/core.html#componentdraw",
+    "title": "Core API",
+    "section": "2 ComponentDraw",
+    "text": "2 ComponentDraw\n\n\n\nCode\nprint(signature(pps.ComponentDraw))\n\n\nComponentDraw(values: 'FloatMatrix', metadata: 'Mapping[str, Any]' = &lt;factory&gt;) -&gt; None\n\n\n\nReturn type for assignment, outcome, and effect components.\n\n\n\nField\nContract\n\n\n\n\nvalues\nFull (n_units, n_periods) numeric matrix\n\n\nmetadata\nOptional mapping of diagnostics or latent truth\n\n\n\nThe simulator validates shape and finiteness at the composition boundary. The final dataset recursively copies and freezes metadata.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Core API"
+    ]
+  },
+  {
+    "objectID": "reference/core.html#unitfeaturedraw",
+    "href": "reference/core.html#unitfeaturedraw",
+    "title": "Core API",
+    "section": "3 UnitFeatureDraw",
+    "text": "3 UnitFeatureDraw\n\n\n\nCode\nprint(signature(pps.UnitFeatureDraw))\n\n\nUnitFeatureDraw(observables: 'FloatMatrix', unobservables: 'FloatMatrix', metadata: 'Mapping[str, Any]' = &lt;factory&gt;) -&gt; None\n\n\n\nReturn type for UnitFeatureModel.generate().\n\n\n\n\n\n\n\n\nField\nShape\nMeaning\n\n\n\n\nobservables\n(n_units, k_x)\nCovariates exposed on PanelDataset\n\n\nunobservables\n(n_units, k_u)\nLatent features retained as simulation truth\n\n\nmetadata\nMapping\nNames and feature-model diagnostics\n\n\n\nZero feature columns are valid. All supplied values must be finite.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Core API"
+    ]
+  },
+  {
+    "objectID": "reference/core.html#assignmentcontext",
+    "href": "reference/core.html#assignmentcontext",
+    "title": "Core API",
+    "section": "4 AssignmentContext",
+    "text": "4 AssignmentContext\n\n\n\nCode\nprint(signature(pps.AssignmentContext))\n\n\nAssignmentContext(dimensions: 'PanelDimensions', observables: 'FloatMatrix | None' = None, unobservables: 'FloatMatrix | None' = None, feature_metadata: 'Mapping[str, Any]' = &lt;factory&gt;) -&gt; None\n\n\n\nImmutable input to feature-aware assignment mechanisms. It owns read-only copies of observed and latent unit features. n_units and n_periods proxy the enclosed PanelDimensions, which keeps legacy assignments that only inspect dimensions operational.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Core API"
+    ]
+  },
+  {
+    "objectID": "reference/core.html#simulationcontext",
+    "href": "reference/core.html#simulationcontext",
+    "title": "Core API",
+    "section": "5 SimulationContext",
+    "text": "5 SimulationContext\n\n\n\nCode\nprint(signature(pps.SimulationContext))\n\n\nSimulationContext(dimensions: 'PanelDimensions', treatment: 'FloatMatrix', observables: 'FloatMatrix | None' = None, unobservables: 'FloatMatrix | None' = None, feature_metadata: 'Mapping[str, Any]' = &lt;factory&gt;) -&gt; None\n\n\n\nInput to outcome and effect components.\n\n\n\nAttribute\nContract\n\n\n\n\ndimensions\nPanelDimensions\n\n\ntreatment\nRead-only finite binary (n_units, n_periods) matrix\n\n\nobservables\nRead-only (n_units, k_x) matrix\n\n\nunobservables\nRead-only (n_units, k_u) matrix\n\n\nfeature_metadata\nRead-only feature metadata mapping\n\n\n\nDerived properties:\n\n\n\n\n\n\n\nProperty\nReturn\n\n\n\n\never_treated\nBoolean unit mask\n\n\ntreated_units\nInteger positions treated at least once\n\n\ncontrol_units\nInteger positions never treated\n\n\nis_absorbing\nWhether treatment never switches off\n\n\nadoption_times\nFirst treated period; never treated uses n_periods\n\n\n\nadoption_times raises ValueError for nonabsorbing treatment.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Core API"
+    ]
+  },
+  {
+    "objectID": "reference/core.html#component-protocols",
+    "href": "reference/core.html#component-protocols",
+    "title": "Core API",
+    "section": "6 Component protocols",
+    "text": "6 Component protocols\nThe protocols are runtime-checkable but inheritance is optional.\nclass UnitFeatureModel(Protocol):\n    def generate(self, dimensions, rng) -&gt; UnitFeatureDraw: ...\n\nclass AssignmentModel(Protocol):\n    def assign(self, context, rng) -&gt; ComponentDraw: ...\n\nclass OutcomeModel(Protocol):\n    def generate(self, context, rng) -&gt; ComponentDraw: ...\n\nclass EffectModel(Protocol):\n    def generate(self, context, rng) -&gt; ComponentDraw: ...\nAll randomness must come from the supplied numpy.random.Generator.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Core API"
+    ]
+  },
+  {
+    "objectID": "reference/core.html#paneldataset",
+    "href": "reference/core.html#paneldataset",
+    "title": "Core API",
+    "section": "7 PanelDataset",
+    "text": "7 PanelDataset\n\n\n\nCode\nprint(signature(pps.PanelDataset))\n\n\nPanelDataset(outcome: 'FloatMatrix', treatment: 'FloatMatrix', untreated_outcome: 'FloatMatrix', treatment_effect: 'FloatMatrix', name: 'str', unit_ids: 'NDArray[Any] | None' = None, time_ids: 'NDArray[Any] | None' = None, metadata: 'Mapping[str, Any]' = &lt;factory&gt;, unit_covariates: 'FloatMatrix | None' = None, unit_covariate_names: 'Sequence[str] | None' = None) -&gt; None\n\n\n\nThe immutable output of every simulation.\n\n7.1 Constructor arrays\n\n\n\n\n\n\n\n\nField\nShape\nValidation\n\n\n\n\noutcome\n(N,T)\nFinite, nonempty, two-dimensional\n\n\ntreatment\n(N,T)\nSame shape; binary\n\n\nuntreated_outcome\n(N,T)\nSame shape; finite\n\n\ntreatment_effect\n(N,T)\nSame shape; zero where untreated\n\n\nunit_covariates\n(N,K)\nOptional finite time-invariant covariates\n\n\n\nThe constructor enforces\n\\[Y=Y(0)+\\tau\\]\ncell by cell. It copies arrays before making them read-only, so later mutation of caller-owned inputs cannot alter the dataset.\n\n\n7.2 Identifiers and metadata\nunit_ids and time_ids default to zero-based integer positions and must be unique. unit_covariate_names defaults to x1, x2, and so on; names must be unique and cannot collide with the long-form core columns. metadata is copied and recursively frozen for mappings, arrays, lists, tuples, and sets.\n\n\n7.3 Properties\n\n\n\nProperty\nMeaning\n\n\n\n\nshape, n_units, n_periods\nPanel dimensions\n\n\never_treated\nUnit-level treatment mask\n\n\ntreated_units, control_units\nInteger row positions\n\n\nis_absorbing\nMonotone treatment indicator\n\n\nadoption_times\nFirst treated period or horizon sentinel\n\n\ntrue_att\nMean realized effect over cells with treatment == 1\n\n\n\ntrue_att raises ValueError when the panel has no treated cells.\n\n\n7.4 Interchange methods\n\n\nCode\nfor name in (\"as_arrays\", \"arrays\", \"as_long_dict\"):\n    method = getattr(pps.PanelDataset, name)\n    print(f\"{name}{inspect.signature(method)}\")\n\n\nas_arrays(self, *, copy: 'bool' = False) -&gt; 'tuple[FloatMatrix, FloatMatrix]'\narrays(self, fields: 'Sequence[str]', *, copy: 'bool' = False) -&gt; 'tuple[FloatMatrix, ...]'\nas_long_dict(self, *, copy: 'bool' = False) -&gt; 'Mapping[str, NDArray[Any]]'\n\n\n\n\n\n\n\n\n\nMethod\nReturn contract\n\n\n\n\nas_arrays(copy=False)\n(outcome, treatment) wide matrices\n\n\narrays(fields, copy=False)\nRequested causal matrices in caller order\n\n\nas_long_dict(copy=False)\nFlat core columns plus named unit covariates\n\n\n\nViews are read-only unless copy=True. arrays() accepts outcome, treatment, untreated_outcome, and treatment_effect; an unknown name raises ValueError.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Core API"
+    ]
+  },
+  {
+    "objectID": "reference/core.html#panelsimulator",
+    "href": "reference/core.html#panelsimulator",
+    "title": "Core API",
+    "section": "8 PanelSimulator",
+    "text": "8 PanelSimulator\n\n\n\nCode\nprint(signature(pps.PanelSimulator))\n\n\nPanelSimulator(name: 'str', dimensions: 'PanelDimensions', assignment: 'AssignmentModel', outcome_model: 'OutcomeModel', effect_model: 'EffectModel', feature_model: 'UnitFeatureModel | None' = None) -&gt; None\n\n\n\n\n\n\nField\nContract\n\n\n\n\nname\nNonempty design identifier\n\n\ndimensions\nPanelDimensions\n\n\nassignment\nObject satisfying AssignmentModel\n\n\noutcome_model\nObject satisfying OutcomeModel\n\n\neffect_model\nObject satisfying EffectModel\n\n\nfeature_model\nOptional object satisfying UnitFeatureModel\n\n\n\n\n8.1 Pipeline\n\nResolve one NumPy generator.\nDraw shared observed and latent features, if configured.\nDraw and validate binary treatment.\nBuild SimulationContext.\nDraw and validate untreated outcomes.\nDraw effects and reject nonzero effects outside treated cells.\nReturn PanelDataset(outcome=untreated+effect, ...).\n\nComponent metadata is namespaced under features, assignment, outcome, and effect. The simulator name and dimensions are stored under simulator.\n\n\nCode\nprint(f\"simulate{inspect.signature(pps.PanelSimulator.simulate)}\")\nprint(f\"iter_simulations{inspect.signature(pps.PanelSimulator.iter_simulations)}\")\n\n\nsimulate(self, *, seed: 'int | np.random.SeedSequence | None' = None, rng: 'np.random.Generator | None' = None) -&gt; 'PanelDataset'\niter_simulations(self, replications: 'int', *, seed: 'int | np.random.SeedSequence | None' = None) -&gt; 'Iterator[PanelDataset]'\n\n\nsimulate(seed=..., rng=...) accepts either an integer/SeedSequence or an existing generator, never both. iter_simulations(replications, seed=...) requires a positive replication count and uses SeedSequence.spawn() for child streams.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Core API"
+    ]
+  },
+  {
+    "objectID": "reference/core.html#resolve_rng",
+    "href": "reference/core.html#resolve_rng",
+    "title": "Core API",
+    "section": "9 resolve_rng",
+    "text": "9 resolve_rng\n\n\n\nCode\nprint(f\"resolve_rng{inspect.signature(pps.resolve_rng)}\")\n\n\nresolve_rng(*, seed: 'int | np.random.SeedSequence | None' = None, rng: 'np.random.Generator | None' = None) -&gt; 'np.random.Generator'\n\n\n\nReturns the supplied numpy.random.Generator after type validation or constructs numpy.random.default_rng(seed). Passing both seed and rng raises ValueError; passing a non-generator rng raises TypeError.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Core API"
+    ]
+  },
+  {
+    "objectID": "validation.html",
+    "href": "validation.html",
+    "title": "1 Validation record",
+    "section": "",
+    "text": "The 0.1.0 repository was validated with:\nuv sync --locked\nuv run ruff format --check .\nuv run ruff check .\nuv run pytest\nuv run python examples/custom_dgp.py\nuv run python examples/estimator_interop.py\nuv run python examples/assignment_mechanisms.py\nuv build\nThe source tree contains no crabbymetrics import. NumPy and Matplotlib are the runtime dependencies declared in pyproject.toml.\nThe wheel was installed into a fresh temporary uv environment. A smoke test then created a registered classic-factor design, generated a (200, 50) panel, extracted estimator arrays, and recovered the canonical true ATT of 1.1.\n\n\n\nBefore the embedded implementation was removed from the balancing reproduction project, the old and new packages were loaded together. Each design used the same small configuration and seed 101:\nCanonicalPanelConfig(\n    n_control=12,\n    n_treated=4,\n    n_pre=8,\n    n_post=3,\n)\nThe audit compared outcome, untreated_outcome, treatment, and treatment_effect with exact NumPy array equality.\n\n\n\n\n\n\n\n\nDesign\nParameters\nResult\n\n\n\n\nClassic factor\noverlap=1.0\nExact\n\n\nWeak factor\noverlap=1.0\nExact\n\n\nSynthetic control\nactive_share=0.25\nExact\n\n\nFactor-synthetic\noverlap=1.0\nExact\n\n\nStationary time series\ncoefficient=0.9, integrated=False\nExact\n\n\nIntegrated time series\ncoefficient=0.2, integrated=True\nExact\n\n\nMixed factor\noverlap=1.0\nExact\n\n\n\nThe migration changes object ownership and metadata layout, not canonical outcomes or treatment arrays.\n\n\n\nThe separate balancing reproduction was changed to consume pypanelsim as an editable sibling dependency. Its tests passed after removal of the embedded source. Its self-contained Quarto report then executed all 25 code cells and rendered successfully with the same cached 398-cell R/Python comparison.\nThis downstream check establishes array-contract compatibility with the current crabbymetrics experiment runner. It does not make crabbymetrics a runtime or test dependency of pypanelsim.\n\n\n\nNumPy and R do not share seeded random streams. The migration audit verifies Python-to-Python extraction parity. The separate reproduction report evaluates R/Python agreement with same-panel estimator fixtures and Monte Carlo standard errors.",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Validation record"
+    ]
+  },
+  {
+    "objectID": "validation.html#package-checks",
+    "href": "validation.html#package-checks",
+    "title": "1 Validation record",
+    "section": "",
+    "text": "The 0.1.0 repository was validated with:\nuv sync --locked\nuv run ruff format --check .\nuv run ruff check .\nuv run pytest\nuv run python examples/custom_dgp.py\nuv run python examples/estimator_interop.py\nuv run python examples/assignment_mechanisms.py\nuv build\nThe source tree contains no crabbymetrics import. NumPy and Matplotlib are the runtime dependencies declared in pyproject.toml.\nThe wheel was installed into a fresh temporary uv environment. A smoke test then created a registered classic-factor design, generated a (200, 50) panel, extracted estimator arrays, and recovered the canonical true ATT of 1.1.",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Validation record"
+    ]
+  },
+  {
+    "objectID": "validation.html#migration-parity",
+    "href": "validation.html#migration-parity",
+    "title": "1 Validation record",
+    "section": "",
+    "text": "Before the embedded implementation was removed from the balancing reproduction project, the old and new packages were loaded together. Each design used the same small configuration and seed 101:\nCanonicalPanelConfig(\n    n_control=12,\n    n_treated=4,\n    n_pre=8,\n    n_post=3,\n)\nThe audit compared outcome, untreated_outcome, treatment, and treatment_effect with exact NumPy array equality.\n\n\n\n\n\n\n\n\nDesign\nParameters\nResult\n\n\n\n\nClassic factor\noverlap=1.0\nExact\n\n\nWeak factor\noverlap=1.0\nExact\n\n\nSynthetic control\nactive_share=0.25\nExact\n\n\nFactor-synthetic\noverlap=1.0\nExact\n\n\nStationary time series\ncoefficient=0.9, integrated=False\nExact\n\n\nIntegrated time series\ncoefficient=0.2, integrated=True\nExact\n\n\nMixed factor\noverlap=1.0\nExact\n\n\n\nThe migration changes object ownership and metadata layout, not canonical outcomes or treatment arrays.",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Validation record"
+    ]
+  },
+  {
+    "objectID": "validation.html#downstream-reproduction-check",
+    "href": "validation.html#downstream-reproduction-check",
+    "title": "1 Validation record",
+    "section": "",
+    "text": "The separate balancing reproduction was changed to consume pypanelsim as an editable sibling dependency. Its tests passed after removal of the embedded source. Its self-contained Quarto report then executed all 25 code cells and rendered successfully with the same cached 398-cell R/Python comparison.\nThis downstream check establishes array-contract compatibility with the current crabbymetrics experiment runner. It does not make crabbymetrics a runtime or test dependency of pypanelsim.",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Validation record"
+    ]
+  },
+  {
+    "objectID": "validation.html#what-is-not-asserted",
+    "href": "validation.html#what-is-not-asserted",
+    "title": "1 Validation record",
+    "section": "",
+    "text": "NumPy and R do not share seeded random streams. The migration audit verifies Python-to-Python extraction parity. The separate reproduction report evaluates R/Python agreement with same-panel estimator fixtures and Monte Carlo standard errors.",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Validation record"
+    ]
+  },
+  {
+    "objectID": "canonical-designs.html",
+    "href": "canonical-designs.html",
+    "title": "1 Canonical panel designs",
+    "section": "",
+    "text": "The default configuration has \\(N_0=160\\) never-treated units, \\(N_1=40\\) treated units, \\(T_0=40\\) pre-treatment periods, and \\(T_1=10\\) post-treatment periods. Controls appear first and treated units appear last only in the default canonical factory. The generic simulation infrastructure does not require this order.\nTreatment is absorbing and starts at zero-based period \\(T_0\\). The realized effect in the \\(k\\)th treated period is\n\\[\n\\tau_{it} = s k,\n\\]\nwith \\(s=0.2\\) and \\(k=1,\\ldots,T_1\\). The default true ATT is therefore 1.1. The observed outcome is\n\\[\nY_{it} = Y_{it}(0) + W_{it}\\tau_{it}.\n\\]\nAll canonical designs add independent observation noise with variance 0.36.\n\n\n\nA factor path is divided by its sample standard deviation with ddof=1. It is not centered. The path types are:\n\ndrift: a stationary AR(1) path with coefficient 0.5 plus \\(0.5t\\);\ncyclical: \\(\\sin(\\pi t / 15)\\);\ntrend: \\(t\\) plus standard normal noise;\nar1: a stationary AR(1) path with coefficient 0.5;\nwhite_noise: independent standard normal values.\n\nAR paths start from their stationary distribution. Drift and AR factor paths discard 20 initial values before returning the requested horizon.\n\n\n\nThe untreated signal is\n\\[\nY_{it}(0) = \\lambda_i^\\top f_t + \\varepsilon_{it},\n\\]\nwith two drift factors. Each control loading is drawn from \\(N(-a,1)\\) and each treated loading from \\(N(a,1)\\). The overlap parameter is \\(a\\). The experiment uses \\(a=0\\) for good loading overlap and \\(a=1\\) for poor overlap.\nFactory: classic_factor_design(overlap=...).\n\n\n\nThis design uses five drift factors and five cyclical factors. Each standardized factor is multiplied by 0.2. Loading distributions use the same overlap parameter as the classic design.\nFactory: weak_factor_design(overlap=...).\n\n\n\nThe control outcomes begin with a two-drift-factor signal. Candidate donor scores are the sums of their two loadings. Units among the largest n_active scores receive sampling weight 1; all other controls receive sampling weight 0.1. The active donor set is sampled without replacement.\nActive donors receive equal convex weights. Each treated signal is the active donor average plus independent standard normal noise. The final latent signal uses weight \\(1/(1+10^{-9})\\) on the synthetic component and the remaining weight on the original factor component.\nThe active count is\n\\[\nn_{active} = \\max\\{1,\\lceil \\text{active_share} \\times N_0 \\rceil\\}.\n\\]\nFactory: synthetic_control_design(active_share=...).\n\n\n\nThis design uses one drift factor and one cyclical factor. The untreated latent signal is an equal mixture of the factor signal and a synthetic-control signal. The active donor count is \\(\\min(N_0,N_1)\\). Independent treated-component noise has standard deviation 2 before the equal mixture is formed.\nFactory: factor_synthetic_design(overlap=...).\n\n\n\nEach unit has an independent process\n\\[\nx_{it} = \\phi x_{i,t-1} + \\mu_i + \\eta_{it},\n\\]\nwhere \\(\\eta_{it}\\) is standard normal. Controls have \\(\\mu_i=0\\) and treated units have \\(\\mu_i=0.25\\). The initial value is drawn from the stationary distribution, so the stationary treated mean is \\(0.25/(1-\\phi)\\).\nWhen integrated=False, \\(Y(0)\\) uses \\(x_{it}\\) plus observation noise. When integrated=True, it uses the cumulative sum of \\(x_{it}\\) plus observation noise, which gives an ARIMA(1,1,0)-type path.\nFactory: time_series_design(coefficient=..., integrated=...).\n\n\n\nThe panel is divided into two equal-sized groups. The first group contains all treated units, enough controls to fill half the panel, and two drift factors. The second group contains only controls and two cyclical factors. Both half-panels restart from the same random-generator state. The final unit order returns all controls before treated units under the default assignment.\nThe total unit count must be even, and the number of treated units must be less than half the panel.\nFactory: mixed_factor_design(overlap=...).\n\n\n\nThe convenience functions preserve the NumPy draw order of the extracted panel_dgps implementation. For a fixed NumPy version and seed, migrated draws match that implementation cell for cell. The R reference uses a different random-number generator, so cross-language comparisons must use distributional properties or Monte Carlo uncertainty rather than identical seeded panels.",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Canonical panel designs"
+    ]
+  },
+  {
+    "objectID": "canonical-designs.html#shared-panel-and-intervention",
+    "href": "canonical-designs.html#shared-panel-and-intervention",
+    "title": "1 Canonical panel designs",
+    "section": "",
+    "text": "The default configuration has \\(N_0=160\\) never-treated units, \\(N_1=40\\) treated units, \\(T_0=40\\) pre-treatment periods, and \\(T_1=10\\) post-treatment periods. Controls appear first and treated units appear last only in the default canonical factory. The generic simulation infrastructure does not require this order.\nTreatment is absorbing and starts at zero-based period \\(T_0\\). The realized effect in the \\(k\\)th treated period is\n\\[\n\\tau_{it} = s k,\n\\]\nwith \\(s=0.2\\) and \\(k=1,\\ldots,T_1\\). The default true ATT is therefore 1.1. The observed outcome is\n\\[\nY_{it} = Y_{it}(0) + W_{it}\\tau_{it}.\n\\]\nAll canonical designs add independent observation noise with variance 0.36.",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Canonical panel designs"
+    ]
+  },
+  {
+    "objectID": "canonical-designs.html#factor-path-construction",
+    "href": "canonical-designs.html#factor-path-construction",
+    "title": "1 Canonical panel designs",
+    "section": "",
+    "text": "A factor path is divided by its sample standard deviation with ddof=1. It is not centered. The path types are:\n\ndrift: a stationary AR(1) path with coefficient 0.5 plus \\(0.5t\\);\ncyclical: \\(\\sin(\\pi t / 15)\\);\ntrend: \\(t\\) plus standard normal noise;\nar1: a stationary AR(1) path with coefficient 0.5;\nwhite_noise: independent standard normal values.\n\nAR paths start from their stationary distribution. Drift and AR factor paths discard 20 initial values before returning the requested horizon.",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Canonical panel designs"
+    ]
+  },
+  {
+    "objectID": "canonical-designs.html#classic-factor-design",
+    "href": "canonical-designs.html#classic-factor-design",
+    "title": "1 Canonical panel designs",
+    "section": "",
+    "text": "The untreated signal is\n\\[\nY_{it}(0) = \\lambda_i^\\top f_t + \\varepsilon_{it},\n\\]\nwith two drift factors. Each control loading is drawn from \\(N(-a,1)\\) and each treated loading from \\(N(a,1)\\). The overlap parameter is \\(a\\). The experiment uses \\(a=0\\) for good loading overlap and \\(a=1\\) for poor overlap.\nFactory: classic_factor_design(overlap=...).",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Canonical panel designs"
+    ]
+  },
+  {
+    "objectID": "canonical-designs.html#weak-factor-design",
+    "href": "canonical-designs.html#weak-factor-design",
+    "title": "1 Canonical panel designs",
+    "section": "",
+    "text": "This design uses five drift factors and five cyclical factors. Each standardized factor is multiplied by 0.2. Loading distributions use the same overlap parameter as the classic design.\nFactory: weak_factor_design(overlap=...).",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Canonical panel designs"
+    ]
+  },
+  {
+    "objectID": "canonical-designs.html#sparse-synthetic-control-design",
+    "href": "canonical-designs.html#sparse-synthetic-control-design",
+    "title": "1 Canonical panel designs",
+    "section": "",
+    "text": "The control outcomes begin with a two-drift-factor signal. Candidate donor scores are the sums of their two loadings. Units among the largest n_active scores receive sampling weight 1; all other controls receive sampling weight 0.1. The active donor set is sampled without replacement.\nActive donors receive equal convex weights. Each treated signal is the active donor average plus independent standard normal noise. The final latent signal uses weight \\(1/(1+10^{-9})\\) on the synthetic component and the remaining weight on the original factor component.\nThe active count is\n\\[\nn_{active} = \\max\\{1,\\lceil \\text{active_share} \\times N_0 \\rceil\\}.\n\\]\nFactory: synthetic_control_design(active_share=...).",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Canonical panel designs"
+    ]
+  },
+  {
+    "objectID": "canonical-designs.html#factor-synthetic-mixture",
+    "href": "canonical-designs.html#factor-synthetic-mixture",
+    "title": "1 Canonical panel designs",
+    "section": "",
+    "text": "This design uses one drift factor and one cyclical factor. The untreated latent signal is an equal mixture of the factor signal and a synthetic-control signal. The active donor count is \\(\\min(N_0,N_1)\\). Independent treated-component noise has standard deviation 2 before the equal mixture is formed.\nFactory: factor_synthetic_design(overlap=...).",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Canonical panel designs"
+    ]
+  },
+  {
+    "objectID": "canonical-designs.html#time-series-design",
+    "href": "canonical-designs.html#time-series-design",
+    "title": "1 Canonical panel designs",
+    "section": "",
+    "text": "Each unit has an independent process\n\\[\nx_{it} = \\phi x_{i,t-1} + \\mu_i + \\eta_{it},\n\\]\nwhere \\(\\eta_{it}\\) is standard normal. Controls have \\(\\mu_i=0\\) and treated units have \\(\\mu_i=0.25\\). The initial value is drawn from the stationary distribution, so the stationary treated mean is \\(0.25/(1-\\phi)\\).\nWhen integrated=False, \\(Y(0)\\) uses \\(x_{it}\\) plus observation noise. When integrated=True, it uses the cumulative sum of \\(x_{it}\\) plus observation noise, which gives an ARIMA(1,1,0)-type path.\nFactory: time_series_design(coefficient=..., integrated=...).",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Canonical panel designs"
+    ]
+  },
+  {
+    "objectID": "canonical-designs.html#mixed-factor-design",
+    "href": "canonical-designs.html#mixed-factor-design",
+    "title": "1 Canonical panel designs",
+    "section": "",
+    "text": "The panel is divided into two equal-sized groups. The first group contains all treated units, enough controls to fill half the panel, and two drift factors. The second group contains only controls and two cyclical factors. Both half-panels restart from the same random-generator state. The final unit order returns all controls before treated units under the default assignment.\nThe total unit count must be even, and the number of treated units must be less than half the panel.\nFactory: mixed_factor_design(overlap=...).",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Canonical panel designs"
+    ]
+  },
+  {
+    "objectID": "canonical-designs.html#random-stream-compatibility",
+    "href": "canonical-designs.html#random-stream-compatibility",
+    "title": "1 Canonical panel designs",
+    "section": "",
+    "text": "The convenience functions preserve the NumPy draw order of the extracted panel_dgps implementation. For a fixed NumPy version and seed, migrated draws match that implementation cell for cell. The R reference uses a different random-number generator, so cross-language comparisons must use distributional properties or Monte Carlo uncertainty rather than identical seeded panels.",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Canonical panel designs"
+    ]
+  },
+  {
+    "objectID": "interoperability.html",
+    "href": "interoperability.html",
+    "title": "Estimator interoperability",
+    "section": "",
+    "text": "pypanelsim does not impose an estimator interface. A panel exposes wide NumPy arrays, long columns, observed unit covariates, treatment timing, and causal truth for evaluation.\nCode\nimport crabbymetrics as cm\nimport numpy as np\nimport pandas as pd\nimport pyfixest as pf\nimport pypanelsim as pps\n\npanel = pps.classic_factor(overlap=0.0, seed=91)",
+    "crumbs": [
+      "Home",
+      "Use pypanelsim",
+      "Estimator interoperability"
+    ]
+  },
+  {
+    "objectID": "interoperability.html#crabbymetrics",
+    "href": "interoperability.html#crabbymetrics",
+    "title": "Estimator interoperability",
+    "section": "1 crabbymetrics",
+    "text": "1 crabbymetrics\ncrabbymetrics panel estimators consume the wide (unit, period) arrays directly.\n\n\nCode\nmodel = cm.AugmentedBalancing(balance=\"double\")\nmodel.fit(panel.outcome, panel.treatment)\nbalancing_att = float(model.summary()[\"att\"])\npd.DataFrame(\n    {\n        \"quantity\": [\"estimated ATT\", \"true ATT\", \"error\"],\n        \"value\": [balancing_att, panel.true_att, balancing_att - panel.true_att],\n    }\n)\n\n\n\n\n\n\n\n\n\nquantity\nvalue\n\n\n\n\n0\nestimated ATT\n1.225096\n\n\n1\ntrue ATT\n1.100000\n\n\n2\nerror\n0.125096\n\n\n\n\n\n\n\nAn outcome model can be supplied as a same-shaped nuisance surface. The oracle surface below is for interface demonstration only; a real estimator must fit its nuisance model without treated post-treatment leakage.\n\n\nCode\noracle = cm.AugmentedBalancing(balance=\"none\")\noracle.fit(panel.outcome, panel.treatment, panel.untreated_outcome)\nprint(float(oracle.summary()[\"att\"]), panel.true_att)\n\n\n1.1 1.1",
+    "crumbs": [
+      "Home",
+      "Use pypanelsim",
+      "Estimator interoperability"
+    ]
+  },
+  {
+    "objectID": "interoperability.html#pyfixest",
+    "href": "interoperability.html#pyfixest",
+    "title": "Estimator interoperability",
+    "section": "2 PyFixest",
+    "text": "2 PyFixest\nPyFixest consumes a long DataFrame and formula. as_long_dict() supplies all core panel columns and repeats observed unit covariates over time.\n\n\nCode\nlong = pd.DataFrame(dict(panel.as_long_dict()))\ntwfe = pf.feols(\n    \"outcome ~ treatment | unit + time\",\n    data=long,\n    vcov={\"CRV1\": \"unit\"},\n)\npd.DataFrame(\n    {\n        \"estimate\": [float(twfe.coef()[\"treatment\"])],\n        \"standard error\": [float(twfe.se()[\"treatment\"])],\n        \"simulation ATT\": [panel.true_att],\n    }\n)\n\n\n\n\n\n\n\n\n\nestimate\nstandard error\nsimulation ATT\n\n\n\n\n0\n0.762392\n0.413651\n1.1\n\n\n\n\n\n\n\nThe regression coefficient and panel.true_att need not target the same weighted estimand under heterogeneous effects or staggered adoption. The point of the interchange is to make this comparison explicit, not to force agreement.",
+    "crumbs": [
+      "Home",
+      "Use pypanelsim",
+      "Estimator interoperability"
+    ]
+  },
+  {
+    "objectID": "interoperability.html#writable-inputs",
+    "href": "interoperability.html#writable-inputs",
+    "title": "Estimator interoperability",
+    "section": "3 Writable inputs",
+    "text": "3 Writable inputs\nThe package returns read-only arrays by default. Ask for copies when an estimator modifies its inputs:\n\n\nCode\ny_copy, w_copy = panel.as_arrays(copy=True)\nprint(y_copy.flags.writeable, w_copy.flags.writeable)\n\n\nTrue True\n\n\nFor selected truth matrices:\n\n\nCode\ny0, tau = panel.arrays((\"untreated_outcome\", \"treatment_effect\"))\nnp.testing.assert_allclose(panel.outcome, y0 + tau)",
+    "crumbs": [
+      "Home",
+      "Use pypanelsim",
+      "Estimator interoperability"
+    ]
+  },
+  {
+    "objectID": "getting-started.html",
+    "href": "getting-started.html",
+    "title": "Get started",
+    "section": "",
+    "text": "Python 3.10 or later is required.\nuv add \"pypanelsim @ git+ssh://git@github.com/apoorvalal/pypanelsim.git\"\nFor a local checkout:\nuv sync\nFor this documentation site, including crabbymetrics, PyFixest, Jupyter, and pandas:\nuv sync --extra docs",
+    "crumbs": [
+      "Home",
+      "Use pypanelsim",
+      "Get started"
+    ]
+  },
+  {
+    "objectID": "getting-started.html#installation",
+    "href": "getting-started.html#installation",
+    "title": "Get started",
+    "section": "",
+    "text": "Python 3.10 or later is required.\nuv add \"pypanelsim @ git+ssh://git@github.com/apoorvalal/pypanelsim.git\"\nFor a local checkout:\nuv sync\nFor this documentation site, including crabbymetrics, PyFixest, Jupyter, and pandas:\nuv sync --extra docs",
+    "crumbs": [
+      "Home",
+      "Use pypanelsim",
+      "Get started"
+    ]
+  },
+  {
+    "objectID": "getting-started.html#one-canonical-draw",
+    "href": "getting-started.html#one-canonical-draw",
+    "title": "Get started",
+    "section": "2 One canonical draw",
+    "text": "2 One canonical draw\n\n\nCode\nimport matplotlib.pyplot as plt\nimport numpy as np\nimport pypanelsim as pps\n\npanel = pps.classic_factor(overlap=1.0, seed=42)\nprint(panel.name, panel.shape, panel.true_att)\n\n\nclassic_factor (200, 50) 1.1\n\n\nEvery panel contains the observed outcome, treatment, untreated potential outcome, and realized treatment effect:\n\n\nCode\nnp.testing.assert_allclose(\n    panel.outcome,\n    panel.untreated_outcome + panel.treatment_effect,\n)\nprint(panel.is_absorbing)\nprint(panel.adoption_times[:5], panel.adoption_times[-5:])\n\n\nTrue\n[50 50 50 50 50] [40 40 40 40 40]\n\n\n\n\nCode\nfig, axes = plt.subplots(1, 2, figsize=(11, 3.8), constrained_layout=True)\naxes[0].matshow(panel.outcome, aspect=\"auto\", cmap=\"coolwarm\")\naxes[1].matshow(panel.treatment, aspect=\"auto\", cmap=\"Greys\", vmin=0, vmax=1)\naxes[0].set_title(\"Observed outcome Y\")\naxes[1].set_title(\"Treatment W\")\nfor axis in axes:\n    axis.set_xlabel(\"period\")\n    axis.set_ylabel(\"unit\")\nplt.show()\n\n\n\n\n\nA canonical factor-panel draw. Controls precede the common treated cohort.",
+    "crumbs": [
+      "Home",
+      "Use pypanelsim",
+      "Get started"
+    ]
+  },
+  {
+    "objectID": "getting-started.html#estimator-interchange",
+    "href": "getting-started.html#estimator-interchange",
+    "title": "Get started",
+    "section": "3 Estimator interchange",
+    "text": "3 Estimator interchange\nWide NumPy arrays:\n\n\nCode\ny, w = panel.as_arrays()\nprint(y.shape, w.shape, y.flags.writeable)\n\n\n(200, 50) (200, 50) False\n\n\nLong columns:\n\n\nCode\nimport pandas as pd\n\nlong = pd.DataFrame(dict(panel.as_long_dict()))\nlong.head()\n\n\n\n\n\n\n\n\n\nunit\ntime\noutcome\ntreatment\nuntreated_outcome\ntreatment_effect\n\n\n\n\n0\n0\n0\n-1.299601\n0.0\n-1.299601\n0.0\n\n\n1\n0\n1\n-0.730091\n0.0\n-0.730091\n0.0\n\n\n2\n0\n2\n-0.068894\n0.0\n-0.068894\n0.0\n\n\n3\n0\n3\n-0.345446\n0.0\n-0.345446\n0.0\n\n\n4\n0\n4\n-0.432427\n0.0\n-0.432427\n0.0\n\n\n\n\n\n\n\nPass copy=True when a downstream estimator mutates its inputs.",
+    "crumbs": [
+      "Home",
+      "Use pypanelsim",
+      "Get started"
+    ]
+  },
+  {
+    "objectID": "getting-started.html#repeated-simulations",
+    "href": "getting-started.html#repeated-simulations",
+    "title": "Get started",
+    "section": "4 Repeated simulations",
+    "text": "4 Repeated simulations\niter_simulations() spawns independent child seed sequences:\n\n\nCode\nsimulator = pps.classic_factor_design(overlap=1.0)\ndraws = list(simulator.iter_simulations(3, seed=2026))\nprint([draw.true_att for draw in draws])\nprint(np.array_equal(draws[0].outcome, draws[1].outcome))\n\n\n[1.1, 1.1, 1.1]\nFalse",
+    "crumbs": [
+      "Home",
+      "Use pypanelsim",
+      "Get started"
+    ]
+  },
+  {
+    "objectID": "getting-started.html#custom-dimensions",
+    "href": "getting-started.html#custom-dimensions",
+    "title": "Get started",
+    "section": "5 Custom dimensions",
+    "text": "5 Custom dimensions\n\n\nCode\nconfig = pps.CanonicalPanelConfig(\n    n_control=40,\n    n_treated=10,\n    n_pre=20,\n    n_post=5,\n    effect_slope=0.15,\n    noise_variance=0.25,\n)\nsmall = pps.synthetic_control(config=config, active_share=0.2, seed=7)\nprint(small.shape, small.true_att)\n\n\n(50, 25) 0.45\n\n\nContinue with assignment mechanisms or the complete API reference.",
+    "crumbs": [
+      "Home",
+      "Use pypanelsim",
+      "Get started"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "pypanelsim",
+    "section": "",
+    "text": "pypanelsim generates balanced panel data while keeping assignment, untreated potential outcomes, treatment effects, observed covariates, and latent unit features explicit. Every draw is reproducible, validated, and estimator-neutral."
+  },
+  {
+    "objectID": "index.html#start-with-a-canonical-design",
+    "href": "index.html#start-with-a-canonical-design",
+    "title": "pypanelsim",
+    "section": "1.1 Start with a canonical design",
+    "text": "1.1 Start with a canonical design\nimport pypanelsim as pps\n\npanel = pps.classic_factor(overlap=1.0, seed=42)\ny, w = panel.as_arrays()\n\nprint(panel.shape)       # (200, 50)\nprint(panel.true_att)    # 1.1"
+  },
+  {
+    "objectID": "index.html#or-compose-the-assignment-law",
+    "href": "index.html#or-compose-the-assignment-law",
+    "title": "pypanelsim",
+    "section": "1.2 Or compose the assignment law",
+    "text": "1.2 Or compose the assignment law\nsimulator = pps.PanelSimulator(\n    name=\"observed_selection\",\n    dimensions=pps.PanelDimensions(120, 48),\n    feature_model=pps.GaussianUnitFeatures(2, 2),\n    assignment=pps.BinaryLogitAssignment(\n        adoption_period=32,\n        intercept=-1.1,\n        observable_coefficients=(1.2, -0.8),\n        unobservable_coefficients=(0.0, 0.0),\n    ),\n    outcome_model=my_outcome_model,\n    effect_model=pps.LinearRampEffect(0.12),\n)\nThe same shared features reach assignment and the untreated-outcome model. Observed features are exposed to downstream estimators; latent features remain simulation truth."
+  },
+  {
+    "objectID": "index.html#documentation-map",
+    "href": "index.html#documentation-map",
+    "title": "pypanelsim",
+    "section": "1.3 Documentation map",
+    "text": "1.3 Documentation map\n\n\n\nGoal\nPage\n\n\n\n\nInstall and draw a first panel\nGet started\n\n\nRandomization, logit selection, and cohort GPS\nAssignment mechanisms\n\n\nUnderstand component order and RNG semantics\nArchitecture\n\n\nInspect every public object and function\nAPI reference\n\n\nReproduce 398 estimator-design RMSE cells\nBalancing reproduction\n\n\nPass panels to crabbymetrics or PyFixest\nEstimator interoperability"
+  },
+  {
+    "objectID": "index.html#installation",
+    "href": "index.html#installation",
+    "title": "pypanelsim",
+    "section": "1.4 Installation",
+    "text": "1.4 Installation\nuv add \"pypanelsim @ git+ssh://git@github.com/apoorvalal/pypanelsim.git\"\nInstall the documentation and estimator interoperability stack with:\nuv sync --extra docs"
+  },
+  {
+    "objectID": "assignment.html",
+    "href": "assignment.html",
+    "title": "Assignment mechanisms",
+    "section": "",
+    "text": "Assignment and untreated outcomes often depend on the same unit attributes. UnitFeatureModel draws these attributes before assignment and splits them into:\n\nobservables, exposed as panel.unit_covariates; and\nunobservables, retained under panel.metadata[\"features\"] as simulation truth.\n\nGaussianUnitFeatures(k_x, k_u) supplies independent standard-normal features. A custom feature model can instead introduce correlation, discrete covariates, or application-specific population structure.\n\n\nCode\nfrom dataclasses import dataclass\n\nimport matplotlib.pyplot as plt\nimport numpy as np\nimport pandas as pd\nimport pypanelsim as pps\n\n\n@dataclass(frozen=True, slots=True)\nclass FeatureOutcome:\n    def generate(self, context, rng):\n        t = np.linspace(-1.0, 1.0, context.dimensions.n_periods)\n        factor = np.sin(np.linspace(0.0, 3.0 * np.pi, context.dimensions.n_periods))\n        y0 = (\n            0.8 * context.observables[:, :1]\n            + 0.6 * context.observables[:, 1:2] * t\n            + 1.2 * context.unobservables[:, :1] * (t + 1.0)\n            + 0.8 * context.unobservables[:, 1:2] * factor\n        )\n        y0 += rng.normal(scale=0.35, size=y0.shape)\n        return pps.ComponentDraw(y0, {\"kind\": \"feature_outcome\"})\n\n\ndimensions = pps.PanelDimensions(120, 48)\nfeatures = pps.GaussianUnitFeatures(2, 2)\n\n\ndef build(name, assignment):\n    return pps.PanelSimulator(\n        name=name,\n        dimensions=dimensions,\n        feature_model=features,\n        assignment=assignment,\n        outcome_model=FeatureOutcome(),\n        effect_model=pps.LinearRampEffect(0.12),\n    )",
+    "crumbs": [
+      "Home",
+      "Use pypanelsim",
+      "Assignment mechanisms"
+    ]
+  },
+  {
+    "objectID": "assignment.html#shared-unit-features",
+    "href": "assignment.html#shared-unit-features",
+    "title": "Assignment mechanisms",
+    "section": "",
+    "text": "Assignment and untreated outcomes often depend on the same unit attributes. UnitFeatureModel draws these attributes before assignment and splits them into:\n\nobservables, exposed as panel.unit_covariates; and\nunobservables, retained under panel.metadata[\"features\"] as simulation truth.\n\nGaussianUnitFeatures(k_x, k_u) supplies independent standard-normal features. A custom feature model can instead introduce correlation, discrete covariates, or application-specific population structure.\n\n\nCode\nfrom dataclasses import dataclass\n\nimport matplotlib.pyplot as plt\nimport numpy as np\nimport pandas as pd\nimport pypanelsim as pps\n\n\n@dataclass(frozen=True, slots=True)\nclass FeatureOutcome:\n    def generate(self, context, rng):\n        t = np.linspace(-1.0, 1.0, context.dimensions.n_periods)\n        factor = np.sin(np.linspace(0.0, 3.0 * np.pi, context.dimensions.n_periods))\n        y0 = (\n            0.8 * context.observables[:, :1]\n            + 0.6 * context.observables[:, 1:2] * t\n            + 1.2 * context.unobservables[:, :1] * (t + 1.0)\n            + 0.8 * context.unobservables[:, 1:2] * factor\n        )\n        y0 += rng.normal(scale=0.35, size=y0.shape)\n        return pps.ComponentDraw(y0, {\"kind\": \"feature_outcome\"})\n\n\ndimensions = pps.PanelDimensions(120, 48)\nfeatures = pps.GaussianUnitFeatures(2, 2)\n\n\ndef build(name, assignment):\n    return pps.PanelSimulator(\n        name=name,\n        dimensions=dimensions,\n        feature_model=features,\n        assignment=assignment,\n        outcome_model=FeatureOutcome(),\n        effect_model=pps.LinearRampEffect(0.12),\n    )",
+    "crumbs": [
+      "Home",
+      "Use pypanelsim",
+      "Assignment mechanisms"
+    ]
+  },
+  {
+    "objectID": "assignment.html#fixed-size-randomization",
+    "href": "assignment.html#fixed-size-randomization",
+    "title": "Assignment mechanisms",
+    "section": "2 Fixed-size randomization",
+    "text": "2 Fixed-size randomization\nRandomizedSingleCohortAssignment samples exactly n_treated eligible units without replacement. Every eligible unit has marginal treatment probability n_treated / n_eligible; ineligible units have probability zero.\n\n\nCode\nrandomized = build(\n    \"randomized\",\n    pps.RandomizedSingleCohortAssignment(\n        n_treated=30,\n        adoption_period=32,\n    ),\n)\nrandom_panel = randomized.simulate(seed=2026)\nprint(random_panel.treated_units.size)\nprint(np.unique(random_panel.metadata[\"assignment\"][\"propensity_scores\"]))\n\n\n30\n[0.25]\n\n\nUse eligible_units= to encode design restrictions. This remains randomized only within that prespecified eligible set.",
+    "crumbs": [
+      "Home",
+      "Use pypanelsim",
+      "Assignment mechanisms"
+    ]
+  },
+  {
+    "objectID": "assignment.html#binary-logit-selection",
+    "href": "assignment.html#binary-logit-selection",
+    "title": "Assignment mechanisms",
+    "section": "3 Binary logit selection",
+    "text": "3 Binary logit selection\nBinaryLogitAssignment independently draws eventual treatment from\n\\[\ne_i=P(D_i=1\\mid X_i,U_i)\n=\\Lambda\\!\\left(\\alpha+X_i^\\top\\beta+U_i^\\top\\gamma\\right),\n\\]\nwhere \\(\\Lambda(z)=1/(1+e^{-z})\\). The selected units adopt at one common period. The assignment metadata records every linear predictor and propensity score.\n\n3.1 Selection on observables\nSet \\(\\gamma=0\\):\n\n\nCode\nobserved_selection = build(\n    \"observed_selection\",\n    pps.BinaryLogitAssignment(\n        adoption_period=32,\n        intercept=-1.1,\n        observable_coefficients=(1.2, -0.8),\n        unobservable_coefficients=(0.0, 0.0),\n    ),\n)\nobserved_panel = observed_selection.simulate(seed=2026)\nprint(observed_panel.unit_covariate_names)\nprint(observed_panel.metadata[\"assignment\"][\"propensity_scores\"][:5])\n\n\n('x1', 'x2')\n[0.09585059 0.01107192 0.47491899 0.1522054  0.22435501]\n\n\nWhen the potential-outcome law also depends on \\(X\\) but treatment does not depend on \\(U\\), assignment is unconfounded conditional on the exposed covariates. The unadjusted treated and control groups need not be comparable.\n\n\n3.2 Selection on latent factors\nSet \\(\\beta=0\\) and \\(\\gamma\\ne0\\):\n\n\nCode\nlatent_selection = build(\n    \"latent_selection\",\n    pps.BinaryLogitAssignment(\n        adoption_period=32,\n        intercept=-1.1,\n        observable_coefficients=(0.0, 0.0),\n        unobservable_coefficients=(1.4, -1.0),\n    ),\n)\nlatent_panel = latent_selection.simulate(seed=2026)\nprint(latent_panel.metadata[\"features\"][\"unobservables\"].shape)\n\n\n(120, 2)\n\n\nThis assignment is confounded relative to estimators that see only \\(X\\). Panel factor, matrix-completion, trajectory-balancing, and synthetic-control methods may nevertheless learn part of the latent structure from pre-treatment paths. How well they do is an estimand- and DGP-specific numerical question.",
+    "crumbs": [
+      "Home",
+      "Use pypanelsim",
+      "Assignment mechanisms"
+    ]
+  },
+  {
+    "objectID": "assignment.html#adoption-cohort-generalized-propensity-scores",
+    "href": "assignment.html#adoption-cohort-generalized-propensity-scores",
+    "title": "Assignment mechanisms",
+    "section": "4 Adoption-cohort generalized propensity scores",
+    "text": "4 Adoption-cohort generalized propensity scores\nFor adoption periods \\(g\\in\\mathcal G\\), GeneralizedPropensityAssignment uses the multinomial-logit generalized propensity score\n\\[\nr_g(X_i,U_i)=P(G_i=g\\mid X_i,U_i)\n=\\frac{\\exp(\\alpha_g+X_i^\\top\\beta_g+U_i^\\top\\gamma_g)}\n{1+\\sum_{h\\in\\mathcal G}\\exp(\\alpha_h+X_i^\\top\\beta_h+U_i^\\top\\gamma_h)}.\n\\]\nNever treated is the baseline category with normalized logit zero. Each sampled cohort produces absorbing treatment from its adoption period onward.\n\n\nCode\ncohort_gps = build(\n    \"cohort_gps\",\n    pps.GeneralizedPropensityAssignment(\n        adoption_periods=(24, 30, 36),\n        intercepts=(-0.7, -0.9, -1.1),\n        observable_coefficients=(\n            (1.0, -0.5),\n            (0.2, 0.8),\n            (-0.8, 0.3),\n        ),\n        unobservable_coefficients=((0.0, 0.0),) * 3,\n    ),\n)\ncohort_panel = cohort_gps.simulate(seed=2026)\ngps = cohort_panel.metadata[\"assignment\"][\"generalized_propensity_scores\"]\nprint(gps.shape)\nprint(np.max(np.abs(gps.sum(axis=1) - 1.0)))\nprint(np.unique(cohort_panel.adoption_times, return_counts=True))\n\n\n(120, 4)\n2.220446049250313e-16\n(array([24, 30, 36, 48]), array([26, 22, 28, 44]))\n\n\nMetadata includes generalized_propensity_scores, assigned_categories, adoption_times, cohort logits, coefficient matrices, and the never-treated category index.",
+    "crumbs": [
+      "Home",
+      "Use pypanelsim",
+      "Assignment mechanisms"
+    ]
+  },
+  {
+    "objectID": "assignment.html#visual-comparison",
+    "href": "assignment.html#visual-comparison",
+    "title": "Assignment mechanisms",
+    "section": "5 Visual comparison",
+    "text": "5 Visual comparison\n\n\nCode\ndesigns = {\n    \"Randomized\": randomized,\n    \"Observed logit\": observed_selection,\n    \"Latent logit\": latent_selection,\n    \"Cohort GPS\": cohort_gps,\n}\nfig, axes = plt.subplots(4, 2, figsize=(11, 12), constrained_layout=True)\nfor row, (label, simulator) in enumerate(designs.items()):\n    panel = simulator.simulate(seed=2026)\n    order = np.argsort(panel.adoption_times, kind=\"stable\")\n    axes[row, 0].matshow(panel.outcome[order], aspect=\"auto\", cmap=\"coolwarm\")\n    axes[row, 1].matshow(\n        panel.treatment[order], aspect=\"auto\", cmap=\"Greys\", vmin=0, vmax=1\n    )\n    axes[row, 0].set_title(f\"{label}: Y\")\n    axes[row, 1].set_title(f\"{label}: W\")\n    axes[row, 0].set_ylabel(\"unit\")\n    for axis in axes[row]:\n        axis.set_xlabel(\"period\")\nplt.show()\n\n\n\n\n\nA common feature-outcome law under four assignment mechanisms. Units are sorted by adoption time.",
+    "crumbs": [
+      "Home",
+      "Use pypanelsim",
+      "Assignment mechanisms"
+    ]
+  },
+  {
+    "objectID": "assignment.html#choosing-a-mechanism",
+    "href": "assignment.html#choosing-a-mechanism",
+    "title": "Assignment mechanisms",
+    "section": "6 Choosing a mechanism",
+    "text": "6 Choosing a mechanism\n\n\n\n\n\n\n\n\nScientific design\nAssignment object\nIdentifying information exposed to estimators\n\n\n\n\nComplete randomization with fixed treated count\nRandomizedSingleCohortAssignment\nDesign propensity\n\n\nBernoulli assignment based on measured baseline attributes\nBinaryLogitAssignment, latent coefficients zero\nunit_covariates\n\n\nAssignment based on latent unit type\nBinaryLogitAssignment, latent coefficients nonzero\nPre-treatment outcome history; latent truth only for diagnostics\n\n\nMultiple adoption cohorts\nGeneralizedPropensityAssignment\nFull unit-by-cohort GPS and observed covariates\n\n\nFixed externally specified adoption\nSingleCohortAssignment or StaggeredAdoption\nThe supplied schedule",
+    "crumbs": [
+      "Home",
+      "Use pypanelsim",
+      "Assignment mechanisms"
+    ]
+  },
+  {
+    "objectID": "architecture.html",
+    "href": "architecture.html",
+    "title": "1 Architecture and extension contract",
+    "section": "",
+    "text": "PanelSimulator evaluates components in a fixed order:\nPanelDimensions\n      |\n      v\nUnitFeatureModel.generate(dimensions, rng) [optional]\n      |\n      v\nAssignmentContext(dimensions, observables, unobservables)\n      |\n      v\nAssignmentModel.assign(context, rng)\n      |\n      v\nSimulationContext(dimensions, treatment, features)\n      |\n      +-------------------------+\n      |                         |\n      v                         v\nOutcomeModel.generate()   EffectModel.generate()\n      |                         |\n      +------------+------------+\n                   |\n                   v\n              PanelDataset\nShared unit features are drawn before assignment. This lets an assignment and an outcome process depend on the same observed covariates or latent unit factors without passing data through diagnostic metadata. Assignment still precedes the outcome draw, and the untreated outcome model does not receive realized effects. The effect model does not receive outcomes. This keeps the causal decomposition explicit.\n\n\n\n\n\nPanelDimensions(n_units, n_periods) defines only shape. It does not assume a control-first unit order, one treatment cohort, or a specific intervention date.\n\n\n\nEvery component returns ComponentDraw(values, metadata). values must be a matrix with the configured shape. Metadata can contain diagnostics or latent simulation truth. The final dataset copies and recursively freezes metadata.\n\n\n\nThe assignment context contains dimensions, observed unit covariates, and latent unit features. Its matrices have shape (n_units, n_features). The feature model is optional, so legacy and canonical assignments receive empty feature matrices without consuming additional random draws.\n\n\n\nThe context contains dimensions, realized treatment, and the same features used by assignment. It derives:\n\never_treated;\ncontrol_units;\ntreated_units;\nis_absorbing;\nadoption_times for absorbing treatment.\n\nOutcome models can therefore depend on treatment status without assuming that controls appear before treated units.\n\n\n\nThe dataset owns the final arrays. It validates shape, finiteness, binary treatment, effect support, and the causal decomposition. Its read-only arrays are safe to share among estimators. copy=True creates writable estimator inputs when required. Observed time-invariant covariates are available through unit_covariates; latent features remain namespaced simulation metadata.\n\n\n\n\nThe component interfaces use typing.Protocol. Inheritance is optional.\nclass UnitFeatureModel(Protocol):\n    def generate(self, dimensions, rng) -&gt; UnitFeatureDraw: ...\n\n\nclass AssignmentModel(Protocol):\n    def assign(self, context, rng) -&gt; ComponentDraw: ...\n\n\nclass OutcomeModel(Protocol):\n    def generate(self, context, rng) -&gt; ComponentDraw: ...\n\n\nclass EffectModel(Protocol):\n    def generate(self, context, rng) -&gt; ComponentDraw: ...\nThe package validates the returned matrices at the composition boundary. A custom class can focus on its probability law.\n\n\n\nPanelSimulator.simulate() resolves one numpy.random.Generator. Components receive the same generator in pipeline order. A deterministic component should not consume random draws.\nAccepted inputs are:\n\nseed=&lt;integer&gt;;\nseed=&lt;numpy.random.SeedSequence&gt;;\nrng=&lt;numpy.random.Generator&gt;;\nneither, for a fresh entropy-seeded generator.\n\nPassing both is an error. iter_simulations() uses SeedSequence.spawn() to create independent child streams instead of using adjacent integer seeds.\nWhen a design needs two components to restart from the same state, it must clone the generator explicitly and document that choice. The canonical mixed-factor design does this because it reproduces two half-panels that restart from the same random stream.\n\n\n\n\n\n\nSingleCohortAssignment creates one absorbing cohort. It supports explicit treated-unit positions.\nStaggeredAdoption accepts a mapping from unit position to adoption period.\nRandomizedSingleCohortAssignment samples a fixed-size cohort without replacement.\nBinaryLogitAssignment draws treatment from observed and latent unit-feature logits.\nGeneralizedPropensityAssignment draws adoption cohorts from multinomial logits with never treated as the baseline category.\n\n\n\n\n\nGaussianUnitFeatures draws independent standard-normal observed covariates and latent unit factors. Custom feature models can impose correlations or generate application-specific covariates.\n\n\n\n\n\nConstantEffect applies one effect to every treated cell.\nLinearRampEffect uses unit-specific event time and supports staggered adoption.\n\n\n\n\nCallableOutcomeModel turns a function into an outcome component. The function can return a matrix or a ComponentDraw with metadata.\n\n\n\n\n\nDefine an immutable configuration object, normally a frozen dataclass.\nValidate scalar parameters in __post_init__.\nImplement the relevant protocol method.\nUse only the provided generator for random draws.\nReturn a full (n_units, n_periods) matrix.\nPut diagnostic truth in metadata, not global state.\nAdd contract, invalid-input, and seeded-reproducibility tests.\n\nAn outcome model should use context.control_units and context.treated_units rather than assume a row order. An effect model must return zero outside treated cells.\n\n\n\nWrite a factory that returns a configured PanelSimulator:\ndef unit_trend_design(*, scale=1.0):\n    return PanelSimulator(\n        name=\"unit_trend\",\n        dimensions=PanelDimensions(100, 30),\n        assignment=SingleCohortAssignment(20, 20),\n        outcome_model=UnitTrendOutcome(scale=scale),\n        effect_model=ConstantEffect(1.0),\n    )\nRegister it in a project registry:\nregistry = DGPRegistry()\nregistry.register(\"unit_trend\", unit_trend_design)\nDo not add estimator options to a simulation factory. Estimator configuration belongs in the downstream experiment runner.\n\n\n\nThe dataset copies arrays before setting them read-only. Mutating an input array after construction cannot change the dataset. Nested mappings, arrays, lists, and sets in metadata are also copied or converted to immutable forms.\nThe package does not promise that arbitrary scalar objects inside metadata are deeply immutable. Store simple scalars, arrays, mappings, and sequences.\n\n\n\nThe current PanelDataset contract requires a balanced rectangular panel and binary treatment. Missing outcomes can be represented by a separate custom metadata mask, but the core outcome matrices must remain finite. A future missing-data extension should add an explicit observation mask instead of using NaN as an implicit contract.",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Architecture and extension contract"
+    ]
+  },
+  {
+    "objectID": "architecture.html#one-way-simulation-pipeline",
+    "href": "architecture.html#one-way-simulation-pipeline",
+    "title": "1 Architecture and extension contract",
+    "section": "",
+    "text": "PanelSimulator evaluates components in a fixed order:\nPanelDimensions\n      |\n      v\nUnitFeatureModel.generate(dimensions, rng) [optional]\n      |\n      v\nAssignmentContext(dimensions, observables, unobservables)\n      |\n      v\nAssignmentModel.assign(context, rng)\n      |\n      v\nSimulationContext(dimensions, treatment, features)\n      |\n      +-------------------------+\n      |                         |\n      v                         v\nOutcomeModel.generate()   EffectModel.generate()\n      |                         |\n      +------------+------------+\n                   |\n                   v\n              PanelDataset\nShared unit features are drawn before assignment. This lets an assignment and an outcome process depend on the same observed covariates or latent unit factors without passing data through diagnostic metadata. Assignment still precedes the outcome draw, and the untreated outcome model does not receive realized effects. The effect model does not receive outcomes. This keeps the causal decomposition explicit.",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Architecture and extension contract"
+    ]
+  },
+  {
+    "objectID": "architecture.html#core-objects",
+    "href": "architecture.html#core-objects",
+    "title": "1 Architecture and extension contract",
+    "section": "",
+    "text": "PanelDimensions(n_units, n_periods) defines only shape. It does not assume a control-first unit order, one treatment cohort, or a specific intervention date.\n\n\n\nEvery component returns ComponentDraw(values, metadata). values must be a matrix with the configured shape. Metadata can contain diagnostics or latent simulation truth. The final dataset copies and recursively freezes metadata.\n\n\n\nThe assignment context contains dimensions, observed unit covariates, and latent unit features. Its matrices have shape (n_units, n_features). The feature model is optional, so legacy and canonical assignments receive empty feature matrices without consuming additional random draws.\n\n\n\nThe context contains dimensions, realized treatment, and the same features used by assignment. It derives:\n\never_treated;\ncontrol_units;\ntreated_units;\nis_absorbing;\nadoption_times for absorbing treatment.\n\nOutcome models can therefore depend on treatment status without assuming that controls appear before treated units.\n\n\n\nThe dataset owns the final arrays. It validates shape, finiteness, binary treatment, effect support, and the causal decomposition. Its read-only arrays are safe to share among estimators. copy=True creates writable estimator inputs when required. Observed time-invariant covariates are available through unit_covariates; latent features remain namespaced simulation metadata.",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Architecture and extension contract"
+    ]
+  },
+  {
+    "objectID": "architecture.html#protocols",
+    "href": "architecture.html#protocols",
+    "title": "1 Architecture and extension contract",
+    "section": "",
+    "text": "The component interfaces use typing.Protocol. Inheritance is optional.\nclass UnitFeatureModel(Protocol):\n    def generate(self, dimensions, rng) -&gt; UnitFeatureDraw: ...\n\n\nclass AssignmentModel(Protocol):\n    def assign(self, context, rng) -&gt; ComponentDraw: ...\n\n\nclass OutcomeModel(Protocol):\n    def generate(self, context, rng) -&gt; ComponentDraw: ...\n\n\nclass EffectModel(Protocol):\n    def generate(self, context, rng) -&gt; ComponentDraw: ...\nThe package validates the returned matrices at the composition boundary. A custom class can focus on its probability law.",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Architecture and extension contract"
+    ]
+  },
+  {
+    "objectID": "architecture.html#random-number-policy",
+    "href": "architecture.html#random-number-policy",
+    "title": "1 Architecture and extension contract",
+    "section": "",
+    "text": "PanelSimulator.simulate() resolves one numpy.random.Generator. Components receive the same generator in pipeline order. A deterministic component should not consume random draws.\nAccepted inputs are:\n\nseed=&lt;integer&gt;;\nseed=&lt;numpy.random.SeedSequence&gt;;\nrng=&lt;numpy.random.Generator&gt;;\nneither, for a fresh entropy-seeded generator.\n\nPassing both is an error. iter_simulations() uses SeedSequence.spawn() to create independent child streams instead of using adjacent integer seeds.\nWhen a design needs two components to restart from the same state, it must clone the generator explicitly and document that choice. The canonical mixed-factor design does this because it reproduces two half-panels that restart from the same random stream.",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Architecture and extension contract"
+    ]
+  },
+  {
+    "objectID": "architecture.html#built-in-composition-components",
+    "href": "architecture.html#built-in-composition-components",
+    "title": "1 Architecture and extension contract",
+    "section": "",
+    "text": "SingleCohortAssignment creates one absorbing cohort. It supports explicit treated-unit positions.\nStaggeredAdoption accepts a mapping from unit position to adoption period.\nRandomizedSingleCohortAssignment samples a fixed-size cohort without replacement.\nBinaryLogitAssignment draws treatment from observed and latent unit-feature logits.\nGeneralizedPropensityAssignment draws adoption cohorts from multinomial logits with never treated as the baseline category.\n\n\n\n\n\nGaussianUnitFeatures draws independent standard-normal observed covariates and latent unit factors. Custom feature models can impose correlations or generate application-specific covariates.\n\n\n\n\n\nConstantEffect applies one effect to every treated cell.\nLinearRampEffect uses unit-specific event time and supports staggered adoption.\n\n\n\n\nCallableOutcomeModel turns a function into an outcome component. The function can return a matrix or a ComponentDraw with metadata.",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Architecture and extension contract"
+    ]
+  },
+  {
+    "objectID": "architecture.html#add-a-component",
+    "href": "architecture.html#add-a-component",
+    "title": "1 Architecture and extension contract",
+    "section": "",
+    "text": "Define an immutable configuration object, normally a frozen dataclass.\nValidate scalar parameters in __post_init__.\nImplement the relevant protocol method.\nUse only the provided generator for random draws.\nReturn a full (n_units, n_periods) matrix.\nPut diagnostic truth in metadata, not global state.\nAdd contract, invalid-input, and seeded-reproducibility tests.\n\nAn outcome model should use context.control_units and context.treated_units rather than assume a row order. An effect model must return zero outside treated cells.",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Architecture and extension contract"
+    ]
+  },
+  {
+    "objectID": "architecture.html#add-a-named-dgp",
+    "href": "architecture.html#add-a-named-dgp",
+    "title": "1 Architecture and extension contract",
+    "section": "",
+    "text": "Write a factory that returns a configured PanelSimulator:\ndef unit_trend_design(*, scale=1.0):\n    return PanelSimulator(\n        name=\"unit_trend\",\n        dimensions=PanelDimensions(100, 30),\n        assignment=SingleCohortAssignment(20, 20),\n        outcome_model=UnitTrendOutcome(scale=scale),\n        effect_model=ConstantEffect(1.0),\n    )\nRegister it in a project registry:\nregistry = DGPRegistry()\nregistry.register(\"unit_trend\", unit_trend_design)\nDo not add estimator options to a simulation factory. Estimator configuration belongs in the downstream experiment runner.",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Architecture and extension contract"
+    ]
+  },
+  {
+    "objectID": "architecture.html#data-ownership",
+    "href": "architecture.html#data-ownership",
+    "title": "1 Architecture and extension contract",
+    "section": "",
+    "text": "The dataset copies arrays before setting them read-only. Mutating an input array after construction cannot change the dataset. Nested mappings, arrays, lists, and sets in metadata are also copied or converted to immutable forms.\nThe package does not promise that arbitrary scalar objects inside metadata are deeply immutable. Store simple scalars, arrays, mappings, and sequences.",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Architecture and extension contract"
+    ]
+  },
+  {
+    "objectID": "architecture.html#extension-limits",
+    "href": "architecture.html#extension-limits",
+    "title": "1 Architecture and extension contract",
+    "section": "",
+    "text": "The current PanelDataset contract requires a balanced rectangular panel and binary treatment. Missing outcomes can be represented by a separate custom metadata mask, but the core outcome matrices must remain finite. A future missing-data extension should add an explicit observation mask instead of using NaN as an implicit contract.",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Architecture and extension contract"
+    ]
+  },
+  {
+    "objectID": "migration.html",
+    "href": "migration.html",
+    "title": "1 Migration from panel_dgps",
+    "section": "",
+    "text": "The former dgps project mixed simulation code with crabbymetrics outcome models, Monte Carlo runners, cached results, and a Quarto report. pypanelsim contains only simulation code and simulation documentation. The reproduction project now depends on this repository as a normal downstream package.\n\n\n\n\n\n\nPrevious\nCurrent\n\n\n\n\npanel_dgps.PanelConfig\npypanelsim.CanonicalPanelConfig\n\n\npanel_dgps.PanelData\npypanelsim.PanelDataset\n\n\npanel_dgps.classic_factor\npypanelsim.classic_factor\n\n\npanel_dgps.weak_factor\npypanelsim.weak_factor\n\n\npanel_dgps.synthetic_control\npypanelsim.synthetic_control\n\n\npanel_dgps.factor_synthetic\npypanelsim.factor_synthetic\n\n\npanel_dgps.time_series\npypanelsim.time_series\n\n\npanel_dgps.mixed_factor\npypanelsim.mixed_factor\n\n\n\nPanelConfig and PanelData are compatibility aliases. New code should use the explicit current names.\n\n\n\n# Previous\nfrom panel_dgps import PanelConfig, classic_factor\n\nconfig = PanelConfig(n_control=80, n_treated=20, n_pre=24, n_post=6)\npanel = classic_factor(config=config, overlap=1.0, seed=10)\n# Current\nfrom pypanelsim import CanonicalPanelConfig, classic_factor\n\nconfig = CanonicalPanelConfig(\n    n_control=80,\n    n_treated=20,\n    n_pre=24,\n    n_post=6,\n)\npanel = classic_factor(config=config, overlap=1.0, seed=10)\nThe resulting outcome, treatment, untreated-outcome, and effect matrices are numerically identical for the same seed and arguments.\n\n\n\nPrevious code configured arguments on each function call. Current code can create one reusable simulator:\nsimulator = classic_factor_design(config=config, overlap=1.0)\n\nfor panel in simulator.iter_simulations(200, seed=10):\n    estimate = estimator.fit(*panel.as_arrays())\nThis uses spawned child streams and avoids coupling replication identifiers to adjacent integer seeds.\n\n\n\nPrevious canonical metadata was flat:\npanel.metadata[\"factors\"]\npanel.metadata[\"loadings\"]\nCurrent metadata is namespaced by component:\npanel.metadata[\"outcome\"][\"factors\"]\npanel.metadata[\"outcome\"][\"loadings\"]\npanel.metadata[\"assignment\"][\"treated_units\"]\npanel.metadata[\"effect\"][\"slope\"]\nSparse-donor donor_weights now has one entry per panel unit and is aligned to the panel row order. control_donor_weights contains the prior control-only vector.\n\n\n\nThe previous container set the write flag on supplied arrays. PanelDataset instead owns copies before making them read-only. Code that intentionally mutates estimator inputs must request copies:\ny, w = panel.as_arrays(copy=True)\n\n\n\nCustom designs no longer need to edit a canonical generator module. Implement an assignment, outcome, or effect protocol and compose it with PanelSimulator. Project-specific named designs can be stored in a DGPRegistry without changing the package registry.",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Migration from `panel_dgps`"
+    ]
+  },
+  {
+    "objectID": "migration.html#package-boundary",
+    "href": "migration.html#package-boundary",
+    "title": "1 Migration from panel_dgps",
+    "section": "",
+    "text": "The former dgps project mixed simulation code with crabbymetrics outcome models, Monte Carlo runners, cached results, and a Quarto report. pypanelsim contains only simulation code and simulation documentation. The reproduction project now depends on this repository as a normal downstream package.",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Migration from `panel_dgps`"
+    ]
+  },
+  {
+    "objectID": "migration.html#import-map",
+    "href": "migration.html#import-map",
+    "title": "1 Migration from panel_dgps",
+    "section": "",
+    "text": "Previous\nCurrent\n\n\n\n\npanel_dgps.PanelConfig\npypanelsim.CanonicalPanelConfig\n\n\npanel_dgps.PanelData\npypanelsim.PanelDataset\n\n\npanel_dgps.classic_factor\npypanelsim.classic_factor\n\n\npanel_dgps.weak_factor\npypanelsim.weak_factor\n\n\npanel_dgps.synthetic_control\npypanelsim.synthetic_control\n\n\npanel_dgps.factor_synthetic\npypanelsim.factor_synthetic\n\n\npanel_dgps.time_series\npypanelsim.time_series\n\n\npanel_dgps.mixed_factor\npypanelsim.mixed_factor\n\n\n\nPanelConfig and PanelData are compatibility aliases. New code should use the explicit current names.",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Migration from `panel_dgps`"
+    ]
+  },
+  {
+    "objectID": "migration.html#one-draw-migration",
+    "href": "migration.html#one-draw-migration",
+    "title": "1 Migration from panel_dgps",
+    "section": "",
+    "text": "# Previous\nfrom panel_dgps import PanelConfig, classic_factor\n\nconfig = PanelConfig(n_control=80, n_treated=20, n_pre=24, n_post=6)\npanel = classic_factor(config=config, overlap=1.0, seed=10)\n# Current\nfrom pypanelsim import CanonicalPanelConfig, classic_factor\n\nconfig = CanonicalPanelConfig(\n    n_control=80,\n    n_treated=20,\n    n_pre=24,\n    n_post=6,\n)\npanel = classic_factor(config=config, overlap=1.0, seed=10)\nThe resulting outcome, treatment, untreated-outcome, and effect matrices are numerically identical for the same seed and arguments.",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Migration from `panel_dgps`"
+    ]
+  },
+  {
+    "objectID": "migration.html#reusable-simulator-migration",
+    "href": "migration.html#reusable-simulator-migration",
+    "title": "1 Migration from panel_dgps",
+    "section": "",
+    "text": "Previous code configured arguments on each function call. Current code can create one reusable simulator:\nsimulator = classic_factor_design(config=config, overlap=1.0)\n\nfor panel in simulator.iter_simulations(200, seed=10):\n    estimate = estimator.fit(*panel.as_arrays())\nThis uses spawned child streams and avoids coupling replication identifiers to adjacent integer seeds.",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Migration from `panel_dgps`"
+    ]
+  },
+  {
+    "objectID": "migration.html#metadata-migration",
+    "href": "migration.html#metadata-migration",
+    "title": "1 Migration from panel_dgps",
+    "section": "",
+    "text": "Previous canonical metadata was flat:\npanel.metadata[\"factors\"]\npanel.metadata[\"loadings\"]\nCurrent metadata is namespaced by component:\npanel.metadata[\"outcome\"][\"factors\"]\npanel.metadata[\"outcome\"][\"loadings\"]\npanel.metadata[\"assignment\"][\"treated_units\"]\npanel.metadata[\"effect\"][\"slope\"]\nSparse-donor donor_weights now has one entry per panel unit and is aligned to the panel row order. control_donor_weights contains the prior control-only vector.",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Migration from `panel_dgps`"
+    ]
+  },
+  {
+    "objectID": "migration.html#data-ownership",
+    "href": "migration.html#data-ownership",
+    "title": "1 Migration from panel_dgps",
+    "section": "",
+    "text": "The previous container set the write flag on supplied arrays. PanelDataset instead owns copies before making them read-only. Code that intentionally mutates estimator inputs must request copies:\ny, w = panel.as_arrays(copy=True)",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Migration from `panel_dgps`"
+    ]
+  },
+  {
+    "objectID": "migration.html#new-composition-api",
+    "href": "migration.html#new-composition-api",
+    "title": "1 Migration from panel_dgps",
+    "section": "",
+    "text": "Custom designs no longer need to edit a canonical generator module. Implement an assignment, outcome, or effect protocol and compose it with PanelSimulator. Project-specific named designs can be stored in a DGPRegistry without changing the package registry.",
+    "crumbs": [
+      "Home",
+      "Concepts",
+      "Migration from `panel_dgps`"
+    ]
+  },
+  {
+    "objectID": "api.html",
+    "href": "api.html",
+    "title": "API reference",
+    "section": "",
+    "text": "All public names are importable from pypanelsim. Component interfaces use structural typing: custom implementations need the documented method, not inheritance from a package base class.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "API reference"
+    ]
+  },
+  {
+    "objectID": "api.html#core-simulation-and-data",
+    "href": "api.html#core-simulation-and-data",
+    "title": "API reference",
+    "section": "1 Core simulation and data",
+    "text": "1 Core simulation and data\n\n\n\nObject\nPurpose\n\n\n\n\nPanelDimensions\nRectangular panel shape\n\n\nPanelDataset\nImmutable observed data and causal truth\n\n\nPanelSimulator\nFeature, assignment, outcome, and effect orchestration\n\n\nSimulationContext\nTreatment and shared features for outcome/effect components\n\n\nComponentDraw\nComponent matrix plus diagnostic metadata\n\n\nresolve_rng\nExplicit seed/generator validation",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "API reference"
+    ]
+  },
+  {
+    "objectID": "api.html#features-and-assignment",
+    "href": "api.html#features-and-assignment",
+    "title": "API reference",
+    "section": "2 Features and assignment",
+    "text": "2 Features and assignment\n\n\n\nObject\nPurpose\n\n\n\n\nGaussianUnitFeatures\nObserved and latent standard-normal unit features\n\n\nSingleCohortAssignment\nFixed common adoption schedule\n\n\nRandomizedSingleCohortAssignment\nFixed-size complete randomization\n\n\nBinaryLogitAssignment\nSigmoid selection on observed and latent features\n\n\nStaggeredAdoption\nFixed unit-to-adoption map\n\n\nGeneralizedPropensityAssignment\nMultinomial-logit adoption cohorts\n\n\nConstantEffect\nConstant effect on treated cells\n\n\nLinearRampEffect\nEvent-time-linear effect path",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "API reference"
+    ]
+  },
+  {
+    "objectID": "api.html#canonical-designs",
+    "href": "api.html#canonical-designs",
+    "title": "API reference",
+    "section": "3 Canonical designs",
+    "text": "3 Canonical designs\nSee canonical design API for CanonicalPanelConfig, the six one-draw functions, reusable simulator factories, and canonical outcome components.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "API reference"
+    ]
+  },
+  {
+    "objectID": "api.html#registry",
+    "href": "api.html#registry",
+    "title": "API reference",
+    "section": "4 Registry",
+    "text": "4 Registry\nSee DGPRegistry for stable name-to-factory mappings and the global canonical registry.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "API reference"
+    ]
+  },
+  {
+    "objectID": "reference/assignment.html",
+    "href": "reference/assignment.html",
+    "title": "Assignment, feature, and effect API",
+    "section": "",
+    "text": "Code\nimport inspect\n\nimport numpy as np\nimport pypanelsim as pps\n\n\ndef show_signature(object_):\n    print(f\"{object_.__name__}{inspect.signature(object_)}\")",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Assignment, feature, and effect API"
+    ]
+  },
+  {
+    "objectID": "reference/assignment.html#gaussianunitfeatures",
+    "href": "reference/assignment.html#gaussianunitfeatures",
+    "title": "Assignment, feature, and effect API",
+    "section": "1 GaussianUnitFeatures",
+    "text": "1 GaussianUnitFeatures\n\n\nCode\nshow_signature(pps.GaussianUnitFeatures)\n\n\nGaussianUnitFeatures(n_observables: 'int' = 2, n_unobservables: 'int' = 2) -&gt; None\n\n\nDraws independent standard-normal observables and unobservables matrices.\n\n\n\nParameter\nDefault\nContract\n\n\n\n\nn_observables\n2\nNonnegative feature count\n\n\nn_unobservables\n2\nNonnegative latent-feature count\n\n\n\nMetadata includes kind=\"gaussian_unit_features\", observable_names, and unobservable_names. A zero count returns an (n_units, 0) matrix without consuming draws for that block.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Assignment, feature, and effect API"
+    ]
+  },
+  {
+    "objectID": "reference/assignment.html#singlecohortassignment",
+    "href": "reference/assignment.html#singlecohortassignment",
+    "title": "Assignment, feature, and effect API",
+    "section": "2 SingleCohortAssignment",
+    "text": "2 SingleCohortAssignment\n\n\nCode\nshow_signature(pps.SingleCohortAssignment)\n\n\nSingleCohortAssignment(n_treated: 'int' = 40, adoption_period: 'int' = 40, treated_units: 'tuple[int, ...] | None' = None) -&gt; None\n\n\nCreates one deterministic absorbing cohort.\n\n\n\n\n\n\n\n\nParameter\nDefault\nContract\n\n\n\n\nn_treated\n40\nBetween one and n_units\n\n\nadoption_period\n40\nZero-based valid period\n\n\ntreated_units\nNone\nOptional unique tuple of exactly n_treated valid positions\n\n\n\nWhen positions are omitted, the last n_treated rows are treated. The model does not consume random draws. Metadata records the positions and adoption period.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Assignment, feature, and effect API"
+    ]
+  },
+  {
+    "objectID": "reference/assignment.html#randomizedsinglecohortassignment",
+    "href": "reference/assignment.html#randomizedsinglecohortassignment",
+    "title": "Assignment, feature, and effect API",
+    "section": "3 RandomizedSingleCohortAssignment",
+    "text": "3 RandomizedSingleCohortAssignment\n\n\nCode\nshow_signature(pps.RandomizedSingleCohortAssignment)\n\n\nRandomizedSingleCohortAssignment(n_treated: 'int', adoption_period: 'int', eligible_units: 'Sequence[int] | None' = None) -&gt; None\n\n\nSamples a fixed number of units without replacement, then treats them from a common adoption period onward.\n\n\n\n\n\n\n\nParameter\nContract\n\n\n\n\nn_treated\nPositive and no larger than the eligible count\n\n\nadoption_period\nZero-based valid period\n\n\neligible_units\nOptional unique valid positions; default is every unit\n\n\n\nFor eligible set \\(E\\), each eligible unit has marginal probability \\(n_{treated}/|E|\\). Metadata contains treated_units, eligible_units, adoption_period, and the unit-aligned propensity_scores vector.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Assignment, feature, and effect API"
+    ]
+  },
+  {
+    "objectID": "reference/assignment.html#binarylogitassignment",
+    "href": "reference/assignment.html#binarylogitassignment",
+    "title": "Assignment, feature, and effect API",
+    "section": "4 BinaryLogitAssignment",
+    "text": "4 BinaryLogitAssignment\n\n\nCode\nshow_signature(pps.BinaryLogitAssignment)\n\n\nBinaryLogitAssignment(adoption_period: 'int', intercept: 'float' = 0.0, observable_coefficients: 'Sequence[float]' = (), unobservable_coefficients: 'Sequence[float]' = ()) -&gt; None\n\n\nDraws independent eventual-treatment indicators using\n\\[\nP(D_i=1\\mid X_i,U_i)=\n\\Lambda(\\alpha+X_i^\\top\\beta+U_i^\\top\\gamma).\n\\]\n\n\n\n\n\n\n\n\nParameter\nDefault\nContract\n\n\n\n\nadoption_period\nRequired\nZero-based valid period\n\n\nintercept\n0.0\nFinite scalar\n\n\nobservable_coefficients\n()\nOne finite coefficient per observed feature\n\n\nunobservable_coefficients\n()\nOne finite coefficient per latent feature\n\n\n\nThe coefficient counts must exactly match AssignmentContext. Unlike fixed-size randomization, the treated count is random and all-treated or all-control draws are possible in small/extreme designs. Metadata contains the linear predictor, sigmoid probabilities, realized treated units, coefficient vectors, and adoption period.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Assignment, feature, and effect API"
+    ]
+  },
+  {
+    "objectID": "reference/assignment.html#staggeredadoption",
+    "href": "reference/assignment.html#staggeredadoption",
+    "title": "Assignment, feature, and effect API",
+    "section": "5 StaggeredAdoption",
+    "text": "5 StaggeredAdoption\n\n\nCode\nshow_signature(pps.StaggeredAdoption)\n\n\nStaggeredAdoption(adoption_times: 'Mapping[int, int]') -&gt; None\n\n\nAccepts a mapping {unit_position: adoption_period} and constructs absorbing treatment. Units absent from the mapping are never treated. The mapping is copied at construction. Invalid unit or time positions raise ValueError.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Assignment, feature, and effect API"
+    ]
+  },
+  {
+    "objectID": "reference/assignment.html#generalizedpropensityassignment",
+    "href": "reference/assignment.html#generalizedpropensityassignment",
+    "title": "Assignment, feature, and effect API",
+    "section": "6 GeneralizedPropensityAssignment",
+    "text": "6 GeneralizedPropensityAssignment\n\n\nCode\nshow_signature(pps.GeneralizedPropensityAssignment)\n\n\nGeneralizedPropensityAssignment(adoption_periods: 'Sequence[int]', intercepts: 'Sequence[float]' = (), observable_coefficients: 'Sequence[Sequence[float]]' = (), unobservable_coefficients: 'Sequence[Sequence[float]]' = ()) -&gt; None\n\n\nMaps each unit to one adoption cohort or never treated. For \\(G\\) supplied adoption periods, coefficient rows correspond to those periods in caller order. Never treated is category G with normalized logit zero.\n\n\n\n\n\n\n\n\nParameter\nShape\nContract\n\n\n\n\nadoption_periods\n(G,)\nNonempty, unique, valid zero-based periods\n\n\nintercepts\n(G,)\nFinite; omitted means zeros\n\n\nobservable_coefficients\n(G,K_x)\nFinite; omitted means zeros\n\n\nunobservable_coefficients\n(G,K_u)\nFinite; omitted means zeros\n\n\n\nProbabilities use a stable row-wise softmax. One uniform draw maps each unit to a category; treatment is one from the realized adoption period onward.\nMetadata keys:\n\n\n\n\n\n\n\nKey\nShape or value\n\n\n\n\ngeneralized_propensity_scores\n(N,G+1); rows sum to one\n\n\ncohort_linear_predictors\n(N,G)\n\n\nassigned_categories\n(N,); G denotes never treated\n\n\nadoption_times\n(N,); never treated uses n_periods\n\n\nadoption_periods\n(G,)\n\n\nnever_treated_category\nInteger G\n\n\ncoefficient/intercept keys\nNormalized NumPy arrays used in the draw",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Assignment, feature, and effect API"
+    ]
+  },
+  {
+    "objectID": "reference/assignment.html#constanteffect",
+    "href": "reference/assignment.html#constanteffect",
+    "title": "Assignment, feature, and effect API",
+    "section": "7 ConstantEffect",
+    "text": "7 ConstantEffect\n\n\nCode\nshow_signature(pps.ConstantEffect)\n\n\nConstantEffect(value: 'float' = 1.0) -&gt; None\n\n\nReturns value * context.treatment. value defaults to 1.0 and must be finite. Metadata records kind=\"constant\" and the value.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Assignment, feature, and effect API"
+    ]
+  },
+  {
+    "objectID": "reference/assignment.html#linearrampeffect",
+    "href": "reference/assignment.html#linearrampeffect",
+    "title": "Assignment, feature, and effect API",
+    "section": "8 LinearRampEffect",
+    "text": "8 LinearRampEffect\n\n\nCode\nshow_signature(pps.LinearRampEffect)\n\n\nLinearRampEffect(slope: 'float' = 0.2) -&gt; None\n\n\nFor adoption time \\(G_i\\), returns\n\\[\n\\tau_{it}=s\\max(t-G_i+1,0)W_{it}.\n\\]\nslope defaults to 0.2 and must be finite. The effect supports staggered absorbing adoption because event time is unit specific. Nonabsorbing treatment raises through context.adoption_times.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Assignment, feature, and effect API"
+    ]
+  },
+  {
+    "objectID": "reference/assignment.html#callableoutcomemodel",
+    "href": "reference/assignment.html#callableoutcomemodel",
+    "title": "Assignment, feature, and effect API",
+    "section": "9 CallableOutcomeModel",
+    "text": "9 CallableOutcomeModel\n\n\nCode\nshow_signature(pps.CallableOutcomeModel)\n\n\nCallableOutcomeModel(function: 'OutcomeCallable', name: 'str' = 'callable_outcome') -&gt; None\n\n\nAdapts a plain callable (SimulationContext, Generator) -&gt; matrix | ComponentDraw to OutcomeModel. Matrix results are wrapped in ComponentDraw with kind=name; a returned ComponentDraw is preserved. Final shape and finiteness remain the simulator’s responsibility.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Assignment, feature, and effect API"
+    ]
+  },
+  {
+    "objectID": "reference/registry.html",
+    "href": "reference/registry.html",
+    "title": "Registry API",
+    "section": "",
+    "text": "Code\nimport inspect\n\nimport pypanelsim as pps\n\nprint(f\"DGPRegistry{inspect.signature(pps.DGPRegistry)}\")\n\n\nDGPRegistry() -&gt; 'None'",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Registry API"
+    ]
+  },
+  {
+    "objectID": "reference/registry.html#dgpregistry",
+    "href": "reference/registry.html#dgpregistry",
+    "title": "Registry API",
+    "section": "1 DGPRegistry",
+    "text": "1 DGPRegistry\nDGPRegistry maps normalized public names to callables that return PanelSimulator objects.\n\n1.1 register\n\n\nCode\nprint(f\"register{inspect.signature(pps.DGPRegistry.register)}\")\n\n\nregister(self, name: 'str', factory: 'SimulatorFactory', *, replace: 'bool' = False) -&gt; 'None'\n\n\n\nname must start with a lowercase letter and otherwise contain only lowercase letters, digits, and underscores.\nfactory must be callable.\nduplicate registration raises ValueError unless replace=True.\nthe registry does not invoke or introspect the factory at registration time.\n\n\n\n1.2 create\n\n\nCode\nprint(f\"create{inspect.signature(pps.DGPRegistry.create)}\")\n\n\ncreate(self, name: 'str', /, **kwargs: 'object') -&gt; 'PanelSimulator'\n\n\nLooks up name and forwards keyword arguments to the factory. An unknown name raises KeyError with the available names. Type and parameter errors from the selected factory propagate to the caller.\n\n\n1.3 Inspection\n\n\nCode\nfor name in (\"names\", \"__contains__\", \"__iter__\", \"__len__\"):\n    print(f\"{name}{inspect.signature(getattr(pps.DGPRegistry, name))}\")\n\n\nnames(self) -&gt; 'tuple[str, ...]'\n__contains__(self, name: 'object') -&gt; 'bool'\n__iter__(self) -&gt; 'Iterator[str]'\n__len__(self) -&gt; 'int'\n\n\nnames() returns sorted names. Membership, iteration, and len() provide the standard container interface.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Registry API"
+    ]
+  },
+  {
+    "objectID": "reference/registry.html#example",
+    "href": "reference/registry.html#example",
+    "title": "Registry API",
+    "section": "2 Example",
+    "text": "2 Example\n\n\nCode\nregistry = pps.DGPRegistry()\n\n\ndef small_factor(*, overlap=0.0):\n    config = pps.CanonicalPanelConfig(\n        n_control=24,\n        n_treated=6,\n        n_pre=16,\n        n_post=4,\n    )\n    return pps.classic_factor_design(config=config, overlap=overlap)\n\n\nregistry.register(\"small_factor\", small_factor)\nsimulator = registry.create(\"small_factor\", overlap=1.0)\npanel = simulator.simulate(seed=12)\nprint(registry.names(), panel.shape)\n\n\n('small_factor',) (30, 20)\n\n\nThe package-level canonical_registry is prepopulated with the six canonical designs. Project-specific registries avoid mutating that global namespace.",
+    "crumbs": [
+      "Home",
+      "API reference",
+      "Registry API"
+    ]
+  }
+]

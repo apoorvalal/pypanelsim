@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from types import MappingProxyType
 from typing import Any, Protocol, runtime_checkable
@@ -35,11 +35,88 @@ class ComponentDraw:
 
 
 @dataclass(frozen=True, slots=True)
+class UnitFeatureDraw:
+    """Observed covariates and latent unit features shared by DGP components."""
+
+    observables: FloatMatrix
+    unobservables: FloatMatrix
+    metadata: Mapping[str, Any] = field(default_factory=dict)
+
+
+def _unit_feature_matrix(
+    value: Any | None,
+    *,
+    n_units: int,
+    name: str,
+) -> FloatMatrix:
+    if value is None:
+        array = np.empty((n_units, 0), dtype=float)
+    else:
+        array = np.array(value, dtype=float, copy=True)
+    if array.ndim != 2 or array.shape[0] != n_units:
+        raise ValueError(f"{name} must have shape (n_units, n_features)")
+    if not np.all(np.isfinite(array)):
+        raise ValueError(f"{name} must contain only finite values")
+    array.setflags(write=False)
+    return array
+
+
+@dataclass(frozen=True, slots=True)
+class AssignmentContext:
+    """Dimensions and unit features available to an assignment mechanism."""
+
+    dimensions: PanelDimensions
+    observables: FloatMatrix | None = None
+    unobservables: FloatMatrix | None = None
+    feature_metadata: Mapping[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self,
+            "observables",
+            _unit_feature_matrix(
+                self.observables,
+                n_units=self.dimensions.n_units,
+                name="observables",
+            ),
+        )
+        object.__setattr__(
+            self,
+            "unobservables",
+            _unit_feature_matrix(
+                self.unobservables,
+                n_units=self.dimensions.n_units,
+                name="unobservables",
+            ),
+        )
+        object.__setattr__(
+            self,
+            "feature_metadata",
+            MappingProxyType(dict(self.feature_metadata)),
+        )
+
+    @property
+    def n_units(self) -> int:
+        """Proxy the unit count for legacy assignment components."""
+
+        return self.dimensions.n_units
+
+    @property
+    def n_periods(self) -> int:
+        """Proxy the period count for legacy assignment components."""
+
+        return self.dimensions.n_periods
+
+
+@dataclass(frozen=True, slots=True)
 class SimulationContext:
     """Dimensions and realized treatment passed to outcome and effect models."""
 
     dimensions: PanelDimensions
     treatment: FloatMatrix
+    observables: FloatMatrix | None = None
+    unobservables: FloatMatrix | None = None
+    feature_metadata: Mapping[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         treatment = np.array(self.treatment, dtype=float, copy=True)
@@ -52,6 +129,29 @@ class SimulationContext:
             raise ValueError("treatment must contain only zero and one")
         treatment.setflags(write=False)
         object.__setattr__(self, "treatment", treatment)
+        object.__setattr__(
+            self,
+            "observables",
+            _unit_feature_matrix(
+                self.observables,
+                n_units=self.dimensions.n_units,
+                name="observables",
+            ),
+        )
+        object.__setattr__(
+            self,
+            "unobservables",
+            _unit_feature_matrix(
+                self.unobservables,
+                n_units=self.dimensions.n_units,
+                name="unobservables",
+            ),
+        )
+        object.__setattr__(
+            self,
+            "feature_metadata",
+            MappingProxyType(dict(self.feature_metadata)),
+        )
 
     @property
     def ever_treated(self) -> np.ndarray:
@@ -96,9 +196,54 @@ class AssignmentModel(Protocol):
     """Protocol for treatment-assignment components."""
 
     def assign(
-        self, dimensions: PanelDimensions, rng: np.random.Generator
+        self,
+        context: AssignmentContext | PanelDimensions,
+        rng: np.random.Generator,
     ) -> ComponentDraw:
         """Draw a treatment matrix."""
+
+
+@runtime_checkable
+class UnitFeatureModel(Protocol):
+    """Protocol for shared observed and latent unit features."""
+
+    def generate(
+        self, dimensions: PanelDimensions, rng: np.random.Generator
+    ) -> UnitFeatureDraw:
+        """Draw unit features before treatment assignment."""
+
+
+@dataclass(frozen=True, slots=True)
+class GaussianUnitFeatures:
+    """Draw independent standard-normal observed and latent unit features."""
+
+    n_observables: int = 2
+    n_unobservables: int = 2
+
+    def __post_init__(self) -> None:
+        if self.n_observables < 0:
+            raise ValueError("n_observables must be nonnegative")
+        if self.n_unobservables < 0:
+            raise ValueError("n_unobservables must be nonnegative")
+
+    def generate(
+        self, dimensions: PanelDimensions, rng: np.random.Generator
+    ) -> UnitFeatureDraw:
+        observables = rng.normal(size=(dimensions.n_units, self.n_observables))
+        unobservables = rng.normal(size=(dimensions.n_units, self.n_unobservables))
+        return UnitFeatureDraw(
+            observables,
+            unobservables,
+            {
+                "kind": "gaussian_unit_features",
+                "observable_names": tuple(
+                    f"x{index + 1}" for index in range(self.n_observables)
+                ),
+                "unobservable_names": tuple(
+                    f"u{index + 1}" for index in range(self.n_unobservables)
+                ),
+            },
+        )
 
 
 @runtime_checkable
@@ -199,6 +344,272 @@ class StaggeredAdoption:
         return ComponentDraw(
             treatment,
             {"kind": "staggered_adoption", "adoption_times": normalized},
+        )
+
+
+def _as_assignment_context(
+    value: AssignmentContext | PanelDimensions,
+) -> AssignmentContext:
+    if isinstance(value, AssignmentContext):
+        return value
+    if isinstance(value, PanelDimensions):
+        return AssignmentContext(value)
+    raise TypeError("assignment context must contain panel dimensions")
+
+
+def _sigmoid(values: np.ndarray) -> np.ndarray:
+    probabilities = np.empty_like(values, dtype=float)
+    nonnegative = values >= 0.0
+    probabilities[nonnegative] = 1.0 / (1.0 + np.exp(-values[nonnegative]))
+    exponent = np.exp(values[~nonnegative])
+    probabilities[~nonnegative] = exponent / (1.0 + exponent)
+    return probabilities
+
+
+@dataclass(frozen=True, slots=True)
+class RandomizedSingleCohortAssignment:
+    """Randomly assign a fixed-size absorbing cohort without replacement."""
+
+    n_treated: int
+    adoption_period: int
+    eligible_units: Sequence[int] | None = None
+
+    def __post_init__(self) -> None:
+        if self.n_treated <= 0:
+            raise ValueError("n_treated must be positive")
+        if self.adoption_period < 0:
+            raise ValueError("adoption_period must be nonnegative")
+        if self.eligible_units is not None:
+            object.__setattr__(self, "eligible_units", tuple(self.eligible_units))
+
+    def assign(
+        self,
+        context: AssignmentContext | PanelDimensions,
+        rng: np.random.Generator,
+    ) -> ComponentDraw:
+        assignment_context = _as_assignment_context(context)
+        dimensions = assignment_context.dimensions
+        if self.adoption_period >= dimensions.n_periods:
+            raise ValueError("adoption_period must be a valid time position")
+        if self.eligible_units is None:
+            eligible = np.arange(dimensions.n_units, dtype=np.int64)
+        else:
+            eligible = np.asarray(self.eligible_units, dtype=np.int64)
+            if eligible.ndim != 1 or np.unique(eligible).size != eligible.size:
+                raise ValueError("eligible_units must contain unique positions")
+            if np.any((eligible < 0) | (eligible >= dimensions.n_units)):
+                raise ValueError("eligible_units contains an invalid unit position")
+        if self.n_treated > eligible.size:
+            raise ValueError("n_treated cannot exceed the eligible unit count")
+
+        treated = np.sort(
+            rng.choice(eligible, size=self.n_treated, replace=False).astype(np.int64)
+        )
+        treatment = np.zeros((dimensions.n_units, dimensions.n_periods), dtype=float)
+        treatment[treated, self.adoption_period :] = 1.0
+        propensity = np.zeros(dimensions.n_units, dtype=float)
+        propensity[eligible] = self.n_treated / eligible.size
+        return ComponentDraw(
+            treatment,
+            {
+                "kind": "randomized_single_cohort",
+                "treated_units": treated,
+                "eligible_units": eligible,
+                "adoption_period": self.adoption_period,
+                "propensity_scores": propensity,
+            },
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class BinaryLogitAssignment:
+    """Assign one cohort using a sigmoid propensity based on unit features.
+
+    Observable coefficients give assignment that is unconfounded conditional on
+    the recorded covariates. Nonzero unobservable coefficients select on latent
+    unit features that an estimator does not receive as covariates.
+    """
+
+    adoption_period: int
+    intercept: float = 0.0
+    observable_coefficients: Sequence[float] = ()
+    unobservable_coefficients: Sequence[float] = ()
+
+    def __post_init__(self) -> None:
+        if self.adoption_period < 0:
+            raise ValueError("adoption_period must be nonnegative")
+        if not np.isfinite(self.intercept):
+            raise ValueError("intercept must be finite")
+        observable = tuple(float(value) for value in self.observable_coefficients)
+        unobservable = tuple(float(value) for value in self.unobservable_coefficients)
+        if not np.all(np.isfinite(observable)):
+            raise ValueError("observable_coefficients must be finite")
+        if not np.all(np.isfinite(unobservable)):
+            raise ValueError("unobservable_coefficients must be finite")
+        object.__setattr__(self, "observable_coefficients", observable)
+        object.__setattr__(self, "unobservable_coefficients", unobservable)
+
+    def assign(
+        self,
+        context: AssignmentContext | PanelDimensions,
+        rng: np.random.Generator,
+    ) -> ComponentDraw:
+        assignment_context = _as_assignment_context(context)
+        dimensions = assignment_context.dimensions
+        if self.adoption_period >= dimensions.n_periods:
+            raise ValueError("adoption_period must be a valid time position")
+
+        observable = np.asarray(self.observable_coefficients, dtype=float)
+        unobservable = np.asarray(self.unobservable_coefficients, dtype=float)
+        if observable.size != assignment_context.observables.shape[1]:
+            raise ValueError(
+                "observable_coefficients must match the observable feature count"
+            )
+        if unobservable.size != assignment_context.unobservables.shape[1]:
+            raise ValueError(
+                "unobservable_coefficients must match the unobservable feature count"
+            )
+
+        linear_predictor = np.full(dimensions.n_units, self.intercept, dtype=float)
+        linear_predictor += assignment_context.observables @ observable
+        linear_predictor += assignment_context.unobservables @ unobservable
+        propensity = _sigmoid(linear_predictor)
+        treated_mask = rng.random(dimensions.n_units) < propensity
+        treated = np.flatnonzero(treated_mask).astype(np.int64, copy=False)
+        treatment = np.zeros((dimensions.n_units, dimensions.n_periods), dtype=float)
+        treatment[treated, self.adoption_period :] = 1.0
+        return ComponentDraw(
+            treatment,
+            {
+                "kind": "binary_logit",
+                "treated_units": treated,
+                "adoption_period": self.adoption_period,
+                "linear_predictor": linear_predictor,
+                "propensity_scores": propensity,
+                "observable_coefficients": observable,
+                "unobservable_coefficients": unobservable,
+            },
+        )
+
+
+def _coefficient_matrix(
+    coefficients: Sequence[Sequence[float]],
+    *,
+    n_cohorts: int,
+    n_features: int,
+    name: str,
+) -> np.ndarray:
+    if len(coefficients) == 0:
+        return np.zeros((n_cohorts, n_features), dtype=float)
+    matrix = np.asarray(coefficients, dtype=float)
+    expected = (n_cohorts, n_features)
+    if matrix.shape != expected:
+        raise ValueError(f"{name} must have shape {expected}")
+    if not np.all(np.isfinite(matrix)):
+        raise ValueError(f"{name} must be finite")
+    return matrix
+
+
+@dataclass(frozen=True, slots=True)
+class GeneralizedPropensityAssignment:
+    """Map units to adoption cohorts with a multinomial-logit GPS.
+
+    The supplied adoption periods are the non-baseline categories. Never treated
+    is the baseline category with a normalized linear predictor of zero.
+    """
+
+    adoption_periods: Sequence[int]
+    intercepts: Sequence[float] = ()
+    observable_coefficients: Sequence[Sequence[float]] = ()
+    unobservable_coefficients: Sequence[Sequence[float]] = ()
+
+    def __post_init__(self) -> None:
+        adoption_periods = tuple(int(value) for value in self.adoption_periods)
+        if not adoption_periods:
+            raise ValueError("adoption_periods must contain at least one cohort")
+        if len(set(adoption_periods)) != len(adoption_periods):
+            raise ValueError("adoption_periods must be unique")
+        intercepts = tuple(float(value) for value in self.intercepts)
+        observable = tuple(
+            tuple(float(value) for value in row) for row in self.observable_coefficients
+        )
+        unobservable = tuple(
+            tuple(float(value) for value in row)
+            for row in self.unobservable_coefficients
+        )
+        object.__setattr__(self, "adoption_periods", adoption_periods)
+        object.__setattr__(self, "intercepts", intercepts)
+        object.__setattr__(self, "observable_coefficients", observable)
+        object.__setattr__(self, "unobservable_coefficients", unobservable)
+
+    def assign(
+        self,
+        context: AssignmentContext | PanelDimensions,
+        rng: np.random.Generator,
+    ) -> ComponentDraw:
+        assignment_context = _as_assignment_context(context)
+        dimensions = assignment_context.dimensions
+        periods = np.asarray(self.adoption_periods, dtype=np.int64)
+        if np.any((periods < 0) | (periods >= dimensions.n_periods)):
+            raise ValueError("adoption_periods must contain valid time positions")
+        n_cohorts = periods.size
+        if len(self.intercepts) == 0:
+            intercepts = np.zeros(n_cohorts, dtype=float)
+        else:
+            intercepts = np.asarray(self.intercepts, dtype=float)
+            if intercepts.shape != (n_cohorts,):
+                raise ValueError("intercepts must match the adoption cohort count")
+            if not np.all(np.isfinite(intercepts)):
+                raise ValueError("intercepts must be finite")
+        observable = _coefficient_matrix(
+            self.observable_coefficients,
+            n_cohorts=n_cohorts,
+            n_features=assignment_context.observables.shape[1],
+            name="observable_coefficients",
+        )
+        unobservable = _coefficient_matrix(
+            self.unobservable_coefficients,
+            n_cohorts=n_cohorts,
+            n_features=assignment_context.unobservables.shape[1],
+            name="unobservable_coefficients",
+        )
+
+        cohort_logits = np.broadcast_to(intercepts, (dimensions.n_units, n_cohorts))
+        cohort_logits = np.array(cohort_logits, copy=True)
+        cohort_logits += assignment_context.observables @ observable.T
+        cohort_logits += assignment_context.unobservables @ unobservable.T
+        logits = np.column_stack((cohort_logits, np.zeros(dimensions.n_units)))
+        centered = logits - logits.max(axis=1, keepdims=True)
+        exponentiated = np.exp(centered)
+        probabilities = exponentiated / exponentiated.sum(axis=1, keepdims=True)
+        uniforms = rng.random(dimensions.n_units)
+        categories = np.sum(
+            uniforms[:, None] > np.cumsum(probabilities, axis=1), axis=1
+        )
+        categories = np.minimum(categories, n_cohorts).astype(np.int64, copy=False)
+
+        adoption_times = np.full(
+            dimensions.n_units, dimensions.n_periods, dtype=np.int64
+        )
+        treatment = np.zeros((dimensions.n_units, dimensions.n_periods), dtype=float)
+        for category, period in enumerate(periods):
+            units = np.flatnonzero(categories == category)
+            adoption_times[units] = period
+            treatment[units, period:] = 1.0
+        return ComponentDraw(
+            treatment,
+            {
+                "kind": "generalized_propensity",
+                "adoption_periods": periods,
+                "adoption_times": adoption_times,
+                "assigned_categories": categories,
+                "generalized_propensity_scores": probabilities,
+                "cohort_linear_predictors": cohort_logits,
+                "intercepts": intercepts,
+                "observable_coefficients": observable,
+                "unobservable_coefficients": unobservable,
+                "never_treated_category": n_cohorts,
+            },
         )
 
 

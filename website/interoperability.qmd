@@ -1,0 +1,86 @@
+---
+title: "Estimator interoperability"
+subtitle: "Wide arrays for crabbymetrics and long panels for PyFixest"
+---
+
+`pypanelsim` does not impose an estimator interface. A panel exposes wide NumPy
+arrays, long columns, observed unit covariates, treatment timing, and causal
+truth for evaluation.
+
+```{python}
+import crabbymetrics as cm
+import numpy as np
+import pandas as pd
+import pyfixest as pf
+import pypanelsim as pps
+
+panel = pps.classic_factor(overlap=0.0, seed=91)
+```
+
+## crabbymetrics
+
+crabbymetrics panel estimators consume the wide `(unit, period)` arrays directly.
+
+```{python}
+model = cm.AugmentedBalancing(balance="double")
+model.fit(panel.outcome, panel.treatment)
+balancing_att = float(model.summary()["att"])
+pd.DataFrame(
+    {
+        "quantity": ["estimated ATT", "true ATT", "error"],
+        "value": [balancing_att, panel.true_att, balancing_att - panel.true_att],
+    }
+)
+```
+
+An outcome model can be supplied as a same-shaped nuisance surface. The oracle
+surface below is for interface demonstration only; a real estimator must fit its
+nuisance model without treated post-treatment leakage.
+
+```{python}
+oracle = cm.AugmentedBalancing(balance="none")
+oracle.fit(panel.outcome, panel.treatment, panel.untreated_outcome)
+print(float(oracle.summary()["att"]), panel.true_att)
+```
+
+## PyFixest
+
+PyFixest consumes a long DataFrame and formula. `as_long_dict()` supplies all
+core panel columns and repeats observed unit covariates over time.
+
+```{python}
+long = pd.DataFrame(dict(panel.as_long_dict()))
+twfe = pf.feols(
+    "outcome ~ treatment | unit + time",
+    data=long,
+    vcov={"CRV1": "unit"},
+)
+pd.DataFrame(
+    {
+        "estimate": [float(twfe.coef()["treatment"])],
+        "standard error": [float(twfe.se()["treatment"])],
+        "simulation ATT": [panel.true_att],
+    }
+)
+```
+
+The regression coefficient and `panel.true_att` need not target the same
+weighted estimand under heterogeneous effects or staggered adoption. The point
+of the interchange is to make this comparison explicit, not to force agreement.
+
+## Writable inputs
+
+The package returns read-only arrays by default. Ask for copies when an estimator
+modifies its inputs:
+
+```{python}
+y_copy, w_copy = panel.as_arrays(copy=True)
+print(y_copy.flags.writeable, w_copy.flags.writeable)
+```
+
+For selected truth matrices:
+
+```{python}
+y0, tau = panel.arrays(("untreated_outcome", "treatment_effect"))
+np.testing.assert_allclose(panel.outcome, y0 + tau)
+```

@@ -1,0 +1,31 @@
+.navbar-brand {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.hero-banner {
+  padding: 2.5rem 2rem;
+  margin: 0 0 2rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, #0b3558 0%, #176b87 65%, #64ccc5 100%);
+  color: white;
+}
+
+.hero-banner h1 {
+  color: white;
+  margin-top: 0;
+}
+
+.api-signature {
+  border-left: 0.25rem solid #176b87;
+  padding-left: 1rem;
+  margin: 1rem 0;
+}
+
+table {
+  font-size: 0.94rem;
+}
+
+code {
+  color: inherit;
+}

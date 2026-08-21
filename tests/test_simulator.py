@@ -2,9 +2,11 @@ import numpy as np
 import pytest
 
 from pypanelsim import (
+    BinaryLogitAssignment,
     CallableOutcomeModel,
     ComponentDraw,
     ConstantEffect,
+    GaussianUnitFeatures,
     PanelDimensions,
     PanelSimulator,
     SingleCohortAssignment,
@@ -81,3 +83,36 @@ def test_simulator_validates_component_shape_and_effect_support() -> None:
     )
     with pytest.raises(ValueError, match="untreated outcome must have shape"):
         simulator.simulate(seed=1)
+
+
+def test_feature_model_is_shared_by_assignment_outcome_and_dataset() -> None:
+    dimensions = PanelDimensions(20, 6)
+
+    def feature_outcome(context, rng):
+        noise = rng.normal(scale=0.01, size=(dimensions.n_units, dimensions.n_periods))
+        signal = context.observables[:, :1] + 2.0 * context.unobservables[:, :1]
+        return ComponentDraw(signal + noise, {"shared_features": True})
+
+    simulator = PanelSimulator(
+        name="feature_selection",
+        dimensions=dimensions,
+        assignment=BinaryLogitAssignment(
+            adoption_period=4,
+            intercept=-0.5,
+            observable_coefficients=(1.0,),
+            unobservable_coefficients=(1.0,),
+        ),
+        outcome_model=CallableOutcomeModel(feature_outcome),
+        effect_model=ConstantEffect(1.0),
+        feature_model=GaussianUnitFeatures(n_observables=1, n_unobservables=1),
+    )
+    panel = simulator.simulate(seed=12)
+
+    np.testing.assert_allclose(
+        panel.unit_covariates,
+        panel.metadata["assignment"]["linear_predictor"][:, None]
+        + 0.5
+        - panel.metadata["features"]["unobservables"],
+    )
+    assert panel.unit_covariate_names == ("x1",)
+    assert panel.metadata["outcome"]["shared_features"] is True

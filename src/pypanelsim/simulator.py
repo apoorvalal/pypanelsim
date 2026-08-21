@@ -8,11 +8,13 @@ from dataclasses import dataclass
 import numpy as np
 
 from .components import (
+    AssignmentContext,
     AssignmentModel,
     EffectModel,
     OutcomeModel,
     PanelDimensions,
     SimulationContext,
+    UnitFeatureModel,
 )
 from .data import FloatMatrix, PanelDataset
 
@@ -57,6 +59,7 @@ class PanelSimulator:
     assignment: AssignmentModel
     outcome_model: OutcomeModel
     effect_model: EffectModel
+    feature_model: UnitFeatureModel | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.name, str) or not self.name.strip():
@@ -71,13 +74,35 @@ class PanelSimulator:
         """Draw one panel using an explicit seed or generator."""
 
         generator = resolve_rng(seed=seed, rng=rng)
-        assignment_draw = self.assignment.assign(self.dimensions, generator)
+        if self.feature_model is None:
+            assignment_context = AssignmentContext(self.dimensions)
+            feature_metadata = None
+        else:
+            feature_draw = self.feature_model.generate(self.dimensions, generator)
+            assignment_context = AssignmentContext(
+                self.dimensions,
+                feature_draw.observables,
+                feature_draw.unobservables,
+                feature_draw.metadata,
+            )
+            feature_metadata = {
+                "model": type(self.feature_model).__name__,
+                **dict(feature_draw.metadata),
+                "unobservables": assignment_context.unobservables,
+            }
+        assignment_draw = self.assignment.assign(assignment_context, generator)
         treatment = _component_matrix(
             assignment_draw.values,
             dimensions=self.dimensions,
             name="assignment",
         )
-        context = SimulationContext(self.dimensions, treatment)
+        context = SimulationContext(
+            self.dimensions,
+            treatment,
+            assignment_context.observables,
+            assignment_context.unobservables,
+            assignment_context.feature_metadata,
+        )
         outcome_draw = self.outcome_model.generate(context, generator)
         untreated = _component_matrix(
             outcome_draw.values,
@@ -93,33 +118,42 @@ class PanelSimulator:
         if not np.allclose(effect[treatment == 0.0], 0.0):
             raise ValueError("effect model returned nonzero effects when untreated")
 
+        metadata = {
+            "simulator": {
+                "name": self.name,
+                "dimensions": {
+                    "n_units": self.dimensions.n_units,
+                    "n_periods": self.dimensions.n_periods,
+                },
+            },
+            "assignment": {
+                "model": type(self.assignment).__name__,
+                **dict(assignment_draw.metadata),
+            },
+            "outcome": {
+                "model": type(self.outcome_model).__name__,
+                **dict(outcome_draw.metadata),
+            },
+            "effect": {
+                "model": type(self.effect_model).__name__,
+                **dict(effect_draw.metadata),
+            },
+        }
+        if feature_metadata is not None:
+            metadata["features"] = feature_metadata
+
+        observable_names = assignment_context.feature_metadata.get(
+            "observable_names", None
+        )
         return PanelDataset(
             outcome=untreated + effect,
             treatment=treatment,
             untreated_outcome=untreated,
             treatment_effect=effect,
             name=self.name,
-            metadata={
-                "simulator": {
-                    "name": self.name,
-                    "dimensions": {
-                        "n_units": self.dimensions.n_units,
-                        "n_periods": self.dimensions.n_periods,
-                    },
-                },
-                "assignment": {
-                    "model": type(self.assignment).__name__,
-                    **dict(assignment_draw.metadata),
-                },
-                "outcome": {
-                    "model": type(self.outcome_model).__name__,
-                    **dict(outcome_draw.metadata),
-                },
-                "effect": {
-                    "model": type(self.effect_model).__name__,
-                    **dict(effect_draw.metadata),
-                },
-            },
+            metadata=metadata,
+            unit_covariates=assignment_context.observables,
+            unit_covariate_names=observable_names,
         )
 
     def iter_simulations(

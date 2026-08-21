@@ -1,0 +1,210 @@
+---
+title: "Assignment mechanisms"
+subtitle: "Randomization, binary propensity scores, latent selection, and adoption-cohort GPS"
+---
+
+## Shared unit features
+
+Assignment and untreated outcomes often depend on the same unit attributes.
+`UnitFeatureModel` draws these attributes before assignment and splits them into:
+
+- `observables`, exposed as `panel.unit_covariates`; and
+- `unobservables`, retained under `panel.metadata["features"]` as simulation truth.
+
+`GaussianUnitFeatures(k_x, k_u)` supplies independent standard-normal features.
+A custom feature model can instead introduce correlation, discrete covariates,
+or application-specific population structure.
+
+```{python}
+from dataclasses import dataclass
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import pypanelsim as pps
+
+
+@dataclass(frozen=True, slots=True)
+class FeatureOutcome:
+    def generate(self, context, rng):
+        t = np.linspace(-1.0, 1.0, context.dimensions.n_periods)
+        factor = np.sin(np.linspace(0.0, 3.0 * np.pi, context.dimensions.n_periods))
+        y0 = (
+            0.8 * context.observables[:, :1]
+            + 0.6 * context.observables[:, 1:2] * t
+            + 1.2 * context.unobservables[:, :1] * (t + 1.0)
+            + 0.8 * context.unobservables[:, 1:2] * factor
+        )
+        y0 += rng.normal(scale=0.35, size=y0.shape)
+        return pps.ComponentDraw(y0, {"kind": "feature_outcome"})
+
+
+dimensions = pps.PanelDimensions(120, 48)
+features = pps.GaussianUnitFeatures(2, 2)
+
+
+def build(name, assignment):
+    return pps.PanelSimulator(
+        name=name,
+        dimensions=dimensions,
+        feature_model=features,
+        assignment=assignment,
+        outcome_model=FeatureOutcome(),
+        effect_model=pps.LinearRampEffect(0.12),
+    )
+```
+
+## Fixed-size randomization
+
+`RandomizedSingleCohortAssignment` samples exactly `n_treated` eligible units
+without replacement. Every eligible unit has marginal treatment probability
+`n_treated / n_eligible`; ineligible units have probability zero.
+
+```{python}
+randomized = build(
+    "randomized",
+    pps.RandomizedSingleCohortAssignment(
+        n_treated=30,
+        adoption_period=32,
+    ),
+)
+random_panel = randomized.simulate(seed=2026)
+print(random_panel.treated_units.size)
+print(np.unique(random_panel.metadata["assignment"]["propensity_scores"]))
+```
+
+Use `eligible_units=` to encode design restrictions. This remains randomized
+only within that prespecified eligible set.
+
+## Binary logit selection
+
+`BinaryLogitAssignment` independently draws eventual treatment from
+
+$$
+e_i=P(D_i=1\mid X_i,U_i)
+=\Lambda\!\left(\alpha+X_i^\top\beta+U_i^\top\gamma\right),
+$$
+
+where $\Lambda(z)=1/(1+e^{-z})$. The selected units adopt at one common period.
+The assignment metadata records every linear predictor and propensity score.
+
+### Selection on observables
+
+Set $\gamma=0$:
+
+```{python}
+observed_selection = build(
+    "observed_selection",
+    pps.BinaryLogitAssignment(
+        adoption_period=32,
+        intercept=-1.1,
+        observable_coefficients=(1.2, -0.8),
+        unobservable_coefficients=(0.0, 0.0),
+    ),
+)
+observed_panel = observed_selection.simulate(seed=2026)
+print(observed_panel.unit_covariate_names)
+print(observed_panel.metadata["assignment"]["propensity_scores"][:5])
+```
+
+When the potential-outcome law also depends on $X$ but treatment does not depend
+on $U$, assignment is unconfounded conditional on the exposed covariates. The
+unadjusted treated and control groups need not be comparable.
+
+### Selection on latent factors
+
+Set $\beta=0$ and $\gamma\ne0$:
+
+```{python}
+latent_selection = build(
+    "latent_selection",
+    pps.BinaryLogitAssignment(
+        adoption_period=32,
+        intercept=-1.1,
+        observable_coefficients=(0.0, 0.0),
+        unobservable_coefficients=(1.4, -1.0),
+    ),
+)
+latent_panel = latent_selection.simulate(seed=2026)
+print(latent_panel.metadata["features"]["unobservables"].shape)
+```
+
+This assignment is confounded relative to estimators that see only $X$. Panel
+factor, matrix-completion, trajectory-balancing, and synthetic-control methods
+may nevertheless learn part of the latent structure from pre-treatment paths.
+How well they do is an estimand- and DGP-specific numerical question.
+
+## Adoption-cohort generalized propensity scores
+
+For adoption periods $g\in\mathcal G$, `GeneralizedPropensityAssignment` uses
+the multinomial-logit generalized propensity score
+
+$$
+r_g(X_i,U_i)=P(G_i=g\mid X_i,U_i)
+=\frac{\exp(\alpha_g+X_i^\top\beta_g+U_i^\top\gamma_g)}
+{1+\sum_{h\in\mathcal G}\exp(\alpha_h+X_i^\top\beta_h+U_i^\top\gamma_h)}.
+$$
+
+Never treated is the baseline category with normalized logit zero. Each sampled
+cohort produces absorbing treatment from its adoption period onward.
+
+```{python}
+cohort_gps = build(
+    "cohort_gps",
+    pps.GeneralizedPropensityAssignment(
+        adoption_periods=(24, 30, 36),
+        intercepts=(-0.7, -0.9, -1.1),
+        observable_coefficients=(
+            (1.0, -0.5),
+            (0.2, 0.8),
+            (-0.8, 0.3),
+        ),
+        unobservable_coefficients=((0.0, 0.0),) * 3,
+    ),
+)
+cohort_panel = cohort_gps.simulate(seed=2026)
+gps = cohort_panel.metadata["assignment"]["generalized_propensity_scores"]
+print(gps.shape)
+print(np.max(np.abs(gps.sum(axis=1) - 1.0)))
+print(np.unique(cohort_panel.adoption_times, return_counts=True))
+```
+
+Metadata includes `generalized_propensity_scores`, `assigned_categories`,
+`adoption_times`, cohort logits, coefficient matrices, and the never-treated
+category index.
+
+## Visual comparison
+
+```{python}
+#| fig-cap: "A common feature-outcome law under four assignment mechanisms. Units are sorted by adoption time."
+designs = {
+    "Randomized": randomized,
+    "Observed logit": observed_selection,
+    "Latent logit": latent_selection,
+    "Cohort GPS": cohort_gps,
+}
+fig, axes = plt.subplots(4, 2, figsize=(11, 12), constrained_layout=True)
+for row, (label, simulator) in enumerate(designs.items()):
+    panel = simulator.simulate(seed=2026)
+    order = np.argsort(panel.adoption_times, kind="stable")
+    axes[row, 0].matshow(panel.outcome[order], aspect="auto", cmap="coolwarm")
+    axes[row, 1].matshow(
+        panel.treatment[order], aspect="auto", cmap="Greys", vmin=0, vmax=1
+    )
+    axes[row, 0].set_title(f"{label}: Y")
+    axes[row, 1].set_title(f"{label}: W")
+    axes[row, 0].set_ylabel("unit")
+    for axis in axes[row]:
+        axis.set_xlabel("period")
+plt.show()
+```
+
+## Choosing a mechanism
+
+| Scientific design | Assignment object | Identifying information exposed to estimators |
+|---|---|---|
+| Complete randomization with fixed treated count | `RandomizedSingleCohortAssignment` | Design propensity |
+| Bernoulli assignment based on measured baseline attributes | `BinaryLogitAssignment`, latent coefficients zero | `unit_covariates` |
+| Assignment based on latent unit type | `BinaryLogitAssignment`, latent coefficients nonzero | Pre-treatment outcome history; latent truth only for diagnostics |
+| Multiple adoption cohorts | `GeneralizedPropensityAssignment` | Full unit-by-cohort GPS and observed covariates |
+| Fixed externally specified adoption | `SingleCohortAssignment` or `StaggeredAdoption` | The supplied schedule |

@@ -1,0 +1,947 @@
+---
+title: "Balancing estimators in synthetic panels"
+subtitle: "R and Python reproduction, implementation contracts, and API reference"
+date: last-modified
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    embed-resources: true
+    page-layout: full
+    code-fold: true
+    code-summary: "Show code"
+    fig-responsive: true
+jupyter: python3
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{python}
+from __future__ import annotations
+
+import csv
+import inspect
+import math
+from pathlib import Path
+
+import crabbymetrics as cm
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+from pypanelsim import (
+    BinaryLogitAssignment,
+    CanonicalPanelConfig,
+    ConstantEffect,
+    GaussianUnitFeatures,
+    GeneralizedPropensityAssignment,
+    LinearRampEffect,
+    PanelDataset,
+    PanelDimensions,
+    PanelSimulator,
+    RandomizedSingleCohortAssignment,
+    SingleCohortAssignment,
+    StaggeredAdoption,
+    available_canonical_designs,
+    classic_factor,
+    classic_factor_design,
+    factor_synthetic,
+    make_canonical,
+    mixed_factor,
+    synthetic_control,
+    time_series,
+    weak_factor,
+)
+from balancing_support.outcome_models import (
+    arima_surface,
+    generalized_synthetic_control_surface,
+    interactive_fixed_effects_surface,
+    mcpanel_surface,
+    panel_var_surface,
+    two_way_fe_surface,
+)
+
+VIGNETTE = Path.cwd()
+ROOT = VIGNETTE.parents[1]
+REFERENCE = VIGNETTE / "reference" / "r_slide_rmse.csv"
+RESULTS = VIGNETTE / "results"
+
+r_results = pd.read_csv(REFERENCE)
+python_results = pd.read_csv(RESULTS / "python_rmse.csv")
+comparison = pd.read_csv(RESULTS / "r_python_rmse_comparison.csv")
+
+FRAME_ORDER = [
+    "u-balance",
+    "outcome",
+    "d-balance",
+    "aug-d-balance (residual)",
+    "aug-d-balance (individual)",
+    "aug-d-balance (residual individual)",
+    "aug-d-balance",
+]
+OUTCOME_ORDER = ["arima", "fe", "gsynth", "ife", "MCPanel", "VAR"]
+
+mpl.rcParams.update(
+    {
+        "figure.dpi": 115,
+        "axes.spines.top": False,
+        "axes.spines.right": False,
+        "font.size": 10,
+    }
+)
+```
+
+## Overview
+
+This study compares estimators of the average treatment effect on the treated (ATT) in five synthetic panel families: classic factors, weak factors, mixed factors, sparse synthetic controls, and autoregressive outcomes. Each canonical panel contains 160 never-treated units, 40 treated units, 40 pre-treatment periods, and 10 post-treatment periods. All treated units adopt in the first post-treatment period. Their treatment effects increase from 0.2 to 2.0, which gives a true ATT of 1.1.
+
+The estimators reconstruct untreated post-treatment outcomes in three ways. An outcome-model estimator uses a fitted untreated-outcome surface. Unit balancing weights control units so their pre-treatment outcomes match the treated units. Double balancing combines those donor weights with weights on pre-treatment periods in an augmented difference-in-differences score. The experiments vary factor-loading overlap, factor strength, donor sparsity, persistence, and integration to change which source of information is useful.
+
+The estimator ranking changes across these designs. Unit balancing is competitive in several good-overlap and synthetic-control settings. Double balancing has substantially lower RMSE under poor factor-loading overlap and persistent integrated dynamics. No outcome model or balancing configuration minimizes RMSE in every design.
+
+The reproduction uses three validation standards:
+
+1. On the same fixed panel, the R quadratic-program reference and `crabbymetrics.AugmentedBalancing` agree to numerical precision across 48 estimator configurations.
+2. On a second fixed panel, Python FE, IFE, MCPanel, generalized synthetic-control, and panel-VAR surfaces agree with their R reference surfaces within specified cell tolerances.
+3. Independent R and Python Monte Carlo runs compare the full 398-cell slide grid. Differences are reported in units of combined Monte Carlo standard errors.
+
+Of the 398 Monte Carlo cells, 390 are within three combined Monte Carlo standard errors. Every FE, IFE, generalized synthetic-control, and VAR cell is within that boundary. The eight exceptions consist of five correlated MCPanel cells in the poor-overlap classic-factor setting and three ARIMA cells in the low-persistence time-series settings. These two outcome-model-specific patterns are documented below.
+
+```{python}
+max_standardized = comparison["standardized_difference"].abs().max()
+within_three = int(comparison["within_three_mcse"].sum())
+summary_claims = pd.DataFrame(
+    {
+        "check": [
+            "Same-panel estimator cases",
+            "Same-panel outcome-model surfaces",
+            "Matched Monte Carlo cells",
+            "Cells within three combined MCSE",
+            "R replications per matched cell",
+            "Python replications per matched cell",
+            "Largest absolute standardized RMSE difference",
+        ],
+        "result": [
+            48,
+            5,
+            len(comparison),
+            within_three,
+            200,
+            200,
+            f"{max_standardized:.3f}",
+        ],
+    }
+)
+summary_claims
+```
+
+## Sources and implementation contracts
+
+The visual reference is `drafts/slides.pdf`, with source in `overleaf_v2/acic_2024_deck.tex`. The executable contracts come from:
+
+- `code/ziyi/formal simulation DGP.R` for panel generation;
+- `code/ziyi/classic_did_framework.R` for estimator composition;
+- `code/ziyi/support/sdid_unit.R` and `sdid_time.R` for ridge balancing;
+- `code/ziyi/support/scm.R` for the penalized-SCM donor loss;
+- `output/simulation/*/estimation.RData` for the exact slide Monte Carlo draws; and
+- `code/apoorva/00_acic_tabfig.R` for the slide aggregation rule, $\operatorname{RMSE}=\sqrt{\operatorname{mean}(\widehat\tau-\tau)^2}$.
+
+The reproduced ATT heatmaps appear on deck pages 27-28 for classic factors, 33-36 for synthetic controls, 41-44 for time series, 48-49 for weak factors, and 54-55 for mixed factors.
+
+The Python comparison is exact for the balancing estimator and its penalties. It also implements all outcome-model columns in the R heatmaps: FE, IFE, MCPanel, generalized synthetic control, panel VAR, and the time-series-only ARIMA column. The Monte Carlo comparison uses the same probability laws and replication indices 1 through 200, but NumPy and R do not use the same seeded random streams. Therefore, Monte Carlo equality is evaluated relative to simulation uncertainty, not bitwise equality.
+
+Several details in the executable R source determine the numerical results:
+
+| Component | Executable R contract | Why it matters |
+|---|---|---|
+| Factor scale | Divide each realized factor path by its sample SD | Fixes the realized signal scale and signal-to-noise ratio |
+| Synthetic donors | Sample active donors without replacement with weights 1 for favored donors and 0.1 for other donors | Changes the donor support in each replication |
+| Time-series mean | Set the treated innovation mean to 0.25 | Separates the innovation mean from the unconditional AR level mean |
+| Mixed factors | Generate two half-panels and restart the seed for the second half | Preserves the dependence structure of the archived experiment |
+| Unit balancing | Use optimized unit weights and uniform pre-period weights in the augmented score | Retains the time correction when time weights are not optimized |
+| Period targets | Fit one time-weight vector for each post period | Allows the time target to change over the post-treatment path |
+| IFE controls | Rank 2 and force 3; tolerance $10^{-5}$ for classic and weak factors and $10^{-4}$ otherwise | Matches the archived `fect` calls |
+| MCPanel | Unit and time effects with fixed nuclear-norm penalty 0.002 | Matches `lambda_L=0.002` with cross-validation disabled |
+| Panel VAR | Use 2 lags for classic and weak factors, 1 for mixed factors and SCM, and 4 for time-series panels | The archived scripts do not use one common lag order |
+| ARIMA | Fit an automatic univariate time-series model to each unit | This column appears only in the time-series DGP |
+| Monte Carlo size | Use 200 successful replications per cell | Makes the reported RMSE comparable to the archived R experiment |
+
+These are part of the statistical specification. They are not interchangeable implementation details.
+
+## Exact same-panel estimator parity
+
+The fixture generator in `crabbymetrics/tests/fixtures/generate_r_augmented_balancing_reference.R` uses R and `quadprog` to fit all combinations of:
+
+- `balance`: unit, time, or double;
+- `unit_target`: cohort or individual;
+- `time_target`: all post periods or one post period at a time;
+- `balance_on`: raw outcomes or outcome-model residuals; and
+- `unit_loss`: SDID ridge or penalized SCM.
+
+The following code sends the identical panel and outcome-model surface to Python.
+
+```{python}
+fixture_dir = VIGNETTE / "reference"
+panel_fixture = np.genfromtxt(
+    fixture_dir / "r_augmented_balancing_panel.csv",
+    delimiter=",",
+    names=True,
+)
+n_units = int(panel_fixture["unit"].max()) + 1
+n_periods = int(panel_fixture["period"].max()) + 1
+y_fixture = panel_fixture["outcome"].reshape(n_units, n_periods)
+w_fixture = panel_fixture["treatment"].reshape(n_units, n_periods)
+m_fixture = panel_fixture["outcome_model"].reshape(n_units, n_periods)
+
+with (fixture_dir / "r_augmented_balancing_results.csv").open(newline="") as stream:
+    r_cases = list(csv.DictReader(stream))
+
+parity_rows = []
+for case in r_cases:
+    model = cm.AugmentedBalancing(
+        balance=case["balance"],
+        unit_target=case["unit_target"],
+        time_target=case["time_target"],
+        balance_on=case["balance_on"],
+        unit_loss=case["unit_loss"],
+        unit_penalty=float(case["unit_penalty"]),
+        max_iterations=10_000,
+    )
+    model.fit(y_fixture, w_fixture, m_fixture)
+    python_att = float(model.summary()["att"])
+    parity_rows.append(
+        {
+            "balance": case["balance"],
+            "unit target": case["unit_target"],
+            "time target": case["time_target"],
+            "fit weights on": case["balance_on"],
+            "unit loss": case["unit_loss"],
+            "R ATT": float(case["att"]),
+            "Python ATT": python_att,
+            "absolute difference": abs(python_att - float(case["att"])),
+        }
+    )
+
+parity = pd.DataFrame(parity_rows)
+assert len(parity) == 48
+assert parity["absolute difference"].max() < 1e-8
+parity.sort_values("absolute difference", ascending=False).head(8)
+```
+
+The maximum absolute ATT difference is:
+
+```{python}
+f"{parity['absolute difference'].max():.3e}"
+```
+
+This is numerical parity. It is separate from the Monte Carlo comparison.
+
+### Same-panel outcome-model parity
+
+The R fixture in `scripts/export_r_outcome_model_reference.R` fits FE, fixed-rank IFE, MCPanel, generalized synthetic control, and panel VAR to one deterministic panel. The Python functions below receive the same outcome and treatment matrices.
+
+```{python}
+outcome_panel = pd.read_csv(VIGNETTE / "reference" / "r_outcome_model_panel.csv")
+outcome_reference = pd.read_csv(VIGNETTE / "reference" / "r_outcome_model_surfaces.csv")
+n_outcome_units = int(outcome_panel["unit"].max()) + 1
+n_outcome_periods = int(outcome_panel["period"].max()) + 1
+outcome_fixture = outcome_panel["outcome"].to_numpy().reshape(
+    n_outcome_units, n_outcome_periods
+)
+treatment_fixture = outcome_panel["treatment"].to_numpy().reshape(
+    n_outcome_units, n_outcome_periods
+)
+
+outcome_functions = {
+    "fe": two_way_fe_surface,
+    "ife": interactive_fixed_effects_surface,
+    "MCPanel": mcpanel_surface,
+    "gsynth": generalized_synthetic_control_surface,
+    "VAR": panel_var_surface,
+}
+outcome_parity_rows = []
+for model_name, function in outcome_functions.items():
+    reference_surface = (
+        outcome_reference[outcome_reference["model"].eq(model_name)]["counterfactual"]
+        .to_numpy()
+        .reshape(n_outcome_units, n_outcome_periods)
+    )
+    python_surface = function(outcome_fixture, treatment_fixture)
+    outcome_parity_rows.append(
+        {
+            "outcome model": model_name,
+            "maximum absolute cell difference": np.max(
+                np.abs(python_surface - reference_surface)
+            ),
+        }
+    )
+outcome_parity = pd.DataFrame(outcome_parity_rows)
+assert outcome_parity.loc[
+    ~outcome_parity["outcome model"].eq("MCPanel"),
+    "maximum absolute cell difference",
+].max() < 1e-8
+assert outcome_parity.loc[
+    outcome_parity["outcome model"].eq("MCPanel"),
+    "maximum absolute cell difference",
+].max() < 5e-4
+outcome_parity
+```
+
+The MCPanel cell tolerance is $5\times10^{-4}$ because the R and Rust SVD solvers stop after slightly different relative-objective updates. FE, IFE, generalized synthetic control, and VAR use a $10^{-8}$ cell tolerance. ARIMA is checked by its API and Monte Carlo contracts because the historical `fable` version is not installed in this environment.
+
+## R and Python Monte Carlo results
+
+### Plot construction
+
+Each row below contains the complete R heatmap and the complete Python heatmap for one setting. The two panels have the same rows, columns, blanks, and color scale. The slide aggregation leaves unit-only and unaugmented double balancing blank outside the FE column because those two estimators do not use an outcome model.
+
+Color follows the slide rule: direct RMSE from 0 to 3 on the reversed Spectral palette. Values above 3 and unavailable cells are gray. Printed labels retain the uncensored RMSE values.
+
+```{python}
+def _matrix_for(data, setting, outcomes):
+    selected = data[data["setting"].eq(setting)]
+    matrix = (
+        selected.pivot_table(index="frame", columns="outcome", values="rmse", aggfunc="first")
+        .reindex(index=FRAME_ORDER, columns=outcomes)
+    )
+    matrix.loc[["u-balance", "d-balance"], [name for name in outcomes if name != "fe"]] = np.nan
+    return matrix
+
+
+def _draw_heatmap(ax, matrix, title, *, show_y=True):
+    values = matrix.to_numpy(dtype=float)
+    color_values = np.ma.masked_where(
+        ~np.isfinite(values) | (values < 0) | (values > 3),
+        values,
+    )
+    palette = mpl.colormaps["Spectral_r"].copy()
+    palette.set_bad("#8c8c8c")
+    image = ax.imshow(
+        color_values,
+        aspect="auto",
+        cmap=palette,
+        vmin=0,
+        vmax=3,
+    )
+    ax.set_title(title, fontsize=10, loc="left")
+    ax.set_xticks(range(matrix.shape[1]), matrix.columns, rotation=35, ha="right")
+    if show_y:
+        ax.set_yticks(range(matrix.shape[0]), matrix.index)
+    else:
+        ax.set_yticks(range(matrix.shape[0]), [])
+    for row in range(values.shape[0]):
+        for column in range(values.shape[1]):
+            value = values[row, column]
+            if np.isfinite(value):
+                ax.text(column, row, f"{value:.3g}", ha="center", va="center", fontsize=8)
+    return image
+
+
+def plot_family(family, settings, title):
+    fig, axes = plt.subplots(
+        len(settings),
+        2,
+        figsize=(15.5, max(3.4, 3.2 * len(settings))),
+        gridspec_kw={"width_ratios": [1, 1]},
+        squeeze=False,
+        constrained_layout=True,
+    )
+    for row, setting in enumerate(settings):
+        r_setting = r_results[(r_results["family"] == family) & (r_results["setting"] == setting)]
+        available = [name for name in OUTCOME_ORDER if name in set(r_setting["outcome"])]
+        r_full = _matrix_for(r_setting, setting, available)
+        p_setting = python_results[
+            (python_results["family"] == family) & (python_results["setting"] == setting)
+        ]
+        p_full = _matrix_for(p_setting, setting, available)
+        image = _draw_heatmap(
+            axes[row, 0],
+            r_full,
+            f"R reference | {setting}",
+            show_y=True,
+        )
+        _draw_heatmap(
+            axes[row, 1],
+            p_full,
+            f"Python reproduction | {setting}",
+            show_y=False,
+        )
+    fig.colorbar(
+        image,
+        ax=axes,
+        orientation="horizontal",
+        fraction=0.025,
+        pad=0.08,
+        label="RMSE (values above 3 are gray)",
+    )
+    fig.suptitle(title, fontsize=14)
+    plt.show()
+```
+
+### Classic factor designs
+
+```{python}
+#| fig-cap: "Classic factor designs. Poor loading overlap changes the ranking sharply."
+plot_family("classic_factor", ["NN=200;a=0", "NN=200;a=1"], "Classic factor model")
+```
+
+### Weak-factor designs
+
+```{python}
+#| fig-cap: "Weak-factor designs. Double balancing dominates unit-only balancing under poor overlap."
+plot_family("weak_factor", ["NN=200;a=0", "NN=200;a=1"], "Weak factor model")
+```
+
+### Mixed-factor designs
+
+```{python}
+#| fig-cap: "Mixed-factor designs. Group-specific factor paths make unit-only balancing fragile under poor overlap."
+plot_family("mixed_factor", ["NN=200;a=0", "NN=200;a=1"], "Mixed factor model")
+```
+
+### Synthetic-control designs and donor losses
+
+```{python}
+#| fig-cap: "Synthetic-control designs for ridge and penalized-SCM unit losses."
+plot_family(
+    "synthetic_control",
+    [
+        "NN=200;active=0.1;unitb=ridge",
+        "NN=200;active=0.1;unitb=penSCM",
+        "NN=200;active=0.5;unitb=ridge",
+        "NN=200;active=0.5;unitb=penSCM",
+    ],
+    "Synthetic-control model",
+)
+```
+
+### Time-series designs
+
+```{python}
+#| fig-cap: "Stationary and integrated AR designs. Persistence and integration produce the largest RMSE scale."
+plot_family(
+    "time_series",
+    [
+        "NN=200;a=0.2;I=0",
+        "NN=200;a=0.2;I=1",
+        "NN=200;a=0.9;I=0",
+        "NN=200;a=0.9;I=1",
+    ],
+    "Time-series model",
+)
+```
+
+### Unit and double balancing in difficult designs
+
+The following table isolates four settings in which double balancing reduces RMSE relative to unit balancing. Ratios above one favor double balancing.
+
+```{python}
+ranking_cases = [
+    ("classic_factor", "NN=200;a=1", "Classic factor, poor overlap"),
+    ("weak_factor", "NN=200;a=1", "Weak factor, poor overlap"),
+    ("mixed_factor", "NN=200;a=1", "Mixed factor, poor overlap"),
+    ("time_series", "NN=200;a=0.9;I=1", "Integrated AR, phi=0.9"),
+]
+
+ranking_rows = []
+for family, setting, label in ranking_cases:
+    for language, data, value_column in [
+        ("R", comparison, "r_rmse"),
+        ("Python", comparison, "python_rmse"),
+    ]:
+        selected = data[(data["family"] == family) & (data["setting"] == setting)]
+        unit = float(selected.loc[selected["frame"] == "u-balance", value_column].iloc[0])
+        double = float(selected.loc[selected["frame"] == "d-balance", value_column].iloc[0])
+        ranking_rows.append(
+            {
+                "DGP": label,
+                "language": language,
+                "unit-only RMSE": unit,
+                "double RMSE": double,
+                "unit/double ratio": unit / double,
+            }
+        )
+pd.DataFrame(ranking_rows).round(3)
+```
+
+## Between-language Monte Carlo agreement
+
+For independent Monte Carlo estimates $\widehat r_R$ and $\widehat r_P$, define
+
+$$
+z_{R-P}=\frac{\widehat r_P-\widehat r_R}
+{\sqrt{\widehat{\operatorname{MCSE}}(\widehat r_P)^2+
+\widehat{\operatorname{MCSE}}(\widehat r_R)^2}}.
+$$
+
+For errors $e_s$ and $r=\sqrt{S^{-1}\sum_s e_s^2}$, the delta-method standard error used here is
+
+$$
+\widehat{\operatorname{MCSE}}(r)=
+\frac{\operatorname{sd}(e_s^2)}{2r\sqrt{S}}.
+$$
+
+```{python}
+fig, ax = plt.subplots(figsize=(11, 4.5), constrained_layout=True)
+ordered = comparison.sort_values("standardized_difference")
+colors = ordered["family"].astype("category").cat.codes
+ax.scatter(np.arange(len(ordered)), ordered["standardized_difference"], c=colors, cmap="tab10", s=28)
+ax.axhline(3, color="black", linestyle="--", linewidth=1)
+ax.axhline(-3, color="black", linestyle="--", linewidth=1)
+ax.axhline(0, color="0.5", linewidth=0.8)
+ax.set_xlabel("Matched RMSE cell, ordered by standardized difference")
+ax.set_ylabel("Python minus R, in combined MCSE units")
+ax.set_title("R and Python RMSE differences relative to combined Monte Carlo uncertainty", loc="left")
+plt.show()
+```
+
+```{python}
+comparison.reindex(comparison["standardized_difference"].abs().sort_values(ascending=False).index)[
+    [
+        "family",
+        "setting",
+        "frame",
+        "outcome",
+        "r_rmse",
+        "python_rmse",
+        "difference",
+        "combined_mcse",
+        "standardized_difference",
+    ]
+].head(12).round(4)
+```
+
+```{python}
+agreement_by_outcome = (
+    comparison.assign(
+        absolute_standardized_difference=comparison["standardized_difference"].abs(),
+        absolute_relative_difference=comparison["relative_difference"].abs(),
+    )
+    .groupby("outcome", as_index=False)
+    .agg(
+        cells=("outcome", "size"),
+        within_three_mcse=("within_three_mcse", "sum"),
+        maximum_absolute_standardized_difference=(
+            "absolute_standardized_difference",
+            "max",
+        ),
+        median_absolute_relative_difference=("absolute_relative_difference", "median"),
+    )
+    .set_index("outcome")
+    .reindex([name for name in OUTCOME_ORDER if name in set(comparison["outcome"])])
+    .reset_index()
+)
+agreement_by_outcome.round(3)
+```
+
+```{python}
+agreement_by_setting = (
+    comparison.assign(
+        absolute_standardized_difference=comparison["standardized_difference"].abs()
+    )
+    .groupby(["family", "setting"], as_index=False)
+    .agg(
+        cells=("outcome", "size"),
+        within_three_mcse=("within_three_mcse", "sum"),
+        maximum_absolute_standardized_difference=(
+            "absolute_standardized_difference",
+            "max",
+        ),
+    )
+    .sort_values("maximum_absolute_standardized_difference", ascending=False)
+)
+agreement_by_setting.round(3)
+```
+
+### Discrepancy diagnosis
+
+The same-panel checks identify the source of a difference before the Monte Carlo results are interpreted:
+
+- FE, IFE, generalized synthetic control, and panel VAR agree cell by cell to $10^{-8}$. A Monte Carlo difference in these columns is not an estimator-algebra difference.
+- MCPanel agrees to $5\times10^{-4}$ on the fixed panel. Its remaining numerical difference comes from the stopping sequence used by the Rcpp and Rust SVD routines.
+- ARIMA does not have a same-panel historical-`fable` fixture. The Python search contains the true DGP models but searches fewer ARMA specifications than `fable::ARIMA`. A persistent ARIMA-column difference is therefore an outcome-model search difference.
+- The R and Python simulations use independent random streams. The standardized difference accounts for the reported Monte Carlo error from both runs.
+- Cells in one setting reuse the same 200 panels. Their standardized differences are correlated, so a cluster of adjacent cells is one setting-level diagnostic rather than a set of independent tests.
+
+A standardized difference near zero is expected under the common probability law. The two tables above show both the most extreme cells and the outcome-model-level pattern. This makes a package-algorithm difference visible instead of attributing every difference to random simulation noise.
+
+## `pypanelsim` simulation API
+
+`pypanelsim` is a separate estimator-neutral package with NumPy and Matplotlib as its runtime dependencies. This documentation environment installs crabbymetrics only through the optional `docs` extra. The simulation package itself does not import crabbymetrics or contain the outcome-model estimators used later in this report.
+
+The simulation pipeline separates four required objects and one optional shared-feature stage:
+
+| Abstraction | Contract |
+|---|---|
+| `PanelDimensions` | Defines only the rectangular `(n_units, n_periods)` shape |
+| Unit-feature model | Optionally draws observed covariates and latent unit factors before assignment |
+| Assignment model | Returns binary treatment; built-ins support fixed, randomized, sigmoid-selected, and generalized-propensity cohort assignment |
+| Outcome model | Returns untreated outcomes conditional on dimensions and realized treatment |
+| Effect model | Returns realized effects that are zero outside treated cells |
+| `PanelSimulator` | Composes the three components and returns a validated `PanelDataset` |
+
+The component interfaces use structural typing. A new design can provide a plain class with the documented `assign()` or `generate()` method without inheriting from a package base class. Randomness enters through an explicit NumPy generator shared in pipeline order.
+
+```{python}
+for object_ in [
+    PanelDimensions,
+    PanelSimulator,
+    GaussianUnitFeatures,
+    SingleCohortAssignment,
+    RandomizedSingleCohortAssignment,
+    BinaryLogitAssignment,
+    StaggeredAdoption,
+    GeneralizedPropensityAssignment,
+    ConstantEffect,
+    LinearRampEffect,
+]:
+    print(object_.__name__, inspect.signature(object_))
+```
+
+### Common data contract
+
+```{python}
+print(inspect.signature(CanonicalPanelConfig))
+print(inspect.signature(PanelDataset))
+```
+
+`CanonicalPanelConfig` has six fields:
+
+| Field | Default | Meaning |
+|---|---:|---|
+| `n_control` | 160 | Number of never-treated units |
+| `n_treated` | 40 | Number of treated units |
+| `n_pre` | 40 | Number of pre-treatment periods |
+| `n_post` | 10 | Number of post-treatment periods |
+| `effect_slope` | 0.2 | Increase in the treatment effect per post period |
+| `noise_variance` | 0.36 | Variance of the common idiosyncratic error |
+
+Every generator returns an immutable `PanelDataset` object. The canonical factories order controls first, but the generic simulation contract does not require that order. Arrays have shape `(n_units, n_periods)`.
+
+| Attribute | Meaning |
+|---|---|
+| `outcome` | Observed $Y=Y(0)+\tau D$ |
+| `untreated_outcome` | Latent $Y(0)$ |
+| `treatment` | Absorbing treatment matrix |
+| `treatment_effect` | Cell-level effect matrix |
+| `control_units`, `treated_units` | Integer row indices |
+| `adoption_times` | Unit-specific first-treatment positions; never-treated units use the panel horizon |
+| `name` | DGP identifier |
+| `metadata` | Read-only components such as factors, loadings, paths, and donor weights |
+| `unit_covariates`, `unit_covariate_names` | Observed time-invariant assignment features available to estimators |
+| `true_att` | Mean effect over treated cells; 1.1 under the canonical design |
+
+`as_arrays()` returns the standard wide outcome and treatment matrices for a downstream estimator. `as_long_dict()` returns flat unit, time, outcome, treatment, untreated-outcome, and treatment-effect columns for pandas, Polars, or Arrow without adding those libraries as simulation dependencies. Both return read-only data by default; `copy=True` requests writable copies.
+
+```{python}
+canonical = classic_factor(overlap=1.0, seed=17)
+print(canonical.outcome.shape)
+print(canonical.true_att)
+print(sorted(canonical.metadata))
+print([array.shape for array in canonical.as_arrays()])
+```
+
+### Generator signatures
+
+```{python}
+generators = [
+    classic_factor,
+    weak_factor,
+    mixed_factor,
+    synthetic_control,
+    time_series,
+    factor_synthetic,
+]
+pd.DataFrame(
+    {
+        "function": [function.__name__ for function in generators],
+        "signature": [str(inspect.signature(function)) for function in generators],
+    }
+)
+```
+
+### Canonical settings
+
+The canonical functions are concise one-draw wrappers around reusable simulator factories. Named creation is also available through the package registry.
+
+```{python}
+print(available_canonical_designs())
+simulator = make_canonical("classic_factor", overlap=1.0)
+print(inspect.signature(classic_factor_design))
+print(simulator)
+```
+
+| Function | Main setting parameter | Slide settings | Executable-source contract |
+|---|---|---|---|
+| `classic_factor` | `overlap` | 0, 1 | Two standardized drift factors; loading means $-a$ for controls and $a$ for treated units |
+| `weak_factor` | `overlap` | 0, 1 | Five drift and five cyclical factors, each with sample SD 0.2 |
+| `mixed_factor` | `overlap` | 0, 1 | One 100-unit drift half-panel with all treated units and one 100-control cyclical half-panel; both restart the seed |
+| `synthetic_control` | `active_share` | 0.1, 0.5 | Equal active weights; favored donors have sampling weight 1 and other donors 0.1 |
+| `time_series` | `coefficient`, `integrated` | $\phi\in\{0.2,0.9\}$, $I\in\{0,1\}$ | Treated innovation mean 0.25; control innovation mean 0 |
+| `factor_synthetic` | `overlap` | archived mixture | Equal mixture of factor and SCM components; retained for the archived experiment output |
+
+The slide prose and executable R source differ in three places. The library follows the executable source because that source generated the stored results:
+
+- Factors are divided by their realized sample standard deviation, not by fixed constants 7.5 and 0.7.
+- Synthetic active donors are sampled with unequal probabilities, not selected as the exact top set.
+- The AR function receives innovation mean 0.25. It does not receive recursion intercept $0.25/(1-\phi)$.
+
+### Custom dimensions
+
+```{python}
+small = CanonicalPanelConfig(n_control=24, n_treated=6, n_pre=20, n_post=5)
+draw = synthetic_control(active_share=0.25, config=small, seed=203)
+print(draw.outcome.shape)
+print(draw.metadata["outcome"]["active_donors"])
+print(draw.metadata["outcome"]["donor_weights"].sum())
+```
+
+The Python `seed` contract is reproducibility within Python. It is not a claim that NumPy seed 203 equals R seed 203 cell by cell.
+
+For repeated experiments, `PanelSimulator.iter_simulations(replications, seed=...)` uses child `SeedSequence` streams. This avoids treating adjacent integer seeds as the independence mechanism. The reproduction keeps the original integer replication indices because they are part of the archived R comparison contract.
+
+## Outcome-model reproduction API
+
+The functions in `scripts/outcome_models.py` accept two same-shaped NumPy arrays. `outcome` contains units in rows and periods in columns. `treatment` is a binary, absorbing-treatment matrix. Each function returns a finite array of the same shape that estimates the untreated-outcome surface. A function never uses a treated post-treatment outcome as an observed response during fitting.
+
+```{python}
+outcome_model_functions = [
+    two_way_fe_surface,
+    interactive_fixed_effects_surface,
+    mcpanel_surface,
+    generalized_synthetic_control_surface,
+    panel_var_surface,
+    arima_surface,
+]
+pd.DataFrame(
+    {
+        "function": [function.__name__ for function in outcome_model_functions],
+        "signature": [str(inspect.signature(function)) for function in outcome_model_functions],
+    }
+)
+```
+
+| Function | R column | Statistical operation | Archived experiment settings |
+|---|---|---|---|
+| `two_way_fe_surface` | `fe` | Alternating projection on additive unit and period effects over untreated cells | No tuning parameter |
+| `interactive_fixed_effects_surface` | `ife` | Missing-cell EM with a rank-constrained interactive fixed-effects M-step | Rank 2, force 3; family-specific tolerance and iteration budget |
+| `mcpanel_surface` | `MCPanel` | Nuclear-norm matrix completion with additive unit and period effects | `lambda_l=0.002`, tolerance $10^{-5}$, 1,000 iterations |
+| `generalized_synthetic_control_surface` | `gsynth` | Estimate common factors on never-treated controls, then estimate treated loadings on pre-treatment data | Rank 2, force 3 |
+| `panel_var_surface` | `VAR` | Pooled autoregression with additive unit and period effects, followed by recursive treated-unit forecasts | Lag orders 2, 2, 1, 1, and 4 by DGP family |
+| `arima_surface` | `arima` | Select a univariate autoregression or integrated autoregression for each unit, then forecast treated periods | Conditional AIC; integration order 0 or 1; AR order 0 through 2 |
+
+The family-specific runner settings are:
+
+| DGP family | IFE tolerance | IFE maximum iterations | VAR lags |
+|---|---:|---:|---:|
+| Classic factor | $10^{-5}$ | 2,000 | 2 |
+| Weak factor | $10^{-5}$ | 2,000 | 2 |
+| Mixed factor | $10^{-4}$ | 4,000 | 1 |
+| Synthetic control | $10^{-4}$ | 4,000 | 1 |
+| Time series | $10^{-4}$ | 4,000 | 4 |
+
+`panel_var_surface` sets the first $p$ fitted periods to zero, as the R code does after predictions with unavailable lags. For a treated unit, its first post-treatment prediction uses observed pre-treatment lags. Later predictions use earlier counterfactual predictions recursively.
+
+The ARIMA function has a narrower automatic model search than the historical `fable::ARIMA` call. It includes the true AR(1) and ARIMA(1,1,0) laws used by the DGP, but it does not search moving-average or seasonal terms. The Monte Carlo comparison therefore reports the ARIMA column separately from the same-input parity tests.
+
+## `crabbymetrics.AugmentedBalancing` API
+
+### Constructor and fit
+
+```{python}
+print(inspect.signature(cm.AugmentedBalancing))
+```
+
+| Constructor parameter | Default | Accepted values and meaning |
+|---|---:|---|
+| `balance` | `"double"` | `"none"`, `"unit"`, `"time"`, or `"double"`; selects the optimized weight dimensions |
+| `unit_target` | `"cohort"` | `"cohort"` for one donor vector per treatment cohort or `"individual"` for one vector per treated unit |
+| `time_target` | `"all"` | `"all"` for one mean-post target or `"period"` for one target per post period |
+| `balance_on` | `"raw"` | `"raw"` fits weights on $Y$; `"residual"` fits them on $Y-\hat m$ |
+| `unit_loss` | `"ridge"` | `"ridge"` for SDID simplex ridge or `"penalized_scm"` for the R donor-distance loss |
+| `unit_penalty` | `0.0001` | Nonnegative penalized-SCM distance coefficient |
+| `zeta_omega` | `None` | Optional nonnegative unit-ridge scale; `None` uses the R data-dependent rule |
+| `zeta_lambda` | `None` | Optional nonnegative time-ridge scale; `None` uses the R data-dependent rule |
+| `max_iterations` | `1000` | Positive active-set iteration budget |
+
+Use:
+
+```python
+model = cm.AugmentedBalancing(...)
+model.fit(y, w, outcome_model=None)
+```
+
+- `y` is a finite balanced outcome matrix with units in rows and periods in columns.
+- `w` is a same-shaped binary absorbing-treatment matrix.
+- `outcome_model` is an optional same-shaped untreated-outcome surface fitted without treated post-treatment outcomes. If omitted, it is zero.
+
+All three arrays must be two-dimensional. `y` and `outcome_model` must be finite. `w` must be binary and absorbing. Each treated cohort must have at least one pre-treatment period, and the panel must contain a never-treated donor. Invalid constructor choices, invalid arrays, unsupported treatment paths, and solver failures raise `ValueError`. `predict()`, `treatment_effect()`, and `summary()` raise `ValueError` before a successful fit.
+
+### Counterfactual formula
+
+Let $C$ be never-treated controls, $P$ be pre-treatment periods, and $\hat m$ be the supplied outcome model. Define residuals $R=Y-\hat m$. For treated unit $i$ and post period $t$,
+
+$$
+\widehat Y_{it}(0)
+=
+\hat m_{it}
++\sum_{j\in C}\hat\omega_jR_{jt}
++\sum_{s\in P}\hat\lambda_sR_{is}
+-\sum_{j\in C}\sum_{s\in P}\hat\omega_j\hat\lambda_sR_{js}.
+$$
+
+The balance choice controls which weights are optimized:
+
+| `balance` | Unit weights $\omega$ | Time weights $\lambda$ |
+|---|---|---|
+| `"none"` | Not used | Not used; returns $\hat m$ |
+| `"unit"` | Optimized | Uniform over pre periods |
+| `"time"` | Uniform over controls | Optimized |
+| `"double"` | Optimized | Optimized |
+
+With `balance="unit"`, the estimator retains the time correction and uses uniform pre-period weights.
+
+### Targets
+
+- `unit_target="cohort"` fits one donor vector to the treated-cohort mean.
+- `unit_target="individual"` fits one donor vector per treated unit.
+- `time_target="all"` fits one pre-period vector to the control post-period mean.
+- `time_target="period"` fits one pre-period vector for each post period.
+
+The R “individual double” row maps to `unit_target="individual", time_target="period"`.
+
+### Weight-fitting data
+
+- `balance_on="raw"` fits weights with $Y$.
+- `balance_on="residual"` fits weights with $R=Y-\hat m$.
+
+In both cases, the final augmentation formula is applied to residuals $R$. `balance_on` changes the weight-fitting problem, not the final algebra.
+
+### Unit losses and penalties
+
+`unit_loss="ridge"` implements the SDID simplex ridge problem with a profiled intercept. If `zeta_omega` and `zeta_lambda` are omitted, the R defaults are
+
+$$
+\zeta_\omega=(N_{\text{target}}T_{\text{post}})^{1/4}\hat\sigma,
+\qquad
+\zeta_\lambda=10^{-6}\hat\sigma,
+$$
+
+where $\hat\sigma$ is the sample SD of control first differences in the selected balancing data. For individual unit targets, $N_{\text{target}}=1$.
+
+`unit_loss="penalized_scm"` implements `penSCM` from the R source. It standardizes the donor matrix by its sample SD and adds the linear donor-distance penalty. `unit_penalty=1e-4` is the R default. Time weights remain SDID ridge weights.
+
+The internal active-set solver handles simplex boundary solutions directly. It can represent exact zero weights, unlike a softmax parameterization.
+
+### R-frame map
+
+| R frame | Python configuration |
+|---|---|
+| outcome | `balance="none"`, supply `outcome_model` |
+| u-balance | `balance="unit"`, omit `outcome_model` |
+| t-balance | `balance="time"`, omit `outcome_model` |
+| d-balance | `balance="double"`, omit `outcome_model` |
+| aug-u-balance | `balance="unit"`, supply `outcome_model` |
+| aug-t-balance | `balance="time"`, supply `outcome_model` |
+| aug-d-balance | `balance="double"`, supply `outcome_model` |
+| residual variant | add `balance_on="residual"` |
+| individual unit variant | add `unit_target="individual"` |
+| individual time variant | add `time_target="period"` |
+| individual double variant | set both individual target options |
+| R ridge loss | `unit_loss="ridge"` |
+| R penSCM loss | `unit_loss="penalized_scm"` |
+
+### Fitted outputs
+
+```{python}
+example_panel = classic_factor(overlap=1.0, seed=91)
+example_model = cm.AugmentedBalancing(
+    balance="double",
+    unit_target="individual",
+    time_target="period",
+    balance_on="residual",
+)
+example_model.fit(
+    example_panel.outcome,
+    example_panel.treatment,
+    np.zeros_like(example_panel.outcome),
+)
+example_summary = example_model.summary()
+pd.DataFrame(
+    {
+        "key": sorted(example_summary),
+        "type or shape": [
+            np.asarray(example_summary[key]).shape
+            if hasattr(example_summary[key], "shape")
+            else type(example_summary[key]).__name__
+            for key in sorted(example_summary)
+        ],
+    }
+)
+```
+
+`predict()` returns the fitted counterfactual surface. `treatment_effect()` returns $Y-\widehat Y(0)$ for treated units. `summary()["att"]` is the simple mean over treated cells. Weight arrays include explicit target mappings:
+
+- `target_units` and `target_cohorts` identify unit-weight rows;
+- `time_target_periods` uses `-1` for an all-post target and a zero-based period for period-specific targets;
+- `time_target_cohorts` identifies the cohort for each time-weight row; and
+- `zeta_omega` and `zeta_lambda` report fitted ridge scales. `zeta_omega` is zero when penalized SCM is used.
+
+| Method | Return contract |
+|---|---|
+| `fit(y, w, outcome_model=None)` | Fits in place and returns `None` |
+| `predict()` | Full counterfactual array with the same shape as `y` |
+| `treatment_effect()` | Full $Y-\widehat Y(0)$ array with the same shape as `y` |
+| `summary()` | Dictionary with the ATT, surfaces, diagnostics, weights, targets, cohorts, and configuration |
+
+## Reproduction workflow
+
+The exact R summary is regenerated without the unavailable outcome packages:
+
+```bash
+Rscript scripts/export_r_slide_results.R
+```
+
+The Python Monte Carlo run is:
+
+```bash
+uv run python -m website.vignettes.balancing_support.run_balancing_experiments --replications 200 --workers 16
+```
+
+Add `--output-directory website/vignettes/results` to overwrite the vignette's
+cached Python summaries. A normal documentation render reads those summaries
+and does not rerun the 2,800 panel draws.
+
+The runner stores every replication in `results/python_replications.csv`, then derives `results/python_rmse.csv`. The comparison table is rebuilt with:
+
+```bash
+uv run python -m website.vignettes.balancing_support.compare_r_python
+```
+
+Render the complete site and all executable documentation with:
+
+```bash
+uv sync --extra docs
+uv run quarto render website
+```
+
+## Scope and limitations
+
+- Same-panel parity tests the numerical estimator implementation. It does not test random-number-generator parity.
+- The Monte Carlo comparison tests common probability laws with independent language-specific random streams. Differences are therefore evaluated with combined Monte Carlo standard errors.
+- The Monte Carlo comparison covers all 398 displayed R/Python cells. FE, IFE, MCPanel, generalized synthetic control, and VAR also have same-panel R parity fixtures. ARIMA has a Monte Carlo check but no historical-`fable` same-panel fixture in this environment.
+- The experiments compare point-estimator RMSE under a common-adoption design. They do not evaluate interval coverage, staggered adoption, or treatment-effect heterogeneity beyond the common linear post-treatment path.
+
+## Conclusions
+
+- Unit-only balancing is effective in several good-overlap and synthetic-control settings.
+- No single balancing or outcome-model configuration is uniformly best.
+- Double balancing materially reduces RMSE under poor factor-loading overlap and under persistent integrated dynamics.
+- Individual unit and post-period targets can help, but they are different estimators and require many more weight fits.
+- Outcome-model performance remains DGP-specific. The R and Python heatmaps show that `gsynth`, `ife`, `MCPanel`, `VAR`, and `arima` have different strengths. A horizontal-ridge result cannot stand in for those columns.
+
+These conclusions rest on an exact same-panel R test, executable R DGP contracts, 200 successful draws in every Monte Carlo cell, and a between-language comparison scaled by combined Monte Carlo uncertainty.

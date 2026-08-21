@@ -1,0 +1,45 @@
+---
+title: "API reference"
+subtitle: "Public simulation objects, assignment laws, canonical designs, and registries"
+execute:
+  enabled: false
+---
+
+All public names are importable from `pypanelsim`. Component interfaces use
+structural typing: custom implementations need the documented method, not
+inheritance from a package base class.
+
+## Core simulation and data
+
+| Object | Purpose |
+|---|---|
+| [`PanelDimensions`](reference/core.qmd#paneldimensions) | Rectangular panel shape |
+| [`PanelDataset`](reference/core.qmd#paneldataset) | Immutable observed data and causal truth |
+| [`PanelSimulator`](reference/core.qmd#panelsimulator) | Feature, assignment, outcome, and effect orchestration |
+| [`SimulationContext`](reference/core.qmd#simulationcontext) | Treatment and shared features for outcome/effect components |
+| [`ComponentDraw`](reference/core.qmd#componentdraw) | Component matrix plus diagnostic metadata |
+| [`resolve_rng`](reference/core.qmd#resolve_rng) | Explicit seed/generator validation |
+
+## Features and assignment
+
+| Object | Purpose |
+|---|---|
+| [`GaussianUnitFeatures`](reference/assignment.qmd#gaussianunitfeatures) | Observed and latent standard-normal unit features |
+| [`SingleCohortAssignment`](reference/assignment.qmd#singlecohortassignment) | Fixed common adoption schedule |
+| [`RandomizedSingleCohortAssignment`](reference/assignment.qmd#randomizedsinglecohortassignment) | Fixed-size complete randomization |
+| [`BinaryLogitAssignment`](reference/assignment.qmd#binarylogitassignment) | Sigmoid selection on observed and latent features |
+| [`StaggeredAdoption`](reference/assignment.qmd#staggeredadoption) | Fixed unit-to-adoption map |
+| [`GeneralizedPropensityAssignment`](reference/assignment.qmd#generalizedpropensityassignment) | Multinomial-logit adoption cohorts |
+| [`ConstantEffect`](reference/assignment.qmd#constanteffect) | Constant effect on treated cells |
+| [`LinearRampEffect`](reference/assignment.qmd#linearampeffect) | Event-time-linear effect path |
+
+## Canonical designs
+
+See [canonical design API](reference/canonical.qmd) for `CanonicalPanelConfig`,
+the six one-draw functions, reusable simulator factories, and canonical outcome
+components.
+
+## Registry
+
+See [`DGPRegistry`](reference/registry.qmd) for stable name-to-factory mappings
+and the global canonical registry.

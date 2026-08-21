@@ -1,0 +1,110 @@
+---
+title: "Get started"
+subtitle: "Install the package, draw panels, and inspect causal truth"
+---
+
+## Installation
+
+Python 3.10 or later is required.
+
+```bash
+uv add "pypanelsim @ git+ssh://git@github.com/apoorvalal/pypanelsim.git"
+```
+
+For a local checkout:
+
+```bash
+uv sync
+```
+
+For this documentation site, including crabbymetrics, PyFixest, Jupyter, and
+pandas:
+
+```bash
+uv sync --extra docs
+```
+
+## One canonical draw
+
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np
+import pypanelsim as pps
+
+panel = pps.classic_factor(overlap=1.0, seed=42)
+print(panel.name, panel.shape, panel.true_att)
+```
+
+Every panel contains the observed outcome, treatment, untreated potential
+outcome, and realized treatment effect:
+
+```{python}
+np.testing.assert_allclose(
+    panel.outcome,
+    panel.untreated_outcome + panel.treatment_effect,
+)
+print(panel.is_absorbing)
+print(panel.adoption_times[:5], panel.adoption_times[-5:])
+```
+
+```{python}
+#| fig-cap: "A canonical factor-panel draw. Controls precede the common treated cohort."
+fig, axes = plt.subplots(1, 2, figsize=(11, 3.8), constrained_layout=True)
+axes[0].matshow(panel.outcome, aspect="auto", cmap="coolwarm")
+axes[1].matshow(panel.treatment, aspect="auto", cmap="Greys", vmin=0, vmax=1)
+axes[0].set_title("Observed outcome Y")
+axes[1].set_title("Treatment W")
+for axis in axes:
+    axis.set_xlabel("period")
+    axis.set_ylabel("unit")
+plt.show()
+```
+
+## Estimator interchange
+
+Wide NumPy arrays:
+
+```{python}
+y, w = panel.as_arrays()
+print(y.shape, w.shape, y.flags.writeable)
+```
+
+Long columns:
+
+```{python}
+import pandas as pd
+
+long = pd.DataFrame(dict(panel.as_long_dict()))
+long.head()
+```
+
+Pass `copy=True` when a downstream estimator mutates its inputs.
+
+## Repeated simulations
+
+`iter_simulations()` spawns independent child seed sequences:
+
+```{python}
+simulator = pps.classic_factor_design(overlap=1.0)
+draws = list(simulator.iter_simulations(3, seed=2026))
+print([draw.true_att for draw in draws])
+print(np.array_equal(draws[0].outcome, draws[1].outcome))
+```
+
+## Custom dimensions
+
+```{python}
+config = pps.CanonicalPanelConfig(
+    n_control=40,
+    n_treated=10,
+    n_pre=20,
+    n_post=5,
+    effect_slope=0.15,
+    noise_variance=0.25,
+)
+small = pps.synthetic_control(config=config, active_share=0.2, seed=7)
+print(small.shape, small.true_att)
+```
+
+Continue with [assignment mechanisms](assignment.qmd) or the
+[complete API reference](api.qmd).

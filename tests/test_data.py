@@ -95,6 +95,25 @@ def test_long_interchange_has_one_row_per_panel_cell() -> None:
     assert not long["outcome"].flags.writeable
 
 
+def test_unit_covariates_are_read_only_and_expand_to_long_columns() -> None:
+    panel = make_panel()
+    panel = PanelDataset(
+        outcome=panel.outcome,
+        treatment=panel.treatment,
+        untreated_outcome=panel.untreated_outcome,
+        treatment_effect=panel.treatment_effect,
+        name=panel.name,
+        unit_covariates=np.array([[1.0, -1.0], [2.0, 0.0], [3.0, 1.0]]),
+        unit_covariate_names=("income", "trend"),
+    )
+
+    assert not panel.unit_covariates.flags.writeable
+    assert panel.unit_covariate_names == ("income", "trend")
+    long = panel.as_long_dict()
+    np.testing.assert_array_equal(long["income"], np.repeat([1.0, 2.0, 3.0], 4))
+    np.testing.assert_array_equal(long["trend"], np.repeat([-1.0, 0.0, 1.0], 4))
+
+
 @pytest.mark.parametrize(
     "change, message",
     [

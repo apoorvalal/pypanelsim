@@ -27,17 +27,24 @@ from .canonical import (
     weak_factor_design,
 )
 from .components import (
+    AssignmentContext,
     AssignmentModel,
+    BinaryLogitAssignment,
     CallableOutcomeModel,
     ComponentDraw,
     ConstantEffect,
     EffectModel,
+    GaussianUnitFeatures,
+    GeneralizedPropensityAssignment,
     LinearRampEffect,
     OutcomeModel,
     PanelDimensions,
+    RandomizedSingleCohortAssignment,
     SimulationContext,
     SingleCohortAssignment,
     StaggeredAdoption,
+    UnitFeatureDraw,
+    UnitFeatureModel,
 )
 from .data import PanelDataset
 from .registry import DGPRegistry
@@ -46,7 +53,9 @@ from .simulator import PanelSimulator, resolve_rng
 __version__ = "0.1.0"
 
 __all__ = [
+    "AssignmentContext",
     "AssignmentModel",
+    "BinaryLogitAssignment",
     "CallableOutcomeModel",
     "CanonicalPanelConfig",
     "ClassicFactorOutcome",
@@ -55,6 +64,8 @@ __all__ = [
     "DGPRegistry",
     "EffectModel",
     "FactorSyntheticOutcome",
+    "GaussianUnitFeatures",
+    "GeneralizedPropensityAssignment",
     "LinearRampEffect",
     "MixedFactorOutcome",
     "OutcomeModel",
@@ -63,11 +74,14 @@ __all__ = [
     "PanelDataset",
     "PanelDimensions",
     "PanelSimulator",
+    "RandomizedSingleCohortAssignment",
     "SimulationContext",
     "SingleCohortAssignment",
     "StaggeredAdoption",
     "SyntheticControlOutcome",
     "TimeSeriesOutcome",
+    "UnitFeatureDraw",
+    "UnitFeatureModel",
     "WeakFactorOutcome",
     "available_canonical_designs",
     "canonical_registry",

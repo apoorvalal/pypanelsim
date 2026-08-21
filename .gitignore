@@ -9,4 +9,11 @@ dist/
 build/
 *.egg-info/
 .DS_Store
+_site/
+.quarto/
+*.quarto_ipynb
 
+/.quarto/
+**/*.quarto_ipynb
+/_freeze/
+/website/_freeze/

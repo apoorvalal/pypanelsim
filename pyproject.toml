@@ -9,6 +9,7 @@ description = "Composable, estimator-neutral simulation infrastructure for synth
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "matplotlib>=3.10",
     "numpy>=1.26",
 ]
 classifiers = [
@@ -22,8 +23,16 @@ classifiers = [
     "Topic :: Scientific/Engineering",
 ]
 
+[project.optional-dependencies]
+docs = [
+    "crabbymetrics",
+    "jupyter>=1.1.1",
+    "pandas>=2.3.3",
+    "pyfixest>=0.50.1",
+]
+
 [project.urls]
-Documentation = "https://github.com/apoorvalal/pypanelsim#readme"
+Documentation = "https://apoorvalal.github.io/pypanelsim"
 Repository = "https://github.com/apoorvalal/pypanelsim"
 
 [dependency-groups]
@@ -38,6 +47,9 @@ packages = ["src/pypanelsim"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra --strict-markers"
+
+[tool.uv.sources]
+crabbymetrics = { git = "ssh://git@github.com/apoorvalal/crabbymetrics.git" }
 
 [tool.ruff]
 target-version = "py310"

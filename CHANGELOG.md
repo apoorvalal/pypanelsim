@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+- Add shared observed and latent unit features to the simulation pipeline.
+- Add fixed-size randomized and binary-logit single-cohort assignments.
+- Add multinomial-logit generalized propensity scores for adoption cohorts.
+- Expose observed unit covariates on `PanelDataset` and long interchange.
+- Add Matplotlib and a rendered comparison of assignment DGP outcome and
+  treatment matrices.
+- Add a Quarto documentation website with detailed public API reference pages.
+- Add optional docs dependencies for crabbymetrics, PyFixest, Jupyter, and
+  pandas.
+- Add the complete balancing-reproduction numerical experiment as an executable
+  vignette with cached 398-cell results, parity fixtures, and runnable support
+  modules.
+
 ## 0.1.0 - 2026-08-19
 
 - Extract the panel simulation layer from the balancing reproduction project.

@@ -8,10 +8,16 @@
 PanelDimensions
       |
       v
-AssignmentModel.assign(dimensions, rng)
+UnitFeatureModel.generate(dimensions, rng) [optional]
       |
       v
-SimulationContext(dimensions, treatment)
+AssignmentContext(dimensions, observables, unobservables)
+      |
+      v
+AssignmentModel.assign(context, rng)
+      |
+      v
+SimulationContext(dimensions, treatment, features)
       |
       +-------------------------+
       |                         |
@@ -24,10 +30,12 @@ OutcomeModel.generate()   EffectModel.generate()
               PanelDataset
 ```
 
-The assignment is drawn first because outcome and effect models can depend on
-treated-unit identity and adoption time. The untreated outcome model does not
-receive realized effects. The effect model does not receive outcomes. This
-keeps the causal decomposition explicit.
+Shared unit features are drawn before assignment. This lets an assignment and
+an outcome process depend on the same observed covariates or latent unit factors
+without passing data through diagnostic metadata. Assignment still precedes the
+outcome draw, and the untreated outcome model does not receive realized effects.
+The effect model does not receive outcomes. This keeps the causal decomposition
+explicit.
 
 ## Core objects
 
@@ -43,9 +51,17 @@ Every component returns `ComponentDraw(values, metadata)`. `values` must be a
 matrix with the configured shape. Metadata can contain diagnostics or latent
 simulation truth. The final dataset copies and recursively freezes metadata.
 
+### `AssignmentContext`
+
+The assignment context contains dimensions, observed unit covariates, and
+latent unit features. Its matrices have shape `(n_units, n_features)`. The
+feature model is optional, so legacy and canonical assignments receive empty
+feature matrices without consuming additional random draws.
+
 ### `SimulationContext`
 
-The context contains dimensions and realized treatment. It derives:
+The context contains dimensions, realized treatment, and the same features used
+by assignment. It derives:
 
 - `ever_treated`;
 - `control_units`;
@@ -61,15 +77,20 @@ controls appear before treated units.
 The dataset owns the final arrays. It validates shape, finiteness, binary
 treatment, effect support, and the causal decomposition. Its read-only arrays
 are safe to share among estimators. `copy=True` creates writable estimator
-inputs when required.
+inputs when required. Observed time-invariant covariates are available through
+`unit_covariates`; latent features remain namespaced simulation metadata.
 
 ## Protocols
 
 The component interfaces use `typing.Protocol`. Inheritance is optional.
 
 ```python
+class UnitFeatureModel(Protocol):
+    def generate(self, dimensions, rng) -> UnitFeatureDraw: ...
+
+
 class AssignmentModel(Protocol):
-    def assign(self, dimensions, rng) -> ComponentDraw: ...
+    def assign(self, context, rng) -> ComponentDraw: ...
 
 
 class OutcomeModel(Protocol):
@@ -111,6 +132,18 @@ same random stream.
 - `SingleCohortAssignment` creates one absorbing cohort. It supports explicit
   treated-unit positions.
 - `StaggeredAdoption` accepts a mapping from unit position to adoption period.
+- `RandomizedSingleCohortAssignment` samples a fixed-size cohort without
+  replacement.
+- `BinaryLogitAssignment` draws treatment from observed and latent unit-feature
+  logits.
+- `GeneralizedPropensityAssignment` draws adoption cohorts from multinomial
+  logits with never treated as the baseline category.
+
+### Unit features
+
+- `GaussianUnitFeatures` draws independent standard-normal observed covariates
+  and latent unit factors. Custom feature models can impose correlations or
+  generate application-specific covariates.
 
 ### Effects
 

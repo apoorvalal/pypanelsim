@@ -14,8 +14,8 @@ designs, tests, examples, and documentation.
 
 ## Design principles
 
-- **Estimator neutral.** NumPy is the only runtime dependency. No estimator is
-  imported by the package.
+- **Estimator neutral.** No estimator is imported by the package. NumPy powers
+  simulation and Matplotlib supports the runnable DGP visualizations.
 - **Composable.** Assignment, untreated outcomes, and treatment effects are
   independent protocols.
 - **Explicit randomness.** Every draw accepts either `seed=` or `rng=`. The
@@ -117,7 +117,9 @@ $$
 
 where `treatment_effect` contains $\tau$ only in treated cells. It also stores
 unique `unit_ids`, unique `time_ids`, a stable design `name`, and namespaced
-component metadata.
+component metadata. Optional time-invariant observed covariates are exposed as
+`unit_covariates` with matching `unit_covariate_names` and are expanded by
+`as_long_dict()`.
 
 Useful properties include:
 
@@ -166,7 +168,7 @@ dependency:
 columns = panel.as_long_dict()
 
 # Optional downstream conversions
-# pandas.DataFrame(columns)
+# pandas.DataFrame(dict(columns))
 # polars.DataFrame(columns)
 # pyarrow.table(columns)
 ```
@@ -196,7 +198,7 @@ control design, `active_share` controls donor sparsity. For the time-series
 design, `integrated=True` cumulatively sums the stationary AR increments.
 
 The exact probability laws and draw order are in
-[`docs/canonical-designs.md`](docs/canonical-designs.md).
+[`website/canonical-designs.md`](website/canonical-designs.md).
 
 ## Registry API
 
@@ -225,12 +227,15 @@ Registration rejects invalid names and accidental replacement. Pass
 
 ## Compose a new DGP
 
-A `PanelSimulator` requires four objects:
+A `PanelSimulator` requires four objects and accepts an optional shared feature
+model:
 
 1. `PanelDimensions` defines the rectangular shape.
 2. An `AssignmentModel` produces binary treatment.
 3. An `OutcomeModel` produces untreated outcomes.
 4. An `EffectModel` produces realized treatment effects.
+5. An optional `UnitFeatureModel` draws observed covariates and latent unit
+   features before assignment. Assignment and outcomes receive the same draw.
 
 The interfaces use structural typing. A custom component does not need to
 inherit from a package base class. It only needs the documented method.
@@ -274,10 +279,38 @@ panel = simulator.simulate(seed=123)
 ```
 
 Plain functions can be wrapped with `CallableOutcomeModel`. Built-in
-assignment components are `SingleCohortAssignment` and `StaggeredAdoption`.
-Built-in effects are `ConstantEffect` and `LinearRampEffect`.
+assignment components include fixed single-cohort and staggered assignments,
+fixed-size randomized assignment, binary logit selection, and multinomial-logit
+generalized propensity scores for adoption cohorts. Built-in effects are
+`ConstantEffect` and `LinearRampEffect`.
 
-See [`docs/architecture.md`](docs/architecture.md) and
+## Assignment mechanisms
+
+`RandomizedSingleCohortAssignment` samples a fixed number of eligible units
+without replacement. `BinaryLogitAssignment` instead draws eventual treatment
+from
+
+$$
+P(D_i=1\mid X_i,U_i)
+=\operatorname{logit}^{-1}(\alpha+X_i^\top\beta+U_i^\top\gamma).
+$$
+
+Setting $\gamma=0$ gives selection on recorded observables and is unconfounded
+conditional on $X_i$ when the outcome model shares those covariates. Nonzero
+$\gamma$ selects on latent unit features; factor and trajectory estimators may
+still recover the outcome structure from pre-treatment histories, but the
+assignment is not unconfounded given the exposed covariates.
+
+`GeneralizedPropensityAssignment` uses multinomial logits for user-supplied
+adoption periods plus a never-treated baseline. Its metadata records the full
+unit-by-category generalized propensity score matrix, realized categories, and
+adoption times.
+
+See [`examples/assignment_mechanisms.py`](examples/assignment_mechanisms.py) and
+the rendered [`examples/assignment_mechanisms.png`](examples/assignment_mechanisms.png)
+for randomized, observed-selection, latent-selection, and cohort-GPS DGPs.
+
+See [`website/architecture.md`](website/architecture.md) and
 [`examples/custom_dgp.py`](examples/custom_dgp.py) for the extension contract.
 
 ## Downstream estimator integration
@@ -347,6 +380,7 @@ Metadata is separated by simulation component:
 
 ```python
 panel.metadata["simulator"]
+panel.metadata["features"]
 panel.metadata["assignment"]
 panel.metadata["outcome"]
 panel.metadata["effect"]
@@ -357,8 +391,10 @@ Canonical factor designs store factors and unit-aligned loadings under
 and both unit-aligned and control-only donor weights. Time-series designs store
 the latent process before observation noise.
 
-Metadata is diagnostic truth, not an estimator input. It is recursively frozen
-and copied when the dataset is created.
+Metadata is diagnostic truth, not an estimator input. Latent unit features are
+stored there. Observed assignment covariates intended for estimators are exposed
+separately as `panel.unit_covariates`. All values are recursively frozen and
+copied when the dataset is created.
 
 ## Fail-fast validation
 
@@ -390,7 +426,7 @@ from pypanelsim import CanonicalPanelConfig, classic_factor
 
 `PanelConfig` and `PanelData` remain available as compatibility aliases for
 `CanonicalPanelConfig` and `PanelDataset`. New code should use the explicit
-names. See [`docs/migration.md`](docs/migration.md) for the full map.
+names. See [`website/migration.md`](website/migration.md) for the full map.
 
 ## Repository layout
 
@@ -404,7 +440,8 @@ pypanelsim/
 │   └── canonical.py     # canonical experiment designs
 ├── tests/               # contract, invariant, and regression tests
 ├── examples/            # runnable composition and interop examples
-└── docs/                # architecture, formulas, and migration
+├── website/             # Quarto source, API docs, and vignettes
+└── docs/                # rendered GitHub Pages site
 ```
 
 ## Development
@@ -419,18 +456,31 @@ uv run pytest
 uv build
 ```
 
+Build the Quarto documentation site, including the optional crabbymetrics and
+PyFixest interoperability examples, with:
+
+```bash
+uv sync --extra docs
+uv run quarto render website
+```
+
+The rendered site is written to `docs/` for branch-based GitHub Pages. Its source includes detailed core,
+assignment, canonical-design, and registry API pages plus the complete
+398-cell balancing-reproduction vignette.
+
 Run the examples with:
 
 ```bash
 uv run python examples/custom_dgp.py
 uv run python examples/estimator_interop.py
+uv run python examples/assignment_mechanisms.py
 ```
 
 The test suite covers immutable data contracts, assignment and effect
 components, custom outcome composition, registry behavior, canonical DGP
 invariants, seeded reproducibility, and downstream array interchange. The
 separate migration audit verifies exact cell-by-cell parity with the extracted
-implementation. See [`docs/validation.md`](docs/validation.md).
+implementation. See [`website/validation.md`](website/validation.md).
 
 ## Scope
 

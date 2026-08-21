@@ -1,0 +1,134 @@
+---
+title: "Canonical design API"
+subtitle: "Shared configuration, reusable factories, one-draw functions, and outcome components"
+---
+
+```{python}
+import inspect
+
+import pandas as pd
+import pypanelsim as pps
+```
+
+## `CanonicalPanelConfig`
+
+```{python}
+print(f"CanonicalPanelConfig{inspect.signature(pps.CanonicalPanelConfig)}")
+```
+
+| Field | Default | Contract |
+|---|---:|---|
+| `n_control` | `160` | Positive never-treated count |
+| `n_treated` | `40` | Positive treated count |
+| `n_pre` | `40` | Positive common pre-period count |
+| `n_post` | `10` | Positive post-period count |
+| `effect_slope` | `0.2` | Finite event-time slope |
+| `noise_variance` | `0.36` | Finite nonnegative observation-noise variance |
+
+Properties `n_units`, `n_periods`, and `dimensions` derive the generic panel
+shape. Canonical factories put controls first, treated units last, and begin
+treatment at `n_pre`.
+
+## Reusable design factories
+
+Each factory returns a configured `PanelSimulator` and accepts
+`config=CanonicalPanelConfig(...)` for dimension changes.
+
+```{python}
+factories = [
+    pps.classic_factor_design,
+    pps.weak_factor_design,
+    pps.synthetic_control_design,
+    pps.factor_synthetic_design,
+    pps.time_series_design,
+    pps.mixed_factor_design,
+]
+pd.DataFrame(
+    {
+        "factory": [function.__name__ for function in factories],
+        "signature": [str(inspect.signature(function)) for function in factories],
+    }
+)
+```
+
+| Factory | Untreated-outcome law | Main parameter validation |
+|---|---|---|
+| `classic_factor_design` | Two standardized drifting factors | `overlap >= 0` |
+| `weak_factor_design` | Five weak drift and five weak cyclical factors | `overlap >= 0` |
+| `synthetic_control_design` | Sparse convex donor signal | `0 < active_share <= 1` |
+| `factor_synthetic_design` | Equal factor/donor mixture | `overlap >= 0` |
+| `time_series_design` | Unit AR(1) or integrated AR(1) paths | `abs(coefficient) < 1` |
+| `mixed_factor_design` | Drift half-panel plus cyclical half-panel | `overlap >= 0`; treated count below half of units |
+
+See [canonical design laws](../canonical-designs.md) for draw order and exact
+probability specifications.
+
+## One-draw functions
+
+The one-draw functions construct the corresponding simulator and call
+`simulate(seed=..., rng=...)`.
+
+```{python}
+draw_functions = [
+    pps.classic_factor,
+    pps.weak_factor,
+    pps.synthetic_control,
+    pps.factor_synthetic,
+    pps.time_series,
+    pps.mixed_factor,
+]
+pd.DataFrame(
+    {
+        "function": [function.__name__ for function in draw_functions],
+        "signature": [str(inspect.signature(function)) for function in draw_functions],
+    }
+)
+```
+
+Passing both `seed` and `rng` raises `ValueError`. A fixed seed preserves the
+extracted canonical NumPy draw order for a fixed compatible NumPy version.
+
+## Canonical outcome components
+
+These classes can also be composed outside the canonical factories:
+
+```{python}
+outcome_components = [
+    pps.ClassicFactorOutcome,
+    pps.WeakFactorOutcome,
+    pps.SyntheticControlOutcome,
+    pps.FactorSyntheticOutcome,
+    pps.TimeSeriesOutcome,
+    pps.MixedFactorOutcome,
+]
+pd.DataFrame(
+    {
+        "component": [component.__name__ for component in outcome_components],
+        "signature": [str(inspect.signature(component)) for component in outcome_components],
+    }
+)
+```
+
+All implement `generate(context, rng) -> ComponentDraw`. Factor components store
+unit-aligned loadings and factor paths in metadata. Synthetic designs add active
+donors and donor weights. Time-series designs store the latent process before
+observation noise. Metadata arrays are diagnostic truth and become read-only in
+the final dataset.
+
+## Named construction
+
+```{python}
+print(f"make_canonical{inspect.signature(pps.make_canonical)}")
+print(f"available_canonical_designs{inspect.signature(pps.available_canonical_designs)}")
+print(pps.available_canonical_designs())
+```
+
+`make_canonical(name, **kwargs)` delegates to the global canonical registry.
+Unknown names and invalid factory parameters raise `ValueError`/`TypeError` from
+the registry or selected factory.
+
+## Compatibility aliases
+
+`PanelConfig` aliases `CanonicalPanelConfig`; `PanelData` aliases
+`PanelDataset`. They remain for migration from the extracted `panel_dgps`
+module. New code should use the explicit canonical and dataset names.

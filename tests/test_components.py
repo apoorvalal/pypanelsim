@@ -2,9 +2,13 @@ import numpy as np
 import pytest
 
 from pypanelsim import (
+    AssignmentContext,
+    BinaryLogitAssignment,
     ConstantEffect,
+    GeneralizedPropensityAssignment,
     LinearRampEffect,
     PanelDimensions,
+    RandomizedSingleCohortAssignment,
     SimulationContext,
     SingleCohortAssignment,
     StaggeredAdoption,
@@ -60,6 +64,97 @@ def test_constant_effect_is_zero_outside_treatment() -> None:
     effect = ConstantEffect(-2.0).generate(context, np.random.default_rng(5))
 
     np.testing.assert_array_equal(effect.values, -2.0 * treatment.values)
+
+
+def test_randomized_single_cohort_samples_fixed_count_from_eligible_units() -> None:
+    dimensions = PanelDimensions(8, 6)
+    model = RandomizedSingleCohortAssignment(
+        n_treated=3,
+        adoption_period=4,
+        eligible_units=(1, 2, 4, 6, 7),
+    )
+    first = model.assign(dimensions, np.random.default_rng(10))
+    second = model.assign(dimensions, np.random.default_rng(10))
+
+    np.testing.assert_array_equal(first.values, second.values)
+    treated = np.flatnonzero(first.values[:, -1])
+    assert treated.size == 3
+    assert set(treated).issubset({1, 2, 4, 6, 7})
+    np.testing.assert_allclose(
+        first.metadata["propensity_scores"],
+        [0.0, 0.6, 0.6, 0.0, 0.6, 0.0, 0.6, 0.6],
+    )
+
+
+def test_binary_logit_uses_observed_and_latent_features() -> None:
+    dimensions = PanelDimensions(4, 5)
+    context = AssignmentContext(
+        dimensions,
+        observables=np.array([[-1.0], [0.0], [1.0], [2.0]]),
+        unobservables=np.array([[0.5], [-0.5], [1.5], [0.0]]),
+    )
+    model = BinaryLogitAssignment(
+        adoption_period=3,
+        intercept=0.2,
+        observable_coefficients=(0.8,),
+        unobservable_coefficients=(-0.4,),
+    )
+    draw = model.assign(context, np.random.default_rng(3))
+
+    linear_predictor = 0.2 + 0.8 * context.observables[:, 0]
+    linear_predictor -= 0.4 * context.unobservables[:, 0]
+    expected = 1.0 / (1.0 + np.exp(-linear_predictor))
+    np.testing.assert_allclose(draw.metadata["propensity_scores"], expected)
+    np.testing.assert_array_equal(draw.values[:, :3], 0.0)
+    np.testing.assert_array_equal(draw.values[:, 3], draw.values[:, 4])
+
+
+def test_generalized_propensity_maps_units_to_adoption_cohorts() -> None:
+    dimensions = PanelDimensions(2000, 8)
+    context = AssignmentContext(
+        dimensions,
+        observables=np.zeros((dimensions.n_units, 1)),
+        unobservables=np.zeros((dimensions.n_units, 0)),
+    )
+    model = GeneralizedPropensityAssignment(
+        adoption_periods=(3, 5),
+        intercepts=(np.log(2.0), np.log(3.0)),
+        observable_coefficients=((0.0,), (0.0,)),
+    )
+    draw = model.assign(context, np.random.default_rng(4))
+
+    scores = draw.metadata["generalized_propensity_scores"]
+    np.testing.assert_allclose(scores, np.tile([2 / 6, 3 / 6, 1 / 6], (2000, 1)))
+    np.testing.assert_allclose(scores.sum(axis=1), 1.0)
+    assert set(np.unique(draw.metadata["adoption_times"])).issubset({3, 5, 8})
+    assert np.all(np.diff(draw.values, axis=1) >= 0.0)
+    empirical = (
+        np.bincount(draw.metadata["assigned_categories"], minlength=3)
+        / dimensions.n_units
+    )
+    np.testing.assert_allclose(empirical, [2 / 6, 3 / 6, 1 / 6], atol=0.035)
+
+
+def test_selection_assignments_validate_feature_dimensions() -> None:
+    dimensions = PanelDimensions(5, 5)
+    context = AssignmentContext(
+        dimensions,
+        observables=np.zeros((5, 2)),
+        unobservables=np.zeros((5, 1)),
+    )
+
+    with pytest.raises(ValueError, match="observable_coefficients"):
+        BinaryLogitAssignment(
+            adoption_period=3,
+            observable_coefficients=(1.0,),
+            unobservable_coefficients=(1.0,),
+        ).assign(context, np.random.default_rng(1))
+    with pytest.raises(ValueError, match="unobservable_coefficients"):
+        GeneralizedPropensityAssignment(
+            adoption_periods=(2, 3),
+            observable_coefficients=((1.0, 1.0), (1.0, 1.0)),
+            unobservable_coefficients=((1.0,),),
+        ).assign(context, np.random.default_rng(1))
 
 
 @pytest.mark.parametrize(

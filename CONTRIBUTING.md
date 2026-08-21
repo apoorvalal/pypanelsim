@@ -21,6 +21,13 @@ uv run pytest
 uv build
 ```
 
+Documentation changes additionally require:
+
+```bash
+uv sync --extra docs
+uv run quarto render website
+```
+
 ## Component requirements
 
 - Use the provided NumPy generator. Do not use global random state.
