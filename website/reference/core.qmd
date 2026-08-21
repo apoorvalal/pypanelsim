@@ -211,7 +211,7 @@ print(signature(pps.PanelSimulator))
 | `dimensions` | `PanelDimensions` |
 | `assignment` | Object satisfying `AssignmentModel` |
 | `outcome_model` | Object satisfying `OutcomeModel` |
-| `effect_model` | Object satisfying `EffectModel` |
+| `effect_model` | Object satisfying `EffectModel`, or a unit-effect callable |
 | `feature_model` | Optional object satisfying `UnitFeatureModel` |
 
 ### Pipeline
@@ -226,6 +226,10 @@ print(signature(pps.PanelSimulator))
 
 Component metadata is namespaced under `features`, `assignment`, `outcome`, and
 `effect`. The simulator name and dimensions are stored under `simulator`.
+
+A callable supplied directly as `effect_model` is wrapped in
+`CallableUnitEffect`. It receives `SimulationContext`, returns a scalar or an
+`(N,)` unit-effect vector, and is multiplied by the realized treatment matrix.
 
 ```{python}
 print(f"simulate{inspect.signature(pps.PanelSimulator.simulate)}")

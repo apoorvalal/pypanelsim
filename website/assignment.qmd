@@ -173,6 +173,69 @@ Metadata includes `generalized_propensity_scores`, `assigned_categories`,
 `adoption_times`, cohort logits, coefficient matrices, and the never-treated
 category index.
 
+## Heterogeneous treatment effects
+
+The effect input may be a lambda defining a unit-level effect
+
+$$
+\tau_i=f(X_i,U_i).
+$$
+
+The lambda receives `SimulationContext`, so the same observed covariates and
+latent factors used by assignment and untreated outcomes are available as
+`x.observables` and `x.unobservables`. It returns either a scalar or one value
+per unit. `PanelSimulator` broadcasts the resulting $\tau_i$ over time and
+multiplies it by realized treatment.
+
+```{python}
+heterogeneous = pps.PanelSimulator(
+    name="heterogeneous_effects",
+    dimensions=dimensions,
+    feature_model=features,
+    assignment=pps.RandomizedSingleCohortAssignment(
+        n_treated=40,
+        adoption_period=32,
+    ),
+    outcome_model=FeatureOutcome(),
+    effect_model=lambda x: (
+        1.0
+        + 0.45 * x.observables[:, 0]
+        - 0.30 * x.observables[:, 1]
+        + 0.80 * x.unobservables[:, 0]
+    ),
+)
+heterogeneous_panel = heterogeneous.simulate(seed=2026)
+unit_effects = heterogeneous_panel.metadata["effect"]["unit_effects"]
+print(unit_effects.min(), unit_effects.mean(), unit_effects.max())
+print(heterogeneous_panel.true_att)
+```
+
+The complete $\tau_i$ vector is stored as simulation truth in effect metadata.
+Observed effect modifiers also remain available in `unit_covariates`; latent
+modifiers remain hidden from estimator-facing interchange unless explicitly
+retrieved from metadata for diagnostics.
+
+```{python}
+#| fig-cap: "Observed outcomes, assignment, and realized effects under tau_i = f(X_i, U_i). Units are sorted by their unit-level effect."
+order = np.argsort(unit_effects, kind="stable")
+fig, axes = plt.subplots(1, 3, figsize=(13, 4), constrained_layout=True)
+for axis, values, title, cmap in (
+    (axes[0], heterogeneous_panel.outcome, "Y", "coolwarm"),
+    (axes[1], heterogeneous_panel.treatment, "W", "Greys"),
+    (
+        axes[2],
+        heterogeneous_panel.treatment_effect,
+        r"$\tau_i W_{it}$",
+        "coolwarm",
+    ),
+):
+    axis.matshow(values[order], aspect="auto", cmap=cmap)
+    axis.set_title(title)
+    axis.set_xlabel("period")
+axes[0].set_ylabel(r"units, sorted by $\tau_i$")
+plt.show()
+```
+
 ## Visual comparison
 
 ```{python}

@@ -10,10 +10,12 @@ import numpy as np
 from .components import (
     AssignmentContext,
     AssignmentModel,
+    CallableUnitEffect,
     EffectModel,
     OutcomeModel,
     PanelDimensions,
     SimulationContext,
+    UnitEffectCallable,
     UnitFeatureModel,
 )
 from .data import FloatMatrix, PanelDataset
@@ -58,12 +60,20 @@ class PanelSimulator:
     dimensions: PanelDimensions
     assignment: AssignmentModel
     outcome_model: OutcomeModel
-    effect_model: EffectModel
+    effect_model: EffectModel | UnitEffectCallable
     feature_model: UnitFeatureModel | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.name, str) or not self.name.strip():
             raise ValueError("name must be a non-empty string")
+        if not isinstance(self.effect_model, EffectModel):
+            if not callable(self.effect_model):
+                raise TypeError("effect_model must satisfy EffectModel or be callable")
+            object.__setattr__(
+                self,
+                "effect_model",
+                CallableUnitEffect(self.effect_model),
+            )
 
     def simulate(
         self,

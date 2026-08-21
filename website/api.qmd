@@ -32,12 +32,28 @@ inheritance from a package base class.
 | [`GeneralizedPropensityAssignment`](reference/assignment.qmd#generalizedpropensityassignment) | Multinomial-logit adoption cohorts |
 | [`ConstantEffect`](reference/assignment.qmd#constanteffect) | Constant effect on treated cells |
 | [`LinearRampEffect`](reference/assignment.qmd#linearampeffect) | Event-time-linear effect path |
+| [`CallableUnitEffect`](reference/assignment.qmd#callableuniteffect) | Unit-level heterogeneity from observed and latent features |
 
 ## Canonical designs
 
 See [canonical design API](reference/canonical.qmd) for `CanonicalPanelConfig`,
 the six one-draw functions, reusable simulator factories, and canonical outcome
 components.
+
+## Baker staggered-adoption design
+
+| Object | Purpose |
+|---|---|
+| [`BakerPanelConfig`](reference/baker.qmd#bakerpanelconfig) | Calendar, cohort sizes, heterogeneous slopes, and noise scales |
+| [`baker_design`](reference/baker.qmd#construction) | Reusable `PanelSimulator` for the Baker TWFE failure design |
+| [`baker`](reference/baker.qmd#construction) | One reproducible panel draw |
+| [`BakerStateFeatures`](reference/baker.qmd#components) | Independently sampled state assignment clusters |
+| [`BakerCohortAssignment`](reference/baker.qmd#components) | State-level randomized adoption cohorts |
+| [`BakerAdditiveOutcome`](reference/baker.qmd#components) | Additive unit effects, time effects, and noise |
+| [`BakerDynamicEffect`](reference/baker.qmd#components) | Cohort-specific linear event-time effects |
+
+See the [Baker TWFE failure vignette](vignettes/baker-twfe.qmd) for executable
+PyFixest vanilla and saturated event-study estimates.
 
 ## Registry
 

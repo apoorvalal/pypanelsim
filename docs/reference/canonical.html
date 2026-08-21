@@ -82,9 +82,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-354ec2e334119c0e8515286d97afb4cd.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-14484c6a423ba8334c2c2e22bfbe1c25.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-354ec2e334119c0e8515286d97afb4cd.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-36d25da79ffdd5f9713da90c3b96a3d2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-38d12467a47ff8fdcb073e1c30ca1f5a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-36d25da79ffdd5f9713da90c3b96a3d2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -120,7 +120,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link rel="stylesheet" href="../styles.css">
 </head>
 
-<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-sidebar docked nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -308,6 +308,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span class="menu-text">Get started</span></a>
   </li>  
   <li class="nav-item">
+    <a class="nav-link" href="../canonical-designs.html"> 
+<span class="menu-text">DGP catalog</span></a>
+  </li>  
+  <li class="nav-item">
     <a class="nav-link" href="../assignment.html"> 
 <span class="menu-text">Assignment</span></a>
   </li>  
@@ -323,6 +327,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li>
     <a class="dropdown-item" href="../vignettes/balancing-reproduction.html">
  <span class="dropdown-text">Balancing reproduction</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../vignettes/baker-twfe.html">
+ <span class="dropdown-text">Baker TWFE failure</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../interoperability.html">
@@ -408,7 +416,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../canonical-designs.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Canonical panel designs</span></a>
+ <span class="menu-text">Balancing DGP catalog</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -454,6 +462,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../reference/baker.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Baker staggered-adoption API</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../reference/canonical.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Canonical design API</span></a>
   </div>
@@ -477,6 +491,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../vignettes/baker-twfe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Baker DGP: why vanilla TWFE event studies fail</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../vignettes/balancing-reproduction.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Balancing estimators in synthetic panels</span></a>
   </div>
@@ -488,20 +508,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#canonicalpanelconfig" id="toc-canonicalpanelconfig" class="nav-link active" data-scroll-target="#canonicalpanelconfig"><span class="header-section-number">1</span> <code>CanonicalPanelConfig</code></a></li>
-  <li><a href="#reusable-design-factories" id="toc-reusable-design-factories" class="nav-link" data-scroll-target="#reusable-design-factories"><span class="header-section-number">2</span> Reusable design factories</a></li>
-  <li><a href="#one-draw-functions" id="toc-one-draw-functions" class="nav-link" data-scroll-target="#one-draw-functions"><span class="header-section-number">3</span> One-draw functions</a></li>
-  <li><a href="#canonical-outcome-components" id="toc-canonical-outcome-components" class="nav-link" data-scroll-target="#canonical-outcome-components"><span class="header-section-number">4</span> Canonical outcome components</a></li>
-  <li><a href="#named-construction" id="toc-named-construction" class="nav-link" data-scroll-target="#named-construction"><span class="header-section-number">5</span> Named construction</a></li>
-  <li><a href="#compatibility-aliases" id="toc-compatibility-aliases" class="nav-link" data-scroll-target="#compatibility-aliases"><span class="header-section-number">6</span> Compatibility aliases</a></li>
-  </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/reference/canonical.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
-    </div>
+    
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
@@ -526,7 +533,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<div id="f1ea250e" class="cell" data-execution_count="1">
+<div id="dc97ba31" class="cell" data-execution_count="1">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> inspect</span>
@@ -537,7 +544,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <section id="canonicalpanelconfig" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="canonicalpanelconfig"><span class="header-section-number">1</span> <code>CanonicalPanelConfig</code></h2>
-<div id="5d747fef" class="cell" data-execution_count="2">
+<div id="7c18a1e1" class="cell" data-execution_count="2">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"CanonicalPanelConfig</span><span class="sc">{</span>inspect<span class="sc">.</span>signature(pps.CanonicalPanelConfig)<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -597,7 +604,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="reusable-design-factories" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="reusable-design-factories"><span class="header-section-number">2</span> Reusable design factories</h2>
 <p>Each factory returns a configured <code>PanelSimulator</code> and accepts <code>config=CanonicalPanelConfig(...)</code> for dimension changes.</p>
-<div id="6424b53e" class="cell" data-execution_count="3">
+<div id="45310dba" class="cell" data-execution_count="3">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>factories <span class="op">=</span> [</span>
@@ -710,12 +717,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 </tbody>
 </table>
-<p>See <a href="../canonical-designs.html">canonical design laws</a> for draw order and exact probability specifications.</p>
+<p>See the <a href="../canonical-designs.html">Balancing DGP catalog</a> for executable construction code, visualizations, draw order, and exact probability laws.</p>
 </section>
 <section id="one-draw-functions" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="one-draw-functions"><span class="header-section-number">3</span> One-draw functions</h2>
 <p>The one-draw functions construct the corresponding simulator and call <code>simulate(seed=..., rng=...)</code>.</p>
-<div id="3419133b" class="cell" data-execution_count="4">
+<div id="97d51bc7" class="cell" data-execution_count="4">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>draw_functions <span class="op">=</span> [</span>
@@ -787,7 +794,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="canonical-outcome-components" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="canonical-outcome-components"><span class="header-section-number">4</span> Canonical outcome components</h2>
 <p>These classes can also be composed outside the canonical factories:</p>
-<div id="99f70cf1" class="cell" data-execution_count="5">
+<div id="53793b94" class="cell" data-execution_count="5">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>outcome_components <span class="op">=</span> [</span>
@@ -858,7 +865,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="named-construction" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="named-construction"><span class="header-section-number">5</span> Named construction</h2>
-<div id="35ac7321" class="cell" data-execution_count="6">
+<div id="ff592291" class="cell" data-execution_count="6">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"make_canonical</span><span class="sc">{</span>inspect<span class="sc">.</span>signature(pps.make_canonical)<span class="sc">}</span><span class="ss">"</span>)</span>
@@ -1299,4 +1306,4 @@ available_canonical_designs() -&gt; 'tuple[str, ...]'
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/reference/canonical.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/reference/canonical.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

@@ -1,0 +1,141 @@
+---
+title: "Baker staggered-adoption API"
+subtitle: "A self-contained event-study design with dynamic cohort heterogeneity"
+---
+
+```{python}
+import inspect
+
+import pandas as pd
+import pypanelsim as pps
+```
+
+## `BakerPanelConfig`
+
+```{python}
+print(f"BakerPanelConfig{inspect.signature(pps.BakerPanelConfig)}")
+```
+
+| Field | Default | Contract |
+|---|---:|---|
+| `n_units` | `1000` | Positive number of panel units |
+| `start_year`, `end_year` | `1980`, `2015` | Inclusive balanced-panel calendar |
+| `adoption_years` | `(1989, 1998, 2007)` | Strictly increasing in-panel cohort years |
+| `cohort_state_counts` | `(17, 18, 15)` | Positive state counts, one for each cohort |
+| `cohort_effect_slopes` | `(0.10, 0.05, 0.01)` | Finite cohort-specific dynamic slopes |
+| `effect_scale` | `1.0` | Nonnegative multiplier on all treatment effects |
+| `unit_effect_scale` | `1.0` | Standard deviation of unit fixed effects |
+| `time_effect_scale` | `0.2` | Standard deviation of time fixed effects |
+| `noise_scale` | `0.5` | Standard deviation of idiosyncratic errors |
+
+The derived properties are `n_states`, `n_periods`, `years`,
+`adoption_periods`, and `dimensions`. The defaults create 50 states, 1,000
+units, and 36 annual observations. Calendar adoption years map to zero-based
+periods `(9, 18, 27)`.
+
+The original Baker replication samples fixed effects and residuals from a
+private Compustat panel. This implementation substitutes Gaussian additive
+fixed effects and noise, while retaining the balanced calendar, randomized
+state-level cohorts, and heterogeneous dynamic effect law that produce the
+TWFE failure.
+
+## Construction
+
+```{python}
+functions = [pps.baker_design, pps.baker]
+pd.DataFrame(
+    {
+        "function": [function.__name__ for function in functions],
+        "signature": [str(inspect.signature(function)) for function in functions],
+    }
+)
+```
+
+`baker_design(config=None)` returns a reusable `PanelSimulator`.
+`baker(config=None, seed=None, rng=None)` constructs the design and returns one
+`PanelDataset`. Passing a fixed seed reproduces the cohort randomization,
+fixed effects, and error draw; passing both `seed` and `rng` raises
+`ValueError`.
+
+```{python}
+config = pps.BakerPanelConfig(n_units=200, noise_scale=0.25)
+panel = pps.baker(config=config, seed=42)
+
+panel.shape, panel.adoption_times[:8], panel.true_att
+```
+
+## Components
+
+```{python}
+components = [
+    pps.BakerStateFeatures,
+    pps.BakerCohortAssignment,
+    pps.BakerAdditiveOutcome,
+    pps.BakerDynamicEffect,
+]
+pd.DataFrame(
+    {
+        "component": [component.__name__ for component in components],
+        "signature": [str(inspect.signature(component)) for component in components],
+        "method": [
+            "generate(dimensions, rng)",
+            "assign(context, rng)",
+            "generate(context, rng)",
+            "generate(context, rng)",
+        ],
+    }
+)
+```
+
+### `BakerStateFeatures`
+
+Creates one observed integer feature named `state`. Following the source DGP,
+each unit independently samples a state ID from zero through `n_states - 1`.
+The state feature is included in `PanelDataset.unit_covariates` and the long
+interchange output.
+
+### `BakerCohortAssignment`
+
+Randomly permutes states and divides them according to
+`cohort_state_counts`. Every unit in a state receives the same adoption period,
+and treatment is absorbing. Assignment metadata records the randomized state
+order and the cohort period for each state and unit.
+
+### `BakerAdditiveOutcome`
+
+Generates
+
+$$
+Y_{it}(0) = \alpha_i + \gamma_t + \varepsilon_{it},
+$$
+
+with independent centered Gaussian draws governed by the three configured
+scales. Metadata retains the realized unit effects, time effects, and error
+matrix.
+
+### `BakerDynamicEffect`
+
+For a unit in cohort $G_i=g$ with configured slope $s_g$, the realized effect
+is
+
+$$
+\tau_{it} = \mathbb{1}\{t \geq g\}\,s_g\,(t-g+1)\,\texttt{effect_scale}.
+$$
+
+The first treated-period effect is therefore $s_g$, not zero. Pre-treatment
+effects are exactly zero. Negative slopes are allowed, while `effect_scale`
+must be nonnegative.
+
+## Dataset truth and metadata
+
+The returned dataset obeys `outcome = untreated_outcome + treatment_effect`.
+In addition to the common `PanelDataset` properties, the design exposes:
+
+- the observed `state` unit covariate;
+- `adoption_times` inferred from the absorbing treatment matrix;
+- randomized state and cohort mappings under `metadata["assignment"]`;
+- additive outcome draws under `metadata["outcome"]`; and
+- cohort-specific unit slopes under `metadata["effect"]`.
+
+See the [Baker TWFE failure vignette](../vignettes/baker-twfe.qmd) for a complete
+PyFixest analysis.

@@ -82,9 +82,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-354ec2e334119c0e8515286d97afb4cd.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-14484c6a423ba8334c2c2e22bfbe1c25.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-354ec2e334119c0e8515286d97afb4cd.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-36d25da79ffdd5f9713da90c3b96a3d2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-38d12467a47ff8fdcb073e1c30ca1f5a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-36d25da79ffdd5f9713da90c3b96a3d2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -146,7 +146,7 @@ window.Quarto = {
 <link rel="stylesheet" href="../styles.css">
 </head>
 
-<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-sidebar docked nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -334,6 +334,10 @@ window.Quarto = {
 <span class="menu-text">Get started</span></a>
   </li>  
   <li class="nav-item">
+    <a class="nav-link" href="../canonical-designs.html"> 
+<span class="menu-text">DGP catalog</span></a>
+  </li>  
+  <li class="nav-item">
     <a class="nav-link" href="../assignment.html"> 
 <span class="menu-text">Assignment</span></a>
   </li>  
@@ -349,6 +353,10 @@ window.Quarto = {
         <li>
     <a class="dropdown-item" href="../vignettes/balancing-reproduction.html">
  <span class="dropdown-text">Balancing reproduction</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../vignettes/baker-twfe.html">
+ <span class="dropdown-text">Baker TWFE failure</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../interoperability.html">
@@ -434,7 +442,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../canonical-designs.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Canonical panel designs</span></a>
+ <span class="menu-text">Balancing DGP catalog</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -480,6 +488,12 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../reference/baker.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Baker staggered-adoption API</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../reference/canonical.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Canonical design API</span></a>
   </div>
@@ -503,6 +517,12 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../vignettes/baker-twfe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Baker DGP: why vanilla TWFE event studies fail</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../vignettes/balancing-reproduction.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Balancing estimators in synthetic panels</span></a>
   </div>
@@ -514,32 +534,7 @@ window.Quarto = {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#paneldimensions" id="toc-paneldimensions" class="nav-link active" data-scroll-target="#paneldimensions"><span class="header-section-number">1</span> <code>PanelDimensions</code></a></li>
-  <li><a href="#componentdraw" id="toc-componentdraw" class="nav-link" data-scroll-target="#componentdraw"><span class="header-section-number">2</span> <code>ComponentDraw</code></a></li>
-  <li><a href="#unitfeaturedraw" id="toc-unitfeaturedraw" class="nav-link" data-scroll-target="#unitfeaturedraw"><span class="header-section-number">3</span> <code>UnitFeatureDraw</code></a></li>
-  <li><a href="#assignmentcontext" id="toc-assignmentcontext" class="nav-link" data-scroll-target="#assignmentcontext"><span class="header-section-number">4</span> <code>AssignmentContext</code></a></li>
-  <li><a href="#simulationcontext" id="toc-simulationcontext" class="nav-link" data-scroll-target="#simulationcontext"><span class="header-section-number">5</span> <code>SimulationContext</code></a></li>
-  <li><a href="#component-protocols" id="toc-component-protocols" class="nav-link" data-scroll-target="#component-protocols"><span class="header-section-number">6</span> Component protocols</a></li>
-  <li><a href="#paneldataset" id="toc-paneldataset" class="nav-link" data-scroll-target="#paneldataset"><span class="header-section-number">7</span> <code>PanelDataset</code></a>
-  <ul class="collapse">
-  <li><a href="#constructor-arrays" id="toc-constructor-arrays" class="nav-link" data-scroll-target="#constructor-arrays"><span class="header-section-number">7.1</span> Constructor arrays</a></li>
-  <li><a href="#identifiers-and-metadata" id="toc-identifiers-and-metadata" class="nav-link" data-scroll-target="#identifiers-and-metadata"><span class="header-section-number">7.2</span> Identifiers and metadata</a></li>
-  <li><a href="#properties" id="toc-properties" class="nav-link" data-scroll-target="#properties"><span class="header-section-number">7.3</span> Properties</a></li>
-  <li><a href="#interchange-methods" id="toc-interchange-methods" class="nav-link" data-scroll-target="#interchange-methods"><span class="header-section-number">7.4</span> Interchange methods</a></li>
-  </ul></li>
-  <li><a href="#panelsimulator" id="toc-panelsimulator" class="nav-link" data-scroll-target="#panelsimulator"><span class="header-section-number">8</span> <code>PanelSimulator</code></a>
-  <ul class="collapse">
-  <li><a href="#pipeline" id="toc-pipeline" class="nav-link" data-scroll-target="#pipeline"><span class="header-section-number">8.1</span> Pipeline</a></li>
-  </ul></li>
-  <li><a href="#resolve_rng" id="toc-resolve_rng" class="nav-link" data-scroll-target="#resolve_rng"><span class="header-section-number">9</span> <code>resolve_rng</code></a></li>
-  </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/reference/core.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
-    </div>
+    
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
@@ -564,7 +559,7 @@ window.Quarto = {
 </header>
 
 
-<div id="b7604ca4" class="cell" data-execution_count="1">
+<div id="4378089f" class="cell" data-execution_count="1">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> inspect</span>
@@ -581,7 +576,7 @@ window.Quarto = {
 <section id="paneldimensions" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="paneldimensions"><span class="header-section-number">1</span> <code>PanelDimensions</code></h2>
 <div class="api-signature">
-<div id="ac1e842a" class="cell" data-execution_count="2">
+<div id="9e3efdec" class="cell" data-execution_count="2">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.PanelDimensions))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -621,7 +616,7 @@ window.Quarto = {
 <section id="componentdraw" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="componentdraw"><span class="header-section-number">2</span> <code>ComponentDraw</code></h2>
 <div class="api-signature">
-<div id="93bcfc36" class="cell" data-execution_count="3">
+<div id="7447335e" class="cell" data-execution_count="3">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.ComponentDraw))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -655,7 +650,7 @@ window.Quarto = {
 <section id="unitfeaturedraw" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="unitfeaturedraw"><span class="header-section-number">3</span> <code>UnitFeatureDraw</code></h2>
 <div class="api-signature">
-<div id="40ed3912" class="cell" data-execution_count="4">
+<div id="8ba1b88b" class="cell" data-execution_count="4">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.UnitFeatureDraw))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -702,7 +697,7 @@ window.Quarto = {
 <section id="assignmentcontext" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="assignmentcontext"><span class="header-section-number">4</span> <code>AssignmentContext</code></h2>
 <div class="api-signature">
-<div id="a0cf8ce7" class="cell" data-execution_count="5">
+<div id="dcfb670f" class="cell" data-execution_count="5">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.AssignmentContext))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -717,7 +712,7 @@ window.Quarto = {
 <section id="simulationcontext" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="simulationcontext"><span class="header-section-number">5</span> <code>SimulationContext</code></h2>
 <div class="api-signature">
-<div id="88a3be50" class="cell" data-execution_count="6">
+<div id="3f23c3a1" class="cell" data-execution_count="6">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.SimulationContext))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -814,7 +809,7 @@ window.Quarto = {
 <section id="paneldataset" class="level2" data-number="7">
 <h2 data-number="7" class="anchored" data-anchor-id="paneldataset"><span class="header-section-number">7</span> <code>PanelDataset</code></h2>
 <div class="api-signature">
-<div id="a76bdabe" class="cell" data-execution_count="7">
+<div id="5c45a280" class="cell" data-execution_count="7">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.PanelDataset))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -916,7 +911,7 @@ window.Quarto = {
 </section>
 <section id="interchange-methods" class="level3" data-number="7.4">
 <h3 data-number="7.4" class="anchored" data-anchor-id="interchange-methods"><span class="header-section-number">7.4</span> Interchange methods</h3>
-<div id="84259b88" class="cell" data-execution_count="8">
+<div id="f6ad0713" class="cell" data-execution_count="8">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> (<span class="st">"as_arrays"</span>, <span class="st">"arrays"</span>, <span class="st">"as_long_dict"</span>):</span>
@@ -961,17 +956,21 @@ as_long_dict(self, *, copy: 'bool' = False) -&gt; 'Mapping[str, NDArray[Any]]'</
 <section id="panelsimulator" class="level2" data-number="8">
 <h2 data-number="8" class="anchored" data-anchor-id="panelsimulator"><span class="header-section-number">8</span> <code>PanelSimulator</code></h2>
 <div class="api-signature">
-<div id="7f076858" class="cell" data-execution_count="9">
+<div id="b6d81052" class="cell" data-execution_count="9">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.PanelSimulator))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>PanelSimulator(name: 'str', dimensions: 'PanelDimensions', assignment: 'AssignmentModel', outcome_model: 'OutcomeModel', effect_model: 'EffectModel', feature_model: 'UnitFeatureModel | None' = None) -&gt; None</code></pre>
+<pre><code>PanelSimulator(name: 'str', dimensions: 'PanelDimensions', assignment: 'AssignmentModel', outcome_model: 'OutcomeModel', effect_model: 'EffectModel | UnitEffectCallable', feature_model: 'UnitFeatureModel | None' = None) -&gt; None</code></pre>
 </div>
 </div>
 </div>
 <table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
 <thead>
 <tr class="header">
 <th>Field</th>
@@ -997,7 +996,7 @@ as_long_dict(self, *, copy: 'bool' = False) -&gt; 'Mapping[str, NDArray[Any]]'</
 </tr>
 <tr class="odd">
 <td><code>effect_model</code></td>
-<td>Object satisfying <code>EffectModel</code></td>
+<td>Object satisfying <code>EffectModel</code>, or a unit-effect callable</td>
 </tr>
 <tr class="even">
 <td><code>feature_model</code></td>
@@ -1017,7 +1016,8 @@ as_long_dict(self, *, copy: 'bool' = False) -&gt; 'Mapping[str, NDArray[Any]]'</
 <li>Return <code>PanelDataset(outcome=untreated+effect, ...)</code>.</li>
 </ol>
 <p>Component metadata is namespaced under <code>features</code>, <code>assignment</code>, <code>outcome</code>, and <code>effect</code>. The simulator name and dimensions are stored under <code>simulator</code>.</p>
-<div id="cb7622d3" class="cell" data-execution_count="10">
+<p>A callable supplied directly as <code>effect_model</code> is wrapped in <code>CallableUnitEffect</code>. It receives <code>SimulationContext</code>, returns a scalar or an <code>(N,)</code> unit-effect vector, and is multiplied by the realized treatment matrix.</p>
+<div id="5d170235" class="cell" data-execution_count="10">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"simulate</span><span class="sc">{</span>inspect<span class="sc">.</span>signature(pps.PanelSimulator.simulate)<span class="sc">}</span><span class="ss">"</span>)</span>
@@ -1034,7 +1034,7 @@ iter_simulations(self, replications: 'int', *, seed: 'int | np.random.SeedSequen
 <section id="resolve_rng" class="level2" data-number="9">
 <h2 data-number="9" class="anchored" data-anchor-id="resolve_rng"><span class="header-section-number">9</span> <code>resolve_rng</code></h2>
 <div class="api-signature">
-<div id="f7b7b3c5" class="cell" data-execution_count="11">
+<div id="dd90f4bc" class="cell" data-execution_count="11">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"resolve_rng</span><span class="sc">{</span>inspect<span class="sc">.</span>signature(pps.resolve_rng)<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1468,4 +1468,4 @@ iter_simulations(self, replications: 'int', *, seed: 'int | np.random.SeedSequen
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/reference/core.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/reference/core.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

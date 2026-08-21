@@ -29,3 +29,9 @@ table {
 code {
   color: inherit;
 }
+
+/* Jupyter's retina PNGs retain an intrinsic CSS width unless constrained. */
+.cell-output-display img {
+  max-width: 100%;
+  height: auto;
+}

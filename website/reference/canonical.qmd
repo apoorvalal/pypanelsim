@@ -60,8 +60,8 @@ pd.DataFrame(
 | `time_series_design` | Unit AR(1) or integrated AR(1) paths | `abs(coefficient) < 1` |
 | `mixed_factor_design` | Drift half-panel plus cyclical half-panel | `overlap >= 0`; treated count below half of units |
 
-See [canonical design laws](../canonical-designs.md) for draw order and exact
-probability specifications.
+See the [Balancing DGP catalog](../canonical-designs.qmd) for executable
+construction code, visualizations, draw order, and exact probability laws.
 
 ## One-draw functions
 

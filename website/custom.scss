@@ -1,0 +1,5 @@
+/*-- scss:defaults --*/
+
+// Quarto defaults to an 800px body column. The extra 50px keeps wide figures
+// inside the content viewport without changing the navigation layout.
+$grid-body-width: 850px;

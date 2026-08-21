@@ -1,5 +1,14 @@
 """Composable, estimator-neutral simulation infrastructure for panel data."""
 
+from .baker import (
+    BakerAdditiveOutcome,
+    BakerCohortAssignment,
+    BakerDynamicEffect,
+    BakerPanelConfig,
+    BakerStateFeatures,
+    baker,
+    baker_design,
+)
 from .canonical import (
     CanonicalPanelConfig,
     ClassicFactorOutcome,
@@ -31,6 +40,7 @@ from .components import (
     AssignmentModel,
     BinaryLogitAssignment,
     CallableOutcomeModel,
+    CallableUnitEffect,
     ComponentDraw,
     ConstantEffect,
     EffectModel,
@@ -55,8 +65,14 @@ __version__ = "0.1.0"
 __all__ = [
     "AssignmentContext",
     "AssignmentModel",
+    "BakerAdditiveOutcome",
+    "BakerCohortAssignment",
+    "BakerDynamicEffect",
+    "BakerPanelConfig",
+    "BakerStateFeatures",
     "BinaryLogitAssignment",
     "CallableOutcomeModel",
+    "CallableUnitEffect",
     "CanonicalPanelConfig",
     "ClassicFactorOutcome",
     "ComponentDraw",
@@ -84,6 +100,8 @@ __all__ = [
     "UnitFeatureModel",
     "WeakFactorOutcome",
     "available_canonical_designs",
+    "baker",
+    "baker_design",
     "canonical_registry",
     "classic_factor",
     "classic_factor_design",
