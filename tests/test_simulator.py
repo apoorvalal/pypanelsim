@@ -4,6 +4,7 @@ import pytest
 from pypanelsim import (
     BinaryLogitAssignment,
     CallableOutcomeModel,
+    CallableUnitEffect,
     ComponentDraw,
     ConstantEffect,
     GaussianUnitFeatures,
@@ -116,3 +117,30 @@ def test_feature_model_is_shared_by_assignment_outcome_and_dataset() -> None:
     )
     assert panel.unit_covariate_names == ("x1",)
     assert panel.metadata["outcome"]["shared_features"] is True
+
+
+def test_simulator_accepts_unit_effect_lambda() -> None:
+    dimensions = PanelDimensions(8, 6)
+    simulator = PanelSimulator(
+        name="heterogeneous_effects",
+        dimensions=dimensions,
+        assignment=SingleCohortAssignment(n_treated=3, adoption_period=4),
+        outcome_model=CallableOutcomeModel(gaussian_outcome),
+        effect_model=lambda x: (
+            1.0 + 0.5 * x.observables[:, 0] + 0.75 * x.unobservables[:, 0]
+        ),
+        feature_model=GaussianUnitFeatures(n_observables=1, n_unobservables=1),
+    )
+    panel = simulator.simulate(seed=14)
+
+    assert isinstance(simulator.effect_model, CallableUnitEffect)
+    expected = (
+        1.0
+        + 0.5 * panel.unit_covariates[:, 0]
+        + 0.75 * panel.metadata["features"]["unobservables"][:, 0]
+    )
+    np.testing.assert_allclose(panel.metadata["effect"]["unit_effects"], expected)
+    np.testing.assert_allclose(
+        panel.treatment_effect,
+        expected[:, None] * panel.treatment,
+    )

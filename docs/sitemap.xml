@@ -2,15 +2,19 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://apoorvalal.github.io/pypanelsim/vignettes/balancing-reproduction.html</loc>
-    <lastmod>2026-08-21T14:30:19.532Z</lastmod>
+    <lastmod>2026-08-21T19:01:00.381Z</lastmod>
   </url>
   <url>
-    <loc>https://apoorvalal.github.io/pypanelsim/reference/canonical.html</loc>
-    <lastmod>2026-08-21T14:29:25.858Z</lastmod>
+    <loc>https://apoorvalal.github.io/pypanelsim/reference/registry.html</loc>
+    <lastmod>2026-08-21T14:29:25.861Z</lastmod>
+  </url>
+  <url>
+    <loc>https://apoorvalal.github.io/pypanelsim/reference/baker.html</loc>
+    <lastmod>2026-08-21T16:28:43.555Z</lastmod>
   </url>
   <url>
     <loc>https://apoorvalal.github.io/pypanelsim/reference/core.html</loc>
-    <lastmod>2026-08-21T14:29:25.860Z</lastmod>
+    <lastmod>2026-08-21T15:32:53.273Z</lastmod>
   </url>
   <url>
     <loc>https://apoorvalal.github.io/pypanelsim/validation.html</loc>
@@ -18,7 +22,7 @@
   </url>
   <url>
     <loc>https://apoorvalal.github.io/pypanelsim/canonical-designs.html</loc>
-    <lastmod>2026-08-21T14:29:25.852Z</lastmod>
+    <lastmod>2026-08-21T19:07:46.413Z</lastmod>
   </url>
   <url>
     <loc>https://apoorvalal.github.io/pypanelsim/interoperability.html</loc>
@@ -30,15 +34,15 @@
   </url>
   <url>
     <loc>https://apoorvalal.github.io/pypanelsim/index.html</loc>
-    <lastmod>2026-08-21T14:30:19.531Z</lastmod>
+    <lastmod>2026-08-21T19:01:00.376Z</lastmod>
   </url>
   <url>
     <loc>https://apoorvalal.github.io/pypanelsim/assignment.html</loc>
-    <lastmod>2026-08-21T14:29:25.851Z</lastmod>
+    <lastmod>2026-08-21T15:33:16.911Z</lastmod>
   </url>
   <url>
     <loc>https://apoorvalal.github.io/pypanelsim/architecture.html</loc>
-    <lastmod>2026-08-21T14:28:45.948Z</lastmod>
+    <lastmod>2026-08-21T15:32:53.272Z</lastmod>
   </url>
   <url>
     <loc>https://apoorvalal.github.io/pypanelsim/migration.html</loc>
@@ -46,14 +50,18 @@
   </url>
   <url>
     <loc>https://apoorvalal.github.io/pypanelsim/api.html</loc>
-    <lastmod>2026-08-21T14:29:25.850Z</lastmod>
+    <lastmod>2026-08-21T16:57:10.530Z</lastmod>
   </url>
   <url>
     <loc>https://apoorvalal.github.io/pypanelsim/reference/assignment.html</loc>
-    <lastmod>2026-08-21T14:29:25.857Z</lastmod>
+    <lastmod>2026-08-21T15:33:16.913Z</lastmod>
   </url>
   <url>
-    <loc>https://apoorvalal.github.io/pypanelsim/reference/registry.html</loc>
-    <lastmod>2026-08-21T14:29:25.861Z</lastmod>
+    <loc>https://apoorvalal.github.io/pypanelsim/reference/canonical.html</loc>
+    <lastmod>2026-08-21T19:01:00.374Z</lastmod>
+  </url>
+  <url>
+    <loc>https://apoorvalal.github.io/pypanelsim/vignettes/baker-twfe.html</loc>
+    <lastmod>2026-08-21T16:32:46.221Z</lastmod>
   </url>
 </urlset>

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>API reference – pypanelsim</title>
+<title>Baker staggered-adoption API – pypanelsim</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -26,30 +26,65 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-36d25da79ffdd5f9713da90c3b96a3d2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-38d12467a47ff8fdcb073e1c30ca1f5a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-36d25da79ffdd5f9713da90c3b96a3d2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-36d25da79ffdd5f9713da90c3b96a3d2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-38d12467a47ff8fdcb073e1c30ca1f5a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-36d25da79ffdd5f9713da90c3b96a3d2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -77,9 +112,41 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
 
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
-<link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
 </head>
 
 <body class="nav-sidebar docked nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
@@ -251,7 +318,7 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">pypanelsim</span>
     </a>
   </div>
@@ -262,23 +329,23 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./index.html"> 
+    <a class="nav-link" href="../index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./getting-started.html" aria-current="page"> 
+    <a class="nav-link active" href="../getting-started.html" aria-current="page"> 
 <span class="menu-text">Get started</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./canonical-designs.html"> 
+    <a class="nav-link" href="../canonical-designs.html"> 
 <span class="menu-text">DGP catalog</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./assignment.html"> 
+    <a class="nav-link" href="../assignment.html"> 
 <span class="menu-text">Assignment</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./api.html"> 
+    <a class="nav-link" href="../api.html"> 
 <span class="menu-text">API</span></a>
   </li>  
   <li class="nav-item dropdown ">
@@ -287,15 +354,15 @@ ul.task-list li input[type="checkbox"] {
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-vignettes">    
         <li>
-    <a class="dropdown-item" href="./vignettes/balancing-reproduction.html">
+    <a class="dropdown-item" href="../vignettes/balancing-reproduction.html">
  <span class="dropdown-text">Balancing reproduction</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./vignettes/baker-twfe.html">
+    <a class="dropdown-item" href="../vignettes/baker-twfe.html">
  <span class="dropdown-text">Baker TWFE failure</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./interoperability.html">
+    <a class="dropdown-item" href="../interoperability.html">
  <span class="dropdown-text">Estimator interoperability</span></a>
   </li>  
     </ul>
@@ -319,7 +386,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">API reference</a></li><li class="breadcrumb-item"><a href="./api.html">API reference</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../api.html">API reference</a></li><li class="breadcrumb-item"><a href="../reference/baker.html">Baker staggered-adoption API</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -342,19 +409,19 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./getting-started.html" class="sidebar-item-text sidebar-link">
+  <a href="../getting-started.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Get started</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./assignment.html" class="sidebar-item-text sidebar-link">
+  <a href="../assignment.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Assignment mechanisms</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./interoperability.html" class="sidebar-item-text sidebar-link">
+  <a href="../interoperability.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Estimator interoperability</span></a>
   </div>
 </li>
@@ -371,25 +438,25 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./architecture.html" class="sidebar-item-text sidebar-link">
+  <a href="../architecture.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Architecture and extension contract</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./canonical-designs.html" class="sidebar-item-text sidebar-link">
+  <a href="../canonical-designs.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Balancing DGP catalog</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./migration.html" class="sidebar-item-text sidebar-link">
+  <a href="../migration.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Migration from <code>panel_dgps</code></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./validation.html" class="sidebar-item-text sidebar-link">
+  <a href="../validation.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Validation record</span></a>
   </div>
 </li>
@@ -406,37 +473,37 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./api.html" class="sidebar-item-text sidebar-link active">
+  <a href="../api.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">API reference</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./reference/core.html" class="sidebar-item-text sidebar-link">
+  <a href="../reference/core.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Core API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./reference/assignment.html" class="sidebar-item-text sidebar-link">
+  <a href="../reference/assignment.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Assignment, feature, and effect API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./reference/baker.html" class="sidebar-item-text sidebar-link">
+  <a href="../reference/baker.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Baker staggered-adoption API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./reference/canonical.html" class="sidebar-item-text sidebar-link">
+  <a href="../reference/canonical.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Canonical design API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./reference/registry.html" class="sidebar-item-text sidebar-link">
+  <a href="../reference/registry.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Registry API</span></a>
   </div>
 </li>
@@ -453,13 +520,13 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./vignettes/baker-twfe.html" class="sidebar-item-text sidebar-link">
+  <a href="../vignettes/baker-twfe.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Baker DGP: why vanilla TWFE event studies fail</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./vignettes/balancing-reproduction.html" class="sidebar-item-text sidebar-link">
+  <a href="../vignettes/balancing-reproduction.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Balancing estimators in synthetic panels</span></a>
   </div>
 </li>
@@ -475,10 +542,10 @@ ul.task-list li input[type="checkbox"] {
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">API reference</a></li><li class="breadcrumb-item"><a href="./api.html">API reference</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../api.html">API reference</a></li><li class="breadcrumb-item"><a href="../reference/baker.html">Baker staggered-adoption API</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">API reference</h1>
-<p class="subtitle lead">Public simulation objects, assignment laws, canonical designs, and registries</p>
+<h1 class="title">Baker staggered-adoption API</h1>
+<p class="subtitle lead">A self-contained event-study design with dynamic cohort heterogeneity</p>
 </div>
 
 
@@ -495,142 +562,250 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>All public names are importable from <code>pypanelsim</code>. Component interfaces use structural typing: custom implementations need the documented method, not inheritance from a package base class.</p>
-<section id="core-simulation-and-data" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="core-simulation-and-data"><span class="header-section-number">1</span> Core simulation and data</h2>
+<div id="993a184e" class="cell" data-execution_count="1">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> inspect</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pypanelsim <span class="im">as</span> pps</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<section id="bakerpanelconfig" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="bakerpanelconfig"><span class="header-section-number">1</span> <code>BakerPanelConfig</code></h2>
+<div id="98e3468b" class="cell" data-execution_count="2">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"BakerPanelConfig</span><span class="sc">{</span>inspect<span class="sc">.</span>signature(pps.BakerPanelConfig)<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>BakerPanelConfig(n_units: 'int' = 1000, start_year: 'int' = 1980, end_year: 'int' = 2015, adoption_years: 'tuple[int, ...]' = (1989, 1998, 2007), cohort_state_counts: 'tuple[int, ...]' = (17, 18, 15), cohort_effect_slopes: 'tuple[float, ...]' = (0.1, 0.05, 0.01), effect_scale: 'float' = 1.0, unit_effect_scale: 'float' = 1.0, time_effect_scale: 'float' = 0.2, noise_scale: 'float' = 0.5) -&gt; None</code></pre>
+</div>
+</div>
 <table class="caption-top table">
+<colgroup>
+<col style="width: 30%">
+<col style="width: 40%">
+<col style="width: 30%">
+</colgroup>
 <thead>
 <tr class="header">
-<th>Object</th>
-<th>Purpose</th>
+<th>Field</th>
+<th style="text-align: right;">Default</th>
+<th>Contract</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="./reference/core.html#paneldimensions"><code>PanelDimensions</code></a></td>
-<td>Rectangular panel shape</td>
+<td><code>n_units</code></td>
+<td style="text-align: right;"><code>1000</code></td>
+<td>Positive number of panel units</td>
 </tr>
 <tr class="even">
-<td><a href="./reference/core.html#paneldataset"><code>PanelDataset</code></a></td>
-<td>Immutable observed data and causal truth</td>
+<td><code>start_year</code>, <code>end_year</code></td>
+<td style="text-align: right;"><code>1980</code>, <code>2015</code></td>
+<td>Inclusive balanced-panel calendar</td>
 </tr>
 <tr class="odd">
-<td><a href="./reference/core.html#panelsimulator"><code>PanelSimulator</code></a></td>
-<td>Feature, assignment, outcome, and effect orchestration</td>
+<td><code>adoption_years</code></td>
+<td style="text-align: right;"><code>(1989, 1998, 2007)</code></td>
+<td>Strictly increasing in-panel cohort years</td>
 </tr>
 <tr class="even">
-<td><a href="./reference/core.html#simulationcontext"><code>SimulationContext</code></a></td>
-<td>Treatment and shared features for outcome/effect components</td>
+<td><code>cohort_state_counts</code></td>
+<td style="text-align: right;"><code>(17, 18, 15)</code></td>
+<td>Positive state counts, one for each cohort</td>
 </tr>
 <tr class="odd">
-<td><a href="./reference/core.html#componentdraw"><code>ComponentDraw</code></a></td>
-<td>Component matrix plus diagnostic metadata</td>
+<td><code>cohort_effect_slopes</code></td>
+<td style="text-align: right;"><code>(0.10, 0.05, 0.01)</code></td>
+<td>Finite cohort-specific dynamic slopes</td>
 </tr>
 <tr class="even">
-<td><a href="./reference/core.html#resolve_rng"><code>resolve_rng</code></a></td>
-<td>Explicit seed/generator validation</td>
+<td><code>effect_scale</code></td>
+<td style="text-align: right;"><code>1.0</code></td>
+<td>Nonnegative multiplier on all treatment effects</td>
+</tr>
+<tr class="odd">
+<td><code>unit_effect_scale</code></td>
+<td style="text-align: right;"><code>1.0</code></td>
+<td>Standard deviation of unit fixed effects</td>
+</tr>
+<tr class="even">
+<td><code>time_effect_scale</code></td>
+<td style="text-align: right;"><code>0.2</code></td>
+<td>Standard deviation of time fixed effects</td>
+</tr>
+<tr class="odd">
+<td><code>noise_scale</code></td>
+<td style="text-align: right;"><code>0.5</code></td>
+<td>Standard deviation of idiosyncratic errors</td>
 </tr>
 </tbody>
 </table>
+<p>The derived properties are <code>n_states</code>, <code>n_periods</code>, <code>years</code>, <code>adoption_periods</code>, and <code>dimensions</code>. The defaults create 50 states, 1,000 units, and 36 annual observations. Calendar adoption years map to zero-based periods <code>(9, 18, 27)</code>.</p>
+<p>The original Baker replication samples fixed effects and residuals from a private Compustat panel. This implementation substitutes Gaussian additive fixed effects and noise, while retaining the balanced calendar, randomized state-level cohorts, and heterogeneous dynamic effect law that produce the TWFE failure.</p>
 </section>
-<section id="features-and-assignment" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="features-and-assignment"><span class="header-section-number">2</span> Features and assignment</h2>
-<table class="caption-top table">
+<section id="construction" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="construction"><span class="header-section-number">2</span> Construction</h2>
+<div id="9f45f628" class="cell" data-execution_count="3">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>functions <span class="op">=</span> [pps.baker_design, pps.baker]</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"function"</span>: [function.<span class="va">__name__</span> <span class="cf">for</span> function <span class="kw">in</span> functions],</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"signature"</span>: [<span class="bu">str</span>(inspect.signature(function)) <span class="cf">for</span> function <span class="kw">in</span> functions],</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
 <thead>
 <tr class="header">
-<th>Object</th>
-<th>Purpose</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">function</th>
+<th data-quarto-table-cell-role="th">signature</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="./reference/assignment.html#gaussianunitfeatures"><code>GaussianUnitFeatures</code></a></td>
-<td>Observed and latent standard-normal unit features</td>
+<th data-quarto-table-cell-role="th">0</th>
+<td>baker_design</td>
+<td>(config: 'BakerPanelConfig | None' = None) -&gt; ...</td>
 </tr>
 <tr class="even">
-<td><a href="./reference/assignment.html#singlecohortassignment"><code>SingleCohortAssignment</code></a></td>
-<td>Fixed common adoption schedule</td>
-</tr>
-<tr class="odd">
-<td><a href="./reference/assignment.html#randomizedsinglecohortassignment"><code>RandomizedSingleCohortAssignment</code></a></td>
-<td>Fixed-size complete randomization</td>
-</tr>
-<tr class="even">
-<td><a href="./reference/assignment.html#binarylogitassignment"><code>BinaryLogitAssignment</code></a></td>
-<td>Sigmoid selection on observed and latent features</td>
-</tr>
-<tr class="odd">
-<td><a href="./reference/assignment.html#staggeredadoption"><code>StaggeredAdoption</code></a></td>
-<td>Fixed unit-to-adoption map</td>
-</tr>
-<tr class="even">
-<td><a href="./reference/assignment.html#generalizedpropensityassignment"><code>GeneralizedPropensityAssignment</code></a></td>
-<td>Multinomial-logit adoption cohorts</td>
-</tr>
-<tr class="odd">
-<td><a href="./reference/assignment.html#constanteffect"><code>ConstantEffect</code></a></td>
-<td>Constant effect on treated cells</td>
-</tr>
-<tr class="even">
-<td><a href="./reference/assignment.html#linearampeffect"><code>LinearRampEffect</code></a></td>
-<td>Event-time-linear effect path</td>
-</tr>
-<tr class="odd">
-<td><a href="./reference/assignment.html#callableuniteffect"><code>CallableUnitEffect</code></a></td>
-<td>Unit-level heterogeneity from observed and latent features</td>
+<th data-quarto-table-cell-role="th">1</th>
+<td>baker</td>
+<td>(*, config: 'BakerPanelConfig | None' = None, ...</td>
 </tr>
 </tbody>
 </table>
+
+</div>
+</div>
+</div>
+<p><code>baker_design(config=None)</code> returns a reusable <code>PanelSimulator</code>. <code>baker(config=None, seed=None, rng=None)</code> constructs the design and returns one <code>PanelDataset</code>. Passing a fixed seed reproduces the cohort randomization, fixed effects, and error draw; passing both <code>seed</code> and <code>rng</code> raises <code>ValueError</code>.</p>
+<div id="3240428b" class="cell" data-execution_count="4">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>config <span class="op">=</span> pps.BakerPanelConfig(n_units<span class="op">=</span><span class="dv">200</span>, noise_scale<span class="op">=</span><span class="fl">0.25</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> pps.baker(config<span class="op">=</span>config, seed<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>panel.shape, panel.adoption_times[:<span class="dv">8</span>], panel.true_att</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<pre><code>((200, 36), array([18, 18, 27, 18, 18,  9, 18, 18]), 0.9363109048723898)</code></pre>
+</div>
+</div>
 </section>
-<section id="canonical-designs" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="canonical-designs"><span class="header-section-number">3</span> Canonical designs</h2>
-<p>See <a href="./reference/canonical.html">canonical design API</a> for <code>CanonicalPanelConfig</code>, the six one-draw functions, reusable simulator factories, and canonical outcome components.</p>
-</section>
-<section id="baker-staggered-adoption-design" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="baker-staggered-adoption-design"><span class="header-section-number">4</span> Baker staggered-adoption design</h2>
-<table class="caption-top table">
+<section id="components" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="components"><span class="header-section-number">3</span> Components</h2>
+<div id="cfe770de" class="cell" data-execution_count="5">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>components <span class="op">=</span> [</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    pps.BakerStateFeatures,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    pps.BakerCohortAssignment,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    pps.BakerAdditiveOutcome,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    pps.BakerDynamicEffect,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"component"</span>: [component.<span class="va">__name__</span> <span class="cf">for</span> component <span class="kw">in</span> components],</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"signature"</span>: [<span class="bu">str</span>(inspect.signature(component)) <span class="cf">for</span> component <span class="kw">in</span> components],</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"method"</span>: [</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>            <span class="st">"generate(dimensions, rng)"</span>,</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>            <span class="st">"assign(context, rng)"</span>,</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>            <span class="st">"generate(context, rng)"</span>,</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>            <span class="st">"generate(context, rng)"</span>,</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
 <thead>
 <tr class="header">
-<th>Object</th>
-<th>Purpose</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">component</th>
+<th data-quarto-table-cell-role="th">signature</th>
+<th data-quarto-table-cell-role="th">method</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="./reference/baker.html#bakerpanelconfig"><code>BakerPanelConfig</code></a></td>
-<td>Calendar, cohort sizes, heterogeneous slopes, and noise scales</td>
+<th data-quarto-table-cell-role="th">0</th>
+<td>BakerStateFeatures</td>
+<td>(n_states: 'int') -&gt; None</td>
+<td>generate(dimensions, rng)</td>
 </tr>
 <tr class="even">
-<td><a href="./reference/baker.html#construction"><code>baker_design</code></a></td>
-<td>Reusable <code>PanelSimulator</code> for the Baker TWFE failure design</td>
+<th data-quarto-table-cell-role="th">1</th>
+<td>BakerCohortAssignment</td>
+<td>(adoption_periods: 'tuple[int, ...]', cohort_s...</td>
+<td>assign(context, rng)</td>
 </tr>
 <tr class="odd">
-<td><a href="./reference/baker.html#construction"><code>baker</code></a></td>
-<td>One reproducible panel draw</td>
+<th data-quarto-table-cell-role="th">2</th>
+<td>BakerAdditiveOutcome</td>
+<td>(unit_effect_scale: 'float' = 1.0, time_effect...</td>
+<td>generate(context, rng)</td>
 </tr>
 <tr class="even">
-<td><a href="./reference/baker.html#components"><code>BakerStateFeatures</code></a></td>
-<td>Independently sampled state assignment clusters</td>
-</tr>
-<tr class="odd">
-<td><a href="./reference/baker.html#components"><code>BakerCohortAssignment</code></a></td>
-<td>State-level randomized adoption cohorts</td>
-</tr>
-<tr class="even">
-<td><a href="./reference/baker.html#components"><code>BakerAdditiveOutcome</code></a></td>
-<td>Additive unit effects, time effects, and noise</td>
-</tr>
-<tr class="odd">
-<td><a href="./reference/baker.html#components"><code>BakerDynamicEffect</code></a></td>
-<td>Cohort-specific linear event-time effects</td>
+<th data-quarto-table-cell-role="th">3</th>
+<td>BakerDynamicEffect</td>
+<td>(adoption_periods: 'tuple[int, ...]', cohort_e...</td>
+<td>generate(context, rng)</td>
 </tr>
 </tbody>
 </table>
-<p>See the <a href="./vignettes/baker-twfe.html">Baker TWFE failure vignette</a> for executable PyFixest vanilla and saturated event-study estimates.</p>
+
+</div>
+</div>
+</div>
+<section id="bakerstatefeatures" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="bakerstatefeatures"><span class="header-section-number">3.1</span> <code>BakerStateFeatures</code></h3>
+<p>Creates one observed integer feature named <code>state</code>. Following the source DGP, each unit independently samples a state ID from zero through <code>n_states - 1</code>. The state feature is included in <code>PanelDataset.unit_covariates</code> and the long interchange output.</p>
 </section>
-<section id="registry" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="registry"><span class="header-section-number">5</span> Registry</h2>
-<p>See <a href="./reference/registry.html"><code>DGPRegistry</code></a> for stable name-to-factory mappings and the global canonical registry.</p>
+<section id="bakercohortassignment" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="bakercohortassignment"><span class="header-section-number">3.2</span> <code>BakerCohortAssignment</code></h3>
+<p>Randomly permutes states and divides them according to <code>cohort_state_counts</code>. Every unit in a state receives the same adoption period, and treatment is absorbing. Assignment metadata records the randomized state order and the cohort period for each state and unit.</p>
+</section>
+<section id="bakeradditiveoutcome" class="level3" data-number="3.3">
+<h3 data-number="3.3" class="anchored" data-anchor-id="bakeradditiveoutcome"><span class="header-section-number">3.3</span> <code>BakerAdditiveOutcome</code></h3>
+<p>Generates</p>
+<p><span class="math display">\[
+Y_{it}(0) = \alpha_i + \gamma_t + \varepsilon_{it},
+\]</span></p>
+<p>with independent centered Gaussian draws governed by the three configured scales. Metadata retains the realized unit effects, time effects, and error matrix.</p>
+</section>
+<section id="bakerdynamiceffect" class="level3" data-number="3.4">
+<h3 data-number="3.4" class="anchored" data-anchor-id="bakerdynamiceffect"><span class="header-section-number">3.4</span> <code>BakerDynamicEffect</code></h3>
+<p>For a unit in cohort <span class="math inline">\(G_i=g\)</span> with configured slope <span class="math inline">\(s_g\)</span>, the realized effect is</p>
+<p><span class="math display">\[
+\tau_{it} = \mathbb{1}\{t \geq g\}\,s_g\,(t-g+1)\,\texttt{effect_scale}.
+\]</span></p>
+<p>The first treated-period effect is therefore <span class="math inline">\(s_g\)</span>, not zero. Pre-treatment effects are exactly zero. Negative slopes are allowed, while <code>effect_scale</code> must be nonnegative.</p>
+</section>
+</section>
+<section id="dataset-truth-and-metadata" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="dataset-truth-and-metadata"><span class="header-section-number">4</span> Dataset truth and metadata</h2>
+<p>The returned dataset obeys <code>outcome = untreated_outcome + treatment_effect</code>. In addition to the common <code>PanelDataset</code> properties, the design exposes:</p>
+<ul>
+<li>the observed <code>state</code> unit covariate;</li>
+<li><code>adoption_times</code> inferred from the absorbing treatment matrix;</li>
+<li>randomized state and cohort mappings under <code>metadata["assignment"]</code>;</li>
+<li>additive outcome draws under <code>metadata["outcome"]</code>; and</li>
+<li>cohort-specific unit slopes under <code>metadata["effect"]</code>.</li>
+</ul>
+<p>See the <a href="../vignettes/baker-twfe.html">Baker TWFE failure vignette</a> for a complete PyFixest analysis.</p>
 
 
 </section>
@@ -1054,4 +1229,4 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/api.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/reference/baker.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

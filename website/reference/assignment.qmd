@@ -161,6 +161,35 @@ $$
 absorbing adoption because event time is unit specific. Nonabsorbing treatment
 raises through `context.adoption_times`.
 
+## `CallableUnitEffect`
+
+```{python}
+show_signature(pps.CallableUnitEffect)
+```
+
+Adapts a deterministic unit-level law to `EffectModel`. Its callable receives
+`SimulationContext`, including `observables` and `unobservables`, and returns a
+finite scalar, an `(N,)` vector, or an `(N,1)` column. For unit effect
+$\tau_i=f(X_i,U_i)$, the realized matrix is
+
+$$
+\tau_{it}^{\mathrm{realized}}=f(X_i,U_i)W_{it}.
+$$
+
+The normalized `(N,)` vector is recorded under `unit_effects` in effect
+metadata. A malformed or nonfinite result raises `ValueError`. The adapter can
+be constructed explicitly to assign a metadata name:
+
+```{python}
+effect = pps.CallableUnitEffect(
+    lambda x: 1.0 + 0.5 * x.observables[:, 0] + x.unobservables[:, 0],
+    name="baseline_heterogeneity",
+)
+```
+
+For the common case, pass the lambda directly to `PanelSimulator` and it will
+be wrapped automatically.
+
 ## `CallableOutcomeModel`
 
 ```{python}

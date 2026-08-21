@@ -654,6 +654,56 @@ class ConstantEffect:
         )
 
 
+UnitEffectCallable = Callable[[SimulationContext], Any]
+
+
+@dataclass(frozen=True, slots=True)
+class CallableUnitEffect:
+    """Turn a callable unit-level effect law into an :class:`EffectModel`.
+
+    The callable receives the shared :class:`SimulationContext` and returns
+    either one finite scalar or one finite value per unit. Unit effects are
+    broadcast over time and realized only in treated cells.
+    """
+
+    function: UnitEffectCallable
+    name: str = "callable_unit_effect"
+
+    def __post_init__(self) -> None:
+        if not callable(self.function):
+            raise TypeError("function must be callable")
+        if not isinstance(self.name, str) or not self.name.strip():
+            raise ValueError("name must be a non-empty string")
+
+    def generate(
+        self, context: SimulationContext, rng: np.random.Generator
+    ) -> ComponentDraw:
+        del rng
+        raw_effects = np.asarray(self.function(context), dtype=float)
+        n_units = context.dimensions.n_units
+        if raw_effects.ndim == 0:
+            unit_effects = np.full(n_units, float(raw_effects), dtype=float)
+        elif raw_effects.shape == (n_units, 1):
+            unit_effects = np.array(raw_effects[:, 0], dtype=float, copy=True)
+        elif raw_effects.shape == (n_units,):
+            unit_effects = np.array(raw_effects, dtype=float, copy=True)
+        else:
+            raise ValueError(
+                "callable unit effect must return a scalar or have shape "
+                f"({n_units},) or ({n_units}, 1)"
+            )
+        if not np.all(np.isfinite(unit_effects)):
+            raise ValueError("callable unit effect must contain only finite values")
+        unit_effects.setflags(write=False)
+        return ComponentDraw(
+            unit_effects[:, None] * context.treatment,
+            {
+                "kind": self.name,
+                "unit_effects": unit_effects,
+            },
+        )
+
+
 OutcomeCallable = Callable[
     [SimulationContext, np.random.Generator], ComponentDraw | FloatMatrix
 ]

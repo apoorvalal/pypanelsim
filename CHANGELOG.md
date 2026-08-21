@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Allow `effect_model` to be a unit-level callable for treatment-effect
+  heterogeneity driven by observed covariates and latent factors.
 - Add shared observed and latent unit features to the simulation pipeline.
 - Add fixed-size randomized and binary-logit single-cohort assignments.
 - Add multinomial-logit generalized propensity scores for adoption cohorts.
@@ -14,6 +16,12 @@
 - Add the complete balancing-reproduction numerical experiment as an executable
   vignette with cached 398-cell results, parity fixtures, and runnable support
   modules.
+- Add an executable catalog with construction code and side-by-side outcome and
+  treatment visualizations for every canonical balancing DGP.
+- Add a self-contained Baker staggered-adoption DGP with randomized state
+  cohorts and dynamic cohort-specific treatment effects.
+- Add an executable PyFixest vignette showing vanilla TWFE contamination and
+  recovery with a saturated Sun--Abraham-style cohort/event-time estimator.
 
 ## 0.1.0 - 2026-08-19
 

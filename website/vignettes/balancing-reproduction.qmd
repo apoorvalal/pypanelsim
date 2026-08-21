@@ -4,8 +4,6 @@ subtitle: "R and Python reproduction, implementation contracts, and API referenc
 date: last-modified
 format:
   html:
-    toc: true
-    toc-depth: 3
     number-sections: true
     embed-resources: true
     page-layout: full
@@ -99,7 +97,7 @@ mpl.rcParams.update(
 
 This study compares estimators of the average treatment effect on the treated (ATT) in five synthetic panel families: classic factors, weak factors, mixed factors, sparse synthetic controls, and autoregressive outcomes. Each canonical panel contains 160 never-treated units, 40 treated units, 40 pre-treatment periods, and 10 post-treatment periods. All treated units adopt in the first post-treatment period. Their treatment effects increase from 0.2 to 2.0, which gives a true ATT of 1.1.
 
-The estimators reconstruct untreated post-treatment outcomes in three ways. An outcome-model estimator uses a fitted untreated-outcome surface. Unit balancing weights control units so their pre-treatment outcomes match the treated units. Double balancing combines those donor weights with weights on pre-treatment periods in an augmented difference-in-differences score. The experiments vary factor-loading overlap, factor strength, donor sparsity, persistence, and integration to change which source of information is useful.
+The estimators reconstruct untreated post-treatment outcomes in three ways. An outcome-model estimator uses a fitted untreated-outcome surface. Unit balancing weights control units so their pre-treatment outcomes match the treated units. Double balancing combines those donor weights with weights on pre-treatment periods in an augmented difference-in-differences score. The experiments vary factor-loading overlap, factor strength, donor sparsity, persistence, and integration to change which source of information is useful. For copyable construction code and `matshow` visualizations of every underlying design, start with the [Balancing DGP catalog](../canonical-designs.qmd).
 
 The estimator ranking changes across these designs. Unit balancing is competitive in several good-overlap and synthetic-control settings. Double balancing has substantially lower RMSE under poor factor-loading overlap and persistent integrated dynamics. No outcome model or balancing configuration minimizes RMSE in every design.
 

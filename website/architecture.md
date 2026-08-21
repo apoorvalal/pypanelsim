@@ -150,6 +150,9 @@ same random stream.
 - `ConstantEffect` applies one effect to every treated cell.
 - `LinearRampEffect` uses unit-specific event time and supports staggered
   adoption.
+- `CallableUnitEffect` evaluates a scalar or unit-vector law against the shared
+  `SimulationContext`; `PanelSimulator` automatically wraps a lambda passed as
+  `effect_model`.
 
 ### Outcome adapter
 

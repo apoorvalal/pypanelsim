@@ -1,11 +1,12 @@
 # pypanelsim
 
 `pypanelsim` is a composable, estimator-neutral Python library for synthetic
-panel data. It separates treatment assignment, untreated outcomes, and
-treatment effects. Each simulation returns a validated `PanelDataset` with a
-small NumPy interchange contract. The package can therefore feed
-`crabbymetrics`, another panel-estimator library, or a project-specific
-estimator without importing that estimator into the simulation layer.
+panel data. It separates shared unit features, treatment assignment, untreated
+outcomes, and treatment effects. Each simulation returns a validated
+`PanelDataset` with a small NumPy interchange contract. The package can
+therefore feed `crabbymetrics`, another panel-estimator library, or a
+project-specific estimator without importing that estimator into the
+simulation layer.
 
 The package began as an extraction of the data-generating processes used in an
 augmented-balancing experiment. The original reproduction remains a downstream
@@ -27,6 +28,25 @@ designs, tests, examples, and documentation.
   metadata. Downstream code can request writable copies when necessary.
 - **Stable canonical factories.** Named designs are available through a
   registry, class-based simulator factories, and concise one-draw functions.
+
+## Feature set
+
+- **Assignment mechanisms:** fixed treatment, fixed-size random assignment,
+  sigmoid selection on observed or latent unit features, and multinomial
+  generalized propensity scores over adoption cohorts.
+- **Treatment effects:** constant and event-time ramp effects plus callables for
+  heterogeneity driven by baseline covariates or unobserved unit factors.
+- **Untreated outcomes:** classic, weak, mixed, synthetic-control,
+  factor--synthetic, and time-series panel DGPs extracted from the original
+  balancing study.
+- **Staggered adoption:** a self-contained Baker DGP with cohort-specific
+  dynamic effects that reproduces vanilla TWFE event-study contamination.
+- **Executable documentation:** side-by-side `matshow` views of $Y$ and $W$ for
+  every canonical DGP, the complete 398-cell balancing experiment, and a
+  PyFixest comparison of vanilla and saturated cohort/event-time estimators.
+- **Estimator interoperability:** NumPy-wide and dependency-free long-column
+  interchange, with optional documentation integrations for crabbymetrics,
+  pandas, and PyFixest.
 
 ## Requirements and installation
 
@@ -56,8 +76,11 @@ dependencies = ["pypanelsim"]
 pypanelsim = { path = "../pypanelsim", editable = true }
 ```
 
-The GitHub repository is private. Installation requires an authenticated GitHub
-SSH or HTTPS session.
+The repository is public. The SSH installation form requires a configured
+GitHub SSH identity; use the corresponding HTTPS URL otherwise.
+
+The rendered documentation is available at
+[apoorvalal.github.io/pypanelsim](https://apoorvalal.github.io/pypanelsim/).
 
 ## Quick start
 
@@ -97,6 +120,23 @@ config = pps.CanonicalPanelConfig(
 )
 panel = pps.weak_factor(config=config, overlap=1.0, seed=42)
 ```
+
+The Baker staggered-adoption design reproduces the dynamic cohort
+heterogeneity that biases a vanilla two-way fixed-effects event study:
+
+```python
+config = pps.BakerPanelConfig()
+panel = pps.baker(config=config, seed=28101695)
+
+print(panel.shape)  # (1000, 36)
+print(config.adoption_years)  # (1989, 1998, 2007)
+print(config.cohort_effect_slopes)  # (0.10, 0.05, 0.01)
+```
+
+Run `uv run python examples/baker_twfe.py` for the PyFixest comparison between
+vanilla relative-time TWFE and a saturated cohort-by-event-time estimator. The
+executable [Baker vignette](website/vignettes/baker-twfe.qmd) explains the
+construction and identifying comparisons.
 
 ## The data contract
 
@@ -183,6 +223,11 @@ pre-treatment periods, and 10 post-treatment periods. The last 40 units adopt
 treatment in period 40. The effect increases by 0.2 per post-treatment period,
 so the true ATT is 1.1.
 
+The balancing report crosses these families to form 12 statistically distinct
+DGP settings. Its 14 named Monte Carlo cases arise because the two synthetic
+settings are each paired with two estimator loss functions; those duplicated
+names do not represent additional panel laws.
+
 | Registry name | Factory | Main parameters | Untreated process |
 |---|---|---|---|
 | `classic_factor` | `classic_factor_design()` | `overlap` | Two drifting factors |
@@ -192,13 +237,16 @@ so the true ATT is 1.1.
 | `time_series` | `time_series_design()` | `coefficient`, `integrated` | AR(1) or ARIMA(1,1,0) unit paths |
 | `mixed_factor` | `mixed_factor_design()` | `overlap` | Drift-factor and cyclical-factor half-panels |
 
+The Baker design is intentionally separate from the stable canonical registry:
+use `baker_design()` for a reusable simulator or `baker()` for one draw.
+
 For the factor designs, `overlap=0` gives overlapping treated and control
 loading distributions. `overlap=1` separates their means. For the synthetic
 control design, `active_share` controls donor sparsity. For the time-series
 design, `integrated=True` cumulatively sums the stationary AR increments.
 
-The exact probability laws and draw order are in
-[`website/canonical-designs.md`](website/canonical-designs.md).
+The exact probability laws, construction code, and visualizations are in the
+[`Balancing DGP catalog`](website/canonical-designs.qmd).
 
 ## Registry API
 
@@ -282,7 +330,34 @@ Plain functions can be wrapped with `CallableOutcomeModel`. Built-in
 assignment components include fixed single-cohort and staggered assignments,
 fixed-size randomized assignment, binary logit selection, and multinomial-logit
 generalized propensity scores for adoption cohorts. Built-in effects are
-`ConstantEffect` and `LinearRampEffect`.
+`ConstantEffect`, `LinearRampEffect`, and `CallableUnitEffect`. A lambda can be
+passed directly to `effect_model` to define a unit-level law
+$\tau_i=f(X_i,U_i)$:
+
+```python
+simulator = pps.PanelSimulator(
+    name="heterogeneous_effects",
+    dimensions=pps.PanelDimensions(120, 40),
+    feature_model=pps.GaussianUnitFeatures(2, 1),
+    assignment=pps.RandomizedSingleCohortAssignment(40, 28),
+    outcome_model=pps.CallableOutcomeModel(
+        lambda x, rng: rng.normal(size=(x.dimensions.n_units, x.dimensions.n_periods))
+    ),
+    effect_model=lambda x: (
+        1.0
+        + 0.45 * x.observables[:, 0]
+        - 0.30 * x.observables[:, 1]
+        + 0.80 * x.unobservables[:, 0]
+    ),
+)
+```
+
+The lambda receives `SimulationContext`. It may return a scalar or one value
+per unit; pypanelsim broadcasts those effects across time and zeros them in
+untreated cells. The complete visual example is
+[`examples/heterogeneous_effects.py`](examples/heterogeneous_effects.py), with
+rendered output in
+[`examples/heterogeneous_effects.png`](examples/heterogeneous_effects.png).
 
 ## Assignment mechanisms
 
@@ -437,7 +512,8 @@ pypanelsim/
 │   ├── components.py    # component protocols and built-ins
 │   ├── simulator.py     # orchestration and RNG policy
 │   ├── registry.py      # named simulator factories
-│   └── canonical.py     # canonical experiment designs
+│   ├── canonical.py     # canonical balancing-experiment designs
+│   └── baker.py         # staggered-adoption TWFE failure design
 ├── tests/               # contract, invariant, and regression tests
 ├── examples/            # runnable composition and interop examples
 ├── website/             # Quarto source, API docs, and vignettes
@@ -464,9 +540,10 @@ uv sync --extra docs
 uv run quarto render website
 ```
 
-The rendered site is written to `docs/` for branch-based GitHub Pages. Its source includes detailed core,
-assignment, canonical-design, and registry API pages plus the complete
-398-cell balancing-reproduction vignette.
+The rendered site is written to `docs/` for branch-based GitHub Pages. Its
+source includes detailed core, assignment, canonical-design, Baker, and
+registry API pages; the visual DGP catalog; the complete 398-cell balancing
+reproduction; and the Baker/PyFixest event-study vignette.
 
 Run the examples with:
 
@@ -474,6 +551,8 @@ Run the examples with:
 uv run python examples/custom_dgp.py
 uv run python examples/estimator_interop.py
 uv run python examples/assignment_mechanisms.py
+uv run python examples/heterogeneous_effects.py
+uv run python examples/baker_twfe.py
 ```
 
 The test suite covers immutable data contracts, assignment and effect

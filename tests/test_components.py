@@ -4,6 +4,7 @@ import pytest
 from pypanelsim import (
     AssignmentContext,
     BinaryLogitAssignment,
+    CallableUnitEffect,
     ConstantEffect,
     GeneralizedPropensityAssignment,
     LinearRampEffect,
@@ -64,6 +65,68 @@ def test_constant_effect_is_zero_outside_treatment() -> None:
     effect = ConstantEffect(-2.0).generate(context, np.random.default_rng(5))
 
     np.testing.assert_array_equal(effect.values, -2.0 * treatment.values)
+
+
+def test_callable_unit_effect_uses_observed_and_latent_features() -> None:
+    dimensions = PanelDimensions(3, 4)
+    treatment = np.array(
+        [
+            [0.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 1.0, 1.0],
+            [0.0, 0.0, 1.0, 1.0],
+        ]
+    )
+    context = SimulationContext(
+        dimensions,
+        treatment,
+        observables=np.array([[-1.0], [0.5], [2.0]]),
+        unobservables=np.array([[0.25], [-0.5], [1.0]]),
+    )
+    model = CallableUnitEffect(
+        lambda x: 1.0 + 0.4 * x.observables[:, 0] + 0.8 * x.unobservables[:, 0]
+    )
+    draw = model.generate(context, np.random.default_rng(6))
+
+    expected_unit_effects = np.array([0.8, 0.8, 2.6])
+    np.testing.assert_allclose(
+        draw.values,
+        expected_unit_effects[:, None] * treatment,
+    )
+    np.testing.assert_allclose(draw.metadata["unit_effects"], expected_unit_effects)
+
+
+@pytest.mark.parametrize(
+    "result, expected",
+    [
+        (2.0, np.array([2.0, 2.0, 2.0])),
+        (np.array([[1.0], [2.0], [3.0]]), np.array([1.0, 2.0, 3.0])),
+    ],
+)
+def test_callable_unit_effect_normalizes_scalar_and_column(result, expected) -> None:
+    dimensions = PanelDimensions(3, 2)
+    context = SimulationContext(dimensions, np.ones((3, 2)))
+
+    draw = CallableUnitEffect(lambda context: result).generate(
+        context, np.random.default_rng(1)
+    )
+
+    np.testing.assert_allclose(draw.metadata["unit_effects"], expected)
+    np.testing.assert_allclose(draw.values, np.repeat(expected[:, None], 2, axis=1))
+
+
+@pytest.mark.parametrize(
+    "function, message",
+    [
+        (lambda context: np.zeros((context.dimensions.n_units, 2)), "shape"),
+        (lambda context: np.full(context.dimensions.n_units, np.nan), "finite"),
+    ],
+)
+def test_callable_unit_effect_validates_output(function, message: str) -> None:
+    dimensions = PanelDimensions(3, 4)
+    context = SimulationContext(dimensions, np.zeros((3, 4)))
+
+    with pytest.raises(ValueError, match=message):
+        CallableUnitEffect(function).generate(context, np.random.default_rng(1))
 
 
 def test_randomized_single_cohort_samples_fixed_count_from_eligible_units() -> None:

@@ -82,9 +82,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-354ec2e334119c0e8515286d97afb4cd.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-14484c6a423ba8334c2c2e22bfbe1c25.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-354ec2e334119c0e8515286d97afb4cd.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-36d25da79ffdd5f9713da90c3b96a3d2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-38d12467a47ff8fdcb073e1c30ca1f5a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-36d25da79ffdd5f9713da90c3b96a3d2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -117,7 +117,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-sidebar docked nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -305,6 +305,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span class="menu-text">Get started</span></a>
   </li>  
   <li class="nav-item">
+    <a class="nav-link" href="./canonical-designs.html"> 
+<span class="menu-text">DGP catalog</span></a>
+  </li>  
+  <li class="nav-item">
     <a class="nav-link" href="./assignment.html"> 
 <span class="menu-text">Assignment</span></a>
   </li>  
@@ -320,6 +324,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li>
     <a class="dropdown-item" href="./vignettes/balancing-reproduction.html">
  <span class="dropdown-text">Balancing reproduction</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./vignettes/baker-twfe.html">
+ <span class="dropdown-text">Baker TWFE failure</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="./interoperability.html">
@@ -405,7 +413,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./canonical-designs.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Canonical panel designs</span></a>
+ <span class="menu-text">Balancing DGP catalog</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -451,6 +459,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./reference/baker.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Baker staggered-adoption API</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./reference/canonical.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Canonical design API</span></a>
   </div>
@@ -474,6 +488,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./vignettes/baker-twfe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Baker DGP: why vanilla TWFE event studies fail</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./vignettes/balancing-reproduction.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Balancing estimators in synthetic panels</span></a>
   </div>
@@ -485,24 +505,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#migration-from-panel_dgps" id="toc-migration-from-panel_dgps" class="nav-link active" data-scroll-target="#migration-from-panel_dgps"><span class="header-section-number">1</span> Migration from <code>panel_dgps</code></a>
-  <ul class="collapse">
-  <li><a href="#package-boundary" id="toc-package-boundary" class="nav-link" data-scroll-target="#package-boundary"><span class="header-section-number">1.1</span> Package boundary</a></li>
-  <li><a href="#import-map" id="toc-import-map" class="nav-link" data-scroll-target="#import-map"><span class="header-section-number">1.2</span> Import map</a></li>
-  <li><a href="#one-draw-migration" id="toc-one-draw-migration" class="nav-link" data-scroll-target="#one-draw-migration"><span class="header-section-number">1.3</span> One-draw migration</a></li>
-  <li><a href="#reusable-simulator-migration" id="toc-reusable-simulator-migration" class="nav-link" data-scroll-target="#reusable-simulator-migration"><span class="header-section-number">1.4</span> Reusable simulator migration</a></li>
-  <li><a href="#metadata-migration" id="toc-metadata-migration" class="nav-link" data-scroll-target="#metadata-migration"><span class="header-section-number">1.5</span> Metadata migration</a></li>
-  <li><a href="#data-ownership" id="toc-data-ownership" class="nav-link" data-scroll-target="#data-ownership"><span class="header-section-number">1.6</span> Data ownership</a></li>
-  <li><a href="#new-composition-api" id="toc-new-composition-api" class="nav-link" data-scroll-target="#new-composition-api"><span class="header-section-number">1.7</span> New composition API</a></li>
-  </ul></li>
-  </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/migration.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
-    </div>
+    
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./architecture.html">Concepts</a></li><li class="breadcrumb-item"><a href="./migration.html">Migration from <code>panel_dgps</code></a></li></ol></nav></header>
 
@@ -1034,4 +1037,4 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/migration.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/migration.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

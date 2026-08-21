@@ -9,14 +9,16 @@ project:
     - assignment.qmd
     - interoperability.qmd
     - architecture.md
-    - canonical-designs.md
+    - canonical-designs.qmd
     - migration.md
     - validation.md
     - api.qmd
     - reference/core.qmd
     - reference/assignment.qmd
+    - reference/baker.qmd
     - reference/canonical.qmd
     - reference/registry.qmd
+    - vignettes/baker-twfe.qmd
     - vignettes/balancing-reproduction.qmd
 
 website:
@@ -32,6 +34,8 @@ website:
         text: Home
       - href: getting-started.qmd
         text: Get started
+      - href: canonical-designs.qmd
+        text: DGP catalog
       - href: assignment.qmd
         text: Assignment
       - href: api.qmd
@@ -40,6 +44,8 @@ website:
         menu:
           - href: vignettes/balancing-reproduction.qmd
             text: Balancing reproduction
+          - href: vignettes/baker-twfe.qmd
+            text: Baker TWFE failure
           - href: interoperability.qmd
             text: Estimator interoperability
     right:
@@ -57,7 +63,7 @@ website:
       - section: "Concepts"
         contents:
           - architecture.md
-          - canonical-designs.md
+          - canonical-designs.qmd
           - migration.md
           - validation.md
       - section: "API reference"
@@ -65,20 +71,21 @@ website:
           - api.qmd
           - reference/core.qmd
           - reference/assignment.qmd
+          - reference/baker.qmd
           - reference/canonical.qmd
           - reference/registry.qmd
       - section: "Vignettes"
         contents:
+          - vignettes/baker-twfe.qmd
           - vignettes/balancing-reproduction.qmd
 
 format:
   html:
     theme:
-      light: cosmo
-      dark: darkly
+      light: [cosmo, custom.scss]
+      dark: [darkly, custom.scss]
     css: styles.css
-    toc: true
-    toc-depth: 3
+    toc: false
     number-sections: true
     code-copy: true
     code-fold: show
