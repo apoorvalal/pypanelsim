@@ -3,13 +3,15 @@ import pytest
 
 from pypanelsim import (
     BinaryLogitAssignment,
+    CallableEffect,
     CallableOutcomeModel,
-    CallableUnitEffect,
     ComponentDraw,
     ConstantEffect,
+    GaussianTimeFeatures,
     GaussianUnitFeatures,
     PanelDimensions,
     PanelSimulator,
+    RandomizedSingleCohortAssignment,
     SingleCohortAssignment,
     resolve_rng,
 )
@@ -133,7 +135,7 @@ def test_simulator_accepts_unit_effect_lambda() -> None:
     )
     panel = simulator.simulate(seed=14)
 
-    assert isinstance(simulator.effect_model, CallableUnitEffect)
+    assert isinstance(simulator.effect_model, CallableEffect)
     expected = (
         1.0
         + 0.5 * panel.unit_covariates[:, 0]
@@ -144,3 +146,57 @@ def test_simulator_accepts_unit_effect_lambda() -> None:
         panel.treatment_effect,
         expected[:, None] * panel.treatment,
     )
+
+
+def test_simulator_shares_time_features_with_outcome_and_effect() -> None:
+    dimensions = PanelDimensions(8, 6)
+
+    def time_feature_outcome(context, rng):
+        noise = rng.normal(scale=0.01, size=(dimensions.n_units, dimensions.n_periods))
+        return context.time_features[:, 0][None, :] + noise
+
+    simulator = PanelSimulator(
+        name="unit_time_heterogeneity",
+        dimensions=dimensions,
+        assignment=SingleCohortAssignment(n_treated=3, adoption_period=3),
+        outcome_model=CallableOutcomeModel(time_feature_outcome),
+        effect_model=lambda x: (
+            (1.0 + 0.5 * x.observables[:, 0])[:, None]
+            * (1.0 + 0.25 * x.time_features[:, 0])[None, :]
+        ),
+        feature_model=GaussianUnitFeatures(n_observables=1, n_unobservables=0),
+        time_feature_model=GaussianTimeFeatures(n_features=1),
+    )
+    panel = simulator.simulate(seed=15)
+
+    time_features = panel.metadata["time_features"]["values"]
+    expected_surface = (1.0 + 0.5 * panel.unit_covariates[:, 0])[:, None] * (
+        1.0 + 0.25 * time_features[:, 0]
+    )[None, :]
+    np.testing.assert_allclose(
+        panel.metadata["effect"]["effect_surface"], expected_surface
+    )
+    np.testing.assert_allclose(
+        panel.treatment_effect, expected_surface * panel.treatment
+    )
+    assert panel.metadata["effect"]["normalization"] == "surface"
+    assert panel.metadata["time_features"]["feature_names"] == ("v1",)
+
+
+def test_time_features_do_not_perturb_assignment_stream() -> None:
+    dimensions = PanelDimensions(20, 8)
+    common = {
+        "dimensions": dimensions,
+        "assignment": RandomizedSingleCohortAssignment(6, 5),
+        "outcome_model": CallableOutcomeModel(gaussian_outcome),
+        "effect_model": ConstantEffect(),
+        "feature_model": GaussianUnitFeatures(1, 1),
+    }
+    without_time = PanelSimulator(name="without_time", **common).simulate(seed=21)
+    with_time = PanelSimulator(
+        name="with_time",
+        time_feature_model=GaussianTimeFeatures(2),
+        **common,
+    ).simulate(seed=21)
+
+    np.testing.assert_array_equal(without_time.treatment, with_time.treatment)

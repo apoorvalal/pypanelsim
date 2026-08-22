@@ -567,7 +567,8 @@ window.Quarto = {
 <li><code>unobservables</code>, retained under <code>panel.metadata["features"]</code> as simulation truth.</li>
 </ul>
 <p><code>GaussianUnitFeatures(k_x, k_u)</code> supplies independent standard-normal features. A custom feature model can instead introduce correlation, discrete covariates, or application-specific population structure.</p>
-<div id="047359b8" class="cell" data-execution_count="1">
+<p><code>TimeFeatureModel</code> analogously draws a <code>(n_periods, k_v)</code> matrix <span class="math inline">\(V_t\)</span> shared by untreated outcomes and treatment effects. <code>GaussianTimeFeatures(k_v)</code> is the built-in independent-normal version; a custom model can supply trends, cycles, shocks, or calendar variables.</p>
+<div id="c3772e28" class="cell" data-execution_count="1">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass</span>
@@ -612,7 +613,7 @@ window.Quarto = {
 <section id="fixed-size-randomization" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="fixed-size-randomization"><span class="header-section-number">2</span> Fixed-size randomization</h2>
 <p><code>RandomizedSingleCohortAssignment</code> samples exactly <code>n_treated</code> eligible units without replacement. Every eligible unit has marginal treatment probability <code>n_treated / n_eligible</code>; ineligible units have probability zero.</p>
-<div id="330415d8" class="cell" data-execution_count="2">
+<div id="fd9258f8" class="cell" data-execution_count="2">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>randomized <span class="op">=</span> build(</span>
@@ -644,7 +645,7 @@ e_i=P(D_i=1\mid X_i,U_i)
 <section id="selection-on-observables" class="level3" data-number="3.1">
 <h3 data-number="3.1" class="anchored" data-anchor-id="selection-on-observables"><span class="header-section-number">3.1</span> Selection on observables</h3>
 <p>Set <span class="math inline">\(\gamma=0\)</span>:</p>
-<div id="78b00d5d" class="cell" data-execution_count="3">
+<div id="819ca36d" class="cell" data-execution_count="3">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>observed_selection <span class="op">=</span> build(</span>
@@ -670,7 +671,7 @@ e_i=P(D_i=1\mid X_i,U_i)
 <section id="selection-on-latent-factors" class="level3" data-number="3.2">
 <h3 data-number="3.2" class="anchored" data-anchor-id="selection-on-latent-factors"><span class="header-section-number">3.2</span> Selection on latent factors</h3>
 <p>Set <span class="math inline">\(\beta=0\)</span> and <span class="math inline">\(\gamma\ne0\)</span>:</p>
-<div id="6732fc6f" class="cell" data-execution_count="4">
+<div id="a09e0a1e" class="cell" data-execution_count="4">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>latent_selection <span class="op">=</span> build(</span>
@@ -701,7 +702,7 @@ r_g(X_i,U_i)=P(G_i=g\mid X_i,U_i)
 {1+\sum_{h\in\mathcal G}\exp(\alpha_h+X_i^\top\beta_h+U_i^\top\gamma_h)}.
 \]</span></p>
 <p>Never treated is the baseline category with normalized logit zero. Each sampled cohort produces absorbing treatment from its adoption period onward.</p>
-<div id="bb635d9d" class="cell" data-execution_count="5">
+<div id="9ef275c0" class="cell" data-execution_count="5">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>cohort_gps <span class="op">=</span> build(</span>
@@ -731,47 +732,51 @@ r_g(X_i,U_i)=P(G_i=g\mid X_i,U_i)
 </div>
 <p>Metadata includes <code>generalized_propensity_scores</code>, <code>assigned_categories</code>, <code>adoption_times</code>, cohort logits, coefficient matrices, and the never-treated category index.</p>
 </section>
-<section id="heterogeneous-treatment-effects" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="heterogeneous-treatment-effects"><span class="header-section-number">5</span> Heterogeneous treatment effects</h2>
-<p>The effect input may be a lambda defining a unit-level effect</p>
+<section id="unit-and-time-heterogeneous-treatment-effects" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="unit-and-time-heterogeneous-treatment-effects"><span class="header-section-number">5</span> Unit and time heterogeneous treatment effects</h2>
+<p>The effect input may be a lambda defining the complete effect surface</p>
 <p><span class="math display">\[
-\tau_i=f(X_i,U_i).
+\tau_{it}=f(X_i,U_i,V_t).
 \]</span></p>
-<p>The lambda receives <code>SimulationContext</code>, so the same observed covariates and latent factors used by assignment and untreated outcomes are available as <code>x.observables</code> and <code>x.unobservables</code>. It returns either a scalar or one value per unit. <code>PanelSimulator</code> broadcasts the resulting <span class="math inline">\(\tau_i\)</span> over time and multiplies it by realized treatment.</p>
-<div id="b058be40" class="cell" data-execution_count="6">
+<p>The lambda receives <code>SimulationContext</code>, so the same observed covariates and latent factors used by assignment and untreated outcomes are available as <code>x.observables</code> and <code>x.unobservables</code>, while shared time modifiers are available as <code>x.time_features</code>. Return an <code>(N,T)</code> matrix for joint unit-time heterogeneity; scalar, unit-vector, and time-vector results are broadcast to that surface. <code>PanelSimulator</code> then multiplies it by realized treatment.</p>
+<div id="4e62f365" class="cell" data-execution_count="6">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>heterogeneous <span class="op">=</span> pps.PanelSimulator(</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">"heterogeneous_effects"</span>,</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    dimensions<span class="op">=</span>dimensions,</span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    feature_model<span class="op">=</span>features,</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    assignment<span class="op">=</span>pps.RandomizedSingleCohortAssignment(</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>        n_treated<span class="op">=</span><span class="dv">40</span>,</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        adoption_period<span class="op">=</span><span class="dv">32</span>,</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    outcome_model<span class="op">=</span>FeatureOutcome(),</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    effect_model<span class="op">=</span><span class="kw">lambda</span> x: (</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>        <span class="fl">1.0</span></span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> <span class="fl">0.45</span> <span class="op">*</span> x.observables[:, <span class="dv">0</span>]</span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>        <span class="op">-</span> <span class="fl">0.30</span> <span class="op">*</span> x.observables[:, <span class="dv">1</span>]</span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> <span class="fl">0.80</span> <span class="op">*</span> x.unobservables[:, <span class="dv">0</span>]</span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>heterogeneous_panel <span class="op">=</span> heterogeneous.simulate(seed<span class="op">=</span><span class="dv">2026</span>)</span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>unit_effects <span class="op">=</span> heterogeneous_panel.metadata[<span class="st">"effect"</span>][<span class="st">"unit_effects"</span>]</span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(unit_effects.<span class="bu">min</span>(), unit_effects.mean(), unit_effects.<span class="bu">max</span>())</span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(heterogeneous_panel.true_att)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    time_feature_model<span class="op">=</span>pps.GaussianTimeFeatures(<span class="dv">1</span>),</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    assignment<span class="op">=</span>pps.RandomizedSingleCohortAssignment(</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        n_treated<span class="op">=</span><span class="dv">40</span>,</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        adoption_period<span class="op">=</span><span class="dv">32</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    outcome_model<span class="op">=</span>FeatureOutcome(),</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    effect_model<span class="op">=</span><span class="kw">lambda</span> x: (</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>            <span class="fl">1.0</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> <span class="fl">0.45</span> <span class="op">*</span> x.observables[:, <span class="dv">0</span>]</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>            <span class="op">-</span> <span class="fl">0.30</span> <span class="op">*</span> x.observables[:, <span class="dv">1</span>]</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> <span class="fl">0.80</span> <span class="op">*</span> x.unobservables[:, <span class="dv">0</span>]</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>        )[:, <span class="va">None</span>]</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>        <span class="op">*</span> (<span class="fl">1.0</span> <span class="op">+</span> <span class="fl">0.30</span> <span class="op">*</span> x.time_features[:, <span class="dv">0</span>])[<span class="va">None</span>, :]</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>heterogeneous_panel <span class="op">=</span> heterogeneous.simulate(seed<span class="op">=</span><span class="dv">2026</span>)</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>effect_surface <span class="op">=</span> heterogeneous_panel.metadata[<span class="st">"effect"</span>][<span class="st">"effect_surface"</span>]</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(effect_surface.<span class="bu">min</span>(), effect_surface.mean(), effect_surface.<span class="bu">max</span>())</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(heterogeneous_panel.true_att)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>-1.3953546110678938 1.0280401569369535 3.795695965731661
-1.0787642752890538</code></pre>
+<pre><code>-2.637436761770768 1.0402353668237683 7.174454434105553
+1.0662805481767876</code></pre>
 </div>
 </div>
-<p>The complete <span class="math inline">\(\tau_i\)</span> vector is stored as simulation truth in effect metadata. Observed effect modifiers also remain available in <code>unit_covariates</code>; latent modifiers remain hidden from estimator-facing interchange unless explicitly retrieved from metadata for diagnostics.</p>
-<div id="41fb1893" class="cell" data-execution_count="7">
+<p>The complete <span class="math inline">\(\tau_{it}\)</span> surface is stored as simulation truth in effect metadata. The realized <code>treatment_effect</code> matrix is that surface multiplied by <span class="math inline">\(W\)</span>. Observed unit modifiers remain available in <code>unit_covariates</code>; latent unit and time modifiers remain under metadata unless explicitly retrieved for diagnostics.</p>
+<div id="a28a3843" class="cell" data-execution_count="7">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>order <span class="op">=</span> np.argsort(unit_effects, kind<span class="op">=</span><span class="st">"stable"</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>order <span class="op">=</span> np.argsort(effect_surface.mean(axis<span class="op">=</span><span class="dv">1</span>), kind<span class="op">=</span><span class="st">"stable"</span>)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">13</span>, <span class="dv">4</span>), constrained_layout<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> axis, values, title, cmap <span class="kw">in</span> (</span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    (axes[<span class="dv">0</span>], heterogeneous_panel.outcome, <span class="st">"Y"</span>, <span class="st">"coolwarm"</span>),</span>
@@ -779,21 +784,21 @@ r_g(X_i,U_i)=P(G_i=g\mid X_i,U_i)
 <span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    (</span>
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        axes[<span class="dv">2</span>],</span>
 <span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        heterogeneous_panel.treatment_effect,</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>        <span class="vs">r"</span><span class="dv">$</span><span class="ch">\t</span><span class="vs">au_i W_{it}</span><span class="dv">$</span><span class="vs">"</span>,</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>        <span class="vs">r"</span><span class="dv">$</span><span class="ch">\t</span><span class="vs">au_{it} W_{it}</span><span class="dv">$</span><span class="vs">"</span>,</span>
 <span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"coolwarm"</span>,</span>
 <span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    ),</span>
 <span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>):</span>
 <span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    axis.matshow(values[order], aspect<span class="op">=</span><span class="st">"auto"</span>, cmap<span class="op">=</span>cmap)</span>
 <span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    axis.set_title(title)</span>
 <span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    axis.set_xlabel(<span class="st">"period"</span>)</span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="vs">r"units, sorted by </span><span class="dv">$</span><span class="ch">\t</span><span class="vs">au_i</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="vs">r"units, sorted by mean </span><span class="dv">$</span><span class="ch">\t</span><span class="vs">au_{it}</span><span class="dv">$</span><span class="vs">"</span>)</span>
 <span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="assignment_files/figure-html/cell-8-output-1.png" width="1259" height="395" class="figure-img"></p>
-<figcaption>Observed outcomes, assignment, and realized effects under tau_i = f(X_i, U_i). Units are sorted by their unit-level effect.</figcaption>
+<figcaption>Observed outcomes, assignment, and realized effects under tau_it = f(X_i, U_i, V_t). Units are sorted by their mean effect.</figcaption>
 </figure>
 </div>
 </div>
@@ -801,7 +806,7 @@ r_g(X_i,U_i)=P(G_i=g\mid X_i,U_i)
 </section>
 <section id="visual-comparison" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="visual-comparison"><span class="header-section-number">6</span> Visual comparison</h2>
-<div id="f1708b67" class="cell" data-execution_count="8">
+<div id="fbdb078e" class="cell" data-execution_count="8">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>designs <span class="op">=</span> {</span>

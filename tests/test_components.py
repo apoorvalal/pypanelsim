@@ -4,8 +4,10 @@ import pytest
 from pypanelsim import (
     AssignmentContext,
     BinaryLogitAssignment,
+    CallableEffect,
     CallableUnitEffect,
     ConstantEffect,
+    GaussianTimeFeatures,
     GeneralizedPropensityAssignment,
     LinearRampEffect,
     PanelDimensions,
@@ -93,6 +95,10 @@ def test_callable_unit_effect_uses_observed_and_latent_features() -> None:
         expected_unit_effects[:, None] * treatment,
     )
     np.testing.assert_allclose(draw.metadata["unit_effects"], expected_unit_effects)
+    np.testing.assert_allclose(
+        draw.metadata["effect_surface"],
+        np.repeat(expected_unit_effects[:, None], dimensions.n_periods, axis=1),
+    )
 
 
 @pytest.mark.parametrize(
@@ -127,6 +133,63 @@ def test_callable_unit_effect_validates_output(function, message: str) -> None:
 
     with pytest.raises(ValueError, match=message):
         CallableUnitEffect(function).generate(context, np.random.default_rng(1))
+
+
+def test_callable_effect_accepts_time_vector_and_unit_time_surface() -> None:
+    dimensions = PanelDimensions(3, 4)
+    treatment = np.array(
+        [
+            [0.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 1.0, 1.0],
+            [0.0, 0.0, 1.0, 1.0],
+        ]
+    )
+    context = SimulationContext(dimensions, treatment)
+    time_effects = np.array([0.5, 1.0, 1.5, 2.0])
+
+    time_draw = CallableEffect(lambda x: time_effects[None, :]).generate(
+        context, np.random.default_rng(1)
+    )
+    np.testing.assert_allclose(time_draw.values, time_effects[None, :] * treatment)
+    np.testing.assert_allclose(time_draw.metadata["time_effects"], time_effects)
+    assert time_draw.metadata["normalization"] == "time"
+
+    vector_draw = CallableEffect(lambda x: time_effects).generate(
+        context, np.random.default_rng(1)
+    )
+    np.testing.assert_allclose(vector_draw.values, time_draw.values)
+
+    surface = np.arange(12, dtype=float).reshape(3, 4) / 10.0
+    surface_draw = CallableEffect(lambda x: surface).generate(
+        context, np.random.default_rng(1)
+    )
+    np.testing.assert_allclose(surface_draw.values, surface * treatment)
+    np.testing.assert_allclose(surface_draw.metadata["effect_surface"], surface)
+    assert surface_draw.metadata["normalization"] == "surface"
+
+
+def test_gaussian_time_features_have_one_row_per_period() -> None:
+    dimensions = PanelDimensions(5, 7)
+    model = GaussianTimeFeatures(n_features=2)
+    first = model.generate(dimensions, np.random.default_rng(9))
+    second = model.generate(dimensions, np.random.default_rng(9))
+
+    assert first.values.shape == (7, 2)
+    np.testing.assert_array_equal(first.values, second.values)
+    assert first.metadata["feature_names"] == ("v1", "v2")
+
+    with pytest.raises(ValueError, match="nonnegative"):
+        GaussianTimeFeatures(n_features=-1)
+
+
+def test_simulation_context_validates_time_feature_rows() -> None:
+    dimensions = PanelDimensions(3, 4)
+    with pytest.raises(ValueError, match="n_periods"):
+        SimulationContext(
+            dimensions,
+            np.zeros((3, 4)),
+            time_features=np.zeros((3, 1)),
+        )
 
 
 def test_randomized_single_cohort_samples_fixed_count_from_eligible_units() -> None:

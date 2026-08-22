@@ -2,8 +2,10 @@
 
 ## Unreleased
 
-- Allow `effect_model` to be a unit-level callable for treatment-effect
-  heterogeneity driven by observed covariates and latent factors.
+- Allow `effect_model` to be a scalar, unit, time, or unit-by-time callable for
+  treatment-effect heterogeneity driven by $X_i$, $U_i$, and shared $V_t$.
+- Add shared time-feature models and Gaussian time features to the simulation
+  pipeline.
 - Add shared observed and latent unit features to the simulation pipeline.
 - Add fixed-size randomized and binary-logit single-cohort assignments.
 - Add multinomial-logit generalized propensity scores for adoption cohorts.

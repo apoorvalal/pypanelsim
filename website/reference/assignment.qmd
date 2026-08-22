@@ -31,6 +31,18 @@ Metadata includes `kind="gaussian_unit_features"`, `observable_names`, and
 `unobservable_names`. A zero count returns an `(n_units, 0)` matrix without
 consuming draws for that block.
 
+## `GaussianTimeFeatures`
+
+```{python}
+show_signature(pps.GaussianTimeFeatures)
+```
+
+Draws an `(n_periods, n_features)` matrix of independent standard-normal time
+features. `n_features` defaults to one and must be nonnegative. Metadata records
+`kind="gaussian_time_features"` and names `v1`, `v2`, and so on. Supply a custom
+`TimeFeatureModel` when $V_t$ should be a trend, cycle, shock process, or
+calendar covariate.
+
 ## `SingleCohortAssignment`
 
 ```{python}
@@ -161,34 +173,48 @@ $$
 absorbing adoption because event time is unit specific. Nonabsorbing treatment
 raises through `context.adoption_times`.
 
-## `CallableUnitEffect`
+## `CallableEffect`
 
 ```{python}
-show_signature(pps.CallableUnitEffect)
+show_signature(pps.CallableEffect)
 ```
 
-Adapts a deterministic unit-level law to `EffectModel`. Its callable receives
-`SimulationContext`, including `observables` and `unobservables`, and returns a
-finite scalar, an `(N,)` vector, or an `(N,1)` column. For unit effect
-$\tau_i=f(X_i,U_i)$, the realized matrix is
+Adapts a deterministic effect law to `EffectModel`. Its callable receives
+`SimulationContext`, including `observables`, `unobservables`, and
+`time_features`. It can therefore implement
+$\tau_{it}=f(X_i,U_i,V_t)$. Accepted results are:
+
+| Returned shape | Interpretation |
+|---|---|
+| scalar | Common across units and time |
+| `(N,)` or `(N,1)` | Unit effect, broadcast over time |
+| `(T,)` or `(1,T)` | Time effect, broadcast over units |
+| `(N,T)` | Complete unit-by-time effect surface |
+
+The realized matrix is
 
 $$
-\tau_{it}^{\mathrm{realized}}=f(X_i,U_i)W_{it}.
+\tau_{it}^{\mathrm{realized}}=f(X_i,U_i,V_t)W_{it}.
 $$
 
-The normalized `(N,)` vector is recorded under `unit_effects` in effect
-metadata. A malformed or nonfinite result raises `ValueError`. The adapter can
-be constructed explicitly to assign a metadata name:
+The normalized `(N,T)` law is recorded under `effect_surface`. Pure unit and
+time laws additionally record `unit_effects` or `time_effects`. Metadata also
+identifies the normalization type. For a square panel, a one-dimensional vector
+retains the legacy unit interpretation; return `(1,T)` for an unambiguous time
+law. A malformed or nonfinite result raises `ValueError`.
 
 ```{python}
-effect = pps.CallableUnitEffect(
-    lambda x: 1.0 + 0.5 * x.observables[:, 0] + x.unobservables[:, 0],
-    name="baseline_heterogeneity",
+effect = pps.CallableEffect(
+    lambda x: (
+        1.0 + 0.5 * x.observables[:, 0] + x.unobservables[:, 0]
+    )[:, None] * (1.0 + 0.25 * x.time_features[:, 0])[None, :],
+    name="unit_time_heterogeneity",
 )
 ```
 
 For the common case, pass the lambda directly to `PanelSimulator` and it will
-be wrapped automatically.
+be wrapped automatically. `CallableUnitEffect` remains a backward-compatible
+class name and accepts the same result shapes.
 
 ## `CallableOutcomeModel`
 

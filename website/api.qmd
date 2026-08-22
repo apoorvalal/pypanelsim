@@ -18,6 +18,7 @@ inheritance from a package base class.
 | [`PanelSimulator`](reference/core.qmd#panelsimulator) | Feature, assignment, outcome, and effect orchestration |
 | [`SimulationContext`](reference/core.qmd#simulationcontext) | Treatment and shared features for outcome/effect components |
 | [`ComponentDraw`](reference/core.qmd#componentdraw) | Component matrix plus diagnostic metadata |
+| [`TimeFeatureDraw`](reference/core.qmd#timefeaturedraw) | Shared time-varying features plus metadata |
 | [`resolve_rng`](reference/core.qmd#resolve_rng) | Explicit seed/generator validation |
 
 ## Features and assignment
@@ -25,6 +26,7 @@ inheritance from a package base class.
 | Object | Purpose |
 |---|---|
 | [`GaussianUnitFeatures`](reference/assignment.qmd#gaussianunitfeatures) | Observed and latent standard-normal unit features |
+| [`GaussianTimeFeatures`](reference/assignment.qmd#gaussiantimefeatures) | Standard-normal time-varying features shared by outcomes and effects |
 | [`SingleCohortAssignment`](reference/assignment.qmd#singlecohortassignment) | Fixed common adoption schedule |
 | [`RandomizedSingleCohortAssignment`](reference/assignment.qmd#randomizedsinglecohortassignment) | Fixed-size complete randomization |
 | [`BinaryLogitAssignment`](reference/assignment.qmd#binarylogitassignment) | Sigmoid selection on observed and latent features |
@@ -32,7 +34,8 @@ inheritance from a package base class.
 | [`GeneralizedPropensityAssignment`](reference/assignment.qmd#generalizedpropensityassignment) | Multinomial-logit adoption cohorts |
 | [`ConstantEffect`](reference/assignment.qmd#constanteffect) | Constant effect on treated cells |
 | [`LinearRampEffect`](reference/assignment.qmd#linearampeffect) | Event-time-linear effect path |
-| [`CallableUnitEffect`](reference/assignment.qmd#callableuniteffect) | Unit-level heterogeneity from observed and latent features |
+| [`CallableEffect`](reference/assignment.qmd#callableeffect) | Scalar, unit, time, or unit-by-time effect heterogeneity |
+| [`CallableUnitEffect`](reference/assignment.qmd#callableeffect) | Compatibility name for callable effects |
 
 ## Canonical designs
 

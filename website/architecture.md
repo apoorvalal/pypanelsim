@@ -17,7 +17,10 @@ AssignmentContext(dimensions, observables, unobservables)
 AssignmentModel.assign(context, rng)
       |
       v
-SimulationContext(dimensions, treatment, features)
+TimeFeatureModel.generate(dimensions, rng) [optional]
+      |
+      v
+SimulationContext(dimensions, treatment, unit features, time features)
       |
       +-------------------------+
       |                         |
@@ -30,12 +33,13 @@ OutcomeModel.generate()   EffectModel.generate()
               PanelDataset
 ```
 
-Shared unit features are drawn before assignment. This lets an assignment and
-an outcome process depend on the same observed covariates or latent unit factors
-without passing data through diagnostic metadata. Assignment still precedes the
-outcome draw, and the untreated outcome model does not receive realized effects.
-The effect model does not receive outcomes. This keeps the causal decomposition
-explicit.
+Shared unit features are drawn before assignment and can reach assignment,
+outcomes, and effects. Time features are drawn after assignment and reach
+outcomes and effects, so adding $V_t$ does not perturb a randomized assignment
+stream. This permits $\tau_{it}=f(X_i,U_i,V_t)$ without passing arrays through
+diagnostic metadata. Assignment still precedes the outcome draw, and the
+untreated outcome model does not receive realized effects. The effect model
+does not receive outcomes. This keeps the causal decomposition explicit.
 
 ## Core objects
 
@@ -60,8 +64,9 @@ feature matrices without consuming additional random draws.
 
 ### `SimulationContext`
 
-The context contains dimensions, realized treatment, and the same features used
-by assignment. It derives:
+The context contains dimensions, realized treatment, the unit features used by
+assignment, and a `(n_periods, n_time_features)` `time_features` matrix. It
+derives:
 
 - `ever_treated`;
 - `control_units`;
@@ -87,6 +92,10 @@ The component interfaces use `typing.Protocol`. Inheritance is optional.
 ```python
 class UnitFeatureModel(Protocol):
     def generate(self, dimensions, rng) -> UnitFeatureDraw: ...
+
+
+class TimeFeatureModel(Protocol):
+    def generate(self, dimensions, rng) -> TimeFeatureDraw: ...
 
 
 class AssignmentModel(Protocol):
@@ -145,14 +154,20 @@ same random stream.
   and latent unit factors. Custom feature models can impose correlations or
   generate application-specific covariates.
 
+### Time features
+
+- `GaussianTimeFeatures` draws independent standard-normal $V_t$. Custom time
+  feature models can generate trends, cycles, shocks, or observed calendars.
+
 ### Effects
 
 - `ConstantEffect` applies one effect to every treated cell.
 - `LinearRampEffect` uses unit-specific event time and supports staggered
   adoption.
-- `CallableUnitEffect` evaluates a scalar or unit-vector law against the shared
-  `SimulationContext`; `PanelSimulator` automatically wraps a lambda passed as
-  `effect_model`.
+- `CallableEffect` evaluates scalar, unit, time, or full unit-by-time laws
+  against the shared `SimulationContext`; `PanelSimulator` automatically wraps
+  a lambda passed as `effect_model`. `CallableUnitEffect` is retained as a
+  compatibility name.
 
 ### Outcome adapter
 

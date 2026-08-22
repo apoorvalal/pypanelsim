@@ -1,4 +1,4 @@
-"""Treatment-effect heterogeneity from observed and latent unit features."""
+"""Treatment-effect heterogeneity across units and time."""
 
 from __future__ import annotations
 
@@ -18,19 +18,33 @@ class FeatureDrivenOutcome:
     noise_scale: float = 0.3
 
     def generate(self, context, rng):
-        time = np.linspace(-1.0, 1.0, context.dimensions.n_periods)
-        cycle = np.sin(np.linspace(0.0, 2.5 * np.pi, context.dimensions.n_periods))
+        trend = context.time_features[:, 0]
+        cycle = context.time_features[:, 1]
         values = (
             0.8 * context.observables[:, :1]
-            + 0.5 * context.observables[:, 1:2] * time
+            + 0.5 * context.observables[:, 1:2] * trend
             + 1.1 * context.unobservables[:, :1] * cycle
         )
         values += rng.normal(scale=self.noise_scale, size=values.shape)
         return pps.ComponentDraw(values, {"kind": "feature_driven_outcome"})
 
 
+@dataclass(frozen=True, slots=True)
+class TrendCycleTimeFeatures:
+    """Deterministic trend and cycle shared by outcomes and effects."""
+
+    def generate(self, dimensions, rng):
+        del rng
+        trend = np.linspace(-1.0, 1.0, dimensions.n_periods)
+        cycle = np.sin(np.linspace(0.0, 2.5 * np.pi, dimensions.n_periods))
+        return pps.TimeFeatureDraw(
+            np.column_stack((trend, cycle)),
+            {"kind": "trend_cycle", "feature_names": ("trend", "cycle")},
+        )
+
+
 def heterogeneous_effect_dgp() -> pps.PanelSimulator:
-    """Build a randomized panel with tau_i = f(X_i, U_i)."""
+    """Build a randomized panel with tau_it = f(X_i, U_i, V_t)."""
 
     return pps.PanelSimulator(
         name="heterogeneous_effects",
@@ -39,16 +53,22 @@ def heterogeneous_effect_dgp() -> pps.PanelSimulator:
             n_observables=2,
             n_unobservables=1,
         ),
+        time_feature_model=TrendCycleTimeFeatures(),
         assignment=pps.RandomizedSingleCohortAssignment(
             n_treated=40,
             adoption_period=28,
         ),
         outcome_model=FeatureDrivenOutcome(),
         effect_model=lambda x: (
-            1.0
-            + 0.45 * x.observables[:, 0]
-            - 0.30 * x.observables[:, 1]
-            + 0.80 * x.unobservables[:, 0]
+            (
+                1.0
+                + 0.45 * x.observables[:, 0]
+                - 0.30 * x.observables[:, 1]
+                + 0.80 * x.unobservables[:, 0]
+            )[:, None]
+            * (1.0 + 0.35 * x.time_features[:, 0] + 0.25 * x.time_features[:, 1])[
+                None, :
+            ]
         ),
     )
 
@@ -63,8 +83,8 @@ def render_heterogeneous_effects(
     if output is None:
         output = Path(__file__).with_name("heterogeneous_effects.png")
     panel = heterogeneous_effect_dgp().simulate(seed=seed)
-    unit_effects = panel.metadata["effect"]["unit_effects"]
-    order = np.argsort(unit_effects, kind="stable")
+    effect_surface = panel.metadata["effect"]["effect_surface"]
+    order = np.argsort(effect_surface.mean(axis=1), kind="stable")
 
     figure, axes = plt.subplots(1, 3, figsize=(14, 5), constrained_layout=True)
     panels = (
@@ -72,7 +92,7 @@ def render_heterogeneous_effects(
         (panel.treatment, "Treatment W", "Greys", 0.0, 1.0),
         (
             panel.treatment_effect,
-            r"Realized effect $\tau_i W_{it}$",
+            r"Realized effect $\tau_{it} W_{it}$",
             "coolwarm",
             None,
             None,
@@ -89,9 +109,9 @@ def render_heterogeneous_effects(
         axis.set_title(title)
         axis.set_xlabel("period")
         figure.colorbar(image, ax=axis, fraction=0.045, pad=0.03)
-    axes[0].set_ylabel(r"units, sorted by $\tau_i$")
+    axes[0].set_ylabel(r"units, sorted by mean $\tau_{it}$")
     figure.suptitle(
-        r"Heterogeneous effects: $\tau_i=1+0.45X_{i1}-0.30X_{i2}+0.80U_i$",
+        r"Unit-time effects: $\tau_{it}=f(X_i,U_i,V_t)$",
         fontsize=14,
     )
     figure.savefig(output, dpi=180)

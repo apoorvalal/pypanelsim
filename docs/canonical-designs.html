@@ -4653,7 +4653,7 @@ height: auto;
 <p>The report contains <strong>12 statistically distinct settings</strong> across five DGP families. Its results contain 14 named cases because each of the two synthetic-control settings is fitted once with ridge unit balancing and once with penalized-SCM unit balancing. Those are estimator choices, not four different DGPs. The archived package also contains a sixth, factor–synthetic mixture, which was not used in the 398-cell comparison; it is documented and plotted here as well.</p>
 <section id="setup-and-the-shared-experiment" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="setup-and-the-shared-experiment"><span class="header-section-number">1</span> Setup and the shared experiment</h2>
-<div id="81c172a1" class="cell" data-execution_count="1">
+<div id="c96c2666" class="cell" data-execution_count="1">
 <details open class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -4681,7 +4681,7 @@ height: auto;
 \]</span></p>
 <p>so treated-period effects run from 0.2 through 2.0 and the true ATT is 1.1. Independent observation noise has standard deviation 0.6. Only the untreated outcome law changes across the sections below.</p>
 <p>There are two equivalent ways to use a canonical DGP. The <code>*_design</code> form returns a reusable simulator; the shorter form draws one panel immediately.</p>
-<div id="f57a670b" class="cell" data-execution_count="2">
+<div id="62a4aee8" class="cell" data-execution_count="2">
 <details open class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Reusable simulator: use this for Monte Carlo work.</span></span>
@@ -4698,7 +4698,7 @@ height: auto;
 </div>
 </div>
 <p>Each returned <code>PanelDataset</code> exposes <code>(unit, time)</code> arrays named <code>outcome</code>, <code>treatment</code>, <code>untreated_outcome</code>, and <code>treatment_effect</code>. The plots below put the observed outcome <span class="math inline">\(Y\)</span> and assignment <span class="math inline">\(W\)</span> side by side. The horizontal boundary separates controls from treated units; the vertical boundary is the common adoption date.</p>
-<div id="b1ff371d" class="cell" data-execution_count="3">
+<div id="e8a6dd27" class="cell" data-execution_count="3">
 <details open class="code-fold">
 <summary>Show the plotting helper</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> matshow_panels(draws, <span class="op">*</span>, title, n_pre<span class="op">=</span>config.n_pre):</span>
@@ -4794,7 +4794,7 @@ height: auto;
 </tbody>
 </table>
 <p>The same factories are available by name when a program chooses the design at runtime:</p>
-<div id="07048104" class="cell" data-execution_count="4">
+<div id="9284ae20" class="cell" data-execution_count="4">
 <details open class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>simulator <span class="op">=</span> pps.make_canonical(<span class="st">&quot;time_series&quot;</span>, coefficient<span class="op">=</span><span class="fl">0.9</span>, integrated<span class="op">=</span><span class="va">True</span>)</span>
@@ -4819,7 +4819,7 @@ N(a,I_2),&amp;i\text{ treated}.
 \end{cases}
 \]</span></p>
 <p>Each <span class="math inline">\(f_t\)</span> is a standardized AR(1) path with coefficient 0.5 plus a linear drift <span class="math inline">\(0.5t\)</span>. <code>overlap=0</code> gives the treated and control loadings the same distribution. <code>overlap=1</code> moves their means to opposite sides of factor space, making the treated counterfactual harder to recover from controls.</p>
-<div id="74e2a649" class="cell" data-execution_count="5">
+<div id="7adb24ce" class="cell" data-execution_count="5">
 <details open class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>classic_draws <span class="op">=</span> [</span>
@@ -4837,7 +4837,7 @@ N(a,I_2),&amp;i\text{ treated}.
 </div>
 </div>
 <p>The realized latent objects are available for diagnosis:</p>
-<div id="0ef0d52b" class="cell" data-execution_count="6">
+<div id="7e0d784c" class="cell" data-execution_count="6">
 <details open class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>classic <span class="op">=</span> classic_draws[<span class="dv">1</span>][<span class="dv">1</span>]</span>
@@ -4855,7 +4855,7 @@ true ATT: 1.1</code></pre>
 <section id="weak-factor" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="weak-factor"><span class="header-section-number">4</span> 2. Weak factor</h2>
 <p>Use this to make the factor structure diffuse and individually weak. The law is again <span class="math inline">\(Y_{it}(0)=\lambda_i^\top f_t+\varepsilon_{it}\)</span>, but there are ten factors: five drifting paths and five cycles <span class="math inline">\(\sin(\pi t/15)\)</span>. Every standardized factor is multiplied by 0.2. The same <code>overlap</code> parameter controls the treated–control loading gap.</p>
-<div id="8f439c1c" class="cell" data-execution_count="7">
+<div id="0d583f74" class="cell" data-execution_count="7">
 <details open class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>weak_draws <span class="op">=</span> [</span>
@@ -4872,7 +4872,7 @@ true ATT: 1.1</code></pre>
 </div>
 </div>
 </div>
-<div id="118a7d49" class="cell" data-execution_count="8">
+<div id="36898642" class="cell" data-execution_count="8">
 <details open class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>weak <span class="op">=</span> weak_draws[<span class="dv">0</span>][<span class="dv">1</span>]</span>
@@ -4894,7 +4894,7 @@ sample SD of every factor: [0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2]</code></pre
 <li>the second block contains 100 controls only and follows two cyclical factors.</li>
 </ul>
 <p>The two blocks restart from the same RNG state, matching the archived implementation. <code>overlap</code> separates treated loadings from the controls in the first block. It does not turn overlap into a treatment-assignment probability.</p>
-<div id="b33806d0" class="cell" data-execution_count="9">
+<div id="490b7d35" class="cell" data-execution_count="9">
 <details open class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>mixed_draws <span class="op">=</span> [</span>
@@ -4911,7 +4911,7 @@ sample SD of every factor: [0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2]</code></pre
 </div>
 </div>
 </div>
-<div id="567a5f56" class="cell" data-execution_count="10">
+<div id="89256a3b" class="cell" data-execution_count="10">
 <details open class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>mixed <span class="op">=</span> mixed_draws[<span class="dv">0</span>][<span class="dv">1</span>]</span>
@@ -4935,7 +4935,7 @@ Y_{it}(0)=\frac{1}{m}\sum_{j\in\mathcal A}Y_{jt}^{\text{factor}}
 +u_{it}+\varepsilon_{it},\qquad i\text{ treated}.
 \]</span></p>
 <p>The favored controls are <em>more likely</em> to be donors; the active set is not simply the exact top-<span class="math inline">\(m\)</span> set. <code>active_share=0.1</code> gives 16 donors and <code>active_share=0.5</code> gives 80 under the default configuration.</p>
-<div id="d5764296" class="cell" data-execution_count="11">
+<div id="61511ec5" class="cell" data-execution_count="11">
 <details open class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>synthetic_draws <span class="op">=</span> [</span>
@@ -4952,7 +4952,7 @@ Y_{it}(0)=\frac{1}{m}\sum_{j\in\mathcal A}Y_{jt}^{\text{factor}}
 </div>
 </div>
 </div>
-<div id="3524d92c" class="cell" data-execution_count="12">
+<div id="dfd55781" class="cell" data-execution_count="12">
 <details open class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> label, draw <span class="kw">in</span> synthetic_draws:</span>
@@ -4978,7 +4978,7 @@ x_{it}=\phi x_{i,t-1}+\mu_i+\eta_{it},\qquad
 \mu_i=0\ \text{for controls},\quad \mu_i=0.25\ \text{for treated units}.
 \]</span></p>
 <p>With <code>integrated=False</code>, <span class="math inline">\(Y_{it}(0)=x_{it}+\varepsilon_{it}\)</span>. With <code>integrated=True</code>, <span class="math inline">\(Y_{it}(0)=\sum_{s\leq t}x_{is}+\varepsilon_{it}\)</span>, an ARIMA(1,1,0)-type path. The report crosses low or high persistence <code>coefficient=0.2, 0.9</code> with stationary or integrated paths.</p>
-<div id="31b826db" class="cell" data-execution_count="13">
+<div id="cba692dc" class="cell" data-execution_count="13">
 <details open class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>time_draws <span class="op">=</span> [</span>
@@ -4998,7 +4998,7 @@ x_{it}=\phi x_{i,t-1}+\mu_i+\eta_{it},\qquad
 </div>
 </div>
 <p>The outcome metadata records both choices and the process before observation noise:</p>
-<div id="12770c4f" class="cell" data-execution_count="14">
+<div id="27d83b73" class="cell" data-execution_count="14">
 <details open class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>integrated <span class="op">=</span> time_draws[<span class="op">-</span><span class="dv">1</span>][<span class="dv">1</span>]</span>
@@ -5020,7 +5020,7 @@ Y_{it}(0)=0.5Y_{it}^{\text{factor}}+0.5Y_{it}^{\text{SCM}}
 +\varepsilon_{it}.
 \]</span></p>
 <p>The treated-specific noise in the SCM component has standard deviation 2. <code>overlap</code> controls factor-loading separation exactly as in the other factor designs.</p>
-<div id="79220d8a" class="cell" data-execution_count="15">
+<div id="587abc29" class="cell" data-execution_count="15">
 <details open class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>factor_synthetic_draws <span class="op">=</span> [</span>
@@ -5041,7 +5041,7 @@ Y_{it}(0)=0.5Y_{it}^{\text{factor}}+0.5Y_{it}^{\text{SCM}}
 <section id="the-exact-report-case-dictionary" class="level2" data-number="9">
 <h2 data-number="9" class="anchored" data-anchor-id="the-exact-report-case-dictionary"><span class="header-section-number">9</span> The exact report case dictionary</h2>
 <p>This is a self-contained version of the case map used by the balancing runner. If the goal is to reproduce that experiment rather than choose one design interactively, copy this dictionary.</p>
-<div id="220da718" class="cell" data-execution_count="16">
+<div id="9c666309" class="cell" data-execution_count="16">
 <details open class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>REPORT_DGPS <span class="op">=</span> {</span>
@@ -5201,7 +5201,7 @@ Y_{it}(0)=0.5Y_{it}^{\text{factor}}+0.5Y_{it}^{\text{SCM}}
 </div>
 </div>
 <p>To obtain the runner’s 14 case names, alias the two synthetic DGPs and attach the different estimator configuration separately:</p>
-<div id="40318890" class="cell" data-execution_count="17">
+<div id="fc77c34c" class="cell" data-execution_count="17">
 <details open class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>ESTIMATOR_ONLY_CASES <span class="op">=</span> {</span>

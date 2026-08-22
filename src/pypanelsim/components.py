@@ -43,6 +43,14 @@ class UnitFeatureDraw:
     metadata: Mapping[str, Any] = field(default_factory=dict)
 
 
+@dataclass(frozen=True, slots=True)
+class TimeFeatureDraw:
+    """Time-varying features shared by outcome and effect components."""
+
+    values: FloatMatrix
+    metadata: Mapping[str, Any] = field(default_factory=dict)
+
+
 def _unit_feature_matrix(
     value: Any | None,
     *,
@@ -55,6 +63,24 @@ def _unit_feature_matrix(
         array = np.array(value, dtype=float, copy=True)
     if array.ndim != 2 or array.shape[0] != n_units:
         raise ValueError(f"{name} must have shape (n_units, n_features)")
+    if not np.all(np.isfinite(array)):
+        raise ValueError(f"{name} must contain only finite values")
+    array.setflags(write=False)
+    return array
+
+
+def _time_feature_matrix(
+    value: Any | None,
+    *,
+    n_periods: int,
+    name: str,
+) -> FloatMatrix:
+    if value is None:
+        array = np.empty((n_periods, 0), dtype=float)
+    else:
+        array = np.array(value, dtype=float, copy=True)
+    if array.ndim != 2 or array.shape[0] != n_periods:
+        raise ValueError(f"{name} must have shape (n_periods, n_features)")
     if not np.all(np.isfinite(array)):
         raise ValueError(f"{name} must contain only finite values")
     array.setflags(write=False)
@@ -117,6 +143,8 @@ class SimulationContext:
     observables: FloatMatrix | None = None
     unobservables: FloatMatrix | None = None
     feature_metadata: Mapping[str, Any] = field(default_factory=dict)
+    time_features: FloatMatrix | None = None
+    time_feature_metadata: Mapping[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         treatment = np.array(self.treatment, dtype=float, copy=True)
@@ -151,6 +179,20 @@ class SimulationContext:
             self,
             "feature_metadata",
             MappingProxyType(dict(self.feature_metadata)),
+        )
+        object.__setattr__(
+            self,
+            "time_features",
+            _time_feature_matrix(
+                self.time_features,
+                n_periods=self.dimensions.n_periods,
+                name="time_features",
+            ),
+        )
+        object.__setattr__(
+            self,
+            "time_feature_metadata",
+            MappingProxyType(dict(self.time_feature_metadata)),
         )
 
     @property
@@ -213,6 +255,16 @@ class UnitFeatureModel(Protocol):
         """Draw unit features before treatment assignment."""
 
 
+@runtime_checkable
+class TimeFeatureModel(Protocol):
+    """Protocol for time-varying features shared by DGP components."""
+
+    def generate(
+        self, dimensions: PanelDimensions, rng: np.random.Generator
+    ) -> TimeFeatureDraw:
+        """Draw one feature row per panel period."""
+
+
 @dataclass(frozen=True, slots=True)
 class GaussianUnitFeatures:
     """Draw independent standard-normal observed and latent unit features."""
@@ -241,6 +293,31 @@ class GaussianUnitFeatures:
                 ),
                 "unobservable_names": tuple(
                     f"u{index + 1}" for index in range(self.n_unobservables)
+                ),
+            },
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class GaussianTimeFeatures:
+    """Draw independent standard-normal time-varying features."""
+
+    n_features: int = 1
+
+    def __post_init__(self) -> None:
+        if self.n_features < 0:
+            raise ValueError("n_features must be nonnegative")
+
+    def generate(
+        self, dimensions: PanelDimensions, rng: np.random.Generator
+    ) -> TimeFeatureDraw:
+        values = rng.normal(size=(dimensions.n_periods, self.n_features))
+        return TimeFeatureDraw(
+            values,
+            {
+                "kind": "gaussian_time_features",
+                "feature_names": tuple(
+                    f"v{index + 1}" for index in range(self.n_features)
                 ),
             },
         )
@@ -654,20 +731,21 @@ class ConstantEffect:
         )
 
 
-UnitEffectCallable = Callable[[SimulationContext], Any]
+EffectCallable = Callable[[SimulationContext], Any]
+UnitEffectCallable = EffectCallable
 
 
 @dataclass(frozen=True, slots=True)
-class CallableUnitEffect:
-    """Turn a callable unit-level effect law into an :class:`EffectModel`.
+class CallableEffect:
+    """Turn a callable effect surface into an :class:`EffectModel`.
 
     The callable receives the shared :class:`SimulationContext` and returns
-    either one finite scalar or one finite value per unit. Unit effects are
-    broadcast over time and realized only in treated cells.
+    a finite scalar, unit vector, time vector, or full unit-by-time surface.
+    Normalized effects are realized only in treated cells.
     """
 
-    function: UnitEffectCallable
-    name: str = "callable_unit_effect"
+    function: EffectCallable
+    name: str = "callable_effect"
 
     def __post_init__(self) -> None:
         if not callable(self.function):
@@ -681,27 +759,59 @@ class CallableUnitEffect:
         del rng
         raw_effects = np.asarray(self.function(context), dtype=float)
         n_units = context.dimensions.n_units
+        n_periods = context.dimensions.n_periods
+        metadata: dict[str, Any] = {"kind": self.name}
         if raw_effects.ndim == 0:
             unit_effects = np.full(n_units, float(raw_effects), dtype=float)
+            effect_surface = np.repeat(unit_effects[:, None], n_periods, axis=1)
+            metadata["normalization"] = "scalar"
+            metadata["unit_effects"] = unit_effects
         elif raw_effects.shape == (n_units, 1):
             unit_effects = np.array(raw_effects[:, 0], dtype=float, copy=True)
+            effect_surface = np.repeat(unit_effects[:, None], n_periods, axis=1)
+            metadata["normalization"] = "unit"
+            metadata["unit_effects"] = unit_effects
         elif raw_effects.shape == (n_units,):
             unit_effects = np.array(raw_effects, dtype=float, copy=True)
+            effect_surface = np.repeat(unit_effects[:, None], n_periods, axis=1)
+            metadata["normalization"] = "unit"
+            metadata["unit_effects"] = unit_effects
+        elif raw_effects.shape == (1, n_periods):
+            time_effects = np.array(raw_effects[0], dtype=float, copy=True)
+            effect_surface = np.repeat(time_effects[None, :], n_units, axis=0)
+            metadata["normalization"] = "time"
+            metadata["time_effects"] = time_effects
+        elif n_periods != n_units and raw_effects.shape == (n_periods,):
+            time_effects = np.array(raw_effects, dtype=float, copy=True)
+            effect_surface = np.repeat(time_effects[None, :], n_units, axis=0)
+            metadata["normalization"] = "time"
+            metadata["time_effects"] = time_effects
+        elif raw_effects.shape == (n_units, n_periods):
+            effect_surface = np.array(raw_effects, dtype=float, copy=True)
+            metadata["normalization"] = "surface"
         else:
             raise ValueError(
-                "callable unit effect must return a scalar or have shape "
-                f"({n_units},) or ({n_units}, 1)"
+                "callable effect must return a scalar or have shape "
+                f"({n_units},), ({n_units}, 1), ({n_periods},), "
+                f"(1, {n_periods}), or ({n_units}, {n_periods})"
             )
-        if not np.all(np.isfinite(unit_effects)):
-            raise ValueError("callable unit effect must contain only finite values")
-        unit_effects.setflags(write=False)
+        if not np.all(np.isfinite(effect_surface)):
+            raise ValueError("callable effect must contain only finite values")
+        metadata["effect_surface"] = effect_surface
+        for value in metadata.values():
+            if isinstance(value, np.ndarray):
+                value.setflags(write=False)
         return ComponentDraw(
-            unit_effects[:, None] * context.treatment,
-            {
-                "kind": self.name,
-                "unit_effects": unit_effects,
-            },
+            effect_surface * context.treatment,
+            metadata,
         )
+
+
+@dataclass(frozen=True, slots=True)
+class CallableUnitEffect(CallableEffect):
+    """Backward-compatible name for callable unit or unit-time effects."""
+
+    name: str = "callable_unit_effect"
 
 
 OutcomeCallable = Callable[

@@ -69,6 +69,19 @@ Return type for `UnitFeatureModel.generate()`.
 
 Zero feature columns are valid. All supplied values must be finite.
 
+## `TimeFeatureDraw`
+
+::: {.api-signature}
+```{python}
+print(signature(pps.TimeFeatureDraw))
+```
+:::
+
+Return type for `TimeFeatureModel.generate()`. `values` has shape
+`(n_periods, k_v)` and is available to both outcome and effect models as
+`context.time_features`. Metadata can name columns or record the generating
+law. Zero feature columns are valid.
+
 ## `AssignmentContext`
 
 ::: {.api-signature}
@@ -99,6 +112,8 @@ Input to outcome and effect components.
 | `observables` | Read-only `(n_units, k_x)` matrix |
 | `unobservables` | Read-only `(n_units, k_u)` matrix |
 | `feature_metadata` | Read-only feature metadata mapping |
+| `time_features` | Read-only `(n_periods, k_v)` matrix |
+| `time_feature_metadata` | Read-only time-feature metadata mapping |
 
 Derived properties:
 
@@ -119,6 +134,9 @@ The protocols are runtime-checkable but inheritance is optional.
 ```python
 class UnitFeatureModel(Protocol):
     def generate(self, dimensions, rng) -> UnitFeatureDraw: ...
+
+class TimeFeatureModel(Protocol):
+    def generate(self, dimensions, rng) -> TimeFeatureDraw: ...
 
 class AssignmentModel(Protocol):
     def assign(self, context, rng) -> ComponentDraw: ...
@@ -211,25 +229,31 @@ print(signature(pps.PanelSimulator))
 | `dimensions` | `PanelDimensions` |
 | `assignment` | Object satisfying `AssignmentModel` |
 | `outcome_model` | Object satisfying `OutcomeModel` |
-| `effect_model` | Object satisfying `EffectModel`, or a unit-effect callable |
+| `effect_model` | Object satisfying `EffectModel`, or a callable effect law |
 | `feature_model` | Optional object satisfying `UnitFeatureModel` |
+| `time_feature_model` | Optional object satisfying `TimeFeatureModel` |
 
 ### Pipeline
 
 1. Resolve one NumPy generator.
-2. Draw shared observed and latent features, if configured.
+2. Draw shared observed and latent unit features, if configured.
 3. Draw and validate binary treatment.
-4. Build `SimulationContext`.
-5. Draw and validate untreated outcomes.
-6. Draw effects and reject nonzero effects outside treated cells.
-7. Return `PanelDataset(outcome=untreated+effect, ...)`.
+4. Draw shared time features, if configured.
+5. Build `SimulationContext`.
+6. Draw and validate untreated outcomes.
+7. Draw effects and reject nonzero effects outside treated cells.
+8. Return `PanelDataset(outcome=untreated+effect, ...)`.
 
-Component metadata is namespaced under `features`, `assignment`, `outcome`, and
-`effect`. The simulator name and dimensions are stored under `simulator`.
+Component metadata is namespaced under `features`, `time_features`,
+`assignment`, `outcome`, and `effect`. The simulator name and dimensions are
+stored under `simulator`.
 
 A callable supplied directly as `effect_model` is wrapped in
-`CallableUnitEffect`. It receives `SimulationContext`, returns a scalar or an
-`(N,)` unit-effect vector, and is multiplied by the realized treatment matrix.
+`CallableEffect`. It receives `SimulationContext` and may return a scalar, an
+`(N,)` or `(N,1)` unit law, a `(T,)` or `(1,T)` time law, or an `(N,T)` surface.
+The normalized surface is multiplied by realized treatment. For square panels,
+use `(1,T)` rather than `(T,)` to distinguish a time law from the legacy unit
+vector form.
 
 ```{python}
 print(f"simulate{inspect.signature(pps.PanelSimulator.simulate)}")

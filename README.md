@@ -35,7 +35,8 @@ designs, tests, examples, and documentation.
   sigmoid selection on observed or latent unit features, and multinomial
   generalized propensity scores over adoption cohorts.
 - **Treatment effects:** constant and event-time ramp effects plus callables for
-  heterogeneity driven by baseline covariates or unobserved unit factors.
+  heterogeneity driven by baseline covariates, unobserved unit factors, and
+  shared time-varying features.
 - **Untreated outcomes:** classic, weak, mixed, synthetic-control,
   factor--synthetic, and time-series panel DGPs extracted from the original
   balancing study.
@@ -275,8 +276,8 @@ Registration rejects invalid names and accidental replacement. Pass
 
 ## Compose a new DGP
 
-A `PanelSimulator` requires four objects and accepts an optional shared feature
-model:
+A `PanelSimulator` requires four objects and accepts optional shared unit and
+time feature models:
 
 1. `PanelDimensions` defines the rectangular shape.
 2. An `AssignmentModel` produces binary treatment.
@@ -284,6 +285,7 @@ model:
 4. An `EffectModel` produces realized treatment effects.
 5. An optional `UnitFeatureModel` draws observed covariates and latent unit
    features before assignment. Assignment and outcomes receive the same draw.
+6. An optional `TimeFeatureModel` draws $V_t$ for outcomes and effects.
 
 The interfaces use structural typing. A custom component does not need to
 inherit from a package base class. It only needs the documented method.
@@ -330,31 +332,37 @@ Plain functions can be wrapped with `CallableOutcomeModel`. Built-in
 assignment components include fixed single-cohort and staggered assignments,
 fixed-size randomized assignment, binary logit selection, and multinomial-logit
 generalized propensity scores for adoption cohorts. Built-in effects are
-`ConstantEffect`, `LinearRampEffect`, and `CallableUnitEffect`. A lambda can be
-passed directly to `effect_model` to define a unit-level law
-$\tau_i=f(X_i,U_i)$:
+`ConstantEffect`, `LinearRampEffect`, and `CallableEffect`.
+`CallableUnitEffect` remains as a compatibility name. A lambda can be passed
+directly to `effect_model` to define
+$\tau_{it}=f(X_i,U_i,V_t)$:
 
 ```python
 simulator = pps.PanelSimulator(
     name="heterogeneous_effects",
     dimensions=pps.PanelDimensions(120, 40),
     feature_model=pps.GaussianUnitFeatures(2, 1),
+    time_feature_model=pps.GaussianTimeFeatures(1),
     assignment=pps.RandomizedSingleCohortAssignment(40, 28),
     outcome_model=pps.CallableOutcomeModel(
         lambda x, rng: rng.normal(size=(x.dimensions.n_units, x.dimensions.n_periods))
     ),
     effect_model=lambda x: (
-        1.0
-        + 0.45 * x.observables[:, 0]
-        - 0.30 * x.observables[:, 1]
-        + 0.80 * x.unobservables[:, 0]
+        (
+            1.0
+            + 0.45 * x.observables[:, 0]
+            - 0.30 * x.observables[:, 1]
+            + 0.80 * x.unobservables[:, 0]
+        )[:, None]
+        * (1.0 + 0.35 * x.time_features[:, 0])[None, :]
     ),
 )
 ```
 
-The lambda receives `SimulationContext`. It may return a scalar or one value
-per unit; pypanelsim broadcasts those effects across time and zeros them in
-untreated cells. The complete visual example is
+The lambda receives `SimulationContext`. It may return a scalar, one value per
+unit, one value per period, or a complete `(n_units, n_periods)` surface;
+pypanelsim broadcasts as needed and zeros effects in untreated cells. The
+complete visual example is
 [`examples/heterogeneous_effects.py`](examples/heterogeneous_effects.py), with
 rendered output in
 [`examples/heterogeneous_effects.png`](examples/heterogeneous_effects.png).
@@ -456,6 +464,7 @@ Metadata is separated by simulation component:
 ```python
 panel.metadata["simulator"]
 panel.metadata["features"]
+panel.metadata["time_features"]
 panel.metadata["assignment"]
 panel.metadata["outcome"]
 panel.metadata["effect"]

@@ -559,7 +559,7 @@ window.Quarto = {
 </header>
 
 
-<div id="c7d12bec" class="cell" data-execution_count="1">
+<div id="17fa4c04" class="cell" data-execution_count="1">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> inspect</span>
@@ -574,7 +574,7 @@ window.Quarto = {
 </div>
 <section id="gaussianunitfeatures" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="gaussianunitfeatures"><span class="header-section-number">1</span> <code>GaussianUnitFeatures</code></h2>
-<div id="9b9de9d5" class="cell" data-execution_count="2">
+<div id="bf14e7aa" class="cell" data-execution_count="2">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.GaussianUnitFeatures)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -607,12 +607,25 @@ window.Quarto = {
 </table>
 <p>Metadata includes <code>kind="gaussian_unit_features"</code>, <code>observable_names</code>, and <code>unobservable_names</code>. A zero count returns an <code>(n_units, 0)</code> matrix without consuming draws for that block.</p>
 </section>
-<section id="singlecohortassignment" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="singlecohortassignment"><span class="header-section-number">2</span> <code>SingleCohortAssignment</code></h2>
-<div id="915d22ea" class="cell" data-execution_count="3">
+<section id="gaussiantimefeatures" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="gaussiantimefeatures"><span class="header-section-number">2</span> <code>GaussianTimeFeatures</code></h2>
+<div id="c74d0b1d" class="cell" data-execution_count="3">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.SingleCohortAssignment)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.GaussianTimeFeatures)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>GaussianTimeFeatures(n_features: 'int' = 1) -&gt; None</code></pre>
+</div>
+</div>
+<p>Draws an <code>(n_periods, n_features)</code> matrix of independent standard-normal time features. <code>n_features</code> defaults to one and must be nonnegative. Metadata records <code>kind="gaussian_time_features"</code> and names <code>v1</code>, <code>v2</code>, and so on. Supply a custom <code>TimeFeatureModel</code> when <span class="math inline">\(V_t\)</span> should be a trend, cycle, shock process, or calendar covariate.</p>
+</section>
+<section id="singlecohortassignment" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="singlecohortassignment"><span class="header-section-number">3</span> <code>SingleCohortAssignment</code></h2>
+<div id="0a29ef79" class="cell" data-execution_count="4">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.SingleCohortAssignment)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>SingleCohortAssignment(n_treated: 'int' = 40, adoption_period: 'int' = 40, treated_units: 'tuple[int, ...] | None' = None) -&gt; None</code></pre>
@@ -652,12 +665,12 @@ window.Quarto = {
 </table>
 <p>When positions are omitted, the last <code>n_treated</code> rows are treated. The model does not consume random draws. Metadata records the positions and adoption period.</p>
 </section>
-<section id="randomizedsinglecohortassignment" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="randomizedsinglecohortassignment"><span class="header-section-number">3</span> <code>RandomizedSingleCohortAssignment</code></h2>
-<div id="8fceb388" class="cell" data-execution_count="4">
+<section id="randomizedsinglecohortassignment" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="randomizedsinglecohortassignment"><span class="header-section-number">4</span> <code>RandomizedSingleCohortAssignment</code></h2>
+<div id="b02d4901" class="cell" data-execution_count="5">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.RandomizedSingleCohortAssignment)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.RandomizedSingleCohortAssignment)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>RandomizedSingleCohortAssignment(n_treated: 'int', adoption_period: 'int', eligible_units: 'Sequence[int] | None' = None) -&gt; None</code></pre>
@@ -692,12 +705,12 @@ window.Quarto = {
 </table>
 <p>For eligible set <span class="math inline">\(E\)</span>, each eligible unit has marginal probability <span class="math inline">\(n_{treated}/|E|\)</span>. Metadata contains <code>treated_units</code>, <code>eligible_units</code>, <code>adoption_period</code>, and the unit-aligned <code>propensity_scores</code> vector.</p>
 </section>
-<section id="binarylogitassignment" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="binarylogitassignment"><span class="header-section-number">4</span> <code>BinaryLogitAssignment</code></h2>
-<div id="83e2f123" class="cell" data-execution_count="5">
+<section id="binarylogitassignment" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="binarylogitassignment"><span class="header-section-number">5</span> <code>BinaryLogitAssignment</code></h2>
+<div id="471fef49" class="cell" data-execution_count="6">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.BinaryLogitAssignment)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.BinaryLogitAssignment)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>BinaryLogitAssignment(adoption_period: 'int', intercept: 'float' = 0.0, observable_coefficients: 'Sequence[float]' = (), unobservable_coefficients: 'Sequence[float]' = ()) -&gt; None</code></pre>
@@ -746,12 +759,12 @@ P(D_i=1\mid X_i,U_i)=
 </table>
 <p>The coefficient counts must exactly match <code>AssignmentContext</code>. Unlike fixed-size randomization, the treated count is random and all-treated or all-control draws are possible in small/extreme designs. Metadata contains the linear predictor, sigmoid probabilities, realized treated units, coefficient vectors, and adoption period.</p>
 </section>
-<section id="staggeredadoption" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="staggeredadoption"><span class="header-section-number">5</span> <code>StaggeredAdoption</code></h2>
-<div id="b2b415cf" class="cell" data-execution_count="6">
+<section id="staggeredadoption" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="staggeredadoption"><span class="header-section-number">6</span> <code>StaggeredAdoption</code></h2>
+<div id="d8dfa592" class="cell" data-execution_count="7">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.StaggeredAdoption)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.StaggeredAdoption)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>StaggeredAdoption(adoption_times: 'Mapping[int, int]') -&gt; None</code></pre>
@@ -759,12 +772,12 @@ P(D_i=1\mid X_i,U_i)=
 </div>
 <p>Accepts a mapping <code>{unit_position: adoption_period}</code> and constructs absorbing treatment. Units absent from the mapping are never treated. The mapping is copied at construction. Invalid unit or time positions raise <code>ValueError</code>.</p>
 </section>
-<section id="generalizedpropensityassignment" class="level2" data-number="6">
-<h2 data-number="6" class="anchored" data-anchor-id="generalizedpropensityassignment"><span class="header-section-number">6</span> <code>GeneralizedPropensityAssignment</code></h2>
-<div id="1728253e" class="cell" data-execution_count="7">
+<section id="generalizedpropensityassignment" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="generalizedpropensityassignment"><span class="header-section-number">7</span> <code>GeneralizedPropensityAssignment</code></h2>
+<div id="12e1fdb2" class="cell" data-execution_count="8">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.GeneralizedPropensityAssignment)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.GeneralizedPropensityAssignment)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>GeneralizedPropensityAssignment(adoption_periods: 'Sequence[int]', intercepts: 'Sequence[float]' = (), observable_coefficients: 'Sequence[Sequence[float]]' = (), unobservable_coefficients: 'Sequence[Sequence[float]]' = ()) -&gt; None</code></pre>
@@ -852,12 +865,12 @@ P(D_i=1\mid X_i,U_i)=
 </tbody>
 </table>
 </section>
-<section id="constanteffect" class="level2" data-number="7">
-<h2 data-number="7" class="anchored" data-anchor-id="constanteffect"><span class="header-section-number">7</span> <code>ConstantEffect</code></h2>
-<div id="7372f574" class="cell" data-execution_count="8">
+<section id="constanteffect" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="constanteffect"><span class="header-section-number">8</span> <code>ConstantEffect</code></h2>
+<div id="a022c496" class="cell" data-execution_count="9">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.ConstantEffect)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.ConstantEffect)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>ConstantEffect(value: 'float' = 1.0) -&gt; None</code></pre>
@@ -865,12 +878,12 @@ P(D_i=1\mid X_i,U_i)=
 </div>
 <p>Returns <code>value * context.treatment</code>. <code>value</code> defaults to <code>1.0</code> and must be finite. Metadata records <code>kind="constant"</code> and the value.</p>
 </section>
-<section id="linearrampeffect" class="level2" data-number="8">
-<h2 data-number="8" class="anchored" data-anchor-id="linearrampeffect"><span class="header-section-number">8</span> <code>LinearRampEffect</code></h2>
-<div id="511eae00" class="cell" data-execution_count="9">
+<section id="linearrampeffect" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="linearrampeffect"><span class="header-section-number">9</span> <code>LinearRampEffect</code></h2>
+<div id="1be37793" class="cell" data-execution_count="10">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.LinearRampEffect)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.LinearRampEffect)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>LinearRampEffect(slope: 'float' = 0.2) -&gt; None</code></pre>
@@ -882,39 +895,68 @@ P(D_i=1\mid X_i,U_i)=
 \]</span></p>
 <p><code>slope</code> defaults to <code>0.2</code> and must be finite. The effect supports staggered absorbing adoption because event time is unit specific. Nonabsorbing treatment raises through <code>context.adoption_times</code>.</p>
 </section>
-<section id="callableuniteffect" class="level2" data-number="9">
-<h2 data-number="9" class="anchored" data-anchor-id="callableuniteffect"><span class="header-section-number">9</span> <code>CallableUnitEffect</code></h2>
-<div id="741a4d4c" class="cell" data-execution_count="10">
+<section id="callableeffect" class="level2" data-number="10">
+<h2 data-number="10" class="anchored" data-anchor-id="callableeffect"><span class="header-section-number">10</span> <code>CallableEffect</code></h2>
+<div id="03b7be3c" class="cell" data-execution_count="11">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.CallableUnitEffect)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.CallableEffect)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>CallableUnitEffect(function: 'UnitEffectCallable', name: 'str' = 'callable_unit_effect') -&gt; None</code></pre>
+<pre><code>CallableEffect(function: 'EffectCallable', name: 'str' = 'callable_effect') -&gt; None</code></pre>
 </div>
 </div>
-<p>Adapts a deterministic unit-level law to <code>EffectModel</code>. Its callable receives <code>SimulationContext</code>, including <code>observables</code> and <code>unobservables</code>, and returns a finite scalar, an <code>(N,)</code> vector, or an <code>(N,1)</code> column. For unit effect <span class="math inline">\(\tau_i=f(X_i,U_i)\)</span>, the realized matrix is</p>
+<p>Adapts a deterministic effect law to <code>EffectModel</code>. Its callable receives <code>SimulationContext</code>, including <code>observables</code>, <code>unobservables</code>, and <code>time_features</code>. It can therefore implement <span class="math inline">\(\tau_{it}=f(X_i,U_i,V_t)\)</span>. Accepted results are:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Returned shape</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>scalar</td>
+<td>Common across units and time</td>
+</tr>
+<tr class="even">
+<td><code>(N,)</code> or <code>(N,1)</code></td>
+<td>Unit effect, broadcast over time</td>
+</tr>
+<tr class="odd">
+<td><code>(T,)</code> or <code>(1,T)</code></td>
+<td>Time effect, broadcast over units</td>
+</tr>
+<tr class="even">
+<td><code>(N,T)</code></td>
+<td>Complete unit-by-time effect surface</td>
+</tr>
+</tbody>
+</table>
+<p>The realized matrix is</p>
 <p><span class="math display">\[
-\tau_{it}^{\mathrm{realized}}=f(X_i,U_i)W_{it}.
+\tau_{it}^{\mathrm{realized}}=f(X_i,U_i,V_t)W_{it}.
 \]</span></p>
-<p>The normalized <code>(N,)</code> vector is recorded under <code>unit_effects</code> in effect metadata. A malformed or nonfinite result raises <code>ValueError</code>. The adapter can be constructed explicitly to assign a metadata name:</p>
-<div id="fca27c13" class="cell" data-execution_count="11">
+<p>The normalized <code>(N,T)</code> law is recorded under <code>effect_surface</code>. Pure unit and time laws additionally record <code>unit_effects</code> or <code>time_effects</code>. Metadata also identifies the normalization type. For a square panel, a one-dimensional vector retains the legacy unit interpretation; return <code>(1,T)</code> for an unambiguous time law. A malformed or nonfinite result raises <code>ValueError</code>.</p>
+<div id="b1266fca" class="cell" data-execution_count="12">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>effect <span class="op">=</span> pps.CallableUnitEffect(</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">lambda</span> x: <span class="fl">1.0</span> <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> x.observables[:, <span class="dv">0</span>] <span class="op">+</span> x.unobservables[:, <span class="dv">0</span>],</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">"baseline_heterogeneity"</span>,</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>effect <span class="op">=</span> pps.CallableEffect(</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">lambda</span> x: (</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>        <span class="fl">1.0</span> <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> x.observables[:, <span class="dv">0</span>] <span class="op">+</span> x.unobservables[:, <span class="dv">0</span>]</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    )[:, <span class="va">None</span>] <span class="op">*</span> (<span class="fl">1.0</span> <span class="op">+</span> <span class="fl">0.25</span> <span class="op">*</span> x.time_features[:, <span class="dv">0</span>])[<span class="va">None</span>, :],</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">"unit_time_heterogeneity"</span>,</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<p>For the common case, pass the lambda directly to <code>PanelSimulator</code> and it will be wrapped automatically.</p>
+<p>For the common case, pass the lambda directly to <code>PanelSimulator</code> and it will be wrapped automatically. <code>CallableUnitEffect</code> remains a backward-compatible class name and accepts the same result shapes.</p>
 </section>
-<section id="callableoutcomemodel" class="level2" data-number="10">
-<h2 data-number="10" class="anchored" data-anchor-id="callableoutcomemodel"><span class="header-section-number">10</span> <code>CallableOutcomeModel</code></h2>
-<div id="1606d6e7" class="cell" data-execution_count="12">
+<section id="callableoutcomemodel" class="level2" data-number="11">
+<h2 data-number="11" class="anchored" data-anchor-id="callableoutcomemodel"><span class="header-section-number">11</span> <code>CallableOutcomeModel</code></h2>
+<div id="c90954cb" class="cell" data-execution_count="13">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.CallableOutcomeModel)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.CallableOutcomeModel)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>CallableOutcomeModel(function: 'OutcomeCallable', name: 'str' = 'callable_outcome') -&gt; None</code></pre>

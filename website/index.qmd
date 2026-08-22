@@ -11,7 +11,9 @@ execute:
 
 `pypanelsim` generates balanced panel data while keeping assignment, untreated
 potential outcomes, treatment effects, observed covariates, and latent unit
-features explicit. Every draw is reproducible, validated, and estimator-neutral.
+features explicit. Treatment effects can vary jointly over units and time as
+$\tau_{it}=f(X_i,U_i,V_t)$. Every draw is reproducible, validated, and
+estimator-neutral.
 :::
 
 ## Start with a canonical design

@@ -10,12 +10,13 @@ import numpy as np
 from .components import (
     AssignmentContext,
     AssignmentModel,
-    CallableUnitEffect,
+    CallableEffect,
+    EffectCallable,
     EffectModel,
     OutcomeModel,
     PanelDimensions,
     SimulationContext,
-    UnitEffectCallable,
+    TimeFeatureModel,
     UnitFeatureModel,
 )
 from .data import FloatMatrix, PanelDataset
@@ -60,8 +61,9 @@ class PanelSimulator:
     dimensions: PanelDimensions
     assignment: AssignmentModel
     outcome_model: OutcomeModel
-    effect_model: EffectModel | UnitEffectCallable
+    effect_model: EffectModel | EffectCallable
     feature_model: UnitFeatureModel | None = None
+    time_feature_model: TimeFeatureModel | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.name, str) or not self.name.strip():
@@ -72,7 +74,7 @@ class PanelSimulator:
             object.__setattr__(
                 self,
                 "effect_model",
-                CallableUnitEffect(self.effect_model),
+                CallableEffect(self.effect_model),
             )
 
     def simulate(
@@ -106,12 +108,24 @@ class PanelSimulator:
             dimensions=self.dimensions,
             name="assignment",
         )
+        if self.time_feature_model is None:
+            time_feature_draw = None
+        else:
+            time_feature_draw = self.time_feature_model.generate(
+                self.dimensions, generator
+            )
         context = SimulationContext(
-            self.dimensions,
-            treatment,
-            assignment_context.observables,
-            assignment_context.unobservables,
-            assignment_context.feature_metadata,
+            dimensions=self.dimensions,
+            treatment=treatment,
+            observables=assignment_context.observables,
+            unobservables=assignment_context.unobservables,
+            feature_metadata=assignment_context.feature_metadata,
+            time_features=(
+                None if time_feature_draw is None else time_feature_draw.values
+            ),
+            time_feature_metadata=(
+                {} if time_feature_draw is None else time_feature_draw.metadata
+            ),
         )
         outcome_draw = self.outcome_model.generate(context, generator)
         untreated = _component_matrix(
@@ -151,6 +165,12 @@ class PanelSimulator:
         }
         if feature_metadata is not None:
             metadata["features"] = feature_metadata
+        if time_feature_draw is not None:
+            metadata["time_features"] = {
+                "model": type(self.time_feature_model).__name__,
+                **dict(time_feature_draw.metadata),
+                "values": context.time_features,
+            }
 
         observable_names = assignment_context.feature_metadata.get(
             "observable_names", None

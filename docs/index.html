@@ -113,6 +113,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -532,7 +561,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="synthetic-panels-with-causal-structure-you-can-inspect" class="level1 hero-banner" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> Synthetic panels with causal structure you can inspect</h1>
-<p><code>pypanelsim</code> generates balanced panel data while keeping assignment, untreated potential outcomes, treatment effects, observed covariates, and latent unit features explicit. Every draw is reproducible, validated, and estimator-neutral.</p>
+<p><code>pypanelsim</code> generates balanced panel data while keeping assignment, untreated potential outcomes, treatment effects, observed covariates, and latent unit features explicit. Treatment effects can vary jointly over units and time as <span class="math inline">\(\tau_{it}=f(X_i,U_i,V_t)\)</span>. Every draw is reproducible, validated, and estimator-neutral.</p>
 </section>
 <section id="start-with-a-canonical-design" class="level2" data-number="1.1">
 <h2 data-number="1.1" class="anchored" data-anchor-id="start-with-a-canonical-design"><span class="header-section-number">1.1</span> Start with a canonical design</h2>

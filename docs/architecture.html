@@ -113,6 +113,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -530,7 +559,10 @@ AssignmentContext(dimensions, observables, unobservables)
 AssignmentModel.assign(context, rng)
       |
       v
-SimulationContext(dimensions, treatment, features)
+TimeFeatureModel.generate(dimensions, rng) [optional]
+      |
+      v
+SimulationContext(dimensions, treatment, unit features, time features)
       |
       +-------------------------+
       |                         |
@@ -541,7 +573,7 @@ OutcomeModel.generate()   EffectModel.generate()
                    |
                    v
               PanelDataset</code></pre>
-<p>Shared unit features are drawn before assignment. This lets an assignment and an outcome process depend on the same observed covariates or latent unit factors without passing data through diagnostic metadata. Assignment still precedes the outcome draw, and the untreated outcome model does not receive realized effects. The effect model does not receive outcomes. This keeps the causal decomposition explicit.</p>
+<p>Shared unit features are drawn before assignment and can reach assignment, outcomes, and effects. Time features are drawn after assignment and reach outcomes and effects, so adding <span class="math inline">\(V_t\)</span> does not perturb a randomized assignment stream. This permits <span class="math inline">\(\tau_{it}=f(X_i,U_i,V_t)\)</span> without passing arrays through diagnostic metadata. Assignment still precedes the outcome draw, and the untreated outcome model does not receive realized effects. The effect model does not receive outcomes. This keeps the causal decomposition explicit.</p>
 </section>
 <section id="core-objects" class="level2" data-number="1.2">
 <h2 data-number="1.2" class="anchored" data-anchor-id="core-objects"><span class="header-section-number">1.2</span> Core objects</h2>
@@ -559,7 +591,7 @@ OutcomeModel.generate()   EffectModel.generate()
 </section>
 <section id="simulationcontext" class="level3" data-number="1.2.4">
 <h3 data-number="1.2.4" class="anchored" data-anchor-id="simulationcontext"><span class="header-section-number">1.2.4</span> <code>SimulationContext</code></h3>
-<p>The context contains dimensions, realized treatment, and the same features used by assignment. It derives:</p>
+<p>The context contains dimensions, realized treatment, the unit features used by assignment, and a <code>(n_periods, n_time_features)</code> <code>time_features</code> matrix. It derives:</p>
 <ul>
 <li><code>ever_treated</code>;</li>
 <li><code>control_units</code>;</li>
@@ -581,16 +613,20 @@ OutcomeModel.generate()   EffectModel.generate()
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> generate(<span class="va">self</span>, dimensions, rng) <span class="op">-&gt;</span> UnitFeatureDraw: ...</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> AssignmentModel(Protocol):</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> assign(<span class="va">self</span>, context, rng) <span class="op">-&gt;</span> ComponentDraw: ...</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TimeFeatureModel(Protocol):</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> generate(<span class="va">self</span>, dimensions, rng) <span class="op">-&gt;</span> TimeFeatureDraw: ...</span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> OutcomeModel(Protocol):</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> generate(<span class="va">self</span>, context, rng) <span class="op">-&gt;</span> ComponentDraw: ...</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> AssignmentModel(Protocol):</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> assign(<span class="va">self</span>, context, rng) <span class="op">-&gt;</span> ComponentDraw: ...</span>
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> EffectModel(Protocol):</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> generate(<span class="va">self</span>, context, rng) <span class="op">-&gt;</span> ComponentDraw: ...</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> OutcomeModel(Protocol):</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> generate(<span class="va">self</span>, context, rng) <span class="op">-&gt;</span> ComponentDraw: ...</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> EffectModel(Protocol):</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> generate(<span class="va">self</span>, context, rng) <span class="op">-&gt;</span> ComponentDraw: ...</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The package validates the returned matrices at the composition boundary. A custom class can focus on its probability law.</p>
 </section>
 <section id="random-number-policy" class="level2" data-number="1.4">
@@ -624,16 +660,22 @@ OutcomeModel.generate()   EffectModel.generate()
 <li><code>GaussianUnitFeatures</code> draws independent standard-normal observed covariates and latent unit factors. Custom feature models can impose correlations or generate application-specific covariates.</li>
 </ul>
 </section>
-<section id="effects" class="level3" data-number="1.5.3">
-<h3 data-number="1.5.3" class="anchored" data-anchor-id="effects"><span class="header-section-number">1.5.3</span> Effects</h3>
+<section id="time-features" class="level3" data-number="1.5.3">
+<h3 data-number="1.5.3" class="anchored" data-anchor-id="time-features"><span class="header-section-number">1.5.3</span> Time features</h3>
+<ul>
+<li><code>GaussianTimeFeatures</code> draws independent standard-normal <span class="math inline">\(V_t\)</span>. Custom time feature models can generate trends, cycles, shocks, or observed calendars.</li>
+</ul>
+</section>
+<section id="effects" class="level3" data-number="1.5.4">
+<h3 data-number="1.5.4" class="anchored" data-anchor-id="effects"><span class="header-section-number">1.5.4</span> Effects</h3>
 <ul>
 <li><code>ConstantEffect</code> applies one effect to every treated cell.</li>
 <li><code>LinearRampEffect</code> uses unit-specific event time and supports staggered adoption.</li>
-<li><code>CallableUnitEffect</code> evaluates a scalar or unit-vector law against the shared <code>SimulationContext</code>; <code>PanelSimulator</code> automatically wraps a lambda passed as <code>effect_model</code>.</li>
+<li><code>CallableEffect</code> evaluates scalar, unit, time, or full unit-by-time laws against the shared <code>SimulationContext</code>; <code>PanelSimulator</code> automatically wraps a lambda passed as <code>effect_model</code>. <code>CallableUnitEffect</code> is retained as a compatibility name.</li>
 </ul>
 </section>
-<section id="outcome-adapter" class="level3" data-number="1.5.4">
-<h3 data-number="1.5.4" class="anchored" data-anchor-id="outcome-adapter"><span class="header-section-number">1.5.4</span> Outcome adapter</h3>
+<section id="outcome-adapter" class="level3" data-number="1.5.5">
+<h3 data-number="1.5.5" class="anchored" data-anchor-id="outcome-adapter"><span class="header-section-number">1.5.5</span> Outcome adapter</h3>
 <p><code>CallableOutcomeModel</code> turns a function into an outcome component. The function can return a matrix or a <code>ComponentDraw</code> with metadata.</p>
 </section>
 </section>

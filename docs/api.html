@@ -527,6 +527,10 @@ ul.task-list li input[type="checkbox"] {
 <td>Component matrix plus diagnostic metadata</td>
 </tr>
 <tr class="even">
+<td><a href="./reference/core.html#timefeaturedraw"><code>TimeFeatureDraw</code></a></td>
+<td>Shared time-varying features plus metadata</td>
+</tr>
+<tr class="odd">
 <td><a href="./reference/core.html#resolve_rng"><code>resolve_rng</code></a></td>
 <td>Explicit seed/generator validation</td>
 </tr>
@@ -548,36 +552,44 @@ ul.task-list li input[type="checkbox"] {
 <td>Observed and latent standard-normal unit features</td>
 </tr>
 <tr class="even">
+<td><a href="./reference/assignment.html#gaussiantimefeatures"><code>GaussianTimeFeatures</code></a></td>
+<td>Standard-normal time-varying features shared by outcomes and effects</td>
+</tr>
+<tr class="odd">
 <td><a href="./reference/assignment.html#singlecohortassignment"><code>SingleCohortAssignment</code></a></td>
 <td>Fixed common adoption schedule</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="./reference/assignment.html#randomizedsinglecohortassignment"><code>RandomizedSingleCohortAssignment</code></a></td>
 <td>Fixed-size complete randomization</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="./reference/assignment.html#binarylogitassignment"><code>BinaryLogitAssignment</code></a></td>
 <td>Sigmoid selection on observed and latent features</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="./reference/assignment.html#staggeredadoption"><code>StaggeredAdoption</code></a></td>
 <td>Fixed unit-to-adoption map</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="./reference/assignment.html#generalizedpropensityassignment"><code>GeneralizedPropensityAssignment</code></a></td>
 <td>Multinomial-logit adoption cohorts</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="./reference/assignment.html#constanteffect"><code>ConstantEffect</code></a></td>
 <td>Constant effect on treated cells</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="./reference/assignment.html#linearampeffect"><code>LinearRampEffect</code></a></td>
 <td>Event-time-linear effect path</td>
 </tr>
+<tr class="even">
+<td><a href="./reference/assignment.html#callableeffect"><code>CallableEffect</code></a></td>
+<td>Scalar, unit, time, or unit-by-time effect heterogeneity</td>
+</tr>
 <tr class="odd">
-<td><a href="./reference/assignment.html#callableuniteffect"><code>CallableUnitEffect</code></a></td>
-<td>Unit-level heterogeneity from observed and latent features</td>
+<td><a href="./reference/assignment.html#callableeffect"><code>CallableUnitEffect</code></a></td>
+<td>Compatibility name for callable effects</td>
 </tr>
 </tbody>
 </table>
