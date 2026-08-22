@@ -21,6 +21,13 @@ inheritance from a package base class.
 | [`TimeFeatureDraw`](reference/core.qmd#timefeaturedraw) | Shared time-varying features plus metadata |
 | [`resolve_rng`](reference/core.qmd#resolve_rng) | Explicit seed/generator validation |
 
+## Untreated-outcome composition
+
+| Object | Purpose |
+|---|---|
+| [`AdditiveFactorOutcome`](reference/core.qmd#additivefactoroutcome) | Gaussian unit and period effects plus idiosyncratic noise |
+| [`SumOutcomeModel`](reference/core.qmd#sumoutcomemodel) | Weighted sum of reusable outcome components |
+
 ## Features and assignment
 
 | Object | Purpose |
@@ -29,11 +36,13 @@ inheritance from a package base class.
 | [`GaussianTimeFeatures`](reference/assignment.qmd#gaussiantimefeatures) | Standard-normal time-varying features shared by outcomes and effects |
 | [`SingleCohortAssignment`](reference/assignment.qmd#singlecohortassignment) | Fixed common adoption schedule |
 | [`RandomizedSingleCohortAssignment`](reference/assignment.qmd#randomizedsinglecohortassignment) | Fixed-size complete randomization |
+| [`RandomizedStaggeredAdoption`](reference/assignment.qmd#randomizedstaggeredadoption) | Exact fixed-size random adoption cohorts |
 | [`BinaryLogitAssignment`](reference/assignment.qmd#binarylogitassignment) | Sigmoid selection on observed and latent features |
 | [`StaggeredAdoption`](reference/assignment.qmd#staggeredadoption) | Fixed unit-to-adoption map |
 | [`GeneralizedPropensityAssignment`](reference/assignment.qmd#generalizedpropensityassignment) | Multinomial-logit adoption cohorts |
 | [`ConstantEffect`](reference/assignment.qmd#constanteffect) | Constant effect on treated cells |
 | [`LinearRampEffect`](reference/assignment.qmd#linearampeffect) | Event-time-linear effect path |
+| [`CohortEventTimeEffect`](reference/assignment.qmd#cohorteventtimeeffect) | Supplied event-time profile for each cohort |
 | [`CallableEffect`](reference/assignment.qmd#callableeffect) | Scalar, unit, time, or unit-by-time effect heterogeneity |
 | [`CallableUnitEffect`](reference/assignment.qmd#callableeffect) | Compatibility name for callable effects |
 
@@ -41,7 +50,7 @@ inheritance from a package base class.
 
 See [canonical design API](reference/canonical.qmd) for `CanonicalPanelConfig`,
 the six one-draw functions, reusable simulator factories, and canonical outcome
-components.
+components such as `ClassicFactorOutcome`.
 
 ## Baker staggered-adoption design
 
@@ -57,6 +66,13 @@ components.
 
 See the [Baker TWFE failure vignette](vignettes/baker-twfe.qmd) for executable
 PyFixest vanilla and saturated event-study estimates.
+
+## F-test paper heterogeneous-effect designs
+
+See the [F-test DGP API](reference/ftest.qmd) for both configuration objects,
+the 7+7 profile catalogs, reusable simulator factories, and one-draw functions.
+The [complete vignette](vignettes/ftest-heterogeneity.qmd) specifies and
+visualizes every design.
 
 ## Registry
 

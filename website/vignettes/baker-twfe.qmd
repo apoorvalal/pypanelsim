@@ -26,8 +26,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pyfixest as pf
+from matplotlib.colors import BoundaryNorm, ListedColormap
 
 import pypanelsim as pps
+
+TREATMENT_CMAP = ListedColormap(["#f7f7f7", "#252525"])
+TREATMENT_NORM = BoundaryNorm([-0.5, 0.5, 1.5], TREATMENT_CMAP.N)
 
 VIGNETTE = Path.cwd()
 ROOT = VIGNETTE.parents[1]
@@ -107,11 +111,20 @@ axes[0].set_ylabel("Units ordered by adoption cohort")
 figure.colorbar(outcome_image, ax=axes[0], fraction=0.03)
 
 treatment_image = axes[1].matshow(
-    panel.treatment[order], aspect="auto", cmap="Greys", vmin=0, vmax=1
+    panel.treatment[order],
+    aspect="auto",
+    cmap=TREATMENT_CMAP,
+    norm=TREATMENT_NORM,
 )
 axes[1].set_title("Treatment W")
 axes[1].set_xlabel("Calendar year")
-figure.colorbar(treatment_image, ax=axes[1], fraction=0.03, ticks=(0, 1))
+treatment_bar = figure.colorbar(
+    treatment_image,
+    ax=axes[1],
+    fraction=0.03,
+    ticks=(0, 1),
+)
+treatment_bar.ax.set_yticklabels(["Untreated", "Treated"])
 
 ticks = np.arange(0, config.n_periods, 5)
 for axis in axes:

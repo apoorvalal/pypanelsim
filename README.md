@@ -32,16 +32,21 @@ designs, tests, examples, and documentation.
 ## Feature set
 
 - **Assignment mechanisms:** fixed treatment, fixed-size random assignment,
-  sigmoid selection on observed or latent unit features, and multinomial
-  generalized propensity scores over adoption cohorts.
+  exact fixed-size randomized adoption cohorts, sigmoid selection on observed
+  or latent unit features, and multinomial generalized propensity scores over
+  adoption cohorts.
 - **Treatment effects:** constant and event-time ramp effects plus callables for
   heterogeneity driven by baseline covariates, unobserved unit factors, and
-  shared time-varying features.
-- **Untreated outcomes:** classic, weak, mixed, synthetic-control,
-  factor--synthetic, and time-series panel DGPs extracted from the original
-  balancing study.
+  shared time-varying features, plus generic cohort/event-time profile maps.
+- **Untreated outcomes:** a basic additive unit/time factor model, weighted
+  component composition, and classic, weak, mixed, synthetic-control,
+  factor--synthetic, and time-series DGPs extracted from the original balancing
+  study.
 - **Staggered adoption:** a self-contained Baker DGP with cohort-specific
   dynamic effects that reproduces vanilla TWFE event-study contamination.
+- **F-test paper DGPs:** all seven single-cohort temporal-effect laws and all
+  seven randomized three-cohort heterogeneity designs, exposed as profiles,
+  reusable simulators, and one-draw functions.
 - **Executable documentation:** side-by-side `matshow` views of $Y$ and $W$ for
   every canonical DGP, the complete 398-cell balancing experiment, and a
   PyFixest comparison of vanilla and saturated cohort/event-time estimators.
@@ -138,6 +143,29 @@ Run `uv run python examples/baker_twfe.py` for the PyFixest comparison between
 vanilla relative-time TWFE and a saturated cohort-by-event-time estimator. The
 executable [Baker vignette](website/vignettes/baker-twfe.qmd) explains the
 construction and identifying comparisons.
+
+The complete heterogeneous-effect catalog from the F-test paper is available
+without paper-specific effect classes:
+
+```python
+print(pps.available_ftest_temporal_designs())  # seven temporal paths
+print(pps.available_ftest_cohort_designs())    # seven cohort surfaces
+
+config = pps.FTestCohortConfig(n_units=2_000)
+simulator = pps.ftest_cohort_design(
+    "selection_on_gains",
+    config=config,
+)
+panel = simulator.simulate(seed=42)
+
+profiles = pps.ftest_cohort_profiles("selection_on_gains", config=config)
+```
+
+`RandomizedStaggeredAdoption` fixes every cohort count while randomizing unit
+membership, and `CohortEventTimeEffect` consumes the returned profile mapping.
+The [F-test DGP vignette](website/vignettes/ftest-heterogeneity.qmd) gives every
+formula and visualizes all fourteen designs plus representative $Y$ and $W$
+matrices.
 
 ## The data contract
 
@@ -330,9 +358,10 @@ panel = simulator.simulate(seed=123)
 
 Plain functions can be wrapped with `CallableOutcomeModel`. Built-in
 assignment components include fixed single-cohort and staggered assignments,
-fixed-size randomized assignment, binary logit selection, and multinomial-logit
-generalized propensity scores for adoption cohorts. Built-in effects are
-`ConstantEffect`, `LinearRampEffect`, and `CallableEffect`.
+fixed-size randomized single and staggered assignments, binary logit selection,
+and multinomial-logit generalized propensity scores for adoption cohorts.
+Built-in effects are `ConstantEffect`, `LinearRampEffect`,
+`CohortEventTimeEffect`, and `CallableEffect`.
 `CallableUnitEffect` remains as a compatibility name. A lambda can be passed
 directly to `effect_model` to define
 $\tau_{it}=f(X_i,U_i,V_t)$:
@@ -383,6 +412,11 @@ conditional on $X_i$ when the outcome model shares those covariates. Nonzero
 $\gamma$ selects on latent unit features; factor and trajectory estimators may
 still recover the outcome structure from pre-treatment histories, but the
 assignment is not unconfounded given the exposed covariates.
+
+`RandomizedStaggeredAdoption` randomly partitions eligible units into adoption
+cohorts with exact user-supplied counts, leaving all unsampled units untreated.
+Its metadata reports the marginal generalized propensity over the fixed
+cohorts and never treatment.
 
 `GeneralizedPropensityAssignment` uses multinomial logits for user-supplied
 adoption periods plus a never-treated baseline. Its metadata records the full

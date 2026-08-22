@@ -35,6 +35,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pypanelsim as pps
+from matplotlib.colors import BoundaryNorm, ListedColormap
+
+TREATMENT_CMAP = ListedColormap(["#f7f7f7", "#252525"])
+TREATMENT_NORM = BoundaryNorm([-0.5, 0.5, 1.5], TREATMENT_CMAP.N)
 
 config = pps.CanonicalPanelConfig(
     n_control=160,
@@ -108,9 +112,8 @@ def matshow_panels(draws, *, title, n_pre=config.n_pre):
         w_axis.matshow(
             panel.treatment,
             aspect="auto",
-            cmap="Greys",
-            vmin=0,
-            vmax=1,
+            cmap=TREATMENT_CMAP,
+            norm=TREATMENT_NORM,
         )
         for axis in (y_axis, w_axis):
             axis.axvline(n_pre - 0.5, color="#f5a623", linewidth=1.2)

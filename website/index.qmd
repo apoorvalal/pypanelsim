@@ -54,11 +54,12 @@ simulation truth.
 
 | Goal | Page |
 |---|---|
-| Install and draw a first panel | [Get started](getting-started.qmd) |
+| Simulate and estimate rank-2 and rank-3 factor panels | [Get started](getting-started.qmd) |
 | Construct and visualize every balancing DGP | [Balancing DGP catalog](canonical-designs.qmd) |
 | Randomization, logit selection, and cohort GPS | [Assignment mechanisms](assignment.qmd) |
 | Understand component order and RNG semantics | [Architecture](architecture.md) |
 | Inspect every public object and function | [API reference](api.qmd) |
+| Simulate all 14 F-test paper effect designs | [F-test heterogeneity DGPs](vignettes/ftest-heterogeneity.qmd) |
 | See heterogeneous adoption bias vanilla TWFE | [Baker TWFE failure](vignettes/baker-twfe.qmd) |
 | Reproduce 398 estimator-design RMSE cells | [Balancing reproduction](vignettes/balancing-reproduction.qmd) |
 | Pass panels to crabbymetrics or PyFixest | [Estimator interoperability](interoperability.qmd) |

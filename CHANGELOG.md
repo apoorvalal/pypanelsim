@@ -24,6 +24,22 @@
   cohorts and dynamic cohort-specific treatment effects.
 - Add an executable PyFixest vignette showing vanilla TWFE contamination and
   recovery with a saturated Sun--Abraham-style cohort/event-time estimator.
+- Add generic fixed-size randomized staggered adoption and cohort/event-time
+  profile effects.
+- Add all seven temporal and seven across-cohort heterogeneous-effect DGPs from
+  the F-test paper, with formula-parity tests, API documentation, and an
+  executable visualization vignette.
+- Expand the executable getting-started guide with rank-2 and rank-3 factor
+  DGPs, PyFixest 2WFE event studies, crabbymetrics matrix-completion and IFE
+  event paths, visible clustered uncertainty, and ATT comparisons against
+  simulation truth. Both factor designs include observation noise so exact
+  reconstruction is not built into the comparison.
+- Render binary treatment matrices with a discrete untreated/treated color map
+  throughout the documentation.
+- Add the public `AdditiveFactorOutcome` rank-2 2WFE DGP and
+  `SumOutcomeModel` composition component. The getting-started rank-3 example
+  now composes the existing canonical `ClassicFactorOutcome` instead of
+  defining notebook-local outcome functions.
 
 ## 0.1.0 - 2026-08-19
 

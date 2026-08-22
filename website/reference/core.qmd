@@ -150,6 +150,51 @@ class EffectModel(Protocol):
 
 All randomness must come from the supplied `numpy.random.Generator`.
 
+## `AdditiveFactorOutcome`
+
+::: {.api-signature}
+```{python}
+print(signature(pps.AdditiveFactorOutcome))
+```
+:::
+
+The basic additive panel outcome model:
+
+$$
+Y_{it}(0)=\alpha_i+\gamma_t+\varepsilon_{it}.
+$$
+
+`unit_effect_scale`, `time_effect_scale`, and `noise_scale` are finite,
+nonnegative Gaussian standard deviations. The systematic surface has rank at
+most two and lies exactly in a 2WFE model. Metadata retains the three realized
+components separately.
+
+## `SumOutcomeModel`
+
+::: {.api-signature}
+```{python}
+print(signature(pps.SumOutcomeModel))
+```
+:::
+
+Adds any nonempty sequence of public `OutcomeModel` components, optionally
+after multiplying them by finite `weights`. Component draw order is the model
+order supplied to the constructor. Metadata preserves each component's model
+name, weight, and diagnostic truth. For example, a unit effect plus the
+canonical two-factor outcome is:
+
+```python
+outcome_model = pps.SumOutcomeModel(
+    (
+        pps.AdditiveFactorOutcome(
+            time_effect_scale=0.0,
+            noise_scale=0.0,
+        ),
+        pps.ClassicFactorOutcome(overlap=1.0),
+    )
+)
+```
+
 ## `PanelDataset`
 
 ::: {.api-signature}

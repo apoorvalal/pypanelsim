@@ -2,19 +2,23 @@ import numpy as np
 import pytest
 
 from pypanelsim import (
+    AdditiveFactorOutcome,
     AssignmentContext,
     BinaryLogitAssignment,
     CallableEffect,
     CallableUnitEffect,
+    CohortEventTimeEffect,
     ConstantEffect,
     GaussianTimeFeatures,
     GeneralizedPropensityAssignment,
     LinearRampEffect,
     PanelDimensions,
     RandomizedSingleCohortAssignment,
+    RandomizedStaggeredAdoption,
     SimulationContext,
     SingleCohortAssignment,
     StaggeredAdoption,
+    SumOutcomeModel,
 )
 
 
@@ -182,6 +186,85 @@ def test_gaussian_time_features_have_one_row_per_period() -> None:
         GaussianTimeFeatures(n_features=-1)
 
 
+def test_additive_factor_outcome_exposes_exact_drawn_components() -> None:
+    dimensions = PanelDimensions(4, 5)
+    context = SimulationContext(dimensions, np.zeros((4, 5)))
+    model = AdditiveFactorOutcome(
+        unit_effect_scale=1.2,
+        time_effect_scale=0.4,
+        noise_scale=0.3,
+    )
+    first = model.generate(context, np.random.default_rng(11))
+    second = model.generate(context, np.random.default_rng(11))
+
+    np.testing.assert_array_equal(first.values, second.values)
+    np.testing.assert_allclose(
+        first.values,
+        first.metadata["unit_effects"][:, None]
+        + first.metadata["time_effects"][None, :]
+        + first.metadata["errors"],
+    )
+    assert first.metadata["kind"] == "additive_factor"
+
+
+@pytest.mark.parametrize(
+    "parameter",
+    ("unit_effect_scale", "time_effect_scale", "noise_scale"),
+)
+def test_additive_factor_outcome_rejects_invalid_scales(parameter: str) -> None:
+    with pytest.raises(ValueError, match=parameter):
+        AdditiveFactorOutcome(**{parameter: -0.1})
+
+
+def test_sum_outcome_model_combines_and_records_components() -> None:
+    dimensions = PanelDimensions(3, 4)
+    context = SimulationContext(dimensions, np.zeros((3, 4)))
+    first = AdditiveFactorOutcome(
+        unit_effect_scale=1.0,
+        time_effect_scale=0.0,
+        noise_scale=0.0,
+    )
+    second = AdditiveFactorOutcome(
+        unit_effect_scale=0.0,
+        time_effect_scale=1.0,
+        noise_scale=0.0,
+    )
+    combined = SumOutcomeModel((first, second), weights=(2.0, 0.5)).generate(
+        context,
+        np.random.default_rng(12),
+    )
+    components = combined.metadata["components"]
+
+    np.testing.assert_allclose(
+        combined.values,
+        2.0
+        * (
+            components[0]["unit_effects"][:, None]
+            + components[0]["time_effects"][None, :]
+            + components[0]["errors"]
+        )
+        + 0.5
+        * (
+            components[1]["unit_effects"][:, None]
+            + components[1]["time_effects"][None, :]
+            + components[1]["errors"]
+        ),
+    )
+    assert [component["model"] for component in components] == [
+        "AdditiveFactorOutcome",
+        "AdditiveFactorOutcome",
+    ]
+
+
+def test_sum_outcome_model_validates_models_and_weights() -> None:
+    with pytest.raises(ValueError, match="at least one"):
+        SumOutcomeModel(())
+    with pytest.raises(TypeError, match="OutcomeModel"):
+        SumOutcomeModel((object(),))
+    with pytest.raises(ValueError, match="equal length"):
+        SumOutcomeModel((AdditiveFactorOutcome(),), weights=(1.0, 2.0))
+
+
 def test_simulation_context_validates_time_feature_rows() -> None:
     dimensions = PanelDimensions(3, 4)
     with pytest.raises(ValueError, match="n_periods"):
@@ -210,6 +293,66 @@ def test_randomized_single_cohort_samples_fixed_count_from_eligible_units() -> N
         first.metadata["propensity_scores"],
         [0.0, 0.6, 0.6, 0.0, 0.6, 0.0, 0.6, 0.6],
     )
+
+
+def test_randomized_staggered_adoption_fixes_each_cohort_size() -> None:
+    dimensions = PanelDimensions(20, 8)
+    model = RandomizedStaggeredAdoption(
+        adoption_periods=(2, 5),
+        cohort_sizes=(4, 6),
+        eligible_units=tuple(range(1, 19)),
+    )
+    first = model.assign(dimensions, np.random.default_rng(10))
+    second = model.assign(dimensions, np.random.default_rng(10))
+
+    np.testing.assert_array_equal(first.values, second.values)
+    adoption = first.metadata["adoption_times"]
+    assert np.sum(adoption == 2) == 4
+    assert np.sum(adoption == 5) == 6
+    assert np.sum(adoption == 8) == 10
+    np.testing.assert_array_equal(first.values[:, :2], 0.0)
+    np.testing.assert_allclose(
+        first.metadata["generalized_propensity_scores"][1],
+        [4 / 18, 6 / 18, 8 / 18],
+    )
+    np.testing.assert_allclose(
+        first.metadata["generalized_propensity_scores"][[0, 19]],
+        [[0.0, 0.0, 1.0], [0.0, 0.0, 1.0]],
+    )
+
+
+def test_cohort_event_time_effect_applies_supplied_profiles() -> None:
+    dimensions = PanelDimensions(4, 5)
+    treatment = StaggeredAdoption({0: 1, 2: 3}).assign(
+        dimensions, np.random.default_rng(2)
+    )
+    context = SimulationContext(dimensions, treatment.values)
+    model = CohortEventTimeEffect(
+        {
+            1: (0.5, 1.0, 1.5, 2.0),
+            3: (-1.0, -2.0),
+        }
+    )
+    draw = model.generate(context, np.random.default_rng(3))
+
+    np.testing.assert_allclose(draw.values[0], [0.0, 0.5, 1.0, 1.5, 2.0])
+    np.testing.assert_allclose(draw.values[2], [0.0, 0.0, 0.0, -1.0, -2.0])
+    np.testing.assert_array_equal(draw.values[[1, 3]], 0.0)
+
+
+def test_cohort_event_time_effect_rejects_missing_or_short_profiles() -> None:
+    dimensions = PanelDimensions(2, 5)
+    treatment = StaggeredAdoption({0: 1}).assign(dimensions, np.random.default_rng(2))
+    context = SimulationContext(dimensions, treatment.values)
+
+    with pytest.raises(ValueError, match="no event-time profile"):
+        CohortEventTimeEffect({2: (1.0, 2.0, 3.0)}).generate(
+            context, np.random.default_rng(3)
+        )
+    with pytest.raises(ValueError, match="at least 4 values"):
+        CohortEventTimeEffect({1: (1.0, 2.0)}).generate(
+            context, np.random.default_rng(3)
+        )
 
 
 def test_binary_logit_uses_observed_and_latent_features() -> None:

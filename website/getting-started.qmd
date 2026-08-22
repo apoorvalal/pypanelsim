@@ -1,6 +1,13 @@
 ---
 title: "Get started"
-subtitle: "Install the package, draw panels, and inspect causal truth"
+subtitle: "Simulate factor panels and estimate event studies with PyFixest and crabbymetrics"
+format:
+  html:
+    page-layout: full
+    embed-resources: true
+    code-fold: true
+    code-summary: "Show code"
+    fig-responsive: true
 ---
 
 ## Installation
@@ -17,64 +24,575 @@ For a local checkout:
 uv sync
 ```
 
-For this documentation site, including crabbymetrics, PyFixest, Jupyter, and
-pandas:
+This page also estimates the simulated panels with PyFixest and crabbymetrics.
+Install the documentation and estimator stack with:
 
 ```bash
 uv sync --extra docs
 ```
 
-## One canonical draw
+## Two nested factor DGPs
+
+We will compare two untreated-outcome surfaces. The first is the classic
+additive factor representation
+
+$$
+\mathbb E[Y_{it}(0)\mid\alpha_i,\gamma_t]=\alpha_i+\gamma_t
+          =\alpha_i\mathbf 1_t' + \mathbf 1_i\gamma_t',
+$$
+
+which has systematic matrix rank at most two and is exactly a two-way
+fixed-effects (2WFE) conditional-mean model. Treatment is completely
+randomized, so a conventional event study is correctly specified.
+
+The second conditional-mean surface combines a unit effect with the catalog's
+two-factor `ClassicFactorOutcome`,
+
+$$
+\mathbb E[Y_{it}(0)\mid\alpha_i,\lambda_i,F_t]
+=\alpha_i+\lambda_i'F_t.
+$$
+
+This systematic surface has rank at most three. The canonical outcome
+component draws separated factor-loading distributions for eventual treated
+and control units, so their counterfactual trends differ and the 2WFE event
+study fails. Matrix completion and interactive fixed effects can use the
+untreated panel to approximate the low-rank counterfactual in the presence of
+observation noise.
+
+Both designs have 120 units, 30 periods, one cohort adopting in period 20, and
+the same dynamic effect path $(0.2,0.4,\ldots,2.0)$. The true ATT is therefore
+1.1. Both designs include idiosyncratic noise. Rank refers to the systematic
+conditional-mean surface, not the realized noisy outcome matrix.
 
 ```{python}
+import crabbymetrics as cm
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import pyfixest as pf
+from matplotlib.colors import BoundaryNorm, ListedColormap
+
 import pypanelsim as pps
 
-panel = pps.classic_factor(overlap=1.0, seed=42)
-print(panel.name, panel.shape, panel.true_att)
-```
+N_UNITS = 120
+N_PERIODS = 30
+ADOPTION_PERIOD = 20
+N_TREATED = 24
+SEED = 42
+ADDITIVE_NOISE_SD = 0.75
+INTERACTIVE_NOISE_SD = 0.75
 
-Every panel contains the observed outcome, treatment, untreated potential
-outcome, and realized treatment effect:
-
-```{python}
-np.testing.assert_allclose(
-    panel.outcome,
-    panel.untreated_outcome + panel.treatment_effect,
+dimensions = pps.PanelDimensions(N_UNITS, N_PERIODS)
+periods = np.arange(N_PERIODS)
+TREATMENT_CMAP = ListedColormap(
+    ["#f7f7f7", "#252525"],
+    name="untreated_treated",
 )
-print(panel.is_absorbing)
-print(panel.adoption_times[:5], panel.adoption_times[-5:])
+TREATMENT_NORM = BoundaryNorm([-0.5, 0.5, 1.5], TREATMENT_CMAP.N)
+```
+
+`AdditiveFactorOutcome` implements the rank-2 additive panel DGP. For the
+rank-3 design, `SumOutcomeModel` adds a unit effect to the catalog's
+`ClassicFactorOutcome`.
+
+```{python}
+additive_simulator = pps.PanelSimulator(
+    name="classic_factor_twfe_rank2",
+    dimensions=dimensions,
+    assignment=pps.RandomizedSingleCohortAssignment(
+        n_treated=N_TREATED,
+        adoption_period=ADOPTION_PERIOD,
+    ),
+    outcome_model=pps.AdditiveFactorOutcome(
+        unit_effect_scale=1.0,
+        time_effect_scale=0.5,
+        noise_scale=ADDITIVE_NOISE_SD,
+    ),
+    effect_model=pps.LinearRampEffect(0.2),
+)
+
+interactive_simulator = pps.PanelSimulator(
+    name="interactive_factor_rank3",
+    dimensions=dimensions,
+    assignment=pps.RandomizedSingleCohortAssignment(
+        n_treated=N_TREATED,
+        adoption_period=ADOPTION_PERIOD,
+    ),
+    outcome_model=pps.SumOutcomeModel(
+        (
+            pps.AdditiveFactorOutcome(
+                unit_effect_scale=1.0,
+                time_effect_scale=0.0,
+                noise_scale=0.0,
+            ),
+            pps.ClassicFactorOutcome(
+                overlap=0.1,
+                noise_variance=INTERACTIVE_NOISE_SD**2,
+            ),
+        )
+    ),
+    effect_model=pps.LinearRampEffect(0.2),
+)
+
+additive_panel = additive_simulator.simulate(seed=SEED)
+interactive_panel = interactive_simulator.simulate(seed=SEED)
+```
+
+The systematic rank is the rank before idiosyncratic noise. Both realized
+outcome matrices are full rank. The additive conditional mean is exactly 2WFE;
+the interactive conditional mean is a unit effect plus two latent factors.
+The factor loadings are recorded as simulation truth but are not exposed as
+estimator covariates.
+
+```{python}
+factor_metadata = interactive_panel.metadata["outcome"]["components"][1]
+factor_loadings = factor_metadata["loadings"]
+pd.DataFrame(
+    {
+        "DGP": ["Additive factor", "Interactive factor"],
+        "systematic rank": [2, 3],
+        "realized rank of Y(0)": [
+            np.linalg.matrix_rank(additive_panel.untreated_outcome),
+            np.linalg.matrix_rank(interactive_panel.untreated_outcome),
+        ],
+        "idiosyncratic SD": [ADDITIVE_NOISE_SD, INTERACTIVE_NOISE_SD],
+        "treated units": [
+            additive_panel.treated_units.size,
+            interactive_panel.treated_units.size,
+        ],
+        "mean latent loading: treated": [
+            np.nan,
+            factor_loadings[interactive_panel.treated_units].mean(),
+        ],
+        "mean latent loading: controls": [
+            np.nan,
+            factor_loadings[interactive_panel.control_units].mean(),
+        ],
+        "true ATT": [additive_panel.true_att, interactive_panel.true_att],
+    }
+).round(3)
 ```
 
 ```{python}
-#| fig-cap: "A canonical factor-panel draw. Controls precede the common treated cohort."
-fig, axes = plt.subplots(1, 2, figsize=(11, 3.8), constrained_layout=True)
-axes[0].matshow(panel.outcome, aspect="auto", cmap="coolwarm")
-axes[1].matshow(panel.treatment, aspect="auto", cmap="Greys", vmin=0, vmax=1)
-axes[0].set_title("Observed outcome Y")
-axes[1].set_title("Treatment W")
-for axis in axes:
-    axis.set_xlabel("period")
-    axis.set_ylabel("unit")
+#| label: fig-factor-panel-matrices
+#| fig-cap: "The rank-2 additive panel and rank-3 interactive panel. Rows are ordered by treatment status."
+#| fig-width: 12
+#| fig-height: 7
+
+figure, axes = plt.subplots(2, 2, figsize=(12, 7), constrained_layout=True)
+for row, (label, panel) in enumerate(
+    (
+        ("Rank 2: additive 2WFE", additive_panel),
+        ("Rank 3: interactive factor", interactive_panel),
+    )
+):
+    order = np.argsort(panel.adoption_times, kind="stable")
+    outcome_image = axes[row, 0].matshow(
+        panel.outcome[order], aspect="auto", cmap="coolwarm"
+    )
+    treatment_image = axes[row, 1].matshow(
+        panel.treatment[order],
+        aspect="auto",
+        cmap=TREATMENT_CMAP,
+        norm=TREATMENT_NORM,
+    )
+    axes[row, 0].set_title(f"{label}: observed Y")
+    axes[row, 1].set_title(f"{label}: treatment W")
+    axes[row, 0].set_ylabel("unit")
+    figure.colorbar(outcome_image, ax=axes[row, 0], fraction=0.03)
+    treatment_bar = figure.colorbar(
+        treatment_image,
+        ax=axes[row, 1],
+        fraction=0.03,
+        ticks=(0, 1),
+    )
+    treatment_bar.ax.set_yticklabels(["Untreated", "Treated"])
+    for axis in axes[row]:
+        axis.set_xlabel("period")
 plt.show()
 ```
 
-## Estimator interchange
+## Fit the estimators
 
-Wide NumPy arrays:
+### PyFixest 2WFE
+
+For the event study, PyFixest interacts calendar period with eventual treatment
+and omits period 19, event time $-1$. A separate static 2WFE regression reports
+the ATT summary.
 
 ```{python}
-y, w = panel.as_arrays()
-print(y.shape, w.shape, y.flags.writeable)
+def fit_pyfixest(panel):
+    frame = pd.DataFrame(dict(panel.as_long_dict()))
+    frame["ever_treated"] = np.repeat(panel.ever_treated, panel.n_periods).astype(
+        int
+    )
+    event_fit = pf.feols(
+        f"outcome ~ i(time, ever_treated, ref={ADOPTION_PERIOD - 1}) | unit + time",
+        frame,
+        vcov={"CRV1": "unit"},
+    )
+    att_fit = pf.feols(
+        "outcome ~ treatment | unit + time",
+        frame,
+        vcov={"CRV1": "unit"},
+    )
+
+    tidy = event_fit.tidy().reset_index()
+    term_column = tidy.columns[0]
+    tidy["period"] = (
+        tidy[term_column].astype(str).str.extract(r"time::(-?\d+)")[0].astype(int)
+    )
+    tidy["event_time"] = tidy["period"] - ADOPTION_PERIOD
+    tidy = tidy.rename(
+        columns={
+            "Estimate": "estimate",
+            "Std. Error": "std_error",
+            "2.5%": "lower",
+            "97.5%": "upper",
+        }
+    )
+    reference = pd.DataFrame(
+        {
+            "event_time": [-1],
+            "estimate": [0.0],
+            "std_error": [0.0],
+            "lower": [0.0],
+            "upper": [0.0],
+        }
+    )
+    event = pd.concat(
+        [
+            tidy[
+                ["event_time", "estimate", "std_error", "lower", "upper"]
+            ],
+            reference,
+        ],
+        ignore_index=True,
+    ).sort_values("event_time")
+    att_row = att_fit.tidy().loc["treatment"]
+    return {
+        "event": event,
+        "att": float(att_row["Estimate"]),
+        "att_se": float(att_row["Std. Error"]),
+        "att_lower": float(att_row["2.5%"]),
+        "att_upper": float(att_row["97.5%"]),
+        "event_fit": event_fit,
+        "att_fit": att_fit,
+    }
 ```
 
-Long columns:
+### crabbymetrics matrix completion
+
+`MatrixCompletion` consumes the native unit-by-period matrices and infers event
+time directly from the absorbing treatment matrix. We retain its documented
+default nuclear-norm penalty, 25% of the largest all-zeroing penalty. Its
+`summary()` returns both `att` and a weighted event-study path.
 
 ```{python}
-import pandas as pd
+def fit_matrix_completion(panel):
+    model = cm.MatrixCompletion(
+        lambda_fraction=0.25,
+        max_iterations=2_000,
+        tolerance=1e-7,
+        svd_seed=1,
+    )
+    model.fit(
+        panel.outcome.copy(),
+        panel.treatment.copy(),
+    )
+    summary = model.summary()
+    event = pd.DataFrame(summary["event_study"]["weighted"])
+    return {
+        "event": event,
+        "att": float(summary["att"]),
+        "counterfactual": np.asarray(model.predict()),
+        "model": model,
+        "summary": summary,
+    }
+```
 
-long = pd.DataFrame(dict(panel.as_long_dict()))
+### crabbymetrics interactive fixed effects
+
+`InteractiveFixedEffects` is a balanced-panel factor decomposition, not a
+treatment-effect estimator or missing-data routine. Following its
+[documented balanced-panel API](https://apoorvalal.github.io/crabbymetrics/examples/interactive-fixed-effects.html),
+we use it only for what it actually does: fit the complete never-treated donor
+panel once. With the donor time effects and factors in hand, ordinary least
+squares on each treated
+unit's pre-treatment history estimates that unit's intercept and factor
+loading. Extrapolating those loadings over the donor factors gives the treated
+counterfactual. No treated post-treatment outcome enters the fit.
+
+The panel is passed to `fit()` in the documented time-by-unit orientation.
+`force=3` includes additive unit and period effects. The DGP tells us to use
+zero interactive factors for the additive design and two for the rank-3
+design; rank selection is deliberately not part of this example.
+
+```{python}
+def fit_interactive_fixed_effects(panel, *, interactive_rank):
+    outcome, _ = panel.as_arrays(copy=True)
+    donors = panel.control_units
+    treated = panel.treated_units
+    adoption = int(np.unique(panel.adoption_times[treated]).item())
+
+    model = cm.InteractiveFixedEffects(
+        rank=interactive_rank,
+        force=3,
+        factor_seed=1,
+    )
+    model.fit(outcome[donors].T)
+    donor_fitted = np.asarray(model.predict())
+    decomposition = model.summary()
+    factors = np.asarray(decomposition["factor"])
+    time_effects = np.asarray(decomposition["xi"])
+
+    pre_design = np.column_stack(
+        [np.ones(adoption), factors[:adoption]],
+    )
+    full_design = np.column_stack(
+        [np.ones(panel.n_periods), factors],
+    )
+    treated_coefficients = np.linalg.lstsq(
+        pre_design,
+        outcome[treated, :adoption].T - time_effects[:adoption, None],
+        rcond=None,
+    )[0]
+    treated_counterfactual = (
+        time_effects[:, None] + full_design @ treated_coefficients
+    ).T
+    effect = outcome[treated] - treated_counterfactual
+    event = pd.DataFrame(
+        {
+            "event_time": np.arange(panel.n_periods) - adoption,
+            "estimate": effect.mean(axis=0),
+            "n": treated.size,
+        }
+    )
+    return {
+        "event": event,
+        "att": float(effect[:, adoption:].mean()),
+        "counterfactual": treated_counterfactual,
+        "donor_fitted": donor_fitted,
+        "model": model,
+        "decomposition": decomposition,
+    }
+```
+
+Fit all three approaches to both panels:
+
+```{python}
+def fit_all(panel, *, interactive_rank):
+    return {
+        "twfe": fit_pyfixest(panel),
+        "matrix_completion": fit_matrix_completion(panel),
+        "ife": fit_interactive_fixed_effects(
+            panel,
+            interactive_rank=interactive_rank,
+        ),
+    }
+
+
+additive_estimates = fit_all(additive_panel, interactive_rank=0)
+interactive_estimates = fit_all(interactive_panel, interactive_rank=2)
+```
+
+## Event-study and ATT results
+
+The plotting function compares all three estimates with the known effect
+stored in `PanelDataset.treatment_effect`. The blue ribbon and capped points
+are PyFixest's unit-clustered 95% confidence intervals. The two crabbymetrics
+curves are model-based point estimates; neither API supplies standard errors
+for these fits.
+
+```{python}
+def true_event_path(panel):
+    treated = panel.treated_units
+    adoption = np.unique(panel.adoption_times[treated]).item()
+    return pd.DataFrame(
+        {
+            "event_time": np.arange(panel.n_periods) - adoption,
+            "estimate": panel.treatment_effect[treated].mean(axis=0),
+        }
+    )
+
+
+def plot_event_study(panel, estimates, title):
+    figure, axis = plt.subplots(figsize=(10, 5), constrained_layout=True)
+    truth = true_event_path(panel).query("event_time >= -10")
+    twfe = estimates["twfe"]["event"].query("event_time >= -10")
+    matrix_completion = estimates["matrix_completion"]["event"].query(
+        "event_time >= -10"
+    )
+    ife = estimates["ife"]["event"].query("event_time >= -10")
+
+    axis.plot(
+        truth["event_time"],
+        truth["estimate"],
+        "--",
+        color="black",
+        linewidth=2.2,
+        label="True effect",
+    )
+    axis.fill_between(
+        twfe["event_time"],
+        twfe["lower"],
+        twfe["upper"],
+        color="#3D5A80",
+        alpha=0.18,
+        linewidth=0,
+        label="PyFixest unit-clustered 95% CI",
+    )
+    axis.errorbar(
+        twfe["event_time"],
+        twfe["estimate"],
+        yerr=np.vstack(
+            (
+                twfe["estimate"] - twfe["lower"],
+                twfe["upper"] - twfe["estimate"],
+            )
+        ),
+        fmt="o-",
+        color="#3D5A80",
+        markersize=4,
+        capsize=2,
+        label="PyFixest 2WFE estimate",
+    )
+    axis.plot(
+        matrix_completion["event_time"],
+        matrix_completion["estimate"],
+        "s-",
+        color="#E07A5F",
+        markersize=4,
+        label="crabbymetrics matrix completion",
+    )
+    axis.plot(
+        ife["event_time"],
+        ife["estimate"],
+        "^-",
+        color="#2A9D8F",
+        markersize=4,
+        label="crabbymetrics IFE",
+    )
+    axis.axhline(0, color="0.4", linewidth=0.8)
+    axis.axvline(-0.5, color="0.5", linewidth=1, linestyle=":")
+    axis.set_xticks(np.arange(-10, 10))
+    axis.set_xlabel("Event time")
+    axis.set_ylabel("Treatment effect")
+    axis.set_title(title)
+    axis.legend(frameon=False, ncol=2)
+    return figure, axis
+
+
+def att_table(panel, estimates):
+    result = pd.DataFrame(
+        {
+            "estimator": [
+                "PyFixest 2WFE",
+                "crabbymetrics matrix completion",
+                "crabbymetrics IFE",
+            ],
+            "ATT estimate": [
+                estimates["twfe"]["att"],
+                estimates["matrix_completion"]["att"],
+                estimates["ife"]["att"],
+            ],
+            "standard error": [
+                estimates["twfe"]["att_se"],
+                np.nan,
+                np.nan,
+            ],
+            "95% CI lower": [
+                estimates["twfe"]["att_lower"],
+                np.nan,
+                np.nan,
+            ],
+            "95% CI upper": [
+                estimates["twfe"]["att_upper"],
+                np.nan,
+                np.nan,
+            ],
+        }
+    )
+    result["true ATT"] = panel.true_att
+    result["absolute error"] = (result["ATT estimate"] - panel.true_att).abs()
+    return result.round(4).fillna("—")
+```
+
+### Rank 2: the event study is well specified
+
+```{python}
+#| label: fig-rank2-event-study
+#| fig-cap: "On the additive rank-2 factor surface, 2WFE, matrix completion, and rank-0 IFE recover the true dynamic effect."
+#| fig-width: 10
+#| fig-height: 5
+
+plot_event_study(
+    additive_panel,
+    additive_estimates,
+    "Rank-2 additive factor DGP: 2WFE is correctly specified",
+)
+plt.show()
+```
+
+```{python}
+att_table(additive_panel, additive_estimates)
+```
+
+The conditional-mean surface lies exactly in the PyFixest regression's
+nuisance space. Complete randomization also makes the treated indicator
+independent of the fixed effects. Sampling noise keeps the point estimates
+from landing mechanically on the truth and makes the clustered confidence
+intervals visible. The matrix estimators recover a similar counterfactual.
+
+### Rank 3: 2WFE fails, factor estimators reduce the bias
+
+```{python}
+#| label: fig-rank3-event-study
+#| fig-cap: "With two latent interactive factors, observation noise, and separated treated/control loadings, 2WFE is biased while matrix completion and rank-2 IFE move the event path toward the truth."
+#| fig-width: 10
+#| fig-height: 5
+
+plot_event_study(
+    interactive_panel,
+    interactive_estimates,
+    "Rank-3 interactive factor DGP: 2WFE omits the latent factor",
+)
+plt.show()
+```
+
+```{python}
+att_table(interactive_panel, interactive_estimates)
+```
+
+The PyFixest event study now attributes the selected loading group's
+counterfactual factor path to treatment. Its static ATT misses 1.1 and its lead
+coefficients are nonzero even though the DGP's treatment effects are exactly
+zero before adoption. Matrix completion and IFE instead estimate $Y(0)$ from
+the never-treated units' full histories and treated units' pre-treatment
+histories. Both low-rank estimates are much closer to the true ATT in this
+seeded draw.
+
+This comparison is deliberately transparent about the identifying assumptions:
+the crabbymetrics fits know the low-rank structure, and the IFE fit is given the
+true interactive rank. Matrix completion uses its default penalty rather than
+a cross-validated one, and neither crabbymetrics curve includes estimator
+uncertainty. Those limitations matter in the noisy design shown here.
+
+## Inspect and reuse a panel
+
+Every simulation keeps the observed matrix, treatment, untreated potential
+outcome, and realized causal effect:
+
+```{python}
+np.testing.assert_allclose(
+    interactive_panel.outcome,
+    interactive_panel.untreated_outcome + interactive_panel.treatment_effect,
+)
+
+y, w = interactive_panel.as_arrays()
+long = pd.DataFrame(dict(interactive_panel.as_long_dict()))
+print(y.shape, w.shape, y.flags.writeable)
 long.head()
 ```
 
@@ -85,26 +603,11 @@ Pass `copy=True` when a downstream estimator mutates its inputs.
 `iter_simulations()` spawns independent child seed sequences:
 
 ```{python}
-simulator = pps.classic_factor_design(overlap=1.0)
-draws = list(simulator.iter_simulations(3, seed=2026))
+draws = list(additive_simulator.iter_simulations(3, seed=2026))
 print([draw.true_att for draw in draws])
 print(np.array_equal(draws[0].outcome, draws[1].outcome))
 ```
 
-## Custom dimensions
-
-```{python}
-config = pps.CanonicalPanelConfig(
-    n_control=40,
-    n_treated=10,
-    n_pre=20,
-    n_post=5,
-    effect_slope=0.15,
-    noise_variance=0.25,
-)
-small = pps.synthetic_control(config=config, active_share=0.2, seed=7)
-print(small.shape, small.true_att)
-```
-
-Continue with [assignment mechanisms](assignment.qmd) or the
-[complete API reference](api.qmd).
+Continue with [assignment mechanisms](assignment.qmd), the
+[complete DGP catalog](canonical-designs.qmd), or the
+[API reference](api.qmd).

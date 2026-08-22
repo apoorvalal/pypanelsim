@@ -65,7 +65,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
 <script src="site_libs/clipboard/clipboard.min.js"></script>
 <script src="site_libs/quarto-search/autocomplete.umd.js"></script>
 <script src="site_libs/quarto-search/fuse.min.js"></script>
@@ -359,6 +358,10 @@ window.Quarto = {
  <span class="dropdown-text">Baker TWFE failure</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="./vignettes/ftest-heterogeneity.html">
+ <span class="dropdown-text">F-test heterogeneity DGPs</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="./interoperability.html">
  <span class="dropdown-text">Estimator interoperability</span></a>
   </li>  
@@ -494,6 +497,12 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./reference/ftest.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">F-test paper DGP API</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./reference/canonical.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Canonical design API</span></a>
   </div>
@@ -519,6 +528,12 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="./vignettes/baker-twfe.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Baker DGP: why vanilla TWFE event studies fail</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vignettes/ftest-heterogeneity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">F-test paper heterogeneous-effect DGPs</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -650,6 +665,7 @@ OutcomeModel.generate()   EffectModel.generate()
 <li><code>SingleCohortAssignment</code> creates one absorbing cohort. It supports explicit treated-unit positions.</li>
 <li><code>StaggeredAdoption</code> accepts a mapping from unit position to adoption period.</li>
 <li><code>RandomizedSingleCohortAssignment</code> samples a fixed-size cohort without replacement.</li>
+<li><code>RandomizedStaggeredAdoption</code> randomly partitions units into exact fixed-size adoption cohorts.</li>
 <li><code>BinaryLogitAssignment</code> draws treatment from observed and latent unit-feature logits.</li>
 <li><code>GeneralizedPropensityAssignment</code> draws adoption cohorts from multinomial logits with never treated as the baseline category.</li>
 </ul>
@@ -671,6 +687,7 @@ OutcomeModel.generate()   EffectModel.generate()
 <ul>
 <li><code>ConstantEffect</code> applies one effect to every treated cell.</li>
 <li><code>LinearRampEffect</code> uses unit-specific event time and supports staggered adoption.</li>
+<li><code>CohortEventTimeEffect</code> maps adoption periods to supplied post-adoption profiles.</li>
 <li><code>CallableEffect</code> evaluates scalar, unit, time, or full unit-by-time laws against the shared <code>SimulationContext</code>; <code>PanelSimulator</code> automatically wraps a lambda passed as <code>effect_model</code>. <code>CallableUnitEffect</code> is retained as a compatibility name.</li>
 </ul>
 </section>

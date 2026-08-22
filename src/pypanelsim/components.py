@@ -344,6 +344,119 @@ class EffectModel(Protocol):
 
 
 @dataclass(frozen=True, slots=True)
+class AdditiveFactorOutcome:
+    """Gaussian additive unit and time factors plus idiosyncratic noise.
+
+    The untreated outcome law is
+
+    ``Y0[i, t] = alpha[i] + gamma[t] + error[i, t]``.
+
+    Its systematic conditional-mean matrix has rank at most two and is exactly
+    a two-way fixed-effects outcome model.
+    """
+
+    unit_effect_scale: float = 1.0
+    time_effect_scale: float = 1.0
+    noise_scale: float = 0.0
+
+    def __post_init__(self) -> None:
+        for name in ("unit_effect_scale", "time_effect_scale", "noise_scale"):
+            value = getattr(self, name)
+            if not np.isfinite(value) or value < 0.0:
+                raise ValueError(f"{name} must be finite and nonnegative")
+
+    def generate(
+        self, context: SimulationContext, rng: np.random.Generator
+    ) -> ComponentDraw:
+        unit_effects = rng.normal(
+            scale=self.unit_effect_scale,
+            size=context.dimensions.n_units,
+        )
+        time_effects = rng.normal(
+            scale=self.time_effect_scale,
+            size=context.dimensions.n_periods,
+        )
+        errors = rng.normal(
+            scale=self.noise_scale,
+            size=(context.dimensions.n_units, context.dimensions.n_periods),
+        )
+        values = unit_effects[:, None] + time_effects[None, :] + errors
+        return ComponentDraw(
+            values,
+            {
+                "kind": "additive_factor",
+                "unit_effects": unit_effects,
+                "time_effects": time_effects,
+                "errors": errors,
+                "unit_effect_scale": self.unit_effect_scale,
+                "time_effect_scale": self.time_effect_scale,
+                "noise_scale": self.noise_scale,
+            },
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class SumOutcomeModel:
+    """Add reusable untreated-outcome components with optional weights."""
+
+    models: Sequence[OutcomeModel]
+    weights: Sequence[float] | None = None
+
+    def __post_init__(self) -> None:
+        models = tuple(self.models)
+        if not models:
+            raise ValueError("models must contain at least one outcome model")
+        if not all(isinstance(model, OutcomeModel) for model in models):
+            raise TypeError("every model must satisfy OutcomeModel")
+        object.__setattr__(self, "models", models)
+
+        if self.weights is None:
+            weights = (1.0,) * len(models)
+        else:
+            weights = tuple(float(value) for value in self.weights)
+            if len(weights) != len(models):
+                raise ValueError("weights and models must have equal length")
+            if not np.all(np.isfinite(weights)):
+                raise ValueError("weights must contain only finite values")
+        object.__setattr__(self, "weights", weights)
+
+    def generate(
+        self, context: SimulationContext, rng: np.random.Generator
+    ) -> ComponentDraw:
+        expected = (context.dimensions.n_units, context.dimensions.n_periods)
+        values = np.zeros(expected, dtype=float)
+        components: list[Mapping[str, Any]] = []
+        for model, weight in zip(self.models, self.weights, strict=True):
+            draw = model.generate(context, rng)
+            component = np.asarray(draw.values, dtype=float)
+            if component.shape != expected:
+                raise ValueError(
+                    f"{type(model).__name__} must return values with shape {expected}"
+                )
+            if not np.all(np.isfinite(component)):
+                raise ValueError(
+                    f"{type(model).__name__} must return only finite values"
+                )
+            values += weight * component
+            components.append(
+                MappingProxyType(
+                    {
+                        "model": type(model).__name__,
+                        "weight": weight,
+                        **dict(draw.metadata),
+                    }
+                )
+            )
+        return ComponentDraw(
+            values,
+            {
+                "kind": "sum_outcome",
+                "components": tuple(components),
+            },
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class SingleCohortAssignment:
     """Assign one absorbing treatment cohort.
 
@@ -494,6 +607,97 @@ class RandomizedSingleCohortAssignment:
                 "eligible_units": eligible,
                 "adoption_period": self.adoption_period,
                 "propensity_scores": propensity,
+            },
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class RandomizedStaggeredAdoption:
+    """Randomly partition eligible units into fixed-size adoption cohorts.
+
+    ``cohort_sizes`` is paired positionally with ``adoption_periods``. Units
+    not sampled into one of those cohorts remain untreated. This is complete
+    randomization over adoption schedules: cohort counts are fixed, while the
+    unit labels attached to those schedules are random.
+    """
+
+    adoption_periods: Sequence[int]
+    cohort_sizes: Sequence[int]
+    eligible_units: Sequence[int] | None = None
+
+    def __post_init__(self) -> None:
+        periods = tuple(int(value) for value in self.adoption_periods)
+        sizes = tuple(int(value) for value in self.cohort_sizes)
+        if not periods:
+            raise ValueError("adoption_periods must contain at least one cohort")
+        if len(periods) != len(sizes):
+            raise ValueError("adoption_periods and cohort_sizes must have equal length")
+        if len(set(periods)) != len(periods):
+            raise ValueError("adoption_periods must be unique")
+        if any(period < 0 for period in periods):
+            raise ValueError("adoption_periods must be nonnegative")
+        if any(size <= 0 for size in sizes):
+            raise ValueError("cohort_sizes must be positive")
+        object.__setattr__(self, "adoption_periods", periods)
+        object.__setattr__(self, "cohort_sizes", sizes)
+        if self.eligible_units is not None:
+            object.__setattr__(self, "eligible_units", tuple(self.eligible_units))
+
+    def assign(
+        self,
+        context: AssignmentContext | PanelDimensions,
+        rng: np.random.Generator,
+    ) -> ComponentDraw:
+        assignment_context = _as_assignment_context(context)
+        dimensions = assignment_context.dimensions
+        periods = np.asarray(self.adoption_periods, dtype=np.int64)
+        sizes = np.asarray(self.cohort_sizes, dtype=np.int64)
+        if np.any(periods >= dimensions.n_periods):
+            raise ValueError("adoption_periods must contain valid time positions")
+
+        if self.eligible_units is None:
+            eligible = np.arange(dimensions.n_units, dtype=np.int64)
+        else:
+            eligible = np.asarray(self.eligible_units, dtype=np.int64)
+            if eligible.ndim != 1 or np.unique(eligible).size != eligible.size:
+                raise ValueError("eligible_units must contain unique positions")
+            if np.any((eligible < 0) | (eligible >= dimensions.n_units)):
+                raise ValueError("eligible_units contains an invalid unit position")
+        if sizes.sum() > eligible.size:
+            raise ValueError("cohort_sizes cannot exceed the eligible unit count")
+
+        randomized = rng.permutation(eligible)
+        categories = np.full(dimensions.n_units, periods.size, dtype=np.int64)
+        adoption_times = np.full(
+            dimensions.n_units, dimensions.n_periods, dtype=np.int64
+        )
+        treatment = np.zeros((dimensions.n_units, dimensions.n_periods), dtype=float)
+        cohort_units: list[np.ndarray] = []
+        start = 0
+        for category, (period, size) in enumerate(zip(periods, sizes, strict=True)):
+            units = np.sort(randomized[start : start + size])
+            start += int(size)
+            categories[units] = category
+            adoption_times[units] = period
+            treatment[units, period:] = 1.0
+            cohort_units.append(units)
+
+        probabilities = np.zeros((dimensions.n_units, periods.size + 1))
+        probabilities[:, -1] = 1.0
+        probabilities[eligible, :-1] = sizes / eligible.size
+        probabilities[eligible, -1] = 1.0 - sizes.sum() / eligible.size
+        return ComponentDraw(
+            treatment,
+            {
+                "kind": "randomized_staggered_adoption",
+                "adoption_periods": periods,
+                "cohort_sizes": sizes,
+                "cohort_units": tuple(cohort_units),
+                "adoption_times": adoption_times,
+                "assigned_categories": categories,
+                "eligible_units": eligible,
+                "generalized_propensity_scores": probabilities,
+                "never_treated_category": periods.size,
             },
         )
 
@@ -728,6 +932,78 @@ class ConstantEffect:
         return ComponentDraw(
             self.value * context.treatment,
             {"kind": "constant", "value": self.value},
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class CohortEventTimeEffect:
+    """Apply supplied event-time profiles to absorbing adoption cohorts.
+
+    The mapping keys are zero-based adoption periods. Each value is the full
+    post-adoption path beginning at event time zero. Profiles must cover every
+    treated cell for their cohort; never-treated units need no entry.
+    """
+
+    profiles: Mapping[int, Sequence[float]]
+
+    def __post_init__(self) -> None:
+        normalized: dict[int, tuple[float, ...]] = {}
+        for raw_period, raw_profile in self.profiles.items():
+            period = int(raw_period)
+            if period < 0:
+                raise ValueError("profile adoption periods must be nonnegative")
+            if period in normalized:
+                raise ValueError("profile adoption periods must be unique")
+            profile = np.asarray(raw_profile, dtype=float)
+            if profile.ndim != 1 or profile.size == 0:
+                raise ValueError("each event-time profile must be nonempty and 1D")
+            if not np.all(np.isfinite(profile)):
+                raise ValueError("event-time profiles must contain finite values")
+            normalized[period] = tuple(float(value) for value in profile)
+        if not normalized:
+            raise ValueError("profiles must contain at least one adoption cohort")
+        object.__setattr__(self, "profiles", MappingProxyType(normalized))
+
+    def generate(
+        self, context: SimulationContext, rng: np.random.Generator
+    ) -> ComponentDraw:
+        del rng
+        adoption_times = context.adoption_times
+        treated_adoptions = np.unique(adoption_times[context.ever_treated])
+        missing = sorted(set(treated_adoptions) - set(self.profiles))
+        if missing:
+            raise ValueError(f"no event-time profile for adoption periods {missing}")
+
+        effect_surface = np.zeros(
+            (context.dimensions.n_units, context.dimensions.n_periods), dtype=float
+        )
+        frozen_profiles: dict[int, np.ndarray] = {}
+        for period, raw_profile in self.profiles.items():
+            if period >= context.dimensions.n_periods:
+                raise ValueError(
+                    f"profile adoption period {period} lies outside the panel"
+                )
+            required = context.dimensions.n_periods - period
+            profile = np.asarray(raw_profile, dtype=float)
+            units = np.flatnonzero(adoption_times == period)
+            if units.size and profile.size < required:
+                raise ValueError(
+                    f"profile for adoption period {period} must contain at least "
+                    f"{required} values"
+                )
+            if units.size:
+                effect_surface[units, period:] = profile[:required]
+            stored = np.array(profile, copy=True)
+            stored.setflags(write=False)
+            frozen_profiles[period] = stored
+        effect_surface.setflags(write=False)
+        return ComponentDraw(
+            effect_surface * context.treatment,
+            {
+                "kind": "cohort_event_time",
+                "profiles": MappingProxyType(frozen_profiles),
+                "effect_surface": effect_surface,
+            },
         )
 
 

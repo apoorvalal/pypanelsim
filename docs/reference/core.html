@@ -65,7 +65,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
@@ -359,6 +358,10 @@ window.Quarto = {
  <span class="dropdown-text">Baker TWFE failure</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../vignettes/ftest-heterogeneity.html">
+ <span class="dropdown-text">F-test heterogeneity DGPs</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../interoperability.html">
  <span class="dropdown-text">Estimator interoperability</span></a>
   </li>  
@@ -494,6 +497,12 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../reference/ftest.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">F-test paper DGP API</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../reference/canonical.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Canonical design API</span></a>
   </div>
@@ -519,6 +528,12 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="../vignettes/baker-twfe.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Baker DGP: why vanilla TWFE event studies fail</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../vignettes/ftest-heterogeneity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">F-test paper heterogeneous-effect DGPs</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -559,7 +574,7 @@ window.Quarto = {
 </header>
 
 
-<div id="41c138da" class="cell" data-execution_count="1">
+<div id="cf9cb9ec" class="cell" data-execution_count="1">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> inspect</span>
@@ -576,7 +591,7 @@ window.Quarto = {
 <section id="paneldimensions" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="paneldimensions"><span class="header-section-number">1</span> <code>PanelDimensions</code></h2>
 <div class="api-signature">
-<div id="3e0bf1f2" class="cell" data-execution_count="2">
+<div id="4ec02630" class="cell" data-execution_count="2">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.PanelDimensions))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -616,7 +631,7 @@ window.Quarto = {
 <section id="componentdraw" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="componentdraw"><span class="header-section-number">2</span> <code>ComponentDraw</code></h2>
 <div class="api-signature">
-<div id="1df532b7" class="cell" data-execution_count="3">
+<div id="1130d617" class="cell" data-execution_count="3">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.ComponentDraw))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -650,7 +665,7 @@ window.Quarto = {
 <section id="unitfeaturedraw" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="unitfeaturedraw"><span class="header-section-number">3</span> <code>UnitFeatureDraw</code></h2>
 <div class="api-signature">
-<div id="41bb529b" class="cell" data-execution_count="4">
+<div id="135575c8" class="cell" data-execution_count="4">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.UnitFeatureDraw))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -697,7 +712,7 @@ window.Quarto = {
 <section id="timefeaturedraw" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="timefeaturedraw"><span class="header-section-number">4</span> <code>TimeFeatureDraw</code></h2>
 <div class="api-signature">
-<div id="1167a559" class="cell" data-execution_count="5">
+<div id="6aa27aa7" class="cell" data-execution_count="5">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.TimeFeatureDraw))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -712,7 +727,7 @@ window.Quarto = {
 <section id="assignmentcontext" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="assignmentcontext"><span class="header-section-number">5</span> <code>AssignmentContext</code></h2>
 <div class="api-signature">
-<div id="a3735641" class="cell" data-execution_count="6">
+<div id="e7d7cfb7" class="cell" data-execution_count="6">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.AssignmentContext))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -727,7 +742,7 @@ window.Quarto = {
 <section id="simulationcontext" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="simulationcontext"><span class="header-section-number">6</span> <code>SimulationContext</code></h2>
 <div class="api-signature">
-<div id="fbb9290c" class="cell" data-execution_count="7">
+<div id="da4d2063" class="cell" data-execution_count="7">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.SimulationContext))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -832,13 +847,56 @@ window.Quarto = {
 <span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> generate(<span class="va">self</span>, context, rng) <span class="op">-&gt;</span> ComponentDraw: ...</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>All randomness must come from the supplied <code>numpy.random.Generator</code>.</p>
 </section>
-<section id="paneldataset" class="level2" data-number="8">
-<h2 data-number="8" class="anchored" data-anchor-id="paneldataset"><span class="header-section-number">8</span> <code>PanelDataset</code></h2>
+<section id="additivefactoroutcome" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="additivefactoroutcome"><span class="header-section-number">8</span> <code>AdditiveFactorOutcome</code></h2>
 <div class="api-signature">
-<div id="ed742074" class="cell" data-execution_count="8">
+<div id="8427fadd" class="cell" data-execution_count="8">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.PanelDataset))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.AdditiveFactorOutcome))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>AdditiveFactorOutcome(unit_effect_scale: 'float' = 1.0, time_effect_scale: 'float' = 1.0, noise_scale: 'float' = 0.0) -&gt; None</code></pre>
+</div>
+</div>
+</div>
+<p>The basic additive panel outcome model:</p>
+<p><span class="math display">\[
+Y_{it}(0)=\alpha_i+\gamma_t+\varepsilon_{it}.
+\]</span></p>
+<p><code>unit_effect_scale</code>, <code>time_effect_scale</code>, and <code>noise_scale</code> are finite, nonnegative Gaussian standard deviations. The systematic surface has rank at most two and lies exactly in a 2WFE model. Metadata retains the three realized components separately.</p>
+</section>
+<section id="sumoutcomemodel" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="sumoutcomemodel"><span class="header-section-number">9</span> <code>SumOutcomeModel</code></h2>
+<div class="api-signature">
+<div id="91d5606d" class="cell" data-execution_count="9">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.SumOutcomeModel))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>SumOutcomeModel(models: 'Sequence[OutcomeModel]', weights: 'Sequence[float] | None' = None) -&gt; None</code></pre>
+</div>
+</div>
+</div>
+<p>Adds any nonempty sequence of public <code>OutcomeModel</code> components, optionally after multiplying them by finite <code>weights</code>. Component draw order is the model order supplied to the constructor. Metadata preserves each component’s model name, weight, and diagnostic truth. For example, a unit effect plus the canonical two-factor outcome is:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>outcome_model <span class="op">=</span> pps.SumOutcomeModel(</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    (</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>        pps.AdditiveFactorOutcome(</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>            time_effect_scale<span class="op">=</span><span class="fl">0.0</span>,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>            noise_scale<span class="op">=</span><span class="fl">0.0</span>,</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>        pps.ClassicFactorOutcome(overlap<span class="op">=</span><span class="fl">1.0</span>),</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="paneldataset" class="level2" data-number="10">
+<h2 data-number="10" class="anchored" data-anchor-id="paneldataset"><span class="header-section-number">10</span> <code>PanelDataset</code></h2>
+<div class="api-signature">
+<div id="769a86be" class="cell" data-execution_count="10">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.PanelDataset))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>PanelDataset(outcome: 'FloatMatrix', treatment: 'FloatMatrix', untreated_outcome: 'FloatMatrix', treatment_effect: 'FloatMatrix', name: 'str', unit_ids: 'NDArray[Any] | None' = None, time_ids: 'NDArray[Any] | None' = None, metadata: 'Mapping[str, Any]' = &lt;factory&gt;, unit_covariates: 'FloatMatrix | None' = None, unit_covariate_names: 'Sequence[str] | None' = None) -&gt; None</code></pre>
@@ -846,8 +904,8 @@ window.Quarto = {
 </div>
 </div>
 <p>The immutable output of every simulation.</p>
-<section id="constructor-arrays" class="level3" data-number="8.1">
-<h3 data-number="8.1" class="anchored" data-anchor-id="constructor-arrays"><span class="header-section-number">8.1</span> Constructor arrays</h3>
+<section id="constructor-arrays" class="level3" data-number="10.1">
+<h3 data-number="10.1" class="anchored" data-anchor-id="constructor-arrays"><span class="header-section-number">10.1</span> Constructor arrays</h3>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 33%">
@@ -893,12 +951,12 @@ window.Quarto = {
 <p><span class="math display">\[Y=Y(0)+\tau\]</span></p>
 <p>cell by cell. It copies arrays before making them read-only, so later mutation of caller-owned inputs cannot alter the dataset.</p>
 </section>
-<section id="identifiers-and-metadata" class="level3" data-number="8.2">
-<h3 data-number="8.2" class="anchored" data-anchor-id="identifiers-and-metadata"><span class="header-section-number">8.2</span> Identifiers and metadata</h3>
+<section id="identifiers-and-metadata" class="level3" data-number="10.2">
+<h3 data-number="10.2" class="anchored" data-anchor-id="identifiers-and-metadata"><span class="header-section-number">10.2</span> Identifiers and metadata</h3>
 <p><code>unit_ids</code> and <code>time_ids</code> default to zero-based integer positions and must be unique. <code>unit_covariate_names</code> defaults to <code>x1</code>, <code>x2</code>, and so on; names must be unique and cannot collide with the long-form core columns. <code>metadata</code> is copied and recursively frozen for mappings, arrays, lists, tuples, and sets.</p>
 </section>
-<section id="properties" class="level3" data-number="8.3">
-<h3 data-number="8.3" class="anchored" data-anchor-id="properties"><span class="header-section-number">8.3</span> Properties</h3>
+<section id="properties" class="level3" data-number="10.3">
+<h3 data-number="10.3" class="anchored" data-anchor-id="properties"><span class="header-section-number">10.3</span> Properties</h3>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -935,14 +993,14 @@ window.Quarto = {
 </table>
 <p><code>true_att</code> raises <code>ValueError</code> when the panel has no treated cells.</p>
 </section>
-<section id="interchange-methods" class="level3" data-number="8.4">
-<h3 data-number="8.4" class="anchored" data-anchor-id="interchange-methods"><span class="header-section-number">8.4</span> Interchange methods</h3>
-<div id="c3a116f6" class="cell" data-execution_count="9">
+<section id="interchange-methods" class="level3" data-number="10.4">
+<h3 data-number="10.4" class="anchored" data-anchor-id="interchange-methods"><span class="header-section-number">10.4</span> Interchange methods</h3>
+<div id="a0d20527" class="cell" data-execution_count="11">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> (<span class="st">"as_arrays"</span>, <span class="st">"arrays"</span>, <span class="st">"as_long_dict"</span>):</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    method <span class="op">=</span> <span class="bu">getattr</span>(pps.PanelDataset, name)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>name<span class="sc">}{</span>inspect<span class="sc">.</span>signature(method)<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> (<span class="st">"as_arrays"</span>, <span class="st">"arrays"</span>, <span class="st">"as_long_dict"</span>):</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    method <span class="op">=</span> <span class="bu">getattr</span>(pps.PanelDataset, name)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>name<span class="sc">}{</span>inspect<span class="sc">.</span>signature(method)<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>as_arrays(self, *, copy: 'bool' = False) -&gt; 'tuple[FloatMatrix, FloatMatrix]'
@@ -979,13 +1037,13 @@ as_long_dict(self, *, copy: 'bool' = False) -&gt; 'Mapping[str, NDArray[Any]]'</
 <p>Views are read-only unless <code>copy=True</code>. <code>arrays()</code> accepts <code>outcome</code>, <code>treatment</code>, <code>untreated_outcome</code>, and <code>treatment_effect</code>; an unknown name raises <code>ValueError</code>.</p>
 </section>
 </section>
-<section id="panelsimulator" class="level2" data-number="9">
-<h2 data-number="9" class="anchored" data-anchor-id="panelsimulator"><span class="header-section-number">9</span> <code>PanelSimulator</code></h2>
+<section id="panelsimulator" class="level2" data-number="11">
+<h2 data-number="11" class="anchored" data-anchor-id="panelsimulator"><span class="header-section-number">11</span> <code>PanelSimulator</code></h2>
 <div class="api-signature">
-<div id="9312771b" class="cell" data-execution_count="10">
+<div id="87ae6ddc" class="cell" data-execution_count="12">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.PanelSimulator))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.PanelSimulator))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>PanelSimulator(name: 'str', dimensions: 'PanelDimensions', assignment: 'AssignmentModel', outcome_model: 'OutcomeModel', effect_model: 'EffectModel | EffectCallable', feature_model: 'UnitFeatureModel | None' = None, time_feature_model: 'TimeFeatureModel | None' = None) -&gt; None</code></pre>
@@ -1034,8 +1092,8 @@ as_long_dict(self, *, copy: 'bool' = False) -&gt; 'Mapping[str, NDArray[Any]]'</
 </tr>
 </tbody>
 </table>
-<section id="pipeline" class="level3" data-number="9.1">
-<h3 data-number="9.1" class="anchored" data-anchor-id="pipeline"><span class="header-section-number">9.1</span> Pipeline</h3>
+<section id="pipeline" class="level3" data-number="11.1">
+<h3 data-number="11.1" class="anchored" data-anchor-id="pipeline"><span class="header-section-number">11.1</span> Pipeline</h3>
 <ol type="1">
 <li>Resolve one NumPy generator.</li>
 <li>Draw shared observed and latent unit features, if configured.</li>
@@ -1048,11 +1106,11 @@ as_long_dict(self, *, copy: 'bool' = False) -&gt; 'Mapping[str, NDArray[Any]]'</
 </ol>
 <p>Component metadata is namespaced under <code>features</code>, <code>time_features</code>, <code>assignment</code>, <code>outcome</code>, and <code>effect</code>. The simulator name and dimensions are stored under <code>simulator</code>.</p>
 <p>A callable supplied directly as <code>effect_model</code> is wrapped in <code>CallableEffect</code>. It receives <code>SimulationContext</code> and may return a scalar, an <code>(N,)</code> or <code>(N,1)</code> unit law, a <code>(T,)</code> or <code>(1,T)</code> time law, or an <code>(N,T)</code> surface. The normalized surface is multiplied by realized treatment. For square panels, use <code>(1,T)</code> rather than <code>(T,)</code> to distinguish a time law from the legacy unit vector form.</p>
-<div id="0a8495be" class="cell" data-execution_count="11">
+<div id="20787ef8" class="cell" data-execution_count="13">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"simulate</span><span class="sc">{</span>inspect<span class="sc">.</span>signature(pps.PanelSimulator.simulate)<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"iter_simulations</span><span class="sc">{</span>inspect<span class="sc">.</span>signature(pps.PanelSimulator.iter_simulations)<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"simulate</span><span class="sc">{</span>inspect<span class="sc">.</span>signature(pps.PanelSimulator.simulate)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"iter_simulations</span><span class="sc">{</span>inspect<span class="sc">.</span>signature(pps.PanelSimulator.iter_simulations)<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>simulate(self, *, seed: 'int | np.random.SeedSequence | None' = None, rng: 'np.random.Generator | None' = None) -&gt; 'PanelDataset'
@@ -1062,13 +1120,13 @@ iter_simulations(self, replications: 'int', *, seed: 'int | np.random.SeedSequen
 <p><code>simulate(seed=..., rng=...)</code> accepts either an integer/<code>SeedSequence</code> or an existing generator, never both. <code>iter_simulations(replications, seed=...)</code> requires a positive replication count and uses <code>SeedSequence.spawn()</code> for child streams.</p>
 </section>
 </section>
-<section id="resolve_rng" class="level2" data-number="10">
-<h2 data-number="10" class="anchored" data-anchor-id="resolve_rng"><span class="header-section-number">10</span> <code>resolve_rng</code></h2>
+<section id="resolve_rng" class="level2" data-number="12">
+<h2 data-number="12" class="anchored" data-anchor-id="resolve_rng"><span class="header-section-number">12</span> <code>resolve_rng</code></h2>
 <div class="api-signature">
-<div id="62541068" class="cell" data-execution_count="12">
+<div id="28958d46" class="cell" data-execution_count="14">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"resolve_rng</span><span class="sc">{</span>inspect<span class="sc">.</span>signature(pps.resolve_rng)<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"resolve_rng</span><span class="sc">{</span>inspect<span class="sc">.</span>signature(pps.resolve_rng)<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>resolve_rng(*, seed: 'int | np.random.SeedSequence | None' = None, rng: 'np.random.Generator | None' = None) -&gt; 'np.random.Generator'</code></pre>

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>API reference – pypanelsim</title>
+<title>F-test paper DGP API – pypanelsim</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -26,29 +26,64 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-36d25da79ffdd5f9713da90c3b96a3d2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-38d12467a47ff8fdcb073e1c30ca1f5a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-36d25da79ffdd5f9713da90c3b96a3d2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-36d25da79ffdd5f9713da90c3b96a3d2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-38d12467a47ff8fdcb073e1c30ca1f5a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-36d25da79ffdd5f9713da90c3b96a3d2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -77,8 +112,37 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
 
-<link rel="stylesheet" href="styles.css">
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
 </head>
 
 <body class="nav-sidebar docked nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
@@ -250,7 +314,7 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">pypanelsim</span>
     </a>
   </div>
@@ -261,23 +325,23 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./index.html"> 
+    <a class="nav-link" href="../index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./getting-started.html" aria-current="page"> 
+    <a class="nav-link active" href="../getting-started.html" aria-current="page"> 
 <span class="menu-text">Get started</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./canonical-designs.html"> 
+    <a class="nav-link" href="../canonical-designs.html"> 
 <span class="menu-text">DGP catalog</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./assignment.html"> 
+    <a class="nav-link" href="../assignment.html"> 
 <span class="menu-text">Assignment</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./api.html"> 
+    <a class="nav-link" href="../api.html"> 
 <span class="menu-text">API</span></a>
   </li>  
   <li class="nav-item dropdown ">
@@ -286,19 +350,19 @@ ul.task-list li input[type="checkbox"] {
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-vignettes">    
         <li>
-    <a class="dropdown-item" href="./vignettes/balancing-reproduction.html">
+    <a class="dropdown-item" href="../vignettes/balancing-reproduction.html">
  <span class="dropdown-text">Balancing reproduction</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./vignettes/baker-twfe.html">
+    <a class="dropdown-item" href="../vignettes/baker-twfe.html">
  <span class="dropdown-text">Baker TWFE failure</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./vignettes/ftest-heterogeneity.html">
+    <a class="dropdown-item" href="../vignettes/ftest-heterogeneity.html">
  <span class="dropdown-text">F-test heterogeneity DGPs</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./interoperability.html">
+    <a class="dropdown-item" href="../interoperability.html">
  <span class="dropdown-text">Estimator interoperability</span></a>
   </li>  
     </ul>
@@ -322,7 +386,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">API reference</a></li><li class="breadcrumb-item"><a href="./api.html">API reference</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../api.html">API reference</a></li><li class="breadcrumb-item"><a href="../reference/ftest.html">F-test paper DGP API</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -345,19 +409,19 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./getting-started.html" class="sidebar-item-text sidebar-link">
+  <a href="../getting-started.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Get started</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./assignment.html" class="sidebar-item-text sidebar-link">
+  <a href="../assignment.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Assignment mechanisms</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./interoperability.html" class="sidebar-item-text sidebar-link">
+  <a href="../interoperability.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Estimator interoperability</span></a>
   </div>
 </li>
@@ -374,25 +438,25 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./architecture.html" class="sidebar-item-text sidebar-link">
+  <a href="../architecture.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Architecture and extension contract</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./canonical-designs.html" class="sidebar-item-text sidebar-link">
+  <a href="../canonical-designs.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Balancing DGP catalog</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./migration.html" class="sidebar-item-text sidebar-link">
+  <a href="../migration.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Migration from <code>panel_dgps</code></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./validation.html" class="sidebar-item-text sidebar-link">
+  <a href="../validation.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Validation record</span></a>
   </div>
 </li>
@@ -409,43 +473,43 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./api.html" class="sidebar-item-text sidebar-link active">
+  <a href="../api.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">API reference</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./reference/core.html" class="sidebar-item-text sidebar-link">
+  <a href="../reference/core.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Core API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./reference/assignment.html" class="sidebar-item-text sidebar-link">
+  <a href="../reference/assignment.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Assignment, feature, and effect API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./reference/baker.html" class="sidebar-item-text sidebar-link">
+  <a href="../reference/baker.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Baker staggered-adoption API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./reference/ftest.html" class="sidebar-item-text sidebar-link">
+  <a href="../reference/ftest.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">F-test paper DGP API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./reference/canonical.html" class="sidebar-item-text sidebar-link">
+  <a href="../reference/canonical.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Canonical design API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./reference/registry.html" class="sidebar-item-text sidebar-link">
+  <a href="../reference/registry.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Registry API</span></a>
   </div>
 </li>
@@ -462,19 +526,19 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./vignettes/baker-twfe.html" class="sidebar-item-text sidebar-link">
+  <a href="../vignettes/baker-twfe.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Baker DGP: why vanilla TWFE event studies fail</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./vignettes/ftest-heterogeneity.html" class="sidebar-item-text sidebar-link">
+  <a href="../vignettes/ftest-heterogeneity.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">F-test paper heterogeneous-effect DGPs</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./vignettes/balancing-reproduction.html" class="sidebar-item-text sidebar-link">
+  <a href="../vignettes/balancing-reproduction.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Balancing estimators in synthetic panels</span></a>
   </div>
 </li>
@@ -490,10 +554,10 @@ ul.task-list li input[type="checkbox"] {
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">API reference</a></li><li class="breadcrumb-item"><a href="./api.html">API reference</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../api.html">API reference</a></li><li class="breadcrumb-item"><a href="../reference/ftest.html">F-test paper DGP API</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">API reference</h1>
-<p class="subtitle lead">Public simulation objects, assignment laws, canonical designs, and registries</p>
+<h1 class="title">F-test paper DGP API</h1>
+<p class="subtitle lead">Configurations, profile catalogs, reusable factories, and one-draw functions</p>
 </div>
 
 
@@ -510,187 +574,124 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>All public names are importable from <code>pypanelsim</code>. Component interfaces use structural typing: custom implementations need the documented method, not inheritance from a package base class.</p>
-<section id="core-simulation-and-data" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="core-simulation-and-data"><span class="header-section-number">1</span> Core simulation and data</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Object</th>
-<th>Purpose</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><a href="./reference/core.html#paneldimensions"><code>PanelDimensions</code></a></td>
-<td>Rectangular panel shape</td>
-</tr>
-<tr class="even">
-<td><a href="./reference/core.html#paneldataset"><code>PanelDataset</code></a></td>
-<td>Immutable observed data and causal truth</td>
-</tr>
-<tr class="odd">
-<td><a href="./reference/core.html#panelsimulator"><code>PanelSimulator</code></a></td>
-<td>Feature, assignment, outcome, and effect orchestration</td>
-</tr>
-<tr class="even">
-<td><a href="./reference/core.html#simulationcontext"><code>SimulationContext</code></a></td>
-<td>Treatment and shared features for outcome/effect components</td>
-</tr>
-<tr class="odd">
-<td><a href="./reference/core.html#componentdraw"><code>ComponentDraw</code></a></td>
-<td>Component matrix plus diagnostic metadata</td>
-</tr>
-<tr class="even">
-<td><a href="./reference/core.html#timefeaturedraw"><code>TimeFeatureDraw</code></a></td>
-<td>Shared time-varying features plus metadata</td>
-</tr>
-<tr class="odd">
-<td><a href="./reference/core.html#resolve_rng"><code>resolve_rng</code></a></td>
-<td>Explicit seed/generator validation</td>
-</tr>
-</tbody>
-</table>
+<div id="2c81ed23" class="cell" data-execution_count="1">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> inspect</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pypanelsim <span class="im">as</span> pps</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> show_signature(object_):</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>object_<span class="sc">.</span><span class="va">__name__</span><span class="sc">}{</span>inspect<span class="sc">.</span>signature(object_)<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<section id="catalogs" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="catalogs"><span class="header-section-number">1</span> Catalogs</h2>
+<div id="2cbac4ad" class="cell" data-execution_count="2">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(pps.available_ftest_temporal_designs())</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(pps.available_ftest_cohort_designs())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>('constant', 'linear', 'concave', 'positive_then_negative', 'exponential', 'sinusoidal', 'random_walk')
+('homogeneous', 'log_vs_linear_vs_sin', 'small_differences', 'large_differences', 'selection_on_gains', 'novelty_effects', 'activity_bias')</code></pre>
+</div>
+</div>
+<p>The first tuple contains the seven single-cohort temporal laws. The second contains all seven across-cohort experiments in the manuscript, including <code>novelty_effects</code>.</p>
 </section>
-<section id="untreated-outcome-composition" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="untreated-outcome-composition"><span class="header-section-number">2</span> Untreated-outcome composition</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Object</th>
-<th>Purpose</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><a href="./reference/core.html#additivefactoroutcome"><code>AdditiveFactorOutcome</code></a></td>
-<td>Gaussian unit and period effects plus idiosyncratic noise</td>
-</tr>
-<tr class="even">
-<td><a href="./reference/core.html#sumoutcomemodel"><code>SumOutcomeModel</code></a></td>
-<td>Weighted sum of reusable outcome components</td>
-</tr>
-</tbody>
-</table>
+<section id="ftesttemporalconfig" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="ftesttemporalconfig"><span class="header-section-number">2</span> <code>FTestTemporalConfig</code></h2>
+<div id="e03f505e" class="cell" data-execution_count="3">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.FTestTemporalConfig)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>FTestTemporalConfig(n_units: 'int' = 1000, n_periods: 'int' = 35, adoption_period: 'int' = 15, n_treated: 'int | None' = None, max_effect: 'float' = 1.0, unit_effect_scale: 'float' = 5.0, time_effect_scale: 'float' = 2.0, unit_trend_scale: 'float' = 0.01, noise_scale: 'float' = 2.0, error_rho: 'float' = 0.7) -&gt; None</code></pre>
+</div>
+</div>
+<p>Controls unit and period counts, the single adoption period and treated count, effect scale, additive fixed-effect scales, unit-trend scale, and stationary AR(1) error parameters. <code>n_treated=None</code> means half the units. The default <span class="math inline">\(N=1{,}000\)</span> is interactive; the paper uses <span class="math inline">\(N=50{,}000\)</span>.</p>
+<p>Derived properties are <code>treated_count</code> and <code>dimensions</code>.</p>
 </section>
-<section id="features-and-assignment" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="features-and-assignment"><span class="header-section-number">3</span> Features and assignment</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Object</th>
-<th>Purpose</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><a href="./reference/assignment.html#gaussianunitfeatures"><code>GaussianUnitFeatures</code></a></td>
-<td>Observed and latent standard-normal unit features</td>
-</tr>
-<tr class="even">
-<td><a href="./reference/assignment.html#gaussiantimefeatures"><code>GaussianTimeFeatures</code></a></td>
-<td>Standard-normal time-varying features shared by outcomes and effects</td>
-</tr>
-<tr class="odd">
-<td><a href="./reference/assignment.html#singlecohortassignment"><code>SingleCohortAssignment</code></a></td>
-<td>Fixed common adoption schedule</td>
-</tr>
-<tr class="even">
-<td><a href="./reference/assignment.html#randomizedsinglecohortassignment"><code>RandomizedSingleCohortAssignment</code></a></td>
-<td>Fixed-size complete randomization</td>
-</tr>
-<tr class="odd">
-<td><a href="./reference/assignment.html#randomizedstaggeredadoption"><code>RandomizedStaggeredAdoption</code></a></td>
-<td>Exact fixed-size random adoption cohorts</td>
-</tr>
-<tr class="even">
-<td><a href="./reference/assignment.html#binarylogitassignment"><code>BinaryLogitAssignment</code></a></td>
-<td>Sigmoid selection on observed and latent features</td>
-</tr>
-<tr class="odd">
-<td><a href="./reference/assignment.html#staggeredadoption"><code>StaggeredAdoption</code></a></td>
-<td>Fixed unit-to-adoption map</td>
-</tr>
-<tr class="even">
-<td><a href="./reference/assignment.html#generalizedpropensityassignment"><code>GeneralizedPropensityAssignment</code></a></td>
-<td>Multinomial-logit adoption cohorts</td>
-</tr>
-<tr class="odd">
-<td><a href="./reference/assignment.html#constanteffect"><code>ConstantEffect</code></a></td>
-<td>Constant effect on treated cells</td>
-</tr>
-<tr class="even">
-<td><a href="./reference/assignment.html#linearampeffect"><code>LinearRampEffect</code></a></td>
-<td>Event-time-linear effect path</td>
-</tr>
-<tr class="odd">
-<td><a href="./reference/assignment.html#cohorteventtimeeffect"><code>CohortEventTimeEffect</code></a></td>
-<td>Supplied event-time profile for each cohort</td>
-</tr>
-<tr class="even">
-<td><a href="./reference/assignment.html#callableeffect"><code>CallableEffect</code></a></td>
-<td>Scalar, unit, time, or unit-by-time effect heterogeneity</td>
-</tr>
-<tr class="odd">
-<td><a href="./reference/assignment.html#callableeffect"><code>CallableUnitEffect</code></a></td>
-<td>Compatibility name for callable effects</td>
-</tr>
-</tbody>
-</table>
+<section id="ftestcohortconfig" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="ftestcohortconfig"><span class="header-section-number">3</span> <code>FTestCohortConfig</code></h2>
+<div id="bf62fe4e" class="cell" data-execution_count="4">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.FTestCohortConfig)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>FTestCohortConfig(n_units: 'int' = 1000, n_periods: 'int' = 30, adoption_periods: 'tuple[int, int, int]' = (10, 15, 20), cohort_shares: 'tuple[float, float, float]' = (0.125, 0.25, 0.125), unit_effect_scale: 'float' = 2.0, time_effect_scale: 'float' = 1.0, noise_scale: 'float' = 1.0, unit_error_rho: 'float' = 0.8, time_error_rho: 'float' = 0.2, periodic_time_effects: 'tuple[float, ...]' = (-0.1, 0.1, 0.0, 0.0, 0.1, 0.5, 0.5)) -&gt; None</code></pre>
+</div>
+</div>
+<p>Controls the three adoption periods and cohort shares, panel dimensions, additive fixed-effect and noise scales, unit and time AR coefficients, and the periodic calendar-effect vector. <code>cohort_sizes</code> floors each share times <code>n_units</code>; <code>dimensions</code> returns the generic panel shape. Defaults reproduce the paper’s <span class="math inline">\((10,15,20)\)</span> schedule and <span class="math inline">\((1/8,1/4,1/8)\)</span> shares with a smaller interactive unit count. The paper uses <span class="math inline">\(N=20{,}000\)</span>.</p>
 </section>
-<section id="canonical-designs" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="canonical-designs"><span class="header-section-number">4</span> Canonical designs</h2>
-<p>See <a href="./reference/canonical.html">canonical design API</a> for <code>CanonicalPanelConfig</code>, the six one-draw functions, reusable simulator factories, and canonical outcome components such as <code>ClassicFactorOutcome</code>.</p>
+<section id="effect-profiles" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="effect-profiles"><span class="header-section-number">4</span> Effect profiles</h2>
+<div id="146c4ea0" class="cell" data-execution_count="5">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.ftest_temporal_profile)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>show_signature(pps.ftest_cohort_profiles)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>ftest_temporal_profile(name: 'str', *, config: 'FTestTemporalConfig | None' = None, seed: 'int | np.random.SeedSequence | None' = None, rng: 'np.random.Generator | None' = None) -&gt; 'np.ndarray'
+ftest_cohort_profiles(name: 'str', *, config: 'FTestCohortConfig | None' = None) -&gt; 'MappingProxyType[int, np.ndarray]'</code></pre>
+</div>
+</div>
+<p><code>ftest_temporal_profile()</code> returns one read-only post-adoption vector. Supply <code>seed=</code> or <code>rng=</code> for a reproducible <code>random_walk</code>; deterministic paths do not consume it. <code>ftest_cohort_profiles()</code> returns a read-only mapping from adoption period to a read-only post-adoption vector.</p>
+<p>The paths are ordinary inputs to the generic effect component:</p>
+<div id="7b41f8a3" class="cell" data-execution_count="6">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>config <span class="op">=</span> pps.FTestCohortConfig(n_units<span class="op">=</span><span class="dv">200</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>profiles <span class="op">=</span> pps.ftest_cohort_profiles(<span class="st">"activity_bias"</span>, config<span class="op">=</span>config)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>effect <span class="op">=</span> pps.CohortEventTimeEffect(profiles)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
 </section>
-<section id="baker-staggered-adoption-design" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="baker-staggered-adoption-design"><span class="header-section-number">5</span> Baker staggered-adoption design</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Object</th>
-<th>Purpose</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><a href="./reference/baker.html#bakerpanelconfig"><code>BakerPanelConfig</code></a></td>
-<td>Calendar, cohort sizes, heterogeneous slopes, and noise scales</td>
-</tr>
-<tr class="even">
-<td><a href="./reference/baker.html#construction"><code>baker_design</code></a></td>
-<td>Reusable <code>PanelSimulator</code> for the Baker TWFE failure design</td>
-</tr>
-<tr class="odd">
-<td><a href="./reference/baker.html#construction"><code>baker</code></a></td>
-<td>One reproducible panel draw</td>
-</tr>
-<tr class="even">
-<td><a href="./reference/baker.html#components"><code>BakerStateFeatures</code></a></td>
-<td>Independently sampled state assignment clusters</td>
-</tr>
-<tr class="odd">
-<td><a href="./reference/baker.html#components"><code>BakerCohortAssignment</code></a></td>
-<td>State-level randomized adoption cohorts</td>
-</tr>
-<tr class="even">
-<td><a href="./reference/baker.html#components"><code>BakerAdditiveOutcome</code></a></td>
-<td>Additive unit effects, time effects, and noise</td>
-</tr>
-<tr class="odd">
-<td><a href="./reference/baker.html#components"><code>BakerDynamicEffect</code></a></td>
-<td>Cohort-specific linear event-time effects</td>
-</tr>
-</tbody>
-</table>
-<p>See the <a href="./vignettes/baker-twfe.html">Baker TWFE failure vignette</a> for executable PyFixest vanilla and saturated event-study estimates.</p>
+<section id="reusable-simulator-factories" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="reusable-simulator-factories"><span class="header-section-number">5</span> Reusable simulator factories</h2>
+<div id="3304617d" class="cell" data-execution_count="7">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.ftest_temporal_design)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>show_signature(pps.ftest_cohort_design)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>ftest_temporal_design(name: 'str', *, config: 'FTestTemporalConfig | None' = None, profile_seed: 'int | np.random.SeedSequence | None' = 42) -&gt; 'PanelSimulator'
+ftest_cohort_design(name: 'str', *, config: 'FTestCohortConfig | None' = None) -&gt; 'PanelSimulator'</code></pre>
+</div>
+</div>
+<p>Both return <code>PanelSimulator</code>. <code>ftest_temporal_design()</code> accepts a separate <code>profile_seed</code> so the random-walk truth can remain fixed while repeated panel draws vary. The cohort factory uses exact fixed-size randomized cohorts.</p>
+<div id="65531f0e" class="cell" data-execution_count="8">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>simulator <span class="op">=</span> pps.ftest_cohort_design(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"log_vs_linear_vs_sin"</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    config<span class="op">=</span>config,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> simulator.simulate(seed<span class="op">=</span><span class="dv">42</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
 </section>
-<section id="f-test-paper-heterogeneous-effect-designs" class="level2" data-number="6">
-<h2 data-number="6" class="anchored" data-anchor-id="f-test-paper-heterogeneous-effect-designs"><span class="header-section-number">6</span> F-test paper heterogeneous-effect designs</h2>
-<p>See the <a href="./reference/ftest.html">F-test DGP API</a> for both configuration objects, the 7+7 profile catalogs, reusable simulator factories, and one-draw functions. The <a href="./vignettes/ftest-heterogeneity.html">complete vignette</a> specifies and visualizes every design.</p>
-</section>
-<section id="registry" class="level2" data-number="7">
-<h2 data-number="7" class="anchored" data-anchor-id="registry"><span class="header-section-number">7</span> Registry</h2>
-<p>See <a href="./reference/registry.html"><code>DGPRegistry</code></a> for stable name-to-factory mappings and the global canonical registry.</p>
+<section id="one-draw-functions" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="one-draw-functions"><span class="header-section-number">6</span> One-draw functions</h2>
+<div id="03f3012a" class="cell" data-execution_count="9">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.ftest_temporal)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>show_signature(pps.ftest_cohort)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>ftest_temporal(name: 'str', *, config: 'FTestTemporalConfig | None' = None, profile_seed: 'int | np.random.SeedSequence | None' = 42, seed: 'int | np.random.SeedSequence | None' = None, rng: 'np.random.Generator | None' = None) -&gt; 'PanelDataset'
+ftest_cohort(name: 'str', *, config: 'FTestCohortConfig | None' = None, seed: 'int | np.random.SeedSequence | None' = None, rng: 'np.random.Generator | None' = None) -&gt; 'PanelDataset'</code></pre>
+</div>
+</div>
+<p>These create the corresponding simulator and immediately call <code>simulate()</code>. They accept the same configuration plus the standard mutually exclusive <code>seed=</code> and <code>rng=</code> arguments.</p>
+<p>See the <a href="../vignettes/ftest-heterogeneity.html">complete F-test DGP vignette</a> for every formula, all fourteen true-effect plots, and representative <span class="math inline">\(Y\)</span>/<span class="math inline">\(W\)</span> matrices.</p>
 
 
 </section>
@@ -1114,4 +1115,4 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/api.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/reference/ftest.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

@@ -65,7 +65,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
 <script src="site_libs/clipboard/clipboard.min.js"></script>
 <script src="site_libs/quarto-search/autocomplete.umd.js"></script>
 <script src="site_libs/quarto-search/fuse.min.js"></script>
@@ -359,6 +358,10 @@ window.Quarto = {
  <span class="dropdown-text">Baker TWFE failure</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="./vignettes/ftest-heterogeneity.html">
+ <span class="dropdown-text">F-test heterogeneity DGPs</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="./interoperability.html">
  <span class="dropdown-text">Estimator interoperability</span></a>
   </li>  
@@ -494,6 +497,12 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./reference/ftest.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">F-test paper DGP API</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./reference/canonical.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Canonical design API</span></a>
   </div>
@@ -519,6 +528,12 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="./vignettes/baker-twfe.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Baker DGP: why vanilla TWFE event studies fail</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vignettes/ftest-heterogeneity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">F-test paper heterogeneous-effect DGPs</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -601,7 +616,7 @@ window.Quarto = {
 </thead>
 <tbody>
 <tr class="odd">
-<td>Install and draw a first panel</td>
+<td>Simulate and estimate rank-2 and rank-3 factor panels</td>
 <td><a href="./getting-started.html">Get started</a></td>
 </tr>
 <tr class="even">
@@ -621,14 +636,18 @@ window.Quarto = {
 <td><a href="./api.html">API reference</a></td>
 </tr>
 <tr class="even">
+<td>Simulate all 14 F-test paper effect designs</td>
+<td><a href="./vignettes/ftest-heterogeneity.html">F-test heterogeneity DGPs</a></td>
+</tr>
+<tr class="odd">
 <td>See heterogeneous adoption bias vanilla TWFE</td>
 <td><a href="./vignettes/baker-twfe.html">Baker TWFE failure</a></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Reproduce 398 estimator-design RMSE cells</td>
 <td><a href="./vignettes/balancing-reproduction.html">Balancing reproduction</a></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Pass panels to crabbymetrics or PyFixest</td>
 <td><a href="./interoperability.html">Estimator interoperability</a></td>
 </tr>

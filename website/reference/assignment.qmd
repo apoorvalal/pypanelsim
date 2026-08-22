@@ -80,6 +80,19 @@ For eligible set $E$, each eligible unit has marginal probability
 $n_{treated}/|E|$. Metadata contains `treated_units`, `eligible_units`,
 `adoption_period`, and the unit-aligned `propensity_scores` vector.
 
+## `RandomizedStaggeredAdoption`
+
+```{python}
+show_signature(pps.RandomizedStaggeredAdoption)
+```
+
+Randomly partitions eligible units into exact fixed-size absorbing adoption
+cohorts. `adoption_periods` and `cohort_sizes` are paired positionally; sampled
+cohorts are disjoint, and unsampled units remain untreated. Metadata contains
+cohort unit positions, realized categories and adoption times, and the marginal
+generalized propensity score over every cohort plus never treated. Ineligible
+units have probability one on the never-treated category.
+
 ## `BinaryLogitAssignment`
 
 ```{python}
@@ -215,6 +228,18 @@ effect = pps.CallableEffect(
 For the common case, pass the lambda directly to `PanelSimulator` and it will
 be wrapped automatically. `CallableUnitEffect` remains a backward-compatible
 class name and accepts the same result shapes.
+
+## `CohortEventTimeEffect`
+
+```{python}
+show_signature(pps.CohortEventTimeEffect)
+```
+
+Accepts `{adoption_period: post_adoption_vector}` and applies each vector by
+unit-specific event time. Treatment must be absorbing. Every realized cohort
+must have a supplied profile long enough to cover its treated cells. This is a
+generic effect component used by the F-test paper catalog and is equally usable
+in custom staggered-adoption designs.
 
 ## `CallableOutcomeModel`
 

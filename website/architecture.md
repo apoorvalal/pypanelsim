@@ -143,6 +143,8 @@ same random stream.
 - `StaggeredAdoption` accepts a mapping from unit position to adoption period.
 - `RandomizedSingleCohortAssignment` samples a fixed-size cohort without
   replacement.
+- `RandomizedStaggeredAdoption` randomly partitions units into exact fixed-size
+  adoption cohorts.
 - `BinaryLogitAssignment` draws treatment from observed and latent unit-feature
   logits.
 - `GeneralizedPropensityAssignment` draws adoption cohorts from multinomial
@@ -164,6 +166,8 @@ same random stream.
 - `ConstantEffect` applies one effect to every treated cell.
 - `LinearRampEffect` uses unit-specific event time and supports staggered
   adoption.
+- `CohortEventTimeEffect` maps adoption periods to supplied post-adoption
+  profiles.
 - `CallableEffect` evaluates scalar, unit, time, or full unit-by-time laws
   against the shared `SimulationContext`; `PanelSimulator` automatically wraps
   a lambda passed as `effect_model`. `CallableUnitEffect` is retained as a

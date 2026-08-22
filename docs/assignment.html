@@ -65,7 +65,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
 <script src="site_libs/clipboard/clipboard.min.js"></script>
 <script src="site_libs/quarto-search/autocomplete.umd.js"></script>
 <script src="site_libs/quarto-search/fuse.min.js"></script>
@@ -359,6 +358,10 @@ window.Quarto = {
  <span class="dropdown-text">Baker TWFE failure</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="./vignettes/ftest-heterogeneity.html">
+ <span class="dropdown-text">F-test heterogeneity DGPs</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="./interoperability.html">
  <span class="dropdown-text">Estimator interoperability</span></a>
   </li>  
@@ -494,6 +497,12 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./reference/ftest.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">F-test paper DGP API</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./reference/canonical.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Canonical design API</span></a>
   </div>
@@ -519,6 +528,12 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="./vignettes/baker-twfe.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Baker DGP: why vanilla TWFE event studies fail</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vignettes/ftest-heterogeneity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">F-test paper heterogeneous-effect DGPs</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -568,7 +583,7 @@ window.Quarto = {
 </ul>
 <p><code>GaussianUnitFeatures(k_x, k_u)</code> supplies independent standard-normal features. A custom feature model can instead introduce correlation, discrete covariates, or application-specific population structure.</p>
 <p><code>TimeFeatureModel</code> analogously draws a <code>(n_periods, k_v)</code> matrix <span class="math inline">\(V_t\)</span> shared by untreated outcomes and treatment effects. <code>GaussianTimeFeatures(k_v)</code> is the built-in independent-normal version; a custom model can supply trends, cycles, shocks, or calendar variables.</p>
-<div id="c3772e28" class="cell" data-execution_count="1">
+<div id="e302d34d" class="cell" data-execution_count="1">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass</span>
@@ -577,43 +592,47 @@ window.Quarto = {
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pypanelsim <span class="im">as</span> pps</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib.colors <span class="im">import</span> BoundaryNorm, ListedColormap</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span>(frozen<span class="op">=</span><span class="va">True</span>, slots<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FeatureOutcome:</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> generate(<span class="va">self</span>, context, rng):</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        t <span class="op">=</span> np.linspace(<span class="op">-</span><span class="fl">1.0</span>, <span class="fl">1.0</span>, context.dimensions.n_periods)</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        factor <span class="op">=</span> np.sin(np.linspace(<span class="fl">0.0</span>, <span class="fl">3.0</span> <span class="op">*</span> np.pi, context.dimensions.n_periods))</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        y0 <span class="op">=</span> (</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.8</span> <span class="op">*</span> context.observables[:, :<span class="dv">1</span>]</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> <span class="fl">0.6</span> <span class="op">*</span> context.observables[:, <span class="dv">1</span>:<span class="dv">2</span>] <span class="op">*</span> t</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> <span class="fl">1.2</span> <span class="op">*</span> context.unobservables[:, :<span class="dv">1</span>] <span class="op">*</span> (t <span class="op">+</span> <span class="fl">1.0</span>)</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> <span class="fl">0.8</span> <span class="op">*</span> context.unobservables[:, <span class="dv">1</span>:<span class="dv">2</span>] <span class="op">*</span> factor</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>        y0 <span class="op">+=</span> rng.normal(scale<span class="op">=</span><span class="fl">0.35</span>, size<span class="op">=</span>y0.shape)</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> pps.ComponentDraw(y0, {<span class="st">"kind"</span>: <span class="st">"feature_outcome"</span>})</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>dimensions <span class="op">=</span> pps.PanelDimensions(<span class="dv">120</span>, <span class="dv">48</span>)</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>features <span class="op">=</span> pps.GaussianUnitFeatures(<span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>TREATMENT_CMAP <span class="op">=</span> ListedColormap([<span class="st">"#f7f7f7"</span>, <span class="st">"#252525"</span>])</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>TREATMENT_NORM <span class="op">=</span> BoundaryNorm([<span class="op">-</span><span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="fl">1.5</span>], TREATMENT_CMAP.N)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span>(frozen<span class="op">=</span><span class="va">True</span>, slots<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FeatureOutcome:</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> generate(<span class="va">self</span>, context, rng):</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        t <span class="op">=</span> np.linspace(<span class="op">-</span><span class="fl">1.0</span>, <span class="fl">1.0</span>, context.dimensions.n_periods)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>        factor <span class="op">=</span> np.sin(np.linspace(<span class="fl">0.0</span>, <span class="fl">3.0</span> <span class="op">*</span> np.pi, context.dimensions.n_periods))</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        y0 <span class="op">=</span> (</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.8</span> <span class="op">*</span> context.observables[:, :<span class="dv">1</span>]</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> <span class="fl">0.6</span> <span class="op">*</span> context.observables[:, <span class="dv">1</span>:<span class="dv">2</span>] <span class="op">*</span> t</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> <span class="fl">1.2</span> <span class="op">*</span> context.unobservables[:, :<span class="dv">1</span>] <span class="op">*</span> (t <span class="op">+</span> <span class="fl">1.0</span>)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> <span class="fl">0.8</span> <span class="op">*</span> context.unobservables[:, <span class="dv">1</span>:<span class="dv">2</span>] <span class="op">*</span> factor</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        y0 <span class="op">+=</span> rng.normal(scale<span class="op">=</span><span class="fl">0.35</span>, size<span class="op">=</span>y0.shape)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> pps.ComponentDraw(y0, {<span class="st">"kind"</span>: <span class="st">"feature_outcome"</span>})</span>
 <span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> build(name, assignment):</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pps.PanelSimulator(</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        name<span class="op">=</span>name,</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>        dimensions<span class="op">=</span>dimensions,</span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>        feature_model<span class="op">=</span>features,</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>        assignment<span class="op">=</span>assignment,</span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>        outcome_model<span class="op">=</span>FeatureOutcome(),</span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>        effect_model<span class="op">=</span>pps.LinearRampEffect(<span class="fl">0.12</span>),</span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>dimensions <span class="op">=</span> pps.PanelDimensions(<span class="dv">120</span>, <span class="dv">48</span>)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>features <span class="op">=</span> pps.GaussianUnitFeatures(<span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> build(name, assignment):</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pps.PanelSimulator(</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>        name<span class="op">=</span>name,</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>        dimensions<span class="op">=</span>dimensions,</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>        feature_model<span class="op">=</span>features,</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>        assignment<span class="op">=</span>assignment,</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>        outcome_model<span class="op">=</span>FeatureOutcome(),</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>        effect_model<span class="op">=</span>pps.LinearRampEffect(<span class="fl">0.12</span>),</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
 <section id="fixed-size-randomization" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="fixed-size-randomization"><span class="header-section-number">2</span> Fixed-size randomization</h2>
 <p><code>RandomizedSingleCohortAssignment</code> samples exactly <code>n_treated</code> eligible units without replacement. Every eligible unit has marginal treatment probability <code>n_treated / n_eligible</code>; ineligible units have probability zero.</p>
-<div id="fd9258f8" class="cell" data-execution_count="2">
+<div id="065d4b25" class="cell" data-execution_count="2">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>randomized <span class="op">=</span> build(</span>
@@ -633,6 +652,29 @@ window.Quarto = {
 </div>
 </div>
 <p>Use <code>eligible_units=</code> to encode design restrictions. This remains randomized only within that prespecified eligible set.</p>
+<p>For several exact-size adoption cohorts, use <code>RandomizedStaggeredAdoption</code>:</p>
+<div id="c8ce1a44" class="cell" data-execution_count="3">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>staggered_randomized <span class="op">=</span> pps.PanelSimulator(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">"staggered_randomized"</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    dimensions<span class="op">=</span>dimensions,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    feature_model<span class="op">=</span>features,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    assignment<span class="op">=</span>pps.RandomizedStaggeredAdoption(</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        adoption_periods<span class="op">=</span>(<span class="dv">24</span>, <span class="dv">28</span>, <span class="dv">32</span>),</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        cohort_sizes<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">18</span>, <span class="dv">24</span>),</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    outcome_model<span class="op">=</span>FeatureOutcome(),</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    effect_model<span class="op">=</span>pps.LinearRampEffect(<span class="fl">0.12</span>),</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>staggered_panel <span class="op">=</span> staggered_randomized.simulate(seed<span class="op">=</span><span class="dv">2026</span>)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>np.unique(staggered_panel.adoption_times, return_counts<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<pre><code>(array([24, 28, 32, 48]), array([12, 18, 24, 66]))</code></pre>
+</div>
+</div>
+<p>This is complete randomization over schedules with fixed cohort totals. Units not selected into a cohort remain never treated.</p>
 </section>
 <section id="binary-logit-selection" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="binary-logit-selection"><span class="header-section-number">3</span> Binary logit selection</h2>
@@ -645,21 +687,21 @@ e_i=P(D_i=1\mid X_i,U_i)
 <section id="selection-on-observables" class="level3" data-number="3.1">
 <h3 data-number="3.1" class="anchored" data-anchor-id="selection-on-observables"><span class="header-section-number">3.1</span> Selection on observables</h3>
 <p>Set <span class="math inline">\(\gamma=0\)</span>:</p>
-<div id="819ca36d" class="cell" data-execution_count="3">
+<div id="ec6f01c1" class="cell" data-execution_count="4">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>observed_selection <span class="op">=</span> build(</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"observed_selection"</span>,</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    pps.BinaryLogitAssignment(</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        adoption_period<span class="op">=</span><span class="dv">32</span>,</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        intercept<span class="op">=-</span><span class="fl">1.1</span>,</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        observable_coefficients<span class="op">=</span>(<span class="fl">1.2</span>, <span class="op">-</span><span class="fl">0.8</span>),</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        unobservable_coefficients<span class="op">=</span>(<span class="fl">0.0</span>, <span class="fl">0.0</span>),</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>observed_panel <span class="op">=</span> observed_selection.simulate(seed<span class="op">=</span><span class="dv">2026</span>)</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(observed_panel.unit_covariate_names)</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(observed_panel.metadata[<span class="st">"assignment"</span>][<span class="st">"propensity_scores"</span>][:<span class="dv">5</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>observed_selection <span class="op">=</span> build(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"observed_selection"</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    pps.BinaryLogitAssignment(</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        adoption_period<span class="op">=</span><span class="dv">32</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        intercept<span class="op">=-</span><span class="fl">1.1</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        observable_coefficients<span class="op">=</span>(<span class="fl">1.2</span>, <span class="op">-</span><span class="fl">0.8</span>),</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        unobservable_coefficients<span class="op">=</span>(<span class="fl">0.0</span>, <span class="fl">0.0</span>),</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>observed_panel <span class="op">=</span> observed_selection.simulate(seed<span class="op">=</span><span class="dv">2026</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(observed_panel.unit_covariate_names)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(observed_panel.metadata[<span class="st">"assignment"</span>][<span class="st">"propensity_scores"</span>][:<span class="dv">5</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>('x1', 'x2')
@@ -671,20 +713,20 @@ e_i=P(D_i=1\mid X_i,U_i)
 <section id="selection-on-latent-factors" class="level3" data-number="3.2">
 <h3 data-number="3.2" class="anchored" data-anchor-id="selection-on-latent-factors"><span class="header-section-number">3.2</span> Selection on latent factors</h3>
 <p>Set <span class="math inline">\(\beta=0\)</span> and <span class="math inline">\(\gamma\ne0\)</span>:</p>
-<div id="a09e0a1e" class="cell" data-execution_count="4">
+<div id="672b1dcf" class="cell" data-execution_count="5">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>latent_selection <span class="op">=</span> build(</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"latent_selection"</span>,</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    pps.BinaryLogitAssignment(</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        adoption_period<span class="op">=</span><span class="dv">32</span>,</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        intercept<span class="op">=-</span><span class="fl">1.1</span>,</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        observable_coefficients<span class="op">=</span>(<span class="fl">0.0</span>, <span class="fl">0.0</span>),</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        unobservable_coefficients<span class="op">=</span>(<span class="fl">1.4</span>, <span class="op">-</span><span class="fl">1.0</span>),</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>latent_panel <span class="op">=</span> latent_selection.simulate(seed<span class="op">=</span><span class="dv">2026</span>)</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(latent_panel.metadata[<span class="st">"features"</span>][<span class="st">"unobservables"</span>].shape)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>latent_selection <span class="op">=</span> build(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"latent_selection"</span>,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    pps.BinaryLogitAssignment(</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        adoption_period<span class="op">=</span><span class="dv">32</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        intercept<span class="op">=-</span><span class="fl">1.1</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        observable_coefficients<span class="op">=</span>(<span class="fl">0.0</span>, <span class="fl">0.0</span>),</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>        unobservable_coefficients<span class="op">=</span>(<span class="fl">1.4</span>, <span class="op">-</span><span class="fl">1.0</span>),</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>latent_panel <span class="op">=</span> latent_selection.simulate(seed<span class="op">=</span><span class="dv">2026</span>)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(latent_panel.metadata[<span class="st">"features"</span>][<span class="st">"unobservables"</span>].shape)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(120, 2)</code></pre>
@@ -702,27 +744,27 @@ r_g(X_i,U_i)=P(G_i=g\mid X_i,U_i)
 {1+\sum_{h\in\mathcal G}\exp(\alpha_h+X_i^\top\beta_h+U_i^\top\gamma_h)}.
 \]</span></p>
 <p>Never treated is the baseline category with normalized logit zero. Each sampled cohort produces absorbing treatment from its adoption period onward.</p>
-<div id="9ef275c0" class="cell" data-execution_count="5">
+<div id="124952fe" class="cell" data-execution_count="6">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>cohort_gps <span class="op">=</span> build(</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"cohort_gps"</span>,</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    pps.GeneralizedPropensityAssignment(</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        adoption_periods<span class="op">=</span>(<span class="dv">24</span>, <span class="dv">30</span>, <span class="dv">36</span>),</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        intercepts<span class="op">=</span>(<span class="op">-</span><span class="fl">0.7</span>, <span class="op">-</span><span class="fl">0.9</span>, <span class="op">-</span><span class="fl">1.1</span>),</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        observable_coefficients<span class="op">=</span>(</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>            (<span class="fl">1.0</span>, <span class="op">-</span><span class="fl">0.5</span>),</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>            (<span class="fl">0.2</span>, <span class="fl">0.8</span>),</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>            (<span class="op">-</span><span class="fl">0.8</span>, <span class="fl">0.3</span>),</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        unobservable_coefficients<span class="op">=</span>((<span class="fl">0.0</span>, <span class="fl">0.0</span>),) <span class="op">*</span> <span class="dv">3</span>,</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>cohort_panel <span class="op">=</span> cohort_gps.simulate(seed<span class="op">=</span><span class="dv">2026</span>)</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>gps <span class="op">=</span> cohort_panel.metadata[<span class="st">"assignment"</span>][<span class="st">"generalized_propensity_scores"</span>]</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(gps.shape)</span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(np.<span class="bu">max</span>(np.<span class="bu">abs</span>(gps.<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">1</span>) <span class="op">-</span> <span class="fl">1.0</span>)))</span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(np.unique(cohort_panel.adoption_times, return_counts<span class="op">=</span><span class="va">True</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>cohort_gps <span class="op">=</span> build(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"cohort_gps"</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    pps.GeneralizedPropensityAssignment(</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>        adoption_periods<span class="op">=</span>(<span class="dv">24</span>, <span class="dv">30</span>, <span class="dv">36</span>),</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>        intercepts<span class="op">=</span>(<span class="op">-</span><span class="fl">0.7</span>, <span class="op">-</span><span class="fl">0.9</span>, <span class="op">-</span><span class="fl">1.1</span>),</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>        observable_coefficients<span class="op">=</span>(</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>            (<span class="fl">1.0</span>, <span class="op">-</span><span class="fl">0.5</span>),</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>            (<span class="fl">0.2</span>, <span class="fl">0.8</span>),</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>            (<span class="op">-</span><span class="fl">0.8</span>, <span class="fl">0.3</span>),</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>        unobservable_coefficients<span class="op">=</span>((<span class="fl">0.0</span>, <span class="fl">0.0</span>),) <span class="op">*</span> <span class="dv">3</span>,</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>cohort_panel <span class="op">=</span> cohort_gps.simulate(seed<span class="op">=</span><span class="dv">2026</span>)</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>gps <span class="op">=</span> cohort_panel.metadata[<span class="st">"assignment"</span>][<span class="st">"generalized_propensity_scores"</span>]</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(gps.shape)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(np.<span class="bu">max</span>(np.<span class="bu">abs</span>(gps.<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">1</span>) <span class="op">-</span> <span class="fl">1.0</span>)))</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(np.unique(cohort_panel.adoption_times, return_counts<span class="op">=</span><span class="va">True</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(120, 4)
@@ -739,33 +781,33 @@ r_g(X_i,U_i)=P(G_i=g\mid X_i,U_i)
 \tau_{it}=f(X_i,U_i,V_t).
 \]</span></p>
 <p>The lambda receives <code>SimulationContext</code>, so the same observed covariates and latent factors used by assignment and untreated outcomes are available as <code>x.observables</code> and <code>x.unobservables</code>, while shared time modifiers are available as <code>x.time_features</code>. Return an <code>(N,T)</code> matrix for joint unit-time heterogeneity; scalar, unit-vector, and time-vector results are broadcast to that surface. <code>PanelSimulator</code> then multiplies it by realized treatment.</p>
-<div id="4e62f365" class="cell" data-execution_count="6">
+<div id="d276d7aa" class="cell" data-execution_count="7">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>heterogeneous <span class="op">=</span> pps.PanelSimulator(</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">"heterogeneous_effects"</span>,</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    dimensions<span class="op">=</span>dimensions,</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    feature_model<span class="op">=</span>features,</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    time_feature_model<span class="op">=</span>pps.GaussianTimeFeatures(<span class="dv">1</span>),</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    assignment<span class="op">=</span>pps.RandomizedSingleCohortAssignment(</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        n_treated<span class="op">=</span><span class="dv">40</span>,</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        adoption_period<span class="op">=</span><span class="dv">32</span>,</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    outcome_model<span class="op">=</span>FeatureOutcome(),</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    effect_model<span class="op">=</span><span class="kw">lambda</span> x: (</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>        (</span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>            <span class="fl">1.0</span></span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> <span class="fl">0.45</span> <span class="op">*</span> x.observables[:, <span class="dv">0</span>]</span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>            <span class="op">-</span> <span class="fl">0.30</span> <span class="op">*</span> x.observables[:, <span class="dv">1</span>]</span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> <span class="fl">0.80</span> <span class="op">*</span> x.unobservables[:, <span class="dv">0</span>]</span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>        )[:, <span class="va">None</span>]</span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>        <span class="op">*</span> (<span class="fl">1.0</span> <span class="op">+</span> <span class="fl">0.30</span> <span class="op">*</span> x.time_features[:, <span class="dv">0</span>])[<span class="va">None</span>, :]</span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>heterogeneous_panel <span class="op">=</span> heterogeneous.simulate(seed<span class="op">=</span><span class="dv">2026</span>)</span>
-<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>effect_surface <span class="op">=</span> heterogeneous_panel.metadata[<span class="st">"effect"</span>][<span class="st">"effect_surface"</span>]</span>
-<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(effect_surface.<span class="bu">min</span>(), effect_surface.mean(), effect_surface.<span class="bu">max</span>())</span>
-<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(heterogeneous_panel.true_att)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>heterogeneous <span class="op">=</span> pps.PanelSimulator(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">"heterogeneous_effects"</span>,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    dimensions<span class="op">=</span>dimensions,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    feature_model<span class="op">=</span>features,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    time_feature_model<span class="op">=</span>pps.GaussianTimeFeatures(<span class="dv">1</span>),</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    assignment<span class="op">=</span>pps.RandomizedSingleCohortAssignment(</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        n_treated<span class="op">=</span><span class="dv">40</span>,</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        adoption_period<span class="op">=</span><span class="dv">32</span>,</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    outcome_model<span class="op">=</span>FeatureOutcome(),</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    effect_model<span class="op">=</span><span class="kw">lambda</span> x: (</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>            <span class="fl">1.0</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> <span class="fl">0.45</span> <span class="op">*</span> x.observables[:, <span class="dv">0</span>]</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>            <span class="op">-</span> <span class="fl">0.30</span> <span class="op">*</span> x.observables[:, <span class="dv">1</span>]</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span> <span class="fl">0.80</span> <span class="op">*</span> x.unobservables[:, <span class="dv">0</span>]</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>        )[:, <span class="va">None</span>]</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>        <span class="op">*</span> (<span class="fl">1.0</span> <span class="op">+</span> <span class="fl">0.30</span> <span class="op">*</span> x.time_features[:, <span class="dv">0</span>])[<span class="va">None</span>, :]</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>heterogeneous_panel <span class="op">=</span> heterogeneous.simulate(seed<span class="op">=</span><span class="dv">2026</span>)</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>effect_surface <span class="op">=</span> heterogeneous_panel.metadata[<span class="st">"effect"</span>][<span class="st">"effect_surface"</span>]</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(effect_surface.<span class="bu">min</span>(), effect_surface.mean(), effect_surface.<span class="bu">max</span>())</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(heterogeneous_panel.true_att)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>-2.637436761770768 1.0402353668237683 7.174454434105553
@@ -773,31 +815,34 @@ r_g(X_i,U_i)=P(G_i=g\mid X_i,U_i)
 </div>
 </div>
 <p>The complete <span class="math inline">\(\tau_{it}\)</span> surface is stored as simulation truth in effect metadata. The realized <code>treatment_effect</code> matrix is that surface multiplied by <span class="math inline">\(W\)</span>. Observed unit modifiers remain available in <code>unit_covariates</code>; latent unit and time modifiers remain under metadata unless explicitly retrieved for diagnostics.</p>
-<div id="a28a3843" class="cell" data-execution_count="7">
+<div id="7fa93ecd" class="cell" data-execution_count="8">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>order <span class="op">=</span> np.argsort(effect_surface.mean(axis<span class="op">=</span><span class="dv">1</span>), kind<span class="op">=</span><span class="st">"stable"</span>)</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">13</span>, <span class="dv">4</span>), constrained_layout<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> axis, values, title, cmap <span class="kw">in</span> (</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    (axes[<span class="dv">0</span>], heterogeneous_panel.outcome, <span class="st">"Y"</span>, <span class="st">"coolwarm"</span>),</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    (axes[<span class="dv">1</span>], heterogeneous_panel.treatment, <span class="st">"W"</span>, <span class="st">"Greys"</span>),</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    (</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        axes[<span class="dv">2</span>],</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        heterogeneous_panel.treatment_effect,</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>        <span class="vs">r"</span><span class="dv">$</span><span class="ch">\t</span><span class="vs">au_{it} W_{it}</span><span class="dv">$</span><span class="vs">"</span>,</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"coolwarm"</span>,</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>):</span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    axis.matshow(values[order], aspect<span class="op">=</span><span class="st">"auto"</span>, cmap<span class="op">=</span>cmap)</span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    axis.set_title(title)</span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    axis.set_xlabel(<span class="st">"period"</span>)</span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="vs">r"units, sorted by mean </span><span class="dv">$</span><span class="ch">\t</span><span class="vs">au_{it}</span><span class="dv">$</span><span class="vs">"</span>)</span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>order <span class="op">=</span> np.argsort(effect_surface.mean(axis<span class="op">=</span><span class="dv">1</span>), kind<span class="op">=</span><span class="st">"stable"</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">13</span>, <span class="dv">4</span>), constrained_layout<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> axis, values, title, cmap <span class="kw">in</span> (</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    (axes[<span class="dv">0</span>], heterogeneous_panel.outcome, <span class="st">"Y"</span>, <span class="st">"coolwarm"</span>),</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    (axes[<span class="dv">1</span>], heterogeneous_panel.treatment, <span class="st">"W"</span>, TREATMENT_CMAP),</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    (</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>        axes[<span class="dv">2</span>],</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>        heterogeneous_panel.treatment_effect,</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>        <span class="vs">r"</span><span class="dv">$</span><span class="ch">\t</span><span class="vs">au_{it} W_{it}</span><span class="dv">$</span><span class="vs">"</span>,</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"coolwarm"</span>,</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    image_kwargs <span class="op">=</span> {<span class="st">"cmap"</span>: cmap}</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> title <span class="op">==</span> <span class="st">"W"</span>:</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>        image_kwargs <span class="op">=</span> {<span class="st">"cmap"</span>: TREATMENT_CMAP, <span class="st">"norm"</span>: TREATMENT_NORM}</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    axis.matshow(values[order], aspect<span class="op">=</span><span class="st">"auto"</span>, <span class="op">**</span>image_kwargs)</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    axis.set_title(title)</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    axis.set_xlabel(<span class="st">"period"</span>)</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="vs">r"units, sorted by mean </span><span class="dv">$</span><span class="ch">\t</span><span class="vs">au_{it}</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="assignment_files/figure-html/cell-8-output-1.png" width="1259" height="395" class="figure-img"></p>
+<p><img src="assignment_files/figure-html/cell-9-output-1.png" width="1259" height="395" class="figure-img"></p>
 <figcaption>Observed outcomes, assignment, and realized effects under tau_it = f(X_i, U_i, V_t). Units are sorted by their mean effect.</figcaption>
 </figure>
 </div>
@@ -806,34 +851,37 @@ r_g(X_i,U_i)=P(G_i=g\mid X_i,U_i)
 </section>
 <section id="visual-comparison" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="visual-comparison"><span class="header-section-number">6</span> Visual comparison</h2>
-<div id="fbdb078e" class="cell" data-execution_count="8">
+<div id="56baff01" class="cell" data-execution_count="9">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>designs <span class="op">=</span> {</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Randomized"</span>: randomized,</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Observed logit"</span>: observed_selection,</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Latent logit"</span>: latent_selection,</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Cohort GPS"</span>: cohort_gps,</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">4</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">11</span>, <span class="dv">12</span>), constrained_layout<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row, (label, simulator) <span class="kw">in</span> <span class="bu">enumerate</span>(designs.items()):</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    panel <span class="op">=</span> simulator.simulate(seed<span class="op">=</span><span class="dv">2026</span>)</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    order <span class="op">=</span> np.argsort(panel.adoption_times, kind<span class="op">=</span><span class="st">"stable"</span>)</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    axes[row, <span class="dv">0</span>].matshow(panel.outcome[order], aspect<span class="op">=</span><span class="st">"auto"</span>, cmap<span class="op">=</span><span class="st">"coolwarm"</span>)</span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    axes[row, <span class="dv">1</span>].matshow(</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>        panel.treatment[order], aspect<span class="op">=</span><span class="st">"auto"</span>, cmap<span class="op">=</span><span class="st">"Greys"</span>, vmin<span class="op">=</span><span class="dv">0</span>, vmax<span class="op">=</span><span class="dv">1</span></span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    axes[row, <span class="dv">0</span>].set_title(<span class="ss">f"</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">: Y"</span>)</span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    axes[row, <span class="dv">1</span>].set_title(<span class="ss">f"</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">: W"</span>)</span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    axes[row, <span class="dv">0</span>].set_ylabel(<span class="st">"unit"</span>)</span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> axis <span class="kw">in</span> axes[row]:</span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>        axis.set_xlabel(<span class="st">"period"</span>)</span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>designs <span class="op">=</span> {</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Randomized"</span>: randomized,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Observed logit"</span>: observed_selection,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Latent logit"</span>: latent_selection,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Cohort GPS"</span>: cohort_gps,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">4</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">11</span>, <span class="dv">12</span>), constrained_layout<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row, (label, simulator) <span class="kw">in</span> <span class="bu">enumerate</span>(designs.items()):</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    panel <span class="op">=</span> simulator.simulate(seed<span class="op">=</span><span class="dv">2026</span>)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    order <span class="op">=</span> np.argsort(panel.adoption_times, kind<span class="op">=</span><span class="st">"stable"</span>)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    axes[row, <span class="dv">0</span>].matshow(panel.outcome[order], aspect<span class="op">=</span><span class="st">"auto"</span>, cmap<span class="op">=</span><span class="st">"coolwarm"</span>)</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    axes[row, <span class="dv">1</span>].matshow(</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>        panel.treatment[order],</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>        aspect<span class="op">=</span><span class="st">"auto"</span>,</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>        cmap<span class="op">=</span>TREATMENT_CMAP,</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>        norm<span class="op">=</span>TREATMENT_NORM,</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>    axes[row, <span class="dv">0</span>].set_title(<span class="ss">f"</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">: Y"</span>)</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    axes[row, <span class="dv">1</span>].set_title(<span class="ss">f"</span><span class="sc">{</span>label<span class="sc">}</span><span class="ss">: W"</span>)</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>    axes[row, <span class="dv">0</span>].set_ylabel(<span class="st">"unit"</span>)</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> axis <span class="kw">in</span> axes[row]:</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>        axis.set_xlabel(<span class="st">"period"</span>)</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="assignment_files/figure-html/cell-9-output-1.png" width="1067" height="1163" class="figure-img"></p>
+<p><img src="assignment_files/figure-html/cell-10-output-1.png" width="1067" height="1163" class="figure-img"></p>
 <figcaption>A common feature-outcome law under four assignment mechanisms. Units are sorted by adoption time.</figcaption>
 </figure>
 </div>
@@ -862,21 +910,26 @@ r_g(X_i,U_i)=P(G_i=g\mid X_i,U_i)
 <td>Design propensity</td>
 </tr>
 <tr class="even">
+<td>Complete randomization with exact adoption-cohort counts</td>
+<td><code>RandomizedStaggeredAdoption</code></td>
+<td>Marginal cohort propensities</td>
+</tr>
+<tr class="odd">
 <td>Bernoulli assignment based on measured baseline attributes</td>
 <td><code>BinaryLogitAssignment</code>, latent coefficients zero</td>
 <td><code>unit_covariates</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Assignment based on latent unit type</td>
 <td><code>BinaryLogitAssignment</code>, latent coefficients nonzero</td>
 <td>Pre-treatment outcome history; latent truth only for diagnostics</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Multiple adoption cohorts</td>
 <td><code>GeneralizedPropensityAssignment</code></td>
 <td>Full unit-by-cohort GPS and observed covariates</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Fixed externally specified adoption</td>
 <td><code>SingleCohortAssignment</code> or <code>StaggeredAdoption</code></td>
 <td>The supplied schedule</td>
