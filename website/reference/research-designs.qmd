@@ -1,0 +1,72 @@
+---
+title: "Research design API"
+subtitle: "Configuration objects and named factories"
+format:
+  html:
+    page-layout: full
+    embed-resources: true
+    code-fold: true
+---
+
+```{python}
+import inspect
+
+import pypanelsim as pps
+
+
+def show_signature(object_):
+    print(f"{object_.__name__}{inspect.signature(object_)}")
+```
+
+## FTestEventStudy Lepskii draft
+
+```{python}
+show_signature(pps.LepskiiPanelConfig)
+show_signature(pps.lepskii_design)
+show_signature(pps.lepskii_profiles)
+print(pps.available_lepskii_designs())
+```
+
+The configuration stores panel dimensions, nine adoption periods, uneven
+cohort shares, and the untreated-outcome noise law. The factory returns a
+reusable `PanelSimulator`. The profile function returns immutable
+adoption-period-to-path mappings.
+
+## ATT-DML
+
+```{python}
+show_signature(pps.ATTDMConditionalConfig)
+show_signature(pps.ATTDMLatentConfig)
+show_signature(pps.ATTDMClusteredConfig)
+show_signature(pps.att_dml_design)
+print(pps.available_att_dml_designs())
+```
+
+The factory validates the configuration type for the selected design family.
+The conditional design has a separate `treated_baseline_shift` switch for the
+executable-code and manuscript laws.
+
+## Regression compression
+
+```{python}
+show_signature(pps.RegressionCompressionConfig)
+show_signature(pps.regression_compression_design)
+show_signature(pps.AnscombePanelConfig)
+show_signature(pps.anscombe_design)
+print(pps.available_anscombe_designs())
+```
+
+The main design supports `constant`, `linear`, `concave`,
+`positive_then_negative`, `exponential`, `sinusoidal`, and `random_walk`
+effects. The Anscombe design names are `zero`, `unit`, `time`, and
+`cohort_time`.
+
+## gsynth2 composite
+
+```{python}
+show_signature(pps.GSynthCompositeConfig)
+show_signature(pps.gsynth_composite_design)
+```
+
+The four component weights must be finite, nonnegative, and not all zero. The
+configuration normalizes them before construction.

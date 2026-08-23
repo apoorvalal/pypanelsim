@@ -102,6 +102,9 @@ class LowRankFactorOutcome:
     factor_scale: float = 1.0
     noise_scale: float = 0.0
     distribution: str = "normal"
+    loading_mean: float = 0.0
+    control_loading_mean: float | None = None
+    treated_loading_mean: float | None = None
 
     def __post_init__(self) -> None:
         if self.rank <= 0:
@@ -110,12 +113,25 @@ class LowRankFactorOutcome:
             _finite_nonnegative(name, getattr(self, name))
         if self.distribution not in {"normal", "uniform"}:
             raise ValueError("distribution must be 'normal' or 'uniform'")
+        means = (
+            self.loading_mean,
+            self.control_loading_mean,
+            self.treated_loading_mean,
+        )
+        if any(value is not None and not np.isfinite(value) for value in means):
+            raise ValueError("loading means must be finite")
 
     def generate(
         self, context: SimulationContext, rng: np.random.Generator
     ) -> ComponentDraw:
+        unit_means = np.full(context.dimensions.n_units, self.loading_mean)
+        if self.control_loading_mean is not None:
+            unit_means[context.control_units] = self.control_loading_mean
+        if self.treated_loading_mean is not None:
+            unit_means[context.treated_units] = self.treated_loading_mean
         if self.distribution == "normal":
             loadings = rng.normal(
+                loc=unit_means[:, None],
                 scale=self.loading_scale,
                 size=(context.dimensions.n_units, self.rank),
             )
@@ -129,6 +145,7 @@ class LowRankFactorOutcome:
                 self.loading_scale,
                 size=(context.dimensions.n_units, self.rank),
             )
+            loadings += unit_means[:, None]
             factors = rng.uniform(
                 -self.factor_scale,
                 self.factor_scale,
@@ -144,6 +161,7 @@ class LowRankFactorOutcome:
             {
                 "kind": "low_rank_factor",
                 "rank": self.rank,
+                "unit_loading_means": unit_means,
                 "loadings": loadings,
                 "factors": factors,
                 "signal": signal,
@@ -172,6 +190,44 @@ class UnitTrendOutcome:
         return ComponentDraw(
             slopes[:, None] * time,
             {"kind": "unit_trend", "slopes": slopes, "time_scores": time},
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class UnitPositionOutcome:
+    """Generate unit levels around a linear position-dependent mean."""
+
+    location_start: float = 0.0
+    location_stop: float = 2.0
+    scale: float = 1.0
+
+    def __post_init__(self) -> None:
+        if not np.isfinite(self.location_start) or not np.isfinite(self.location_stop):
+            raise ValueError("locations must be finite")
+        _finite_nonnegative("scale", self.scale)
+
+    def generate(
+        self, context: SimulationContext, rng: np.random.Generator
+    ) -> ComponentDraw:
+        means = np.linspace(
+            self.location_start,
+            self.location_stop,
+            context.dimensions.n_units,
+            endpoint=False,
+        )
+        means += (self.location_stop - self.location_start) / context.dimensions.n_units
+        levels = rng.normal(means, self.scale)
+        values = np.broadcast_to(
+            levels[:, None],
+            (context.dimensions.n_units, context.dimensions.n_periods),
+        )
+        return ComponentDraw(
+            values,
+            {
+                "kind": "unit_position",
+                "unit_means": means,
+                "unit_levels": levels,
+            },
         )
 
 
@@ -259,35 +315,97 @@ class ARMAErrorOutcome:
 
 
 @dataclass(frozen=True, slots=True)
+class RandomARMAErrorOutcome:
+    """Draw one stationary ARMA specification shared by all unit paths."""
+
+    max_ar_order: int = 2
+    max_ma_order: int = 2
+    ar_bound: float = 0.5
+    ma_bound: float = 0.5
+    innovation_scale: float = 1.0
+    burn_in: int = 100
+
+    def __post_init__(self) -> None:
+        if self.max_ar_order <= 0 or self.max_ma_order <= 0:
+            raise ValueError("maximum ARMA orders must be positive")
+        for name in ("ar_bound", "ma_bound", "innovation_scale"):
+            _finite_nonnegative(name, getattr(self, name))
+        if self.burn_in < 0:
+            raise ValueError("burn_in must be nonnegative")
+
+    def generate(
+        self, context: SimulationContext, rng: np.random.Generator
+    ) -> ComponentDraw:
+        ar_order = int(rng.integers(1, self.max_ar_order + 1))
+        ma_order = int(rng.integers(1, self.max_ma_order + 1))
+        for _ in range(10_000):
+            ar = rng.uniform(-self.ar_bound, self.ar_bound, ar_order)
+            if np.abs(ar).sum() < 1.0:
+                break
+        else:
+            raise ValueError(
+                "could not draw stationary AR coefficients within 10,000 attempts"
+            )
+        ma = rng.uniform(-self.ma_bound, self.ma_bound, ma_order)
+        draw = ARMAErrorOutcome(
+            tuple(ar),
+            tuple(ma),
+            innovation_scale=self.innovation_scale,
+            burn_in=self.burn_in,
+        ).generate(context, rng)
+        return ComponentDraw(
+            draw.values,
+            {
+                **dict(draw.metadata),
+                "kind": "random_arma_error",
+                "selected_ar_order": ar_order,
+                "selected_ma_order": ma_order,
+            },
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class ClusteredTrendOutcome:
     """Generate latent groups whose members share a linear time slope."""
 
     n_clusters: int = 5
     slope_scale: float = 1.0
+    within_cluster_scale: float = 0.0
+    center_distribution: str = "normal"
     center_time: bool = False
 
     def __post_init__(self) -> None:
         if self.n_clusters <= 0:
             raise ValueError("n_clusters must be positive")
         _finite_nonnegative("slope_scale", self.slope_scale)
+        _finite_nonnegative("within_cluster_scale", self.within_cluster_scale)
+        if self.center_distribution not in {"normal", "uniform"}:
+            raise ValueError("center_distribution must be 'normal' or 'uniform'")
 
     def generate(
         self, context: SimulationContext, rng: np.random.Generator
     ) -> ComponentDraw:
-        clusters = rng.integers(
-            0, self.n_clusters, size=context.dimensions.n_units
+        clusters = rng.integers(0, self.n_clusters, size=context.dimensions.n_units)
+        if self.center_distribution == "normal":
+            slopes = rng.normal(scale=self.slope_scale, size=self.n_clusters)
+        else:
+            slopes = rng.uniform(
+                -self.slope_scale, self.slope_scale, size=self.n_clusters
+            )
+        unit_slopes = slopes[clusters] + rng.normal(
+            scale=self.within_cluster_scale, size=context.dimensions.n_units
         )
-        slopes = rng.normal(scale=self.slope_scale, size=self.n_clusters)
         time = np.arange(context.dimensions.n_periods, dtype=float)
         if self.center_time:
             time -= time.mean()
-        values = slopes[clusters, None] * time
+        values = unit_slopes[:, None] * time
         return ComponentDraw(
             values,
             {
                 "kind": "clustered_trend",
                 "cluster_assignments": clusters,
                 "cluster_slopes": slopes,
+                "unit_slopes": unit_slopes,
             },
         )
 

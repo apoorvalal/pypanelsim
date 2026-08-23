@@ -28,9 +28,7 @@ def test_effect_surface_and_annotations_are_explicit_opt_in_columns() -> None:
     panel = make_staggered_panel()
 
     assert "effect_surface" not in panel.as_long_dict()
-    expanded = panel.as_long_dict(
-        include_effect_surface=True, include_annotations=True
-    )
+    expanded = panel.as_long_dict(include_effect_surface=True, include_annotations=True)
     assert "effect_surface" in expanded
     np.testing.assert_array_equal(expanded["group"][:6], ["a"] * 6)
     np.testing.assert_array_equal(expanded["calendar_year"][:6], range(2000, 2006))

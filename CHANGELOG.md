@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+- Add explicit `TwoWayFixedEffectsOutcome` and generic rank-$k$
+  `LowRankFactorOutcome` primitives and use both in the getting-started guide.
+- Add correlated and transformed Gaussian features, feature-linear outcomes,
+  unit and clustered trends, periodic time effects, and ARMA errors.
+- Add fourteen many-cohort designs from the FTestEventStudy Lepskii draft.
+- Add ATT-DML conditional-trend, latent-factor, and clustered-ARMA design
+  families, with an explicit switch for the baseline-law discrepancy.
+- Add the regression-compression main design, its longitudinal Anscombe
+  quartet, and the gsynth2 weighted composite.
+- Separate full `effect_surface` truth from realized `treatment_effect` and add
+  support-aware cohort/event targets through `PanelTruth`.
+- Add immutable unit/time annotations, estimator-visible feature transforms,
+  and opt-in named component streams through `SimulationSeeds`.
+- Add a research-design map, API pages, and an executable four-project
+  vignette.
+
 - Allow `effect_model` to be a scalar, unit, time, or unit-by-time callable for
   treatment-effect heterogeneity driven by $X_i$, $U_i$, and shared $V_t$.
 - Add shared time-feature models and Gaussian time features to the simulation

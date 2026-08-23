@@ -98,12 +98,12 @@ class PanelDataset:
     untreated_outcome: FloatMatrix
     treatment_effect: FloatMatrix
     name: str
-    effect_surface: FloatMatrix | None = None
     unit_ids: NDArray[Any] | None = None
     time_ids: NDArray[Any] | None = None
     metadata: Mapping[str, Any] = field(default_factory=dict)
     unit_covariates: FloatMatrix | None = None
     unit_covariate_names: Sequence[str] | None = None
+    effect_surface: FloatMatrix | None = None
     unit_annotations: Mapping[str, Any] = field(default_factory=dict)
     time_annotations: Mapping[str, Any] = field(default_factory=dict)
 
@@ -351,6 +351,9 @@ class PanelDataset:
         if include_annotations:
             conflicts = set(columns).intersection(self.unit_annotations)
             conflicts.update(set(columns).intersection(self.time_annotations))
+            conflicts.update(
+                set(self.unit_annotations).intersection(self.time_annotations)
+            )
             if conflicts:
                 names = ", ".join(sorted(conflicts))
                 raise ValueError(

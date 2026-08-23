@@ -115,19 +115,22 @@ custom class can focus on its probability law.
 
 ## Random-number policy
 
-`PanelSimulator.simulate()` resolves one `numpy.random.Generator`. Components
-receive the same generator in pipeline order. A deterministic component should
-not consume random draws.
+`PanelSimulator.simulate()` supports a legacy shared generator and opt-in named
+component streams. A deterministic component should not consume random draws.
 
 Accepted inputs are:
 
 - `seed=<integer>`;
 - `seed=<numpy.random.SeedSequence>`;
 - `rng=<numpy.random.Generator>`;
+- `streams=SimulationSeeds.from_seed(<integer>)`;
 - neither, for a fresh entropy-seeded generator.
 
-Passing both is an error. `iter_simulations()` uses `SeedSequence.spawn()` to
-create independent child streams instead of using adjacent integer seeds.
+Passing more than one mode is an error. The named mode separates feature,
+assignment, time-feature, outcome, and effect draws. Adding an unrelated
+component then leaves other streams unchanged. The shared mode preserves exact
+canonical output. `iter_simulations()` uses `SeedSequence.spawn()` to create
+independent child streams instead of using adjacent integer seeds.
 
 When a design needs two components to restart from the same state, it must clone
 the generator explicitly and document that choice. The canonical mixed-factor
@@ -153,8 +156,10 @@ same random stream.
 ### Unit features
 
 - `GaussianUnitFeatures` draws independent standard-normal observed covariates
-  and latent unit factors. Custom feature models can impose correlations or
-  generate application-specific covariates.
+  and latent unit factors.
+- `CorrelatedGaussianFeatures` supports Toeplitz or explicit covariance,
+  callable transforms, and separate estimator-visible raw covariates.
+- `LatentGradientFeatures` supplies the ATT-DML latent-selection factor.
 
 ### Time features
 
@@ -177,6 +182,25 @@ same random stream.
 
 `CallableOutcomeModel` turns a function into an outcome component. The function
 can return a matrix or a `ComponentDraw` with metadata.
+
+### Outcome primitives
+
+- `TwoWayFixedEffectsOutcome` generates additive unit and period effects.
+- `LowRankFactorOutcome` generates a rank-$k$ interactive fixed-effects law.
+- `LinearFeatureOutcome` generates feature-linear levels and trends.
+- `UnitTrendOutcome`, `PeriodicTimeOutcome`, `ARMAErrorOutcome`, and
+  `ClusteredTrendOutcome` are independent composable terms.
+
+### Causal truth and labels
+
+`effect_surface` is the full effect law. `treatment_effect` is its realized
+contribution and must equal `effect_surface * treatment`. `PanelTruth` derives
+cohort/event cells, supported event-study targets, and cohort ATTs without a
+dataframe dependency.
+
+Unit and time identifiers remain separate from annotations. The simulator adds
+`ever_treated` and `adoption_period` to unit annotations and preserves any
+project-specific axis labels.
 
 ## Add a component
 

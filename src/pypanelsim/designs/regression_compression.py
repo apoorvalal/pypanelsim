@@ -18,9 +18,10 @@ from ..components import (
     RandomizedStaggeredAdoption,
     SumOutcomeModel,
 )
+from ..data import PanelDataset
 from ..outcomes import ARMAErrorOutcome, LowRankFactorOutcome, UnitTrendOutcome
 from ..profiles import EventTimeProfileEffect, RandomUnitEffect, RandomWalkEffect
-from ..simulator import PanelSimulator
+from ..simulator import PanelSimulator, SimulationSeeds
 
 _ANSCOMBE_DESIGNS = MappingProxyType(
     {
@@ -253,16 +254,41 @@ def anscombe_design(
         elif name == "unit":
             effect = RandomUnitEffect(0.0, 0.25)
         else:
-            path = np.linspace(
-                -0.5, 0.5, resolved.n_periods - resolved.first_adoption
-            )
-            effect = EventTimeProfileEffect(
-                _indexed_path(path), name="anscombe_time"
-            )
+            path = np.linspace(-0.5, 0.5, resolved.n_periods - resolved.first_adoption)
+            effect = EventTimeProfileEffect(_indexed_path(path), name="anscombe_time")
     return PanelSimulator(
         name=f"regression_compression_anscombe_{name}",
         dimensions=resolved.dimensions,
         assignment=assignment,
         outcome_model=outcome,
         effect_model=effect,
+    )
+
+
+def regression_compression(
+    *,
+    config: RegressionCompressionConfig | None = None,
+    seed: int | np.random.SeedSequence | None = None,
+    rng: np.random.Generator | None = None,
+    streams: SimulationSeeds | None = None,
+) -> PanelDataset:
+    """Draw one regression-compression benchmark panel."""
+
+    return regression_compression_design(config=config).simulate(
+        seed=seed, rng=rng, streams=streams
+    )
+
+
+def anscombe(
+    name: str,
+    *,
+    config: AnscombePanelConfig | None = None,
+    seed: int | np.random.SeedSequence | None = None,
+    rng: np.random.Generator | None = None,
+    streams: SimulationSeeds | None = None,
+) -> PanelDataset:
+    """Draw one longitudinal Anscombe panel."""
+
+    return anscombe_design(name, config=config).simulate(
+        seed=seed, rng=rng, streams=streams
     )

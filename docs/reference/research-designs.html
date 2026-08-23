@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Registry API – pypanelsim</title>
+<title>Research design API – pypanelsim</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -4855,7 +4855,7 @@ height: auto;
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../api.html">API reference</a></li><li class="breadcrumb-item"><a href="../reference/registry.html">Registry API</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../api.html">API reference</a></li><li class="breadcrumb-item"><a href="../reference/research-designs.html">Research design API</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -4966,7 +4966,7 @@ height: auto;
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../reference/research-designs.html" class="sidebar-item-text sidebar-link">
+  <a href="../reference/research-designs.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Research design API</span></a>
   </div>
 </li>
@@ -4996,7 +4996,7 @@ height: auto;
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../reference/registry.html" class="sidebar-item-text sidebar-link active">
+  <a href="../reference/registry.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Registry API</span></a>
   </div>
 </li>
@@ -5046,10 +5046,10 @@ height: auto;
 <!-- main -->
 <main class="content column-page-right" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../api.html">API reference</a></li><li class="breadcrumb-item"><a href="../reference/registry.html">Registry API</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../api.html">API reference</a></li><li class="breadcrumb-item"><a href="../reference/research-designs.html">Research design API</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Registry API</h1>
-<p class="subtitle lead">Stable names for simulator factories</p>
+<h1 class="title">Research design API</h1>
+<p class="subtitle lead">Configuration objects and named factories</p>
 </div>
 
 
@@ -5066,99 +5066,93 @@ height: auto;
 </header>
 
 
-<div id="d03f62d9" class="cell" data-execution_count="1">
+<div id="aae63220" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> inspect</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pypanelsim <span class="im">as</span> pps</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;DGPRegistry</span><span class="sc">{</span>inspect<span class="sc">.</span>signature(pps.DGPRegistry)<span class="sc">}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> show_signature(object_):</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span>object_<span class="sc">.</span><span class="va">__name__</span><span class="sc">}{</span>inspect<span class="sc">.</span>signature(object_)<span class="sc">}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-stdout">
-<pre><code>DGPRegistry() -&gt; &#39;None&#39;</code></pre>
 </div>
-</div>
-<section id="dgpregistry" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="dgpregistry"><span class="header-section-number">1</span> <code>DGPRegistry</code></h2>
-<p><code>DGPRegistry</code> maps normalized public names to callables that return <code>PanelSimulator</code> objects.</p>
-<section id="register" class="level3" data-number="1.1">
-<h3 data-number="1.1" class="anchored" data-anchor-id="register"><span class="header-section-number">1.1</span> <code>register</code></h3>
-<div id="35a077d1" class="cell" data-execution_count="2">
+<section id="ftesteventstudy-lepskii-draft" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="ftesteventstudy-lepskii-draft"><span class="header-section-number">1</span> FTestEventStudy Lepskii draft</h2>
+<div id="9a0b5487" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;register</span><span class="sc">{</span>inspect<span class="sc">.</span>signature(pps.DGPRegistry.register)<span class="sc">}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.LepskiiPanelConfig)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>show_signature(pps.lepskii_design)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>show_signature(pps.lepskii_profiles)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(pps.available_lepskii_designs())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>register(self, name: &#39;str&#39;, factory: &#39;SimulatorFactory&#39;, *, replace: &#39;bool&#39; = False) -&gt; &#39;None&#39;</code></pre>
+<pre><code>LepskiiPanelConfig(n_units: &#39;int&#39; = 1200, n_periods: &#39;int&#39; = 36, adoption_periods: &#39;tuple[int, ...]&#39; = (8, 10, 12, 14, 16, 18, 20, 22, 24), cohort_shares: &#39;tuple[float, ...]&#39; = (0.05, 0.07, 0.09, 0.12, 0.14, 0.13, 0.1, 0.07, 0.05), unit_effect_scale: &#39;float&#39; = 2.0, time_effect_scale: &#39;float&#39; = 1.0, noise_scale: &#39;float&#39; = 1.0, unit_error_rho: &#39;float&#39; = 0.8, time_error_rho: &#39;float&#39; = 0.2, periodic_time_effects: &#39;tuple[float, ...]&#39; = (-0.1, 0.1, 0.0, 0.0, 0.1, 0.5, 0.5)) -&gt; None
+lepskii_design(name: &#39;str&#39;, *, config: &#39;LepskiiPanelConfig | None&#39; = None) -&gt; &#39;PanelSimulator&#39;
+lepskii_profiles(name: &#39;str&#39;, *, config: &#39;LepskiiPanelConfig | None&#39; = None) -&gt; &#39;Mapping[int, np.ndarray]&#39;
+(&#39;complete_homogeneity&#39;, &#39;common_path&#39;, &#39;cohort_only_blocks&#39;, &#39;time_only_blocks&#39;, &#39;tensor_blocks&#39;, &#39;early_late_split&#39;, &#39;three_epoch&#39;, &#39;smooth_dose_gradient&#39;, &#39;response_timing&#39;, &#39;local_window_shock&#39;, &#39;log_shark_sin&#39;, &#39;no_pool_unique_signatures&#39;, &#39;no_pool_unique_peaks&#39;, &#39;no_pool_signed_paths&#39;)</code></pre>
 </div>
 </div>
-<ul>
-<li><code>name</code> must start with a lowercase letter and otherwise contain only lowercase letters, digits, and underscores.</li>
-<li><code>factory</code> must be callable.</li>
-<li>duplicate registration raises <code>ValueError</code> unless <code>replace=True</code>.</li>
-<li>the registry does not invoke or introspect the factory at registration time.</li>
-</ul>
+<p>The configuration stores panel dimensions, nine adoption periods, uneven cohort shares, and the untreated-outcome noise law. The factory returns a reusable <code>PanelSimulator</code>. The profile function returns immutable adoption-period-to-path mappings.</p>
 </section>
-<section id="create" class="level3" data-number="1.2">
-<h3 data-number="1.2" class="anchored" data-anchor-id="create"><span class="header-section-number">1.2</span> <code>create</code></h3>
-<div id="262fd323" class="cell" data-execution_count="3">
+<section id="att-dml" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="att-dml"><span class="header-section-number">2</span> ATT-DML</h2>
+<div id="1cf874f0" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;create</span><span class="sc">{</span>inspect<span class="sc">.</span>signature(pps.DGPRegistry.create)<span class="sc">}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.ATTDMConditionalConfig)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>show_signature(pps.ATTDMLatentConfig)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>show_signature(pps.ATTDMClusteredConfig)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>show_signature(pps.att_dml_design)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(pps.available_att_dml_designs())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>create(self, name: &#39;str&#39;, /, **kwargs: &#39;object&#39;) -&gt; &#39;PanelSimulator&#39;</code></pre>
+<pre><code>ATTDMConditionalConfig(n_units: &#39;int&#39; = 2000, n_features: &#39;int&#39; = 20, n_active: &#39;int&#39; = 5, treatment_effect: &#39;float&#39; = 3.0, trend_strength: &#39;float&#39; = 0.0, nonlinear: &#39;bool&#39; = False, treated_baseline_shift: &#39;bool&#39; = False) -&gt; None
+ATTDMLatentConfig(n_units: &#39;int&#39; = 1000, n_periods: &#39;int&#39; = 7, noise_scale: &#39;float&#39; = 0.1, treatment_effect: &#39;float&#39; = 0.0, unconfounded_assignment: &#39;bool&#39; = False) -&gt; None
+ATTDMClusteredConfig(n_units: &#39;int&#39; = 50, n_periods: &#39;int&#39; = 50, n_treated: &#39;int&#39; = 10, adoption_period: &#39;int&#39; = 34, n_clusters: &#39;int&#39; = 10, assignment_pattern: &#39;str&#39; = &#39;simultaneous&#39;, ar_coefficients: &#39;tuple[float, ...]&#39; = (0.3, -0.1), ma_coefficients: &#39;tuple[float, ...]&#39; = (0.2,), randomize_arma: &#39;bool&#39; = True, max_ar_order: &#39;int&#39; = 2, max_ma_order: &#39;int&#39; = 2, ar_bound: &#39;float&#39; = 0.5, ma_bound: &#39;float&#39; = 0.5, trend_scale: &#39;float&#39; = 0.6) -&gt; None
+att_dml_design(name: &#39;str&#39;, *, config: &#39;ATTDMConditionalConfig | ATTDMLatentConfig | ATTDMClusteredConfig | None&#39; = None) -&gt; &#39;PanelSimulator&#39;
+(&#39;conditional_parallel_trends&#39;, &#39;conditional_parallel_trends_nonlinear&#39;, &#39;latent_parallel&#39;, &#39;latent_nonparallel&#39;, &#39;clustered_arma&#39;)</code></pre>
 </div>
 </div>
-<p>Looks up <code>name</code> and forwards keyword arguments to the factory. An unknown name raises <code>KeyError</code> with the available names. Type and parameter errors from the selected factory propagate to the caller.</p>
+<p>The factory validates the configuration type for the selected design family. The conditional design has a separate <code>treated_baseline_shift</code> switch for the executable-code and manuscript laws.</p>
 </section>
-<section id="inspection" class="level3" data-number="1.3">
-<h3 data-number="1.3" class="anchored" data-anchor-id="inspection"><span class="header-section-number">1.3</span> Inspection</h3>
-<div id="a5f2cdb8" class="cell" data-execution_count="4">
+<section id="regression-compression" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="regression-compression"><span class="header-section-number">3</span> Regression compression</h2>
+<div id="4698e125" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> (<span class="st">&quot;names&quot;</span>, <span class="st">&quot;__contains__&quot;</span>, <span class="st">&quot;__iter__&quot;</span>, <span class="st">&quot;__len__&quot;</span>):</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span>name<span class="sc">}{</span>inspect<span class="sc">.</span>signature(<span class="bu">getattr</span>(pps.DGPRegistry, name))<span class="sc">}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.RegressionCompressionConfig)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>show_signature(pps.regression_compression_design)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>show_signature(pps.AnscombePanelConfig)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>show_signature(pps.anscombe_design)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(pps.available_anscombe_designs())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>names(self) -&gt; &#39;tuple[str, ...]&#39;
-__contains__(self, name: &#39;object&#39;) -&gt; &#39;bool&#39;
-__iter__(self) -&gt; &#39;Iterator[str]&#39;
-__len__(self) -&gt; &#39;int&#39;</code></pre>
+<pre><code>RegressionCompressionConfig(n_units: &#39;int&#39; = 1000, n_periods: &#39;int&#39; = 35, adoption_period: &#39;int&#39; = 15, n_treated: &#39;int | None&#39; = None, effect_profile: &#39;str&#39; = &#39;concave&#39;, max_effect: &#39;float&#39; = 1.0, heterogeneous_effects: &#39;bool&#39; = False, unit_effect_scale: &#39;float&#39; = 5.0, time_effect_scale: &#39;float&#39; = 2.0, unit_trend_scale: &#39;float&#39; = 0.01, error_scale: &#39;float&#39; = 2.0, error_rho: &#39;float&#39; = 0.7) -&gt; None
+regression_compression_design(*, config: &#39;RegressionCompressionConfig | None&#39; = None) -&gt; &#39;PanelSimulator&#39;
+AnscombePanelConfig(n_units: &#39;int&#39; = 1000, n_periods: &#39;int&#39; = 20, first_adoption: &#39;int&#39; = 10, second_adoption: &#39;int&#39; = 15, rank: &#39;int&#39; = 3, noise_scale: &#39;float&#39; = 0.1, unit_trend_scale: &#39;float&#39; = 0.01) -&gt; None
+anscombe_design(name: &#39;str&#39;, *, config: &#39;AnscombePanelConfig | None&#39; = None) -&gt; &#39;PanelSimulator&#39;
+(&#39;zero&#39;, &#39;unit&#39;, &#39;time&#39;, &#39;cohort_time&#39;)</code></pre>
 </div>
 </div>
-<p><code>names()</code> returns sorted names. Membership, iteration, and <code>len()</code> provide the standard container interface.</p>
+<p>The main design supports <code>constant</code>, <code>linear</code>, <code>concave</code>, <code>positive_then_negative</code>, <code>exponential</code>, <code>sinusoidal</code>, and <code>random_walk</code> effects. The Anscombe design names are <code>zero</code>, <code>unit</code>, <code>time</code>, and <code>cohort_time</code>.</p>
 </section>
-</section>
-<section id="example" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="example"><span class="header-section-number">2</span> Example</h2>
-<div id="276ae0c3" class="cell" data-execution_count="5">
+<section id="gsynth2-composite" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="gsynth2-composite"><span class="header-section-number">4</span> gsynth2 composite</h2>
+<div id="88db9a59" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>registry <span class="op">=</span> pps.DGPRegistry()</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> small_factor(<span class="op">*</span>, overlap<span class="op">=</span><span class="fl">0.0</span>):</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    config <span class="op">=</span> pps.CanonicalPanelConfig(</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        n_control<span class="op">=</span><span class="dv">24</span>,</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        n_treated<span class="op">=</span><span class="dv">6</span>,</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>        n_pre<span class="op">=</span><span class="dv">16</span>,</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>        n_post<span class="op">=</span><span class="dv">4</span>,</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pps.classic_factor_design(config<span class="op">=</span>config, overlap<span class="op">=</span>overlap)</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>registry.register(<span class="st">&quot;small_factor&quot;</span>, small_factor)</span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>simulator <span class="op">=</span> registry.create(<span class="st">&quot;small_factor&quot;</span>, overlap<span class="op">=</span><span class="fl">1.0</span>)</span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> simulator.simulate(seed<span class="op">=</span><span class="dv">12</span>)</span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(registry.names(), panel.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>show_signature(pps.GSynthCompositeConfig)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>show_signature(pps.gsynth_composite_design)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>(&#39;small_factor&#39;,) (30, 20)</code></pre>
+<pre><code>GSynthCompositeConfig(n_control: &#39;int&#39; = 160, n_treated: &#39;int&#39; = 40, n_pre: &#39;int&#39; = 40, n_post: &#39;int&#39; = 10, factor_weight: &#39;float&#39; = 0.25, time_series_weight: &#39;float&#39; = 0.25, synthetic_weight: &#39;float&#39; = 0.25, fixed_effect_weight: &#39;float&#39; = 0.25, factor_rank: &#39;int&#39; = 2, ar_coefficient: &#39;float&#39; = 0.5, effect_slope: &#39;float&#39; = 0.2, noise_scale: &#39;float&#39; = 0.6) -&gt; None
+gsynth_composite_design(*, config: &#39;GSynthCompositeConfig | None&#39; = None) -&gt; &#39;PanelSimulator&#39;</code></pre>
 </div>
 </div>
-<p>The package-level <code>canonical_registry</code> is prepopulated with the six canonical designs. Project-specific registries avoid mutating that global namespace.</p>
+<p>The four component weights must be finite, nonnegative, and not all zero. The configuration normalizes them before construction.</p>
 
 
 </section>
@@ -5733,4 +5727,4 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/reference/registry.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/reference/research-designs.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

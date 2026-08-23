@@ -51,7 +51,13 @@ def test_every_att_dml_design_simulates(name: str) -> None:
     assert panel.is_absorbing
     if name.startswith("conditional"):
         assert panel.unit_covariates.shape == (120, 10)
-        assert panel.true_att == 3.0
+        assert panel.true_att == pytest.approx(3.0, abs=0.1)
+        if name.endswith("_nonlinear"):
+            required = {10, 11, 12}
+            assert required.issubset(
+                set(panel.metadata["assignment"]["active_features"])
+            )
+            assert required.issubset(set(panel.metadata["outcome"]["trend_active"]))
 
 
 def test_att_dml_baseline_discrepancy_is_an_explicit_switch() -> None:
@@ -100,16 +106,39 @@ def test_regression_compression_main_design_and_gsynth_composite() -> None:
         )
     ).simulate(seed=13)
     composite = pps.gsynth_composite_design(
-        config=pps.GSynthCompositeConfig(
-            n_control=40, n_treated=10, n_pre=10, n_post=5
-        )
+        config=pps.GSynthCompositeConfig(n_control=40, n_treated=10, n_pre=10, n_post=5)
     ).simulate(seed=14)
 
     assert compression.metadata["outcome"]["kind"] == "sum_outcome"
     assert len(compression.metadata["outcome"]["components"]) == 3
     assert composite.metadata["outcome"]["kind"] == "sum_outcome"
     weights = [
-        component["weight"]
-        for component in composite.metadata["outcome"]["components"]
+        component["weight"] for component in composite.metadata["outcome"]["components"]
     ]
     np.testing.assert_allclose(weights, [0.25] * 4)
+
+
+def test_one_draw_research_convenience_functions() -> None:
+    assert pps.lepskii(
+        "complete_homogeneity",
+        config=pps.LepskiiPanelConfig(n_units=200),
+        seed=1,
+    ).shape == (200, 36)
+    assert pps.att_dml(
+        "latent_parallel",
+        config=pps.ATTDMLatentConfig(n_units=50),
+        seed=1,
+    ).shape == (50, 7)
+    assert pps.regression_compression(
+        config=pps.RegressionCompressionConfig(
+            n_units=50, n_periods=10, adoption_period=5, n_treated=20
+        ),
+        seed=1,
+    ).shape == (50, 10)
+    assert pps.anscombe(
+        "zero", config=pps.AnscombePanelConfig(n_units=40), seed=1
+    ).shape == (40, 20)
+    assert pps.gsynth_composite(
+        config=pps.GSynthCompositeConfig(n_control=20, n_treated=5, n_pre=8, n_post=3),
+        seed=1,
+    ).shape == (25, 11)

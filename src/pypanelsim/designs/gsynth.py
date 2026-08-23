@@ -14,8 +14,9 @@ from ..components import (
     SingleCohortAssignment,
     SumOutcomeModel,
 )
+from ..data import PanelDataset
 from ..outcomes import ARMAErrorOutcome, LowRankFactorOutcome
-from ..simulator import PanelSimulator
+from ..simulator import PanelSimulator, SimulationSeeds
 
 
 @dataclass(frozen=True, slots=True)
@@ -81,9 +82,7 @@ def gsynth_composite_design(
     return PanelSimulator(
         name="gsynth_composite",
         dimensions=resolved.dimensions,
-        assignment=SingleCohortAssignment(
-            resolved.n_treated, resolved.n_pre
-        ),
+        assignment=SingleCohortAssignment(resolved.n_treated, resolved.n_pre),
         outcome_model=SumOutcomeModel(
             (
                 LowRankFactorOutcome(
@@ -103,4 +102,18 @@ def gsynth_composite_design(
             weights=resolved.normalized_weights,
         ),
         effect_model=LinearRampEffect(resolved.effect_slope),
+    )
+
+
+def gsynth_composite(
+    *,
+    config: GSynthCompositeConfig | None = None,
+    seed: int | np.random.SeedSequence | None = None,
+    rng: np.random.Generator | None = None,
+    streams: SimulationSeeds | None = None,
+) -> PanelDataset:
+    """Draw one gsynth2 composite panel."""
+
+    return gsynth_composite_design(config=config).simulate(
+        seed=seed, rng=rng, streams=streams
     )

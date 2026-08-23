@@ -162,14 +162,20 @@ class PanelSimulator:
 
         if streams is not None and (seed is not None or rng is not None):
             raise ValueError("provide seed, rng, or streams, not more than one")
-        generator = resolve_rng(seed=seed, rng=rng)
-        generators = (
-            {name: generator for name in (
-                "features", "assignment", "time_features", "outcome", "effect"
-            )}
-            if streams is None
-            else streams.generators()
-        )
+        if streams is None:
+            generator = resolve_rng(seed=seed, rng=rng)
+            generators = {
+                name: generator
+                for name in (
+                    "features",
+                    "assignment",
+                    "time_features",
+                    "outcome",
+                    "effect",
+                )
+            }
+        else:
+            generators = streams.generators()
         if self.feature_model is None:
             assignment_context = AssignmentContext(self.dimensions)
             feature_metadata = None

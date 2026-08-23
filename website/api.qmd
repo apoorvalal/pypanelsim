@@ -19,6 +19,8 @@ inheritance from a package base class.
 | [`SimulationContext`](reference/core.qmd#simulationcontext) | Treatment and shared features for outcome/effect components |
 | [`ComponentDraw`](reference/core.qmd#componentdraw) | Component matrix plus diagnostic metadata |
 | [`TimeFeatureDraw`](reference/core.qmd#timefeaturedraw) | Shared time-varying features plus metadata |
+| [`PanelTruth`](reference/primitives.qmd#paneltruth) | Support-aware cohort and event-time causal truth |
+| [`SimulationSeeds`](reference/primitives.qmd#named-random-streams) | Independent named component streams |
 | [`resolve_rng`](reference/core.qmd#resolve_rng) | Explicit seed/generator validation |
 
 ## Untreated-outcome composition
@@ -26,6 +28,11 @@ inheritance from a package base class.
 | Object | Purpose |
 |---|---|
 | [`AdditiveFactorOutcome`](reference/core.qmd#additivefactoroutcome) | Gaussian unit and period effects plus idiosyncratic noise |
+| [`TwoWayFixedEffectsOutcome`](reference/primitives.qmd#outcome-primitives) | Explicit 2WFE outcome primitive |
+| [`LowRankFactorOutcome`](reference/primitives.qmd#outcome-primitives) | Generic rank-$k$ interactive fixed-effects primitive |
+| [`ARMAErrorOutcome`](reference/primitives.qmd#outcome-primitives) | Unit-level ARMA paths |
+| [`UnitTrendOutcome`](reference/primitives.qmd#outcome-primitives) | Unit-specific linear trends |
+| [`ClusteredTrendOutcome`](reference/primitives.qmd#outcome-primitives) | Shared trends within latent groups |
 | [`SumOutcomeModel`](reference/core.qmd#sumoutcomemodel) | Weighted sum of reusable outcome components |
 
 ## Features and assignment
@@ -73,6 +80,13 @@ See the [F-test DGP API](reference/ftest.qmd) for both configuration objects,
 the 7+7 profile catalogs, reusable simulator factories, and one-draw functions.
 The [complete vignette](vignettes/ftest-heterogeneity.qmd) specifies and
 visualizes every design.
+
+## Downstream research design suites
+
+See the [research design API](reference/research-designs.qmd) for the fourteen
+Lepskii-draft designs, five ATT-DML designs, the regression-compression main
+law and Anscombe quartet, and the gsynth2 weighted composite. The
+[project map](research-designs.qmd) states which objects stay downstream.
 
 ## Registry
 

@@ -12,8 +12,9 @@ execute:
 `pypanelsim` generates balanced panel data while keeping assignment, untreated
 potential outcomes, treatment effects, observed covariates, and latent unit
 features explicit. Treatment effects can vary jointly over units and time as
-$\tau_{it}=f(X_i,U_i,V_t)$. Every draw is reproducible, validated, and
-estimator-neutral.
+$\tau_{it}=f(X_i,U_i,V_t)$. The package includes explicit 2WFE and rank-$k$
+factor primitives plus named designs for four research projects. Every draw is
+reproducible, validated, and estimator-neutral.
 :::
 
 ## Start with a canonical design
@@ -57,9 +58,11 @@ simulation truth.
 | Simulate and estimate rank-2 and rank-3 factor panels | [Get started](getting-started.qmd) |
 | Construct and visualize every balancing DGP | [Balancing DGP catalog](canonical-designs.qmd) |
 | Randomization, logit selection, and cohort GPS | [Assignment mechanisms](assignment.qmd) |
+| Simulate FTestEventStudy, ATT-DML, regression compression, and gsynth2 | [Research design suites](research-designs.qmd) |
 | Understand component order and RNG semantics | [Architecture](architecture.md) |
 | Inspect every public object and function | [API reference](api.qmd) |
 | Simulate all 14 F-test paper effect designs | [F-test heterogeneity DGPs](vignettes/ftest-heterogeneity.qmd) |
+| Compare four downstream projects under one contract | [Research-suite vignette](vignettes/research-suites.qmd) |
 | See heterogeneous adoption bias vanilla TWFE | [Baker TWFE failure](vignettes/baker-twfe.qmd) |
 | Reproduce 398 estimator-design RMSE cells | [Balancing reproduction](vignettes/balancing-reproduction.qmd) |
 | Pass panels to crabbymetrics or PyFixest | [Estimator interoperability](interoperability.qmd) |

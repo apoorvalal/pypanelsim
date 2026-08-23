@@ -63,9 +63,11 @@ Return type for `UnitFeatureModel.generate()`.
 
 | Field | Shape | Meaning |
 |---|---|---|
-| `observables` | `(n_units, k_x)` | Covariates exposed on `PanelDataset` |
+| `observables` | `(n_units, k_x)` | Covariates used by assignment and outcomes |
 | `unobservables` | `(n_units, k_u)` | Latent features retained as simulation truth |
 | `metadata` | Mapping | Names and feature-model diagnostics |
+| `estimator_observables` | `(n_units, k_e)` or `None` | Optional estimator-visible covariates |
+| `unit_annotations` | Mapping | Optional unit-aligned labels |
 
 Zero feature columns are valid. All supplied values must be finite.
 
@@ -80,7 +82,8 @@ print(signature(pps.TimeFeatureDraw))
 Return type for `TimeFeatureModel.generate()`. `values` has shape
 `(n_periods, k_v)` and is available to both outcome and effect models as
 `context.time_features`. Metadata can name columns or record the generating
-law. Zero feature columns are valid.
+law. `time_annotations` can hold period-aligned labels. Zero feature columns
+are valid.
 
 ## `AssignmentContext`
 
@@ -213,6 +216,7 @@ The immutable output of every simulation.
 | `treatment` | `(N,T)` | Same shape; binary |
 | `untreated_outcome` | `(N,T)` | Same shape; finite |
 | `treatment_effect` | `(N,T)` | Same shape; zero where untreated |
+| `effect_surface` | `(N,T)` | Full effect law; realized effect equals surface times treatment |
 | `unit_covariates` | `(N,K)` | Optional finite time-invariant covariates |
 
 The constructor enforces
@@ -228,6 +232,7 @@ of caller-owned inputs cannot alter the dataset.
 unique. `unit_covariate_names` defaults to `x1`, `x2`, and so on; names must be
 unique and cannot collide with the long-form core columns. `metadata` is copied
 and recursively frozen for mappings, arrays, lists, tuples, and sets.
+`unit_annotations` and `time_annotations` hold immutable axis-aligned labels.
 
 ### Properties
 
@@ -239,6 +244,7 @@ and recursively frozen for mappings, arrays, lists, tuples, and sets.
 | `is_absorbing` | Monotone treatment indicator |
 | `adoption_times` | First treated period or horizon sentinel |
 | `true_att` | Mean realized effect over cells with `treatment == 1` |
+| `truth` | `PanelTruth` cohort and event-time summaries |
 
 `true_att` raises `ValueError` when the panel has no treated cells.
 
@@ -254,11 +260,13 @@ for name in ("as_arrays", "arrays", "as_long_dict"):
 |---|---|
 | `as_arrays(copy=False)` | `(outcome, treatment)` wide matrices |
 | `arrays(fields, copy=False)` | Requested causal matrices in caller order |
-| `as_long_dict(copy=False)` | Flat core columns plus named unit covariates |
+| `as_long_dict(...)` | Flat core columns plus optional surface and annotations |
 
 Views are read-only unless `copy=True`. `arrays()` accepts `outcome`,
 `treatment`, `untreated_outcome`, and `treatment_effect`; an unknown name raises
-`ValueError`.
+`ValueError`. `arrays()` also accepts `effect_surface`. The default long schema
+is backward compatible. Set `include_effect_surface=True` or
+`include_annotations=True` for the expanded columns.
 
 ## `PanelSimulator`
 
@@ -277,6 +285,8 @@ print(signature(pps.PanelSimulator))
 | `effect_model` | Object satisfying `EffectModel`, or a callable effect law |
 | `feature_model` | Optional object satisfying `UnitFeatureModel` |
 | `time_feature_model` | Optional object satisfying `TimeFeatureModel` |
+| `unit_ids`, `time_ids` | Optional external axis identifiers |
+| `unit_annotations`, `time_annotations` | Optional axis-aligned labels |
 
 ### Pipeline
 
@@ -286,7 +296,7 @@ print(signature(pps.PanelSimulator))
 4. Draw shared time features, if configured.
 5. Build `SimulationContext`.
 6. Draw and validate untreated outcomes.
-7. Draw effects and reject nonzero effects outside treated cells.
+7. Draw the effect surface and validate realized effects.
 8. Return `PanelDataset(outcome=untreated+effect, ...)`.
 
 Component metadata is namespaced under `features`, `time_features`,
@@ -305,8 +315,8 @@ print(f"simulate{inspect.signature(pps.PanelSimulator.simulate)}")
 print(f"iter_simulations{inspect.signature(pps.PanelSimulator.iter_simulations)}")
 ```
 
-`simulate(seed=..., rng=...)` accepts either an integer/`SeedSequence` or an
-existing generator, never both. `iter_simulations(replications, seed=...)`
+`simulate(seed=..., rng=..., streams=...)` accepts a legacy shared stream or
+`SimulationSeeds`, never more than one. `iter_simulations(replications, seed=...)`
 requires a positive replication count and uses `SeedSequence.spawn()` for child
 streams.
 

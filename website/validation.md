@@ -22,6 +22,11 @@ The wheel was installed into a fresh temporary `uv` environment. A smoke test
 then created a registered classic-factor design, generated a `(200, 50)` panel,
 extracted estimator arrays, and recovered the canonical true ATT of 1.1.
 
+The expanded suite adds contract tests for the full effect surface, immutable
+annotations, support-aware cohort/event truth, named random streams, explicit
+2WFE and rank-$k$ factor primitives, and every named Lepskii, ATT-DML,
+regression-compression, and gsynth2 factory.
+
 ## Migration parity
 
 Before the embedded implementation was removed from the balancing reproduction

@@ -87,8 +87,7 @@ class CorrelatedGaussianFeatures:
         if not np.all(np.isfinite(transformed)):
             raise ValueError("transformed features must contain only finite values")
         names = tuple(
-            f"{self.name_prefix}{index + 1}"
-            for index in range(transformed.shape[1])
+            f"{self.name_prefix}{index + 1}" for index in range(transformed.shape[1])
         )
         raw_names = tuple(
             f"{self.name_prefix}{index + 1}" for index in range(self.n_features)
@@ -119,9 +118,7 @@ class LatentGradientFeatures:
     scale: float = 0.5
 
     def __post_init__(self) -> None:
-        if not np.isfinite(self.location_start) or not np.isfinite(
-            self.location_stop
-        ):
+        if not np.isfinite(self.location_start) or not np.isfinite(self.location_stop):
             raise ValueError("locations must be finite")
         if not np.isfinite(self.scale) or self.scale < 0.0:
             raise ValueError("scale must be finite and nonnegative")
@@ -145,5 +142,4 @@ class LatentGradientFeatures:
                 "unobservable_names": ("latent_factor",),
                 "latent_means": means,
             },
-            unit_annotations={"latent_factor": latent[:, 0]},
         )

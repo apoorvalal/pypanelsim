@@ -15,7 +15,8 @@ from ..components import (
     RandomizedStaggeredAdoption,
     SimulationContext,
 )
-from ..simulator import PanelSimulator
+from ..data import PanelDataset
+from ..simulator import PanelSimulator, SimulationSeeds
 
 _LABELS = MappingProxyType(
     {
@@ -86,8 +87,7 @@ class LepskiiPanelConfig:
         if tuple(sorted(set(self.adoption_periods))) != self.adoption_periods:
             raise ValueError("adoption_periods must be unique and increasing")
         if any(
-            period < 0 or period >= self.n_periods
-            for period in self.adoption_periods
+            period < 0 or period >= self.n_periods for period in self.adoption_periods
         ):
             raise ValueError("adoption_periods must lie inside the panel")
         if any(share <= 0.0 for share in self.cohort_shares):
@@ -202,9 +202,7 @@ def _signature(length: int, index: int) -> np.ndarray:
     if index == 5:
         return _damped_wave(length, 1.6, 0.2, 1.2)
     if index == 6:
-        return -0.8 * np.exp(-0.5 * ((event - 2.0) / 1.3) ** 2) + _common(
-            length, 1.7
-        )
+        return -0.8 * np.exp(-0.5 * ((event - 2.0) / 1.3) ** 2) + _common(length, 1.7)
     if index == 7:
         return _ramp(length, -0.35, 2.4)
     return _hump(length, 1.5, center=8, width=3.2, floor=0.2) - 0.5
@@ -226,8 +224,7 @@ def _unique_signed(length: int, index: int) -> np.ndarray:
     curves = (
         1.8 * (1.0 - np.exp(-0.25 * event)),
         -1.2 * (1.0 - np.exp(-0.35 * event)),
-        2.0 * np.exp(-0.5 * ((event - 2.0) / 1.2) ** 2)
-        - 0.25 * event / max(length, 1),
+        2.0 * np.exp(-0.5 * ((event - 2.0) / 1.2) ** 2) - 0.25 * event / max(length, 1),
         -1.5 * np.exp(-0.5 * ((event - 3.0) / 1.5) ** 2)
         + 1.3 * (1.0 - np.exp(-0.18 * event)),
         0.9 + 0.8 * np.sin(0.8 * event),
@@ -265,8 +262,9 @@ def _profile_builders(
             if index < 6
             else _hump(length, 2.4, center=4, width=2.1, floor=0.1)
         ),
-        "smooth_dose_gradient": lambda length, index: _common(length, 1.9)
-        * (0.55 + 0.17 * index),
+        "smooth_dose_gradient": lambda length, index: (
+            _common(length, 1.9) * (0.55 + 0.17 * index)
+        ),
         "response_timing": lambda length, index: (
             _persistent(length, 1.9)
             if index < 3
@@ -300,9 +298,7 @@ def _log_shark_sin(length: int, index: int) -> np.ndarray:
     if index < 6:
         raw = np.log(np.arange(1, length + 1))
         return (1.7 + 0.25 * (index - 3)) * raw / raw.max()
-    return 0.35 + (0.9 + 0.15 * (index - 6)) * np.sin(
-        0.9 * event + 0.7 * index
-    )
+    return 0.35 + (0.9 + 0.15 * (index - 6)) * np.sin(0.9 * event + 0.7 * index)
 
 
 def lepskii_profiles(
@@ -383,4 +379,19 @@ def lepskii_design(
         ),
         outcome_model=_LepskiiOutcome(resolved),
         effect_model=CohortEventTimeEffect(lepskii_profiles(name, config=resolved)),
+    )
+
+
+def lepskii(
+    name: str,
+    *,
+    config: LepskiiPanelConfig | None = None,
+    seed: int | np.random.SeedSequence | None = None,
+    rng: np.random.Generator | None = None,
+    streams: SimulationSeeds | None = None,
+) -> PanelDataset:
+    """Draw one panel from a Lepskii-draft design."""
+
+    return lepskii_design(name, config=config).simulate(
+        seed=seed, rng=rng, streams=streams
     )

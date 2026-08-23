@@ -144,14 +144,44 @@ class RandomUnitEffect:
         unit_effects = rng.normal(
             self.mean, self.scale, size=context.dimensions.n_units
         )
-        surface = np.repeat(
-            unit_effects[:, None], context.dimensions.n_periods, axis=1
-        )
+        surface = np.repeat(unit_effects[:, None], context.dimensions.n_periods, axis=1)
         return ComponentDraw(
             surface * context.treatment,
             {
                 "kind": "random_unit_effect",
                 "unit_effects": unit_effects,
+                "effect_surface": surface,
+            },
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class GaussianCellEffect:
+    """Draw an independent Gaussian treatment effect for each panel cell."""
+
+    mean: float = 1.0
+    scale: float = 0.0
+
+    def __post_init__(self) -> None:
+        if not np.isfinite(self.mean):
+            raise ValueError("mean must be finite")
+        if not np.isfinite(self.scale) or self.scale < 0.0:
+            raise ValueError("scale must be finite and nonnegative")
+
+    def generate(
+        self, context: SimulationContext, rng: np.random.Generator
+    ) -> ComponentDraw:
+        surface = rng.normal(
+            self.mean,
+            self.scale,
+            size=(context.dimensions.n_units, context.dimensions.n_periods),
+        )
+        return ComponentDraw(
+            surface * context.treatment,
+            {
+                "kind": "gaussian_cell_effect",
+                "mean": self.mean,
+                "scale": self.scale,
                 "effect_surface": surface,
             },
         )
@@ -176,9 +206,7 @@ class RandomWalkEffect:
         first_adoption = int(adoption[context.ever_treated].min())
         max_length = context.dimensions.n_periods - first_adoption
         profile = np.cumsum(rng.normal(scale=self.innovation_scale, size=max_length))
-        surface = np.zeros(
-            (context.dimensions.n_units, context.dimensions.n_periods)
-        )
+        surface = np.zeros((context.dimensions.n_units, context.dimensions.n_periods))
         for unit in context.treated_units:
             start = int(adoption[unit])
             surface[unit, start:] = profile[: context.dimensions.n_periods - start]

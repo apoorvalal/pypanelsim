@@ -19,8 +19,8 @@ designs, tests, examples, and documentation.
   simulation and Matplotlib supports the runnable DGP visualizations.
 - **Composable.** Assignment, untreated outcomes, and treatment effects are
   independent protocols.
-- **Explicit randomness.** Every draw accepts either `seed=` or `rng=`. The
-  package does not use global random state.
+- **Explicit randomness.** Every draw accepts `seed=`, `rng=`, or independent
+  named component streams. The package does not use global random state.
 - **Validated output.** All matrices have `(unit, time)` shape. Treatment is
   binary, realized effects are zero when untreated, and observed outcomes must
   equal untreated outcomes plus realized effects.
@@ -39,14 +39,20 @@ designs, tests, examples, and documentation.
   heterogeneity driven by baseline covariates, unobserved unit factors, and
   shared time-varying features, plus generic cohort/event-time profile maps.
 - **Untreated outcomes:** a basic additive unit/time factor model, weighted
-  component composition, and classic, weak, mixed, synthetic-control,
-  factor--synthetic, and time-series DGPs extracted from the original balancing
-  study.
+  component composition, generic rank-$k$ factors, feature-linear trends, unit
+  trends, periodic time effects, ARMA errors, clustered trends, and the
+  canonical DGPs extracted from the original balancing study.
 - **Staggered adoption:** a self-contained Baker DGP with cohort-specific
   dynamic effects that reproduces vanilla TWFE event-study contamination.
 - **F-test paper DGPs:** all seven single-cohort temporal-effect laws and all
   seven randomized three-cohort heterogeneity designs, exposed as profiles,
   reusable simulators, and one-draw functions.
+- **Research suites:** all fourteen many-cohort designs from the Lepskii draft,
+  the ATT-DML conditional-trend, latent-factor, and clustered-ARMA laws, the
+  regression-compression benchmark and Anscombe quartet, and the gsynth2
+  weighted composite.
+- **Causal truth:** the full effect surface, realized effects, cohort/event
+  truth, support-aware event-study targets, and cohort ATTs.
 - **Executable documentation:** side-by-side `matshow` views of $Y$ and $W$ for
   every canonical DGP, the complete 398-cell balancing experiment, and a
   PyFixest comparison of vanilla and saturated cohort/event-time estimators.
@@ -169,7 +175,7 @@ matrices.
 
 ## The data contract
 
-`PanelDataset` stores four same-shaped float matrices.
+`PanelDataset` stores five same-shaped float matrices.
 
 | Field | Meaning |
 |---|---|
@@ -177,18 +183,23 @@ matrices.
 | `treatment` | Binary treatment matrix $W$ |
 | `untreated_outcome` | Untreated potential outcome $Y(0)$ |
 | `treatment_effect` | Realized cell effect, zero when $W=0$ |
+| `effect_surface` | Full effect law before multiplication by $W$ |
 
 The class enforces
 
 $$
-Y = Y(0) + \tau,
+Y = Y(0) + \tau^{\mathrm{realized}},
+\qquad
+\tau^{\mathrm{realized}}=\tau^{\mathrm{surface}}W.
 $$
 
-where `treatment_effect` contains $\tau$ only in treated cells. It also stores
+`treatment_effect` contains the realized effect only in treated cells. The
+class also stores
 unique `unit_ids`, unique `time_ids`, a stable design `name`, and namespaced
 component metadata. Optional time-invariant observed covariates are exposed as
 `unit_covariates` with matching `unit_covariate_names` and are expanded by
-`as_long_dict()`.
+`as_long_dict()`. Unit and time annotations are separate from identifiers and
+can be included in long output on request.
 
 Useful properties include:
 
@@ -201,6 +212,8 @@ panel.ever_treated
 panel.is_absorbing
 panel.adoption_times
 panel.true_att
+panel.effect_surface
+panel.truth.event_study(event_times=range(-5, 13))
 ```
 
 ### Wide NumPy interchange
@@ -244,6 +257,33 @@ columns = panel.as_long_dict()
 
 The columns are `unit`, `time`, `outcome`, `treatment`,
 `untreated_outcome`, and `treatment_effect`.
+
+The default schema remains stable. Request the expanded causal and label
+columns explicitly:
+
+```python
+columns = panel.as_long_dict(
+    include_effect_surface=True,
+    include_annotations=True,
+)
+```
+
+## Reusable research suites
+
+```python
+lepskii = pps.lepskii_design("tensor_blocks")
+att_dml = pps.att_dml_design("conditional_parallel_trends_nonlinear")
+compression = pps.regression_compression_design()
+gsynth = pps.gsynth_composite_design()
+
+panel = lepskii.simulate(
+    streams=pps.SimulationSeeds.from_seed(42),
+)
+```
+
+The [research design map](website/research-designs.qmd) links each downstream
+project to its configuration and factory. Estimators, tuners, Monte Carlo
+runners, and reports stay outside this package.
 
 ## Canonical designs
 

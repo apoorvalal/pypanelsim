@@ -45,18 +45,18 @@ which has systematic matrix rank at most two and is exactly a two-way
 fixed-effects (2WFE) conditional-mean model. Treatment is completely
 randomized, so a conventional event study is correctly specified.
 
-The second conditional-mean surface combines a unit effect with the catalog's
-two-factor `ClassicFactorOutcome`,
+The second conditional-mean surface combines a unit effect with the generic
+two-factor `LowRankFactorOutcome`,
 
 $$
 \mathbb E[Y_{it}(0)\mid\alpha_i,\lambda_i,F_t]
 =\alpha_i+\lambda_i'F_t.
 $$
 
-This systematic surface has rank at most three. The canonical outcome
-component draws separated factor-loading distributions for eventual treated
-and control units, so their counterfactual trends differ and the 2WFE event
-study fails. Matrix completion and interactive fixed effects can use the
+This systematic surface has rank at most three. The factor component draws
+separated loading distributions for eventual treated and control units, so
+their counterfactual trends differ and the 2WFE event study fails. Matrix
+completion and interactive fixed effects can use the
 untreated panel to approximate the low-rank counterfactual in the presence of
 observation noise.
 
@@ -92,9 +92,10 @@ TREATMENT_CMAP = ListedColormap(
 TREATMENT_NORM = BoundaryNorm([-0.5, 0.5, 1.5], TREATMENT_CMAP.N)
 ```
 
-`AdditiveFactorOutcome` implements the rank-2 additive panel DGP. For the
-rank-3 design, `SumOutcomeModel` adds a unit effect to the catalog's
-`ClassicFactorOutcome`.
+`TwoWayFixedEffectsOutcome` is the explicit rank-2 2WFE primitive. For the
+rank-3 design, `SumOutcomeModel` adds a unit effect to the generic rank-$k$
+`LowRankFactorOutcome`. The factor primitive can set different loading means
+for eventual treated and control units without introducing an estimator.
 
 ```{python}
 additive_simulator = pps.PanelSimulator(
@@ -104,7 +105,7 @@ additive_simulator = pps.PanelSimulator(
         n_treated=N_TREATED,
         adoption_period=ADOPTION_PERIOD,
     ),
-    outcome_model=pps.AdditiveFactorOutcome(
+    outcome_model=pps.TwoWayFixedEffectsOutcome(
         unit_effect_scale=1.0,
         time_effect_scale=0.5,
         noise_scale=ADDITIVE_NOISE_SD,
@@ -121,14 +122,16 @@ interactive_simulator = pps.PanelSimulator(
     ),
     outcome_model=pps.SumOutcomeModel(
         (
-            pps.AdditiveFactorOutcome(
+            pps.TwoWayFixedEffectsOutcome(
                 unit_effect_scale=1.0,
                 time_effect_scale=0.0,
                 noise_scale=0.0,
             ),
-            pps.ClassicFactorOutcome(
-                overlap=0.1,
-                noise_variance=INTERACTIVE_NOISE_SD**2,
+            pps.LowRankFactorOutcome(
+                rank=2,
+                control_loading_mean=-0.1,
+                treated_loading_mean=0.1,
+                noise_scale=INTERACTIVE_NOISE_SD,
             ),
         )
     ),

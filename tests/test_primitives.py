@@ -8,10 +8,12 @@ from pypanelsim import (
     LowRankFactorOutcome,
     PanelDimensions,
     PanelSimulator,
+    RandomARMAErrorOutcome,
     RandomizedSingleCohortAssignment,
     SimulationContext,
     SimulationSeeds,
     TwoWayFixedEffectsOutcome,
+    UnitPositionOutcome,
     UnitTrendOutcome,
     att_dml_nonlinear_basis,
 )
@@ -55,7 +57,9 @@ def test_arma_unit_trend_and_cluster_trend_have_panel_shape() -> None:
     context = SimulationContext(dimensions, np.zeros((20, 30)))
     models = (
         ARMAErrorOutcome((0.4,), (0.2,), burn_in=20),
+        RandomARMAErrorOutcome(2, 2, burn_in=20),
         UnitTrendOutcome(0.5),
+        UnitPositionOutcome(0.0, 2.0, 0.5),
         ClusteredTrendOutcome(4, 0.5),
     )
     for model in models:

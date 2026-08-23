@@ -43,6 +43,17 @@ features. `n_features` defaults to one and must be nonnegative. Metadata records
 `TimeFeatureModel` when $V_t$ should be a trend, cycle, shock process, or
 calendar covariate.
 
+## `CorrelatedGaussianFeatures`
+
+```{python}
+show_signature(pps.CorrelatedGaussianFeatures)
+```
+
+Draws Toeplitz-correlated Gaussian covariates or uses an explicit covariance
+matrix. A callable transform can expand the features used by assignment and
+outcomes. `estimator_uses_raw=True` keeps the original Gaussian columns on the
+returned dataset.
+
 ## `SingleCohortAssignment`
 
 ```{python}
@@ -118,6 +129,17 @@ randomization, the treated count is random and all-treated or all-control draws
 are possible in small/extreme designs. Metadata contains the linear predictor,
 sigmoid probabilities, realized treated units, coefficient vectors, and adoption
 period.
+
+## `SparseLogitAssignment`
+
+```{python}
+show_signature(pps.SparseLogitAssignment)
+```
+
+Draws a random sparse coefficient index and applies a binary logit assignment.
+`required_active_features` can force basis terms into the index. Negative
+positions count from the last feature. This is the assignment primitive used
+by the nonlinear ATT-DML design.
 
 ## `StaggeredAdoption`
 

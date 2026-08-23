@@ -27,6 +27,7 @@ class SparseLogitAssignment:
     intercept: float = -1.0
     coefficient_bounds: tuple[float, float] = (-1.0, 1.0)
     logit_noise_scale: float = 0.0
+    required_active_features: tuple[int, ...] = ()
 
     def __post_init__(self) -> None:
         if self.adoption_period < 0:
@@ -40,6 +41,10 @@ class SparseLogitAssignment:
             raise ValueError("coefficient_bounds must be finite and ordered")
         if not np.isfinite(self.logit_noise_scale) or self.logit_noise_scale < 0.0:
             raise ValueError("logit_noise_scale must be finite and nonnegative")
+        if len(set(self.required_active_features)) != len(
+            self.required_active_features
+        ):
+            raise ValueError("required_active_features must be unique")
 
     def assign(
         self,
@@ -57,10 +62,15 @@ class SparseLogitAssignment:
         n_features = assignment_context.observables.shape[1]
         if self.n_active > n_features:
             raise ValueError("n_active cannot exceed the observable feature count")
-        active = np.sort(rng.choice(n_features, self.n_active, replace=False))
+        random_active = rng.choice(n_features, self.n_active, replace=False)
+        required = np.asarray(self.required_active_features, dtype=int)
+        required = np.where(required < 0, required + n_features, required)
+        if np.any((required < 0) | (required >= n_features)):
+            raise ValueError("required_active_features contains an invalid index")
+        active = np.unique(np.concatenate((random_active, required)))
         coefficients = np.zeros(n_features)
         lower, upper = self.coefficient_bounds
-        coefficients[active] = rng.uniform(lower, upper, self.n_active)
+        coefficients[active] = rng.uniform(lower, upper, active.size)
         linear_predictor = (
             self.intercept + assignment_context.observables @ coefficients
         )
