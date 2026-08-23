@@ -47,6 +47,26 @@ def _readonly_unit_covariates(value: Any | None, *, n_units: int) -> FloatMatrix
     return array
 
 
+def _readonly_annotations(
+    value: Mapping[str, Any] | None,
+    *,
+    length: int,
+    axis_name: str,
+) -> Mapping[str, NDArray[Any]]:
+    annotations: dict[str, NDArray[Any]] = {}
+    for name, raw_values in dict(value or {}).items():
+        if not isinstance(name, str) or not name:
+            raise ValueError(f"{axis_name}_annotations names must be non-empty strings")
+        array = np.array(raw_values, copy=True)
+        if array.ndim != 1 or array.size != length:
+            raise ValueError(
+                f"{axis_name}_annotations[{name!r}] must have length {length}"
+            )
+        array.setflags(write=False)
+        annotations[name] = array
+    return MappingProxyType(annotations)
+
+
 def _freeze_value(value: Any) -> Any:
     if isinstance(value, np.ndarray):
         array = np.array(value, copy=True)
@@ -78,11 +98,14 @@ class PanelDataset:
     untreated_outcome: FloatMatrix
     treatment_effect: FloatMatrix
     name: str
+    effect_surface: FloatMatrix | None = None
     unit_ids: NDArray[Any] | None = None
     time_ids: NDArray[Any] | None = None
     metadata: Mapping[str, Any] = field(default_factory=dict)
     unit_covariates: FloatMatrix | None = None
     unit_covariate_names: Sequence[str] | None = None
+    unit_annotations: Mapping[str, Any] = field(default_factory=dict)
+    time_annotations: Mapping[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if not isinstance(self.name, str) or not self.name.strip():
@@ -92,13 +115,24 @@ class PanelDataset:
         treatment = _readonly_matrix(self.treatment, name="treatment")
         untreated = _readonly_matrix(self.untreated_outcome, name="untreated_outcome")
         effect = _readonly_matrix(self.treatment_effect, name="treatment_effect")
+        effect_surface = _readonly_matrix(
+            effect if self.effect_surface is None else self.effect_surface,
+            name="effect_surface",
+        )
         shape = outcome.shape
-        if any(array.shape != shape for array in (treatment, untreated, effect)):
+        if any(
+            array.shape != shape
+            for array in (treatment, untreated, effect, effect_surface)
+        ):
             raise ValueError("all panel matrices must have the same shape")
         if not np.all((treatment == 0.0) | (treatment == 1.0)):
             raise ValueError("treatment must contain only zero and one")
         if not np.allclose(effect[treatment == 0.0], 0.0):
             raise ValueError("treatment_effect must be zero outside treated cells")
+        if not np.allclose(effect, effect_surface * treatment):
+            raise ValueError(
+                "treatment_effect must equal effect_surface times treatment"
+            )
         if not np.allclose(outcome, untreated + effect):
             raise ValueError(
                 "outcome must equal untreated_outcome plus treatment_effect"
@@ -127,6 +161,7 @@ class PanelDataset:
             "treatment",
             "untreated_outcome",
             "treatment_effect",
+            "effect_surface",
         }
         if reserved.intersection(unit_covariate_names):
             raise ValueError("unit_covariate_names cannot use reserved panel names")
@@ -145,6 +180,7 @@ class PanelDataset:
         object.__setattr__(self, "treatment", treatment)
         object.__setattr__(self, "untreated_outcome", untreated)
         object.__setattr__(self, "treatment_effect", effect)
+        object.__setattr__(self, "effect_surface", effect_surface)
         object.__setattr__(self, "unit_covariates", unit_covariates)
         object.__setattr__(self, "unit_covariate_names", unit_covariate_names)
         object.__setattr__(
@@ -156,6 +192,24 @@ class PanelDataset:
             self,
             "time_ids",
             _readonly_ids(time_ids, length=n_periods, name="time_ids"),
+        )
+        object.__setattr__(
+            self,
+            "unit_annotations",
+            _readonly_annotations(
+                self.unit_annotations,
+                length=n_units,
+                axis_name="unit",
+            ),
+        )
+        object.__setattr__(
+            self,
+            "time_annotations",
+            _readonly_annotations(
+                self.time_annotations,
+                length=n_periods,
+                axis_name="time",
+            ),
         )
         object.__setattr__(self, "metadata", _freeze_value(dict(self.metadata)))
 
@@ -228,6 +282,22 @@ class PanelDataset:
             raise ValueError("true_att is undefined because the panel has no treatment")
         return float(self.treatment_effect[treated_cells].mean())
 
+    @property
+    def truth(self):
+        """Return dependency-free cohort and event-time truth summaries."""
+
+        from .truth import PanelTruth
+
+        return PanelTruth(self)
+
+    @property
+    def counterfactual_target_mask(self) -> NDArray[np.bool_]:
+        """Return treated cells whose untreated outcomes are counterfactual."""
+
+        mask = self.treatment == 1.0
+        mask.setflags(write=False)
+        return mask
+
     def as_arrays(self, *, copy: bool = False) -> tuple[FloatMatrix, FloatMatrix]:
         """Return outcome and treatment matrices for a downstream estimator."""
 
@@ -248,6 +318,7 @@ class PanelDataset:
             "treatment": self.treatment,
             "untreated_outcome": self.untreated_outcome,
             "treatment_effect": self.treatment_effect,
+            "effect_surface": self.effect_surface,
         }
         unknown = set(fields).difference(allowed)
         if unknown:
@@ -256,7 +327,13 @@ class PanelDataset:
         values = tuple(allowed[field] for field in fields)
         return tuple(value.copy() for value in values) if copy else values
 
-    def as_long_dict(self, *, copy: bool = False) -> Mapping[str, NDArray[Any]]:
+    def as_long_dict(
+        self,
+        *,
+        copy: bool = False,
+        include_effect_surface: bool = False,
+        include_annotations: bool = False,
+    ) -> Mapping[str, NDArray[Any]]:
         """Return flat columns suitable for pandas, Polars, Arrow, or formulas."""
 
         columns: dict[str, NDArray[Any]] = {
@@ -267,8 +344,22 @@ class PanelDataset:
             "untreated_outcome": self.untreated_outcome.reshape(-1),
             "treatment_effect": self.treatment_effect.reshape(-1),
         }
+        if include_effect_surface:
+            columns["effect_surface"] = self.effect_surface.reshape(-1)
         for index, name in enumerate(self.unit_covariate_names):
             columns[name] = np.repeat(self.unit_covariates[:, index], self.n_periods)
+        if include_annotations:
+            conflicts = set(columns).intersection(self.unit_annotations)
+            conflicts.update(set(columns).intersection(self.time_annotations))
+            if conflicts:
+                names = ", ".join(sorted(conflicts))
+                raise ValueError(
+                    f"annotation names conflict with panel columns: {names}"
+                )
+            for name, values in self.unit_annotations.items():
+                columns[name] = np.repeat(values, self.n_periods)
+            for name, values in self.time_annotations.items():
+                columns[name] = np.tile(values, self.n_units)
         if copy:
             return {name: np.array(value, copy=True) for name, value in columns.items()}
         for value in columns.values():

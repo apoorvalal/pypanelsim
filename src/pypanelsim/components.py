@@ -41,6 +41,8 @@ class UnitFeatureDraw:
     observables: FloatMatrix
     unobservables: FloatMatrix
     metadata: Mapping[str, Any] = field(default_factory=dict)
+    estimator_observables: FloatMatrix | None = None
+    unit_annotations: Mapping[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)
@@ -49,6 +51,7 @@ class TimeFeatureDraw:
 
     values: FloatMatrix
     metadata: Mapping[str, Any] = field(default_factory=dict)
+    time_annotations: Mapping[str, Any] = field(default_factory=dict)
 
 
 def _unit_feature_matrix(
@@ -911,8 +914,11 @@ class LinearRampEffect:
         adoption = context.adoption_times
         periods = np.arange(context.dimensions.n_periods)
         event_time = periods[None, :] - adoption[:, None] + 1
-        values = self.slope * np.maximum(event_time, 0) * context.treatment
-        return ComponentDraw(values, {"kind": "linear_ramp", "slope": self.slope})
+        surface = self.slope * np.maximum(event_time, 0)
+        return ComponentDraw(
+            surface * context.treatment,
+            {"kind": "linear_ramp", "slope": self.slope, "effect_surface": surface},
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -929,9 +935,13 @@ class ConstantEffect:
         self, context: SimulationContext, rng: np.random.Generator
     ) -> ComponentDraw:
         del rng
+        surface = np.full(
+            (context.dimensions.n_units, context.dimensions.n_periods),
+            self.value,
+        )
         return ComponentDraw(
-            self.value * context.treatment,
-            {"kind": "constant", "value": self.value},
+            surface * context.treatment,
+            {"kind": "constant", "value": self.value, "effect_surface": surface},
         )
 
 
