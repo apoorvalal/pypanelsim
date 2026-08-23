@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="description" content="Move from panel_dgps or flat pypanelsim imports to the documented namespaces.">
 
-<title>migration – pypanelsim</title>
+<title>Migration guide – pypanelsim</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -4786,56 +4787,29 @@ height: auto;
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./index.html"> 
+    <a class="nav-link active" href="./index.html" aria-current="page"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./getting-started.html" aria-current="page"> 
+    <a class="nav-link" href="./getting-started.html"> 
 <span class="menu-text">Get started</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./canonical-designs.html"> 
-<span class="menu-text">DGP catalog</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./assignment.html"> 
-<span class="menu-text">Assignment</span></a>
+<span class="menu-text">Design catalog</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./research-designs.html"> 
-<span class="menu-text">Research suites</span></a>
+<span class="menu-text">Research designs</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./interoperability.html"> 
+<span class="menu-text">Export</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./api.html"> 
 <span class="menu-text">API</span></a>
   </li>  
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-vignettes" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Vignettes</span>
-    </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-vignettes">    
-        <li>
-    <a class="dropdown-item" href="./vignettes/balancing-reproduction.html">
- <span class="dropdown-text">Balancing reproduction</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./vignettes/baker-twfe.html">
- <span class="dropdown-text">Baker TWFE failure</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./vignettes/ftest-heterogeneity.html">
- <span class="dropdown-text">F-test heterogeneity DGPs</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./vignettes/research-suites.html">
- <span class="dropdown-text">Four research suites</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./interoperability.html">
- <span class="dropdown-text">Estimator interoperability</span></a>
-  </li>  
-    </ul>
-  </li>
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item compact">
@@ -4855,7 +4829,7 @@ height: auto;
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./architecture.html">Concepts</a></li><li class="breadcrumb-item"><a href="./migration.html">Migration from <code>panel_dgps</code></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./validation.html">Maintenance and provenance</a></li><li class="breadcrumb-item"><a href="./migration.html">Migration guide</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -4870,12 +4844,18 @@ height: auto;
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
- <span class="menu-text">Use pypanelsim</span></a>
+ <span class="menu-text">Start here</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Synthetic panels with visible assumptions</span></a>
+  </div>
+</li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./getting-started.html" class="sidebar-item-text sidebar-link">
@@ -4884,20 +4864,8 @@ height: auto;
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./assignment.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Assignment mechanisms</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./research-designs.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Research design suites</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./interoperability.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Estimator interoperability</span></a>
+  <a href="./architecture.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Architecture and data contract</span></a>
   </div>
 </li>
       </ul>
@@ -4905,7 +4873,7 @@ height: auto;
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
- <span class="menu-text">Concepts</span></a>
+ <span class="menu-text">Build a design</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -4913,26 +4881,26 @@ height: auto;
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./architecture.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Architecture and extension contract</span></a>
+  <a href="./assignment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Treatment assignment</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./canonical-designs.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Balancing DGP catalog</span></a>
+ <span class="menu-text">Design catalog</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./migration.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Migration from <code>panel_dgps</code></span></a>
+  <a href="./research-designs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Research designs</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./validation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Validation record</span></a>
+  <a href="./interoperability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Export and interoperability</span></a>
   </div>
 </li>
       </ul>
@@ -4940,7 +4908,7 @@ height: auto;
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
- <span class="menu-text">API reference</span></a>
+ <span class="menu-text">Research tutorials</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -4948,8 +4916,61 @@ height: auto;
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./api.html" class="sidebar-item-text sidebar-link">
+  <a href="./vignettes/baker-twfe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Baker’s dynamic-effects example</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vignettes/ftest-heterogeneity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">F-test heterogeneity designs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vignettes/support-aware-event-studies.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Support-aware event studies</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vignettes/conditional-trends.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Conditional and latent trends</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vignettes/large-panels.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Large panels and compressed regressions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vignettes/composite-panels.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Composite panel benchmark</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vignettes/balancing-reproduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Balancing validation snapshot</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
  <span class="menu-text">API reference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">API map</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -4966,32 +4987,8 @@ height: auto;
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./reference/research-designs.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Research design API</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./reference/assignment.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Assignment, feature, and effect API</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./reference/baker.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Baker staggered-adoption API</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./reference/ftest.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">F-test paper DGP API</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./reference/canonical.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Canonical design API</span></a>
+  <a href="./reference/designs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Design API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -5004,35 +5001,23 @@ height: auto;
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
- <span class="menu-text">Vignettes</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Maintenance and provenance</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./vignettes/baker-twfe.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Baker DGP: why vanilla TWFE event studies fail</span></a>
+  <a href="./validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Validation and provenance</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./vignettes/ftest-heterogeneity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">F-test paper heterogeneous-effect DGPs</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./vignettes/research-suites.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Four research projects, one simulation contract</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./vignettes/balancing-reproduction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Balancing estimators in synthetic panels</span></a>
+  <a href="./migration.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Migration guide</span></a>
   </div>
 </li>
       </ul>
@@ -5042,22 +5027,68 @@ height: auto;
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#from-flat-imports-to-descriptive-namespaces" id="toc-from-flat-imports-to-descriptive-namespaces" class="nav-link active" data-scroll-target="#from-flat-imports-to-descriptive-namespaces"><span class="header-section-number">1</span> From flat imports to descriptive namespaces</a></li>
+  <li><a href="#from-panel_dgps" id="toc-from-panel_dgps" class="nav-link" data-scroll-target="#from-panel_dgps"><span class="header-section-number">2</span> From <code>panel_dgps</code></a></li>
+  <li><a href="#one-draw-migration" id="toc-one-draw-migration" class="nav-link" data-scroll-target="#one-draw-migration"><span class="header-section-number">3</span> One-draw migration</a></li>
+  <li><a href="#reusable-simulators" id="toc-reusable-simulators" class="nav-link" data-scroll-target="#reusable-simulators"><span class="header-section-number">4</span> Reusable simulators</a></li>
+  <li><a href="#metadata-layout" id="toc-metadata-layout" class="nav-link" data-scroll-target="#metadata-layout"><span class="header-section-number">5</span> Metadata layout</a></li>
+  <li><a href="#data-ownership" id="toc-data-ownership" class="nav-link" data-scroll-target="#data-ownership"><span class="header-section-number">6</span> Data ownership</a></li>
+  <li><a href="#custom-designs" id="toc-custom-designs" class="nav-link" data-scroll-target="#custom-designs"><span class="header-section-number">7</span> Custom designs</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/website/migration.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
 <!-- main -->
-<main class="content column-page-right" id="quarto-document-content">
+<main class="content column-body" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./validation.html">Maintenance and provenance</a></li><li class="breadcrumb-item"><a href="./migration.html">Migration guide</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Migration guide</h1>
+</div>
+
+<div>
+  <div class="description">
+    Move from panel_dgps or flat pypanelsim imports to the documented namespaces.
+  </div>
+</div>
 
 
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
 
 
-<section id="migration-from-panel_dgps" class="level1" data-number="1">
-<h1 data-number="1"><span class="header-section-number">1</span> Migration from <code>panel_dgps</code></h1>
-<section id="package-boundary" class="level2" data-number="1.1">
-<h2 data-number="1.1" class="anchored" data-anchor-id="package-boundary"><span class="header-section-number">1.1</span> Package boundary</h2>
-<p>The former <code>dgps</code> project mixed simulation code with crabbymetrics outcome models, Monte Carlo runners, cached results, and a Quarto report. <code>pypanelsim</code> contains only simulation code and simulation documentation. The reproduction project now depends on this repository as a normal downstream package.</p>
+</header>
+
+
+<section id="from-flat-imports-to-descriptive-namespaces" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="from-flat-imports-to-descriptive-namespaces"><span class="header-section-number">1</span> From flat imports to descriptive namespaces</h2>
+<p>Root-level imports still work, but new code should state each object’s role.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compatibility form</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> PanelSimulator, classic_factor</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Preferred form</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> core, designs</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>simulator_type <span class="op">=</span> core.PanelSimulator</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> designs.classic_factor(seed<span class="op">=</span><span class="dv">42</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The change is organizational. It does not change generated arrays.</p>
 </section>
-<section id="import-map" class="level2" data-number="1.2">
-<h2 data-number="1.2" class="anchored" data-anchor-id="import-map"><span class="header-section-number">1.2</span> Import map</h2>
+<section id="from-panel_dgps" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="from-panel_dgps"><span class="header-section-number">2</span> From <code>panel_dgps</code></h2>
 <table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
 <thead>
 <tr class="header">
 <th>Previous</th>
@@ -5067,91 +5098,93 @@ height: auto;
 <tbody>
 <tr class="odd">
 <td><code>panel_dgps.PanelConfig</code></td>
-<td><code>pypanelsim.CanonicalPanelConfig</code></td>
+<td><code>pypanelsim.designs.CanonicalPanelConfig</code></td>
 </tr>
 <tr class="even">
 <td><code>panel_dgps.PanelData</code></td>
-<td><code>pypanelsim.PanelDataset</code></td>
+<td><code>pypanelsim.core.PanelDataset</code></td>
 </tr>
 <tr class="odd">
 <td><code>panel_dgps.classic_factor</code></td>
-<td><code>pypanelsim.classic_factor</code></td>
+<td><code>pypanelsim.designs.classic_factor</code></td>
 </tr>
 <tr class="even">
 <td><code>panel_dgps.weak_factor</code></td>
-<td><code>pypanelsim.weak_factor</code></td>
+<td><code>pypanelsim.designs.weak_factor</code></td>
 </tr>
 <tr class="odd">
 <td><code>panel_dgps.synthetic_control</code></td>
-<td><code>pypanelsim.synthetic_control</code></td>
+<td><code>pypanelsim.designs.synthetic_control</code></td>
 </tr>
 <tr class="even">
 <td><code>panel_dgps.factor_synthetic</code></td>
-<td><code>pypanelsim.factor_synthetic</code></td>
+<td><code>pypanelsim.designs.factor_synthetic</code></td>
 </tr>
 <tr class="odd">
 <td><code>panel_dgps.time_series</code></td>
-<td><code>pypanelsim.time_series</code></td>
+<td><code>pypanelsim.designs.time_series</code></td>
 </tr>
 <tr class="even">
 <td><code>panel_dgps.mixed_factor</code></td>
-<td><code>pypanelsim.mixed_factor</code></td>
+<td><code>pypanelsim.designs.mixed_factor</code></td>
 </tr>
 </tbody>
 </table>
-<p><code>PanelConfig</code> and <code>PanelData</code> are compatibility aliases. New code should use the explicit current names.</p>
+<p><code>PanelConfig</code> and <code>PanelData</code> remain compatibility aliases at the package root.</p>
 </section>
-<section id="one-draw-migration" class="level2" data-number="1.3">
-<h2 data-number="1.3" class="anchored" data-anchor-id="one-draw-migration"><span class="header-section-number">1.3</span> One-draw migration</h2>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Previous</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> panel_dgps <span class="im">import</span> PanelConfig, classic_factor</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>config <span class="op">=</span> PanelConfig(n_control<span class="op">=</span><span class="dv">80</span>, n_treated<span class="op">=</span><span class="dv">20</span>, n_pre<span class="op">=</span><span class="dv">24</span>, n_post<span class="op">=</span><span class="dv">6</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> classic_factor(config<span class="op">=</span>config, overlap<span class="op">=</span><span class="fl">1.0</span>, seed<span class="op">=</span><span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Current</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> CanonicalPanelConfig, classic_factor</span>
+<section id="one-draw-migration" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="one-draw-migration"><span class="header-section-number">3</span> One-draw migration</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Previous</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> panel_dgps <span class="im">import</span> PanelConfig, classic_factor</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>config <span class="op">=</span> CanonicalPanelConfig(</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    n_control<span class="op">=</span><span class="dv">80</span>,</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    n_treated<span class="op">=</span><span class="dv">20</span>,</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    n_pre<span class="op">=</span><span class="dv">24</span>,</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    n_post<span class="op">=</span><span class="dv">6</span>,</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> classic_factor(config<span class="op">=</span>config, overlap<span class="op">=</span><span class="fl">1.0</span>, seed<span class="op">=</span><span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The resulting outcome, treatment, untreated-outcome, and effect matrices are numerically identical for the same seed and arguments.</p>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>config <span class="op">=</span> PanelConfig(n_control<span class="op">=</span><span class="dv">80</span>, n_treated<span class="op">=</span><span class="dv">20</span>, n_pre<span class="op">=</span><span class="dv">24</span>, n_post<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> classic_factor(config<span class="op">=</span>config, overlap<span class="op">=</span><span class="fl">1.0</span>, seed<span class="op">=</span><span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Current</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> designs</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>config <span class="op">=</span> designs.CanonicalPanelConfig(</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    n_control<span class="op">=</span><span class="dv">80</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    n_treated<span class="op">=</span><span class="dv">20</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    n_pre<span class="op">=</span><span class="dv">24</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    n_post<span class="op">=</span><span class="dv">6</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> designs.classic_factor(</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    config<span class="op">=</span>config,</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    overlap<span class="op">=</span><span class="fl">1.0</span>,</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    seed<span class="op">=</span><span class="dv">10</span>,</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The extraction audit found exact equality for the canonical outcome, treatment, untreated-outcome, and realized-effect arrays when arguments and seed matched.</p>
 </section>
-<section id="reusable-simulator-migration" class="level2" data-number="1.4">
-<h2 data-number="1.4" class="anchored" data-anchor-id="reusable-simulator-migration"><span class="header-section-number">1.4</span> Reusable simulator migration</h2>
-<p>Previous code configured arguments on each function call. Current code can create one reusable simulator:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>simulator <span class="op">=</span> classic_factor_design(config<span class="op">=</span>config, overlap<span class="op">=</span><span class="fl">1.0</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> panel <span class="kw">in</span> simulator.iter_simulations(<span class="dv">200</span>, seed<span class="op">=</span><span class="dv">10</span>):</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    estimate <span class="op">=</span> estimator.fit(<span class="op">*</span>panel.as_arrays())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>This uses spawned child streams and avoids coupling replication identifiers to adjacent integer seeds.</p>
+<section id="reusable-simulators" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="reusable-simulators"><span class="header-section-number">4</span> Reusable simulators</h2>
+<p>Use a <code>_design</code> constructor when an experiment needs many draws:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>simulator <span class="op">=</span> designs.classic_factor_design(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    config<span class="op">=</span>config,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    overlap<span class="op">=</span><span class="fl">1.0</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> panel <span class="kw">in</span> simulator.iter_simulations(<span class="dv">200</span>, seed<span class="op">=</span><span class="dv">10</span>):</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    outcome, treatment <span class="op">=</span> panel.as_arrays()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><code>iter_simulations</code> uses child seed sequences. It does not rely on adjacent integer seeds.</p>
 </section>
-<section id="metadata-migration" class="level2" data-number="1.5">
-<h2 data-number="1.5" class="anchored" data-anchor-id="metadata-migration"><span class="header-section-number">1.5</span> Metadata migration</h2>
-<p>Previous canonical metadata was flat:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>panel.metadata[<span class="st">&quot;factors&quot;</span>]</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>panel.metadata[<span class="st">&quot;loadings&quot;</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Current metadata is namespaced by component:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>panel.metadata[<span class="st">&quot;outcome&quot;</span>][<span class="st">&quot;factors&quot;</span>]</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>panel.metadata[<span class="st">&quot;outcome&quot;</span>][<span class="st">&quot;loadings&quot;</span>]</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>panel.metadata[<span class="st">&quot;assignment&quot;</span>][<span class="st">&quot;treated_units&quot;</span>]</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>panel.metadata[<span class="st">&quot;effect&quot;</span>][<span class="st">&quot;slope&quot;</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Sparse-donor <code>donor_weights</code> now has one entry per panel unit and is aligned to the panel row order. <code>control_donor_weights</code> contains the prior control-only vector.</p>
+<section id="metadata-layout" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="metadata-layout"><span class="header-section-number">5</span> Metadata layout</h2>
+<p>Earlier canonical metadata was flat. Current metadata is namespaced by component:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>panel.metadata[<span class="st">&quot;outcome&quot;</span>]</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>panel.metadata[<span class="st">&quot;assignment&quot;</span>]</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>panel.metadata[<span class="st">&quot;effect&quot;</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Feature and time-feature metadata appear only when those components exist.</p>
 </section>
-<section id="data-ownership" class="level2" data-number="1.6">
-<h2 data-number="1.6" class="anchored" data-anchor-id="data-ownership"><span class="header-section-number">1.6</span> Data ownership</h2>
-<p>The previous container set the write flag on supplied arrays. <code>PanelDataset</code> instead owns copies before making them read-only. Code that intentionally mutates estimator inputs must request copies:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>y, w <span class="op">=</span> panel.as_arrays(copy<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="data-ownership" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="data-ownership"><span class="header-section-number">6</span> Data ownership</h2>
+<p><code>PanelDataset</code> owns read-only copies. Code that intentionally mutates estimator inputs must request copies:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>outcome, treatment <span class="op">=</span> panel.as_arrays(copy<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
-<section id="new-composition-api" class="level2" data-number="1.7">
-<h2 data-number="1.7" class="anchored" data-anchor-id="new-composition-api"><span class="header-section-number">1.7</span> New composition API</h2>
-<p>Custom designs no longer need to edit a canonical generator module. Implement an assignment, outcome, or effect protocol and compose it with <code>PanelSimulator</code>. Project-specific named designs can be stored in a <code>DGPRegistry</code> without changing the package registry.</p>
+<section id="custom-designs" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="custom-designs"><span class="header-section-number">7</span> Custom designs</h2>
+<p>Do not edit a canonical generator to add a project-specific law. Compose <code>core.PanelSimulator</code> from <code>primitives</code>, or register a local factory in <code>core.DGPRegistry</code>. This keeps the package API small and makes the scientific assumptions explicit at the call site.</p>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->
@@ -5724,4 +5757,4 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/migration.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/website/migration.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

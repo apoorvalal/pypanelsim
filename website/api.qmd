@@ -1,94 +1,52 @@
 ---
-title: "API reference"
-subtitle: "Public simulation objects, assignment laws, canonical designs, and registries"
-execute:
-  enabled: false
+title: "API map"
+description: "Find the public object by task and namespace."
 ---
 
-All public names are importable from `pypanelsim`. Component interfaces use
-structural typing: custom implementations need the documented method, not
-inheritance from a package base class.
+New code should import one of three descriptive namespaces:
 
-## Core simulation and data
+```python
+from pypanelsim import core, designs, primitives
+```
 
-| Object | Purpose |
-|---|---|
-| [`PanelDimensions`](reference/core.qmd#paneldimensions) | Rectangular panel shape |
-| [`PanelDataset`](reference/core.qmd#paneldataset) | Immutable observed data and causal truth |
-| [`PanelSimulator`](reference/core.qmd#panelsimulator) | Feature, assignment, outcome, and effect orchestration |
-| [`SimulationContext`](reference/core.qmd#simulationcontext) | Treatment and shared features for outcome/effect components |
-| [`ComponentDraw`](reference/core.qmd#componentdraw) | Component matrix plus diagnostic metadata |
-| [`TimeFeatureDraw`](reference/core.qmd#timefeaturedraw) | Shared time-varying features plus metadata |
-| [`PanelTruth`](reference/primitives.qmd#paneltruth) | Support-aware cohort and event-time causal truth |
-| [`SimulationSeeds`](reference/primitives.qmd#named-random-streams) | Independent named component streams |
-| [`resolve_rng`](reference/core.qmd#resolve_rng) | Explicit seed/generator validation |
+Root-level imports remain available for backward compatibility. They are not
+the preferred teaching interface.
 
-## Untreated-outcome composition
+## By task
 
-| Object | Purpose |
-|---|---|
-| [`AdditiveFactorOutcome`](reference/core.qmd#additivefactoroutcome) | Gaussian unit and period effects plus idiosyncratic noise |
-| [`TwoWayFixedEffectsOutcome`](reference/primitives.qmd#outcome-primitives) | Explicit 2WFE outcome primitive |
-| [`LowRankFactorOutcome`](reference/primitives.qmd#outcome-primitives) | Generic rank-$k$ interactive fixed-effects primitive |
-| [`ARMAErrorOutcome`](reference/primitives.qmd#outcome-primitives) | Unit-level ARMA paths |
-| [`UnitTrendOutcome`](reference/primitives.qmd#outcome-primitives) | Unit-specific linear trends |
-| [`ClusteredTrendOutcome`](reference/primitives.qmd#outcome-primitives) | Shared trends within latent groups |
-| [`SumOutcomeModel`](reference/core.qmd#sumoutcomemodel) | Weighted sum of reusable outcome components |
+| Task | Start with | Reference |
+|---|---|---|
+| Define dimensions and compose a simulation | `core.PanelSimulator` | [Core](reference/core.qmd) |
+| Inspect arrays, identifiers, annotations, and truth | `core.PanelDataset` | [Core](reference/core.qmd) |
+| Make randomness stable by component | `core.SimulationSeeds` | [Core](reference/core.qmd) |
+| Choose a feature or assignment law | `primitives` | [Primitives](reference/primitives.qmd) |
+| Choose an untreated outcome law | `primitives` | [Primitives](reference/primitives.qmd) |
+| Choose a treatment-effect law | `primitives` | [Primitives](reference/primitives.qmd) |
+| Run a configured benchmark | `designs` | [Designs](reference/designs.qmd) |
+| Register local design factories | `core.DGPRegistry` | [Registry](reference/registry.qmd) |
 
-## Features and assignment
+## Constructor and direct-draw convention
 
-| Object | Purpose |
-|---|---|
-| [`GaussianUnitFeatures`](reference/assignment.qmd#gaussianunitfeatures) | Observed and latent standard-normal unit features |
-| [`GaussianTimeFeatures`](reference/assignment.qmd#gaussiantimefeatures) | Standard-normal time-varying features shared by outcomes and effects |
-| [`SingleCohortAssignment`](reference/assignment.qmd#singlecohortassignment) | Fixed common adoption schedule |
-| [`RandomizedSingleCohortAssignment`](reference/assignment.qmd#randomizedsinglecohortassignment) | Fixed-size complete randomization |
-| [`RandomizedStaggeredAdoption`](reference/assignment.qmd#randomizedstaggeredadoption) | Exact fixed-size random adoption cohorts |
-| [`BinaryLogitAssignment`](reference/assignment.qmd#binarylogitassignment) | Sigmoid selection on observed and latent features |
-| [`StaggeredAdoption`](reference/assignment.qmd#staggeredadoption) | Fixed unit-to-adoption map |
-| [`GeneralizedPropensityAssignment`](reference/assignment.qmd#generalizedpropensityassignment) | Multinomial-logit adoption cohorts |
-| [`ConstantEffect`](reference/assignment.qmd#constanteffect) | Constant effect on treated cells |
-| [`LinearRampEffect`](reference/assignment.qmd#linearampeffect) | Event-time-linear effect path |
-| [`CohortEventTimeEffect`](reference/assignment.qmd#cohorteventtimeeffect) | Supplied event-time profile for each cohort |
-| [`CallableEffect`](reference/assignment.qmd#callableeffect) | Scalar, unit, time, or unit-by-time effect heterogeneity |
-| [`CallableUnitEffect`](reference/assignment.qmd#callableeffect) | Compatibility name for callable effects |
+Configured families use two related functions:
 
-## Canonical designs
+```python
+simulator = designs.baker_design()
+panel = designs.baker(seed=42)
+```
 
-See [canonical design API](reference/canonical.qmd) for `CanonicalPanelConfig`,
-the six one-draw functions, reusable simulator factories, and canonical outcome
-components such as `ClassicFactorOutcome`.
+The `_design` function returns a reusable `PanelSimulator`. The shorter function
+runs one draw and returns a `PanelDataset`.
 
-## Baker staggered-adoption design
+## Stability policy
 
-| Object | Purpose |
-|---|---|
-| [`BakerPanelConfig`](reference/baker.qmd#bakerpanelconfig) | Calendar, cohort sizes, heterogeneous slopes, and noise scales |
-| [`baker_design`](reference/baker.qmd#construction) | Reusable `PanelSimulator` for the Baker TWFE failure design |
-| [`baker`](reference/baker.qmd#construction) | One reproducible panel draw |
-| [`BakerStateFeatures`](reference/baker.qmd#components) | Independently sampled state assignment clusters |
-| [`BakerCohortAssignment`](reference/baker.qmd#components) | State-level randomized adoption cohorts |
-| [`BakerAdditiveOutcome`](reference/baker.qmd#components) | Additive unit effects, time effects, and noise |
-| [`BakerDynamicEffect`](reference/baker.qmd#components) | Cohort-specific linear event-time effects |
+The package treats `core`, `primitives`, and `designs` as the documented public
+surface. Objects imported from internal modules can change without a migration
+alias. Root-level exports are compatibility aliases and may be deprecated only
+through a documented release process.
 
-See the [Baker TWFE failure vignette](vignettes/baker-twfe.qmd) for executable
-PyFixest vanilla and saturated event-study estimates.
+## Error conventions
 
-## F-test paper heterogeneous-effect designs
-
-See the [F-test DGP API](reference/ftest.qmd) for both configuration objects,
-the 7+7 profile catalogs, reusable simulator factories, and one-draw functions.
-The [complete vignette](vignettes/ftest-heterogeneity.qmd) specifies and
-visualizes every design.
-
-## Downstream research design suites
-
-See the [research design API](reference/research-designs.qmd) for the fourteen
-Lepskii-draft designs, five ATT-DML designs, the regression-compression main
-law and Anscombe quartet, and the gsynth2 weighted composite. The
-[project map](research-designs.qmd) states which objects stay downstream.
-
-## Registry
-
-See [`DGPRegistry`](reference/registry.qmd) for stable name-to-factory mappings
-and the global canonical registry.
+Constructors validate configuration values at creation. Simulation validates
+drawn matrix shapes, finite values, binary treatment, and the causal identity.
+Errors identify the failed field or component. A component should not silently
+coerce an invalid probability law into a valid one.

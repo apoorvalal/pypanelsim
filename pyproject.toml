@@ -25,9 +25,11 @@ classifiers = [
 
 [project.optional-dependencies]
 docs = [
-    "crabbymetrics",
     "jupyter>=1.1.1",
     "pandas>=2.3.3",
+]
+estimators = [
+    "crabbymetrics",
     "pyfixest>=0.50.1",
 ]
 
@@ -49,7 +51,7 @@ testpaths = ["tests"]
 addopts = "-ra --strict-markers"
 
 [tool.uv.sources]
-crabbymetrics = { git = "ssh://git@github.com/apoorvalal/crabbymetrics.git" }
+crabbymetrics = { git = "https://github.com/apoorvalal/crabbymetrics.git" }
 
 [tool.ruff]
 target-version = "py310"

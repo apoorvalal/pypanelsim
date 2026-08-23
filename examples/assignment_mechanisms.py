@@ -8,7 +8,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-import pypanelsim as pps
+from pypanelsim import core, primitives
 
 
 @dataclass(frozen=True, slots=True)
@@ -32,22 +32,25 @@ class FeatureDrivenOutcome:
             scale=self.noise_scale,
             size=(context.dimensions.n_units, context.dimensions.n_periods),
         )
-        return pps.ComponentDraw(
+        return core.ComponentDraw(
             observed + latent + noise,
             {"kind": "feature_driven_factor_outcome"},
         )
 
 
-def assignment_dgps() -> dict[str, pps.PanelSimulator]:
+def assignment_dgps() -> dict[str, core.PanelSimulator]:
     """Construct four DGPs with a common feature-driven outcome process."""
 
-    dimensions = pps.PanelDimensions(n_units=120, n_periods=48)
-    features = pps.GaussianUnitFeatures(n_observables=2, n_unobservables=2)
+    dimensions = core.PanelDimensions(n_units=120, n_periods=48)
+    features = primitives.GaussianUnitFeatures(
+        n_observables=2,
+        n_unobservables=2,
+    )
     outcome = FeatureDrivenOutcome()
-    effect = pps.LinearRampEffect(slope=0.12)
+    effect = primitives.LinearRampEffect(slope=0.12)
 
     def simulator(name, assignment):
-        return pps.PanelSimulator(
+        return core.PanelSimulator(
             name=name,
             dimensions=dimensions,
             feature_model=features,
@@ -59,14 +62,14 @@ def assignment_dgps() -> dict[str, pps.PanelSimulator]:
     return {
         "Randomized fixed cohort": simulator(
             "randomized",
-            pps.RandomizedSingleCohortAssignment(
+            primitives.RandomizedSingleCohortAssignment(
                 n_treated=30,
                 adoption_period=32,
             ),
         ),
         "Logit selection on observed X": simulator(
             "selection_observed",
-            pps.BinaryLogitAssignment(
+            primitives.BinaryLogitAssignment(
                 adoption_period=32,
                 intercept=-1.1,
                 observable_coefficients=(1.2, -0.8),
@@ -75,7 +78,7 @@ def assignment_dgps() -> dict[str, pps.PanelSimulator]:
         ),
         "Logit selection on latent factors": simulator(
             "selection_latent",
-            pps.BinaryLogitAssignment(
+            primitives.BinaryLogitAssignment(
                 adoption_period=32,
                 intercept=-1.1,
                 observable_coefficients=(0.0, 0.0),
@@ -84,7 +87,7 @@ def assignment_dgps() -> dict[str, pps.PanelSimulator]:
         ),
         "Cohort GPS on observed X": simulator(
             "cohort_gps",
-            pps.GeneralizedPropensityAssignment(
+            primitives.GeneralizedPropensityAssignment(
                 adoption_periods=(24, 30, 36),
                 intercepts=(-0.7, -0.9, -1.1),
                 observable_coefficients=(

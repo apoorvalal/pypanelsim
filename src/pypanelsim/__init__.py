@@ -1,5 +1,7 @@
 """Composable, estimator-neutral simulation infrastructure for panel data."""
 
+# Descriptive public namespaces. Root-level imports remain for compatibility.
+from . import core, designs, primitives
 from .assignments import SparseLogitAssignment
 from .baker import (
     BakerAdditiveOutcome,
@@ -227,6 +229,8 @@ __all__ = [
     "classic_factor_design",
     "concave_profile",
     "constant_profile",
+    "core",
+    "designs",
     "factor_synthetic",
     "factor_synthetic_design",
     "ftest_cohort",
@@ -245,6 +249,7 @@ __all__ = [
     "make_canonical",
     "mixed_factor",
     "mixed_factor_design",
+    "primitives",
     "regression_compression",
     "regression_compression_design",
     "resolve_rng",

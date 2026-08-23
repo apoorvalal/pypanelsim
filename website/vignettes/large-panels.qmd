@@ -1,0 +1,197 @@
+---
+title: "Large panels and compressed regressions"
+description: "Test whether small regression summaries preserve a large longitudinal experiment."
+jupyter: python3
+---
+
+This family is connected to [Large Scale Longitudinal
+Experiments](https://arxiv.org/abs/2410.09952) by Apoorva Lal, Alexander
+Fischer, and Matthew Wardrop, with [public
+code](https://github.com/py-econometrics/panel-at-scale-code). It supplies
+panel laws for studying regression compression. It does not implement a data
+storage system or a distributed estimator.
+
+## Scientific question
+
+Suppose raw longitudinal data are too large to centralize. A site can transmit
+small regression summaries instead. A simulation should test whether those
+summaries preserve the treatment-effect information under trends, serial
+dependence, and heterogeneous effects.
+
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np
+
+from pypanelsim import designs
+```
+
+## Main panel law
+
+The untreated outcome contains unit effects, time effects, unit-specific linear
+trends, and AR(1) error. One cohort adopts treatment. The effect path can be
+concave or another configured profile, with optional unit heterogeneity.
+
+```{python}
+config = designs.RegressionCompressionConfig(
+    n_units=800,
+    n_periods=35,
+    adoption_period=15,
+    n_treated=320,
+    effect_profile="concave",
+    max_effect=1.0,
+    heterogeneous_effects=True,
+)
+
+panel = designs.regression_compression(config=config, seed=42)
+print(panel.shape)
+print(round(panel.true_att, 3))
+```
+
+```{python}
+#| label: fig-large-panel-law
+#| fig-cap: "Observed outcome structure and event-time causal truth in the regression-compression design."
+#| fig-alt: "A heatmap shows the large panel's observed outcomes, and a line chart shows the true event-time effect path."
+
+order = np.argsort(panel.adoption_times, kind="stable")
+event_truth = panel.truth.event_study(event_times=range(-10, 20))
+
+figure, axes = plt.subplots(1, 2, figsize=(13, 5), constrained_layout=True)
+outcome_image = axes[0].matshow(
+    panel.outcome[order],
+    aspect="auto",
+    cmap="coolwarm",
+)
+axes[0].set_xlabel("period")
+axes[0].set_ylabel("units, sorted by adoption")
+axes[0].set_title("Observed outcome")
+figure.colorbar(outcome_image, ax=axes[0], fraction=0.035, pad=0.02)
+
+axes[1].plot(
+    event_truth["event_time"],
+    event_truth["effect"],
+    marker="o",
+)
+axes[1].axhline(0.0, color="black", linewidth=0.7)
+axes[1].axvline(-0.5, color="grey", linestyle=":", linewidth=0.8)
+axes[1].set_xlabel("event time")
+axes[1].set_ylabel("true effect")
+axes[1].set_title("Supported event-study truth")
+plt.show()
+```
+
+## A minimal compressed summary
+
+For a regression $y=X\beta+u$, a site can summarize its data with
+$X'X$, $X'y$, $y'y$, and the observation count. Sites can add these terms
+without sharing rows.
+
+The example below uses treatment, a post indicator, and their interaction. It
+is deliberately small; an applied design would add its required fixed-effect
+or basis representation.
+
+```{python}
+columns = panel.as_long_dict()
+y = columns["outcome"]
+
+post = (columns["time"] >= config.adoption_period).astype(float)
+treated_unit = np.repeat(panel.ever_treated.astype(float), panel.n_periods)
+x = np.column_stack(
+    (
+        np.ones(y.size),
+        treated_unit,
+        post,
+        treated_unit * post,
+    )
+)
+
+summary = {
+    "n": y.size,
+    "xtx": x.T @ x,
+    "xty": x.T @ y,
+    "yty": float(y @ y),
+}
+
+beta_from_summary = np.linalg.solve(summary["xtx"], summary["xty"])
+beta_from_rows = np.linalg.lstsq(x, y, rcond=None)[0]
+
+print(np.allclose(beta_from_summary, beta_from_rows))
+print(np.round(beta_from_summary, 3))
+```
+
+This equality is algebraic for the stated regression. It does not show that
+the interaction coefficient equals the desired dynamic-effect estimand.
+Compression and causal identification are separate questions.
+
+## Combine summaries across sites
+
+```{python}
+site_ids = np.array_split(np.arange(panel.n_units), 4)
+site_summaries = []
+
+for site_units in site_ids:
+    rows = np.isin(columns["unit"], site_units)
+    x_site = x[rows]
+    y_site = y[rows]
+    site_summaries.append((x_site.T @ x_site, x_site.T @ y_site))
+
+pooled_xtx = sum(item[0] for item in site_summaries)
+pooled_xty = sum(item[1] for item in site_summaries)
+pooled_beta = np.linalg.solve(pooled_xtx, pooled_xty)
+
+print(np.allclose(pooled_beta, beta_from_rows))
+```
+
+The partition has no effect because the summaries are additive.
+
+## Anscombe-style stress tests
+
+The Anscombe family changes panel structure while preserving selected low-order
+summaries. It asks whether an analysis that sees only those summaries misses a
+scientifically important difference.
+
+```{python}
+print(designs.available_anscombe_designs())
+
+anscombe_config = designs.AnscombePanelConfig(
+    n_units=400,
+    n_periods=20,
+)
+
+for name in designs.available_anscombe_designs():
+    draw = designs.anscombe(name, config=anscombe_config, seed=17)
+    print(name, draw.shape, round(draw.true_att, 3))
+```
+
+```{python}
+#| label: fig-anscombe-surfaces
+#| fig-cap: "Treatment-effect surfaces for the four Anscombe-style panel variants."
+#| fig-alt: "Four heatmaps compare treatment-effect surfaces that share summary features but have different structures."
+
+figure, axes = plt.subplots(2, 2, figsize=(11, 8), constrained_layout=True)
+for axis, name in zip(
+    axes.ravel(),
+    designs.available_anscombe_designs(),
+    strict=True,
+):
+    draw = designs.anscombe(name, config=anscombe_config, seed=17)
+    image = axis.matshow(draw.effect_surface, aspect="auto", cmap="coolwarm")
+    axis.set_title(name.replace("_", " "))
+    axis.set_xlabel("period")
+    axis.set_ylabel("unit")
+    figure.colorbar(image, ax=axis, fraction=0.04, pad=0.02)
+plt.show()
+```
+
+The four variants are `zero`, `unit`, `time`, and `cohort_time`. They locate
+heterogeneity at different levels.
+
+## What to report
+
+A compression experiment should report both layers:
+
+- the causal design: assignment, untreated outcome, effect surface, and target;
+- the transmitted summary: regressors, sufficient statistics, grouping, and
+  numeric precision.
+
+A small communication cost is not useful if the summary corresponds to the
+wrong regression or the regression corresponds to the wrong causal target.

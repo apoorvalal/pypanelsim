@@ -6,6 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="description" content="Store local simulator factories behind explicit names.">
 
 <title>Registry API – pypanelsim</title>
 <style>
@@ -4786,56 +4787,29 @@ height: auto;
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../index.html"> 
+    <a class="nav-link active" href="../index.html" aria-current="page"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="../getting-started.html" aria-current="page"> 
+    <a class="nav-link" href="../getting-started.html"> 
 <span class="menu-text">Get started</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="../canonical-designs.html"> 
-<span class="menu-text">DGP catalog</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../assignment.html"> 
-<span class="menu-text">Assignment</span></a>
+<span class="menu-text">Design catalog</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="../research-designs.html"> 
-<span class="menu-text">Research suites</span></a>
+<span class="menu-text">Research designs</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../interoperability.html"> 
+<span class="menu-text">Export</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="../api.html"> 
 <span class="menu-text">API</span></a>
   </li>  
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-vignettes" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Vignettes</span>
-    </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-vignettes">    
-        <li>
-    <a class="dropdown-item" href="../vignettes/balancing-reproduction.html">
- <span class="dropdown-text">Balancing reproduction</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/baker-twfe.html">
- <span class="dropdown-text">Baker TWFE failure</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/ftest-heterogeneity.html">
- <span class="dropdown-text">F-test heterogeneity DGPs</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/research-suites.html">
- <span class="dropdown-text">Four research suites</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../interoperability.html">
- <span class="dropdown-text">Estimator interoperability</span></a>
-  </li>  
-    </ul>
-  </li>
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item compact">
@@ -4870,12 +4844,18 @@ height: auto;
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
- <span class="menu-text">Use pypanelsim</span></a>
+ <span class="menu-text">Start here</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Synthetic panels with visible assumptions</span></a>
+  </div>
+</li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../getting-started.html" class="sidebar-item-text sidebar-link">
@@ -4884,20 +4864,8 @@ height: auto;
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../assignment.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Assignment mechanisms</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../research-designs.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Research design suites</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../interoperability.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Estimator interoperability</span></a>
+  <a href="../architecture.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Architecture and data contract</span></a>
   </div>
 </li>
       </ul>
@@ -4905,7 +4873,7 @@ height: auto;
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
- <span class="menu-text">Concepts</span></a>
+ <span class="menu-text">Build a design</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -4913,26 +4881,26 @@ height: auto;
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../architecture.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Architecture and extension contract</span></a>
+  <a href="../assignment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Treatment assignment</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../canonical-designs.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Balancing DGP catalog</span></a>
+ <span class="menu-text">Design catalog</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../migration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Migration from <code>panel_dgps</code></span></a>
+  <a href="../research-designs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Research designs</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../validation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Validation record</span></a>
+  <a href="../interoperability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Export and interoperability</span></a>
   </div>
 </li>
       </ul>
@@ -4940,7 +4908,7 @@ height: auto;
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
- <span class="menu-text">API reference</span></a>
+ <span class="menu-text">Research tutorials</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -4948,8 +4916,61 @@ height: auto;
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../api.html" class="sidebar-item-text sidebar-link">
+  <a href="../vignettes/baker-twfe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Baker’s dynamic-effects example</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../vignettes/ftest-heterogeneity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">F-test heterogeneity designs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../vignettes/support-aware-event-studies.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Support-aware event studies</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../vignettes/conditional-trends.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Conditional and latent trends</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../vignettes/large-panels.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Large panels and compressed regressions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../vignettes/composite-panels.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Composite panel benchmark</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../vignettes/balancing-reproduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Balancing validation snapshot</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
  <span class="menu-text">API reference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">API map</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -4966,32 +4987,8 @@ height: auto;
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../reference/research-designs.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Research design API</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../reference/assignment.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Assignment, feature, and effect API</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../reference/baker.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Baker staggered-adoption API</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../reference/ftest.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">F-test paper DGP API</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../reference/canonical.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Canonical design API</span></a>
+  <a href="../reference/designs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Design API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -5004,35 +5001,23 @@ height: auto;
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
- <span class="menu-text">Vignettes</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Maintenance and provenance</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../vignettes/baker-twfe.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Baker DGP: why vanilla TWFE event studies fail</span></a>
+  <a href="../validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Validation and provenance</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../vignettes/ftest-heterogeneity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">F-test paper heterogeneous-effect DGPs</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../vignettes/research-suites.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Four research projects, one simulation contract</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../vignettes/balancing-reproduction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Balancing estimators in synthetic panels</span></a>
+  <a href="../migration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Migration guide</span></a>
   </div>
 </li>
       </ul>
@@ -5042,19 +5027,33 @@ height: auto;
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#register-a-factory" id="toc-register-a-factory" class="nav-link active" data-scroll-target="#register-a-factory"><span class="header-section-number">1</span> Register a factory</a></li>
+  <li><a href="#create-and-simulate" id="toc-create-and-simulate" class="nav-link" data-scroll-target="#create-and-simulate"><span class="header-section-number">2</span> Create and simulate</a></li>
+  <li><a href="#keep-registries-local" id="toc-keep-registries-local" class="nav-link" data-scroll-target="#keep-registries-local"><span class="header-section-number">3</span> Keep registries local</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/website/reference/registry.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
 <!-- main -->
-<main class="content column-page-right" id="quarto-document-content">
+<main class="content column-body" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../api.html">API reference</a></li><li class="breadcrumb-item"><a href="../reference/registry.html">Registry API</a></li></ol></nav>
 <div class="quarto-title">
 <h1 class="title">Registry API</h1>
-<p class="subtitle lead">Stable names for simulator factories</p>
+</div>
+
+<div>
+  <div class="description">
+    Store local simulator factories behind explicit names.
+  </div>
 </div>
 
 
-
-<div class="quarto-title-meta column-page-right">
+<div class="quarto-title-meta column-body">
 
     
   
@@ -5066,99 +5065,79 @@ height: auto;
 </header>
 
 
-<div id="d03f62d9" class="cell" data-execution_count="1">
+<p>Most code should call an explicit design constructor. Use <code>DGPRegistry</code> when an experiment reads design names from configuration or when a downstream project maintains its own design catalog.</p>
+<div id="08998382" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> inspect</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pypanelsim <span class="im">as</span> pps</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> core, designs</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;DGPRegistry</span><span class="sc">{</span>inspect<span class="sc">.</span>signature(pps.DGPRegistry)<span class="sc">}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.signature(core.DGPRegistry))</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> (<span class="st">&quot;register&quot;</span>, <span class="st">&quot;create&quot;</span>, <span class="st">&quot;names&quot;</span>):</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(name, inspect.signature(<span class="bu">getattr</span>(core.DGPRegistry, name)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>DGPRegistry() -&gt; &#39;None&#39;</code></pre>
+<pre><code>() -&gt; &#39;None&#39;
+register (self, name: &#39;str&#39;, factory: &#39;SimulatorFactory&#39;, *, replace: &#39;bool&#39; = False) -&gt; &#39;None&#39;
+create (self, name: &#39;str&#39;, /, **kwargs: &#39;object&#39;) -&gt; &#39;PanelSimulator&#39;
+names (self) -&gt; &#39;tuple[str, ...]&#39;</code></pre>
 </div>
 </div>
-<section id="dgpregistry" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="dgpregistry"><span class="header-section-number">1</span> <code>DGPRegistry</code></h2>
-<p><code>DGPRegistry</code> maps normalized public names to callables that return <code>PanelSimulator</code> objects.</p>
-<section id="register" class="level3" data-number="1.1">
-<h3 data-number="1.1" class="anchored" data-anchor-id="register"><span class="header-section-number">1.1</span> <code>register</code></h3>
-<div id="35a077d1" class="cell" data-execution_count="2">
+<section id="register-a-factory" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="register-a-factory"><span class="header-section-number">1</span> Register a factory</h2>
+<p>A factory must return a <code>PanelSimulator</code>.</p>
+<div id="5b3f3fad" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;register</span><span class="sc">{</span>inspect<span class="sc">.</span>signature(pps.DGPRegistry.register)<span class="sc">}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>registry <span class="op">=</span> core.DGPRegistry()</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> classic_small(<span class="op">*</span>, overlap<span class="op">=</span><span class="fl">0.0</span>):</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    config <span class="op">=</span> designs.CanonicalPanelConfig(</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        n_control<span class="op">=</span><span class="dv">60</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        n_treated<span class="op">=</span><span class="dv">20</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        n_pre<span class="op">=</span><span class="dv">24</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        n_post<span class="op">=</span><span class="dv">8</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> designs.classic_factor_design(</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        config<span class="op">=</span>config,</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        overlap<span class="op">=</span>overlap,</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>registry.register(<span class="st">&quot;classic_small&quot;</span>, classic_small)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(registry.names())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>register(self, name: &#39;str&#39;, factory: &#39;SimulatorFactory&#39;, *, replace: &#39;bool&#39; = False) -&gt; &#39;None&#39;</code></pre>
+<pre><code>(&#39;classic_small&#39;,)</code></pre>
 </div>
 </div>
-<ul>
-<li><code>name</code> must start with a lowercase letter and otherwise contain only lowercase letters, digits, and underscores.</li>
-<li><code>factory</code> must be callable.</li>
-<li>duplicate registration raises <code>ValueError</code> unless <code>replace=True</code>.</li>
-<li>the registry does not invoke or introspect the factory at registration time.</li>
-</ul>
+<p>Names must start with a lowercase letter and contain only lowercase letters, digits, and underscores. Registering the same name twice raises an error unless <code>replace=True</code> is supplied.</p>
 </section>
-<section id="create" class="level3" data-number="1.2">
-<h3 data-number="1.2" class="anchored" data-anchor-id="create"><span class="header-section-number">1.2</span> <code>create</code></h3>
-<div id="262fd323" class="cell" data-execution_count="3">
+<section id="create-and-simulate" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="create-and-simulate"><span class="header-section-number">2</span> Create and simulate</h2>
+<div id="59c84276" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;create</span><span class="sc">{</span>inspect<span class="sc">.</span>signature(pps.DGPRegistry.create)<span class="sc">}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>simulator <span class="op">=</span> registry.create(<span class="st">&quot;classic_small&quot;</span>, overlap<span class="op">=</span><span class="fl">1.0</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> simulator.simulate(seed<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(simulator.name)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(panel.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>create(self, name: &#39;str&#39;, /, **kwargs: &#39;object&#39;) -&gt; &#39;PanelSimulator&#39;</code></pre>
+<pre><code>classic_factor
+(80, 32)</code></pre>
 </div>
 </div>
-<p>Looks up <code>name</code> and forwards keyword arguments to the factory. An unknown name raises <code>KeyError</code> with the available names. Type and parameter errors from the selected factory propagate to the caller.</p>
+<p><code>create</code> forwards keyword arguments to the registered factory. An unknown name raises a key error that lists the available names.</p>
 </section>
-<section id="inspection" class="level3" data-number="1.3">
-<h3 data-number="1.3" class="anchored" data-anchor-id="inspection"><span class="header-section-number">1.3</span> Inspection</h3>
-<div id="a5f2cdb8" class="cell" data-execution_count="4">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> (<span class="st">&quot;names&quot;</span>, <span class="st">&quot;__contains__&quot;</span>, <span class="st">&quot;__iter__&quot;</span>, <span class="st">&quot;__len__&quot;</span>):</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span>name<span class="sc">}{</span>inspect<span class="sc">.</span>signature(<span class="bu">getattr</span>(pps.DGPRegistry, name))<span class="sc">}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>names(self) -&gt; &#39;tuple[str, ...]&#39;
-__contains__(self, name: &#39;object&#39;) -&gt; &#39;bool&#39;
-__iter__(self) -&gt; &#39;Iterator[str]&#39;
-__len__(self) -&gt; &#39;int&#39;</code></pre>
-</div>
-</div>
-<p><code>names()</code> returns sorted names. Membership, iteration, and <code>len()</code> provide the standard container interface.</p>
-</section>
-</section>
-<section id="example" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="example"><span class="header-section-number">2</span> Example</h2>
-<div id="276ae0c3" class="cell" data-execution_count="5">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>registry <span class="op">=</span> pps.DGPRegistry()</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> small_factor(<span class="op">*</span>, overlap<span class="op">=</span><span class="fl">0.0</span>):</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    config <span class="op">=</span> pps.CanonicalPanelConfig(</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        n_control<span class="op">=</span><span class="dv">24</span>,</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        n_treated<span class="op">=</span><span class="dv">6</span>,</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>        n_pre<span class="op">=</span><span class="dv">16</span>,</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>        n_post<span class="op">=</span><span class="dv">4</span>,</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pps.classic_factor_design(config<span class="op">=</span>config, overlap<span class="op">=</span>overlap)</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>registry.register(<span class="st">&quot;small_factor&quot;</span>, small_factor)</span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>simulator <span class="op">=</span> registry.create(<span class="st">&quot;small_factor&quot;</span>, overlap<span class="op">=</span><span class="fl">1.0</span>)</span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> simulator.simulate(seed<span class="op">=</span><span class="dv">12</span>)</span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(registry.names(), panel.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>(&#39;small_factor&#39;,) (30, 20)</code></pre>
-</div>
-</div>
-<p>The package-level <code>canonical_registry</code> is prepopulated with the six canonical designs. Project-specific registries avoid mutating that global namespace.</p>
+<section id="keep-registries-local" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="keep-registries-local"><span class="header-section-number">3</span> Keep registries local</h2>
+<p>Do not add every paper-specific experiment to the package-wide namespace. Downstream projects can define a registry near their experiment configuration:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>EXPERIMENTS <span class="op">=</span> core.DGPRegistry()</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>EXPERIMENTS.register(<span class="st">&quot;main_null&quot;</span>, make_main_null)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>EXPERIMENTS.register(<span class="st">&quot;main_power&quot;</span>, make_main_power)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The functions remain ordinary Python and can be tested directly. The registry adds name-based dispatch; it does not replace documentation of the scientific law.</p>
 
 
 </section>
@@ -5733,4 +5712,4 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/reference/registry.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/website/reference/registry.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

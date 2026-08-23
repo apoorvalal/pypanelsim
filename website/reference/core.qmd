@@ -1,333 +1,162 @@
 ---
 title: "Core API"
-subtitle: "Dimensions, contexts, datasets, simulation orchestration, and randomness"
+description: "Simulation contracts, data, truth, random streams, and orchestration."
+jupyter: python3
 ---
 
 ```{python}
 import inspect
 
-import numpy as np
-import pandas as pd
-import pypanelsim as pps
-
-
-def signature(object_):
-    return f"{object_.__name__}{inspect.signature(object_)}"
+from pypanelsim import core
 ```
 
 ## `PanelDimensions`
 
-::: {.api-signature}
 ```{python}
-print(signature(pps.PanelDimensions))
+print(inspect.signature(core.PanelDimensions))
 ```
-:::
 
-Immutable rectangular panel dimensions.
+`n_units` and `n_periods` must be positive integers. Every component draw uses
+these dimensions.
 
-| Parameter | Type | Default | Validation |
-|---|---|---:|---|
-| `n_units` | `int` | `200` | Strictly positive |
-| `n_periods` | `int` | `50` | Strictly positive |
+## Component draws
 
-The object intentionally carries no assumptions about unit order, treatment
-cohorts, or pre/post periods.
-
-## `ComponentDraw`
-
-::: {.api-signature}
-```{python}
-print(signature(pps.ComponentDraw))
-```
-:::
-
-Return type for assignment, outcome, and effect components.
-
-| Field | Contract |
-|---|---|
-| `values` | Full `(n_units, n_periods)` numeric matrix |
-| `metadata` | Optional mapping of diagnostics or latent truth |
-
-The simulator validates shape and finiteness at the composition boundary. The
-final dataset recursively copies and freezes metadata.
-
-## `UnitFeatureDraw`
-
-::: {.api-signature}
-```{python}
-print(signature(pps.UnitFeatureDraw))
-```
-:::
-
-Return type for `UnitFeatureModel.generate()`.
-
-| Field | Shape | Meaning |
+| Type | Required values | Other fields |
 |---|---|---|
-| `observables` | `(n_units, k_x)` | Covariates used by assignment and outcomes |
-| `unobservables` | `(n_units, k_u)` | Latent features retained as simulation truth |
-| `metadata` | Mapping | Names and feature-model diagnostics |
-| `estimator_observables` | `(n_units, k_e)` or `None` | Optional estimator-visible covariates |
-| `unit_annotations` | Mapping | Optional unit-aligned labels |
+| `ComponentDraw` | one `(unit, time)` matrix | metadata |
+| `UnitFeatureDraw` | observed and latent `(unit, feature)` matrices | estimator-visible features, metadata, unit annotations |
+| `TimeFeatureDraw` | one `(time, feature)` matrix | metadata, time annotations |
 
-Zero feature columns are valid. All supplied values must be finite.
-
-## `TimeFeatureDraw`
-
-::: {.api-signature}
 ```{python}
-print(signature(pps.TimeFeatureDraw))
+for name in ("ComponentDraw", "UnitFeatureDraw", "TimeFeatureDraw"):
+    print(name, inspect.signature(getattr(core, name)))
 ```
-:::
 
-Return type for `TimeFeatureModel.generate()`. `values` has shape
-`(n_periods, k_v)` and is available to both outcome and effect models as
-`context.time_features`. Metadata can name columns or record the generating
-law. `time_annotations` can hold period-aligned labels. Zero feature columns
-are valid.
+Draw objects are return values for custom components. They are not complete
+panels.
 
-## `AssignmentContext`
+## Component contexts
 
-::: {.api-signature}
+`AssignmentContext` contains dimensions, observed features, latent features,
+and feature metadata.
+
+`SimulationContext` adds the treatment matrix and optional time features. It is
+passed to outcome and effect models.
+
 ```{python}
-print(signature(pps.AssignmentContext))
+print(inspect.signature(core.AssignmentContext))
+print(inspect.signature(core.SimulationContext))
 ```
-:::
-
-Immutable input to feature-aware assignment mechanisms. It owns read-only
-copies of observed and latent unit features. `n_units` and `n_periods` proxy the
-enclosed `PanelDimensions`, which keeps legacy assignments that only inspect
-dimensions operational.
-
-## `SimulationContext`
-
-::: {.api-signature}
-```{python}
-print(signature(pps.SimulationContext))
-```
-:::
-
-Input to outcome and effect components.
-
-| Attribute | Contract |
-|---|---|
-| `dimensions` | `PanelDimensions` |
-| `treatment` | Read-only finite binary `(n_units, n_periods)` matrix |
-| `observables` | Read-only `(n_units, k_x)` matrix |
-| `unobservables` | Read-only `(n_units, k_u)` matrix |
-| `feature_metadata` | Read-only feature metadata mapping |
-| `time_features` | Read-only `(n_periods, k_v)` matrix |
-| `time_feature_metadata` | Read-only time-feature metadata mapping |
-
-Derived properties:
-
-| Property | Return |
-|---|---|
-| `ever_treated` | Boolean unit mask |
-| `treated_units` | Integer positions treated at least once |
-| `control_units` | Integer positions never treated |
-| `is_absorbing` | Whether treatment never switches off |
-| `adoption_times` | First treated period; never treated uses `n_periods` |
-
-`adoption_times` raises `ValueError` for nonabsorbing treatment.
 
 ## Component protocols
 
-The protocols are runtime-checkable but inheritance is optional.
+| Protocol | Required method | Output |
+|---|---|---|
+| `UnitFeatureModel` | `generate(dimensions, rng)` | `UnitFeatureDraw` |
+| `AssignmentModel` | `assign(context, rng)` | `ComponentDraw` |
+| `TimeFeatureModel` | `generate(dimensions, rng)` | `TimeFeatureDraw` |
+| `OutcomeModel` | `generate(context, rng)` | `ComponentDraw` for $Y(0)$ |
+| `EffectModel` | `generate(context, rng)` | realized effect plus `effect_surface` metadata |
 
-```python
-class UnitFeatureModel(Protocol):
-    def generate(self, dimensions, rng) -> UnitFeatureDraw: ...
+Protocols use structural typing. A custom class can satisfy one without
+inheritance.
 
-class TimeFeatureModel(Protocol):
-    def generate(self, dimensions, rng) -> TimeFeatureDraw: ...
+## `PanelSimulator`
 
-class AssignmentModel(Protocol):
-    def assign(self, context, rng) -> ComponentDraw: ...
-
-class OutcomeModel(Protocol):
-    def generate(self, context, rng) -> ComponentDraw: ...
-
-class EffectModel(Protocol):
-    def generate(self, context, rng) -> ComponentDraw: ...
-```
-
-All randomness must come from the supplied `numpy.random.Generator`.
-
-## `AdditiveFactorOutcome`
-
-::: {.api-signature}
 ```{python}
-print(signature(pps.AdditiveFactorOutcome))
+print(inspect.signature(core.PanelSimulator))
+print("simulate", inspect.signature(core.PanelSimulator.simulate))
+print("iter_simulations", inspect.signature(core.PanelSimulator.iter_simulations))
 ```
-:::
 
-The basic additive panel outcome model:
+Required constructor fields are:
 
-$$
-Y_{it}(0)=\alpha_i+\gamma_t+\varepsilon_{it}.
-$$
+- `name`: a nonempty design identifier;
+- `dimensions`: one `PanelDimensions` value;
+- `assignment`: an `AssignmentModel`;
+- `outcome_model`: an `OutcomeModel`;
+- `effect_model`: an `EffectModel` or compatible callable.
 
-`unit_effect_scale`, `time_effect_scale`, and `noise_scale` are finite,
-nonnegative Gaussian standard deviations. The systematic surface has rank at
-most two and lies exactly in a 2WFE model. Metadata retains the three realized
-components separately.
+Feature models, custom unit and time identifiers, and axis annotations are
+optional.
 
-## `SumOutcomeModel`
+`simulate` accepts exactly one of `seed`, `rng`, or `streams`. It returns one
+`PanelDataset`. `iter_simulations` spawns independent seed sequences and yields
+the requested number of draws.
 
-::: {.api-signature}
+## `SimulationSeeds`
+
 ```{python}
-print(signature(pps.SumOutcomeModel))
+print(inspect.signature(core.SimulationSeeds))
+print(inspect.signature(core.SimulationSeeds.from_seed))
 ```
-:::
 
-Adds any nonempty sequence of public `OutcomeModel` components, optionally
-after multiplying them by finite `weights`. Component draw order is the model
-order supplied to the constructor. Metadata preserves each component's model
-name, weight, and diagnostic truth. For example, a unit effect plus the
-canonical two-factor outcome is:
+The five streams are `features`, `assignment`, `time_features`, `outcome`, and
+`effect`. `from_seed` derives them from one NumPy `SeedSequence`.
 
-```python
-outcome_model = pps.SumOutcomeModel(
-    (
-        pps.AdditiveFactorOutcome(
-            time_effect_scale=0.0,
-            noise_scale=0.0,
-        ),
-        pps.ClassicFactorOutcome(overlap=1.0),
-    )
-)
+## `resolve_rng`
+
+```{python}
+print(inspect.signature(core.resolve_rng))
 ```
+
+This helper accepts a seed or an existing `numpy.random.Generator`, but not
+both. Custom components normally receive an existing generator from the
+simulator and do not call this helper.
 
 ## `PanelDataset`
 
-::: {.api-signature}
 ```{python}
-print(signature(pps.PanelDataset))
+print(inspect.signature(core.PanelDataset))
 ```
-:::
 
-The immutable output of every simulation.
+### Stored matrices
 
-### Constructor arrays
+All matrices are read-only and have the same `(unit, time)` shape.
 
-| Field | Shape | Validation |
-|---|---|---|
-| `outcome` | `(N,T)` | Finite, nonempty, two-dimensional |
-| `treatment` | `(N,T)` | Same shape; binary |
-| `untreated_outcome` | `(N,T)` | Same shape; finite |
-| `treatment_effect` | `(N,T)` | Same shape; zero where untreated |
-| `effect_surface` | `(N,T)` | Full effect law; realized effect equals surface times treatment |
-| `unit_covariates` | `(N,K)` | Optional finite time-invariant covariates |
-
-The constructor enforces
-
-$$Y=Y(0)+\tau$$
-
-cell by cell. It copies arrays before making them read-only, so later mutation
-of caller-owned inputs cannot alter the dataset.
-
-### Identifiers and metadata
-
-`unit_ids` and `time_ids` default to zero-based integer positions and must be
-unique. `unit_covariate_names` defaults to `x1`, `x2`, and so on; names must be
-unique and cannot collide with the long-form core columns. `metadata` is copied
-and recursively frozen for mappings, arrays, lists, tuples, and sets.
-`unit_annotations` and `time_annotations` hold immutable axis-aligned labels.
+| Field | Invariant |
+|---|---|
+| `outcome` | equals `untreated_outcome + treatment_effect` |
+| `treatment` | contains only zero and one |
+| `untreated_outcome` | finite untreated potential outcomes |
+| `effect_surface` | complete cell effect if treated |
+| `treatment_effect` | equals `effect_surface * treatment` |
 
 ### Properties
 
 | Property | Meaning |
 |---|---|
-| `shape`, `n_units`, `n_periods` | Panel dimensions |
-| `ever_treated` | Unit-level treatment mask |
-| `treated_units`, `control_units` | Integer row positions |
-| `is_absorbing` | Monotone treatment indicator |
-| `adoption_times` | First treated period or horizon sentinel |
-| `true_att` | Mean realized effect over cells with `treatment == 1` |
-| `truth` | `PanelTruth` cohort and event-time summaries |
+| `shape`, `n_units`, `n_periods` | dimensions |
+| `ever_treated` | unit mask |
+| `treated_units`, `control_units` | integer unit positions |
+| `is_absorbing` | treatment never switches off |
+| `adoption_times` | first treatment position; `n_periods` for controls |
+| `true_att` | mean realized effect over treated cells |
+| `truth` | a `PanelTruth` view |
+| `counterfactual_target_mask` | treated cells whose $Y(0)$ is hidden |
 
-`true_att` raises `ValueError` when the panel has no treated cells.
-
-### Interchange methods
+### Conversion methods
 
 ```{python}
 for name in ("as_arrays", "arrays", "as_long_dict"):
-    method = getattr(pps.PanelDataset, name)
-    print(f"{name}{inspect.signature(method)}")
+    print(name, inspect.signature(getattr(core.PanelDataset, name)))
 ```
 
-| Method | Return contract |
-|---|---|
-| `as_arrays(copy=False)` | `(outcome, treatment)` wide matrices |
-| `arrays(fields, copy=False)` | Requested causal matrices in caller order |
-| `as_long_dict(...)` | Flat core columns plus optional surface and annotations |
+`as_arrays()` returns outcome and treatment. `arrays(fields)` returns selected
+matrices. `as_long_dict()` returns columns for data-frame construction. Pass
+`include_effect_surface=True` or `include_annotations=True` only when those
+columns are needed.
 
-Views are read-only unless `copy=True`. `arrays()` accepts `outcome`,
-`treatment`, `untreated_outcome`, and `treatment_effect`; an unknown name raises
-`ValueError`. `arrays()` also accepts `effect_surface`. The default long schema
-is backward compatible. Set `include_effect_surface=True` or
-`include_annotations=True` for the expanded columns.
-
-## `PanelSimulator`
-
-::: {.api-signature}
-```{python}
-print(signature(pps.PanelSimulator))
-```
-:::
-
-| Field | Contract |
-|---|---|
-| `name` | Nonempty design identifier |
-| `dimensions` | `PanelDimensions` |
-| `assignment` | Object satisfying `AssignmentModel` |
-| `outcome_model` | Object satisfying `OutcomeModel` |
-| `effect_model` | Object satisfying `EffectModel`, or a callable effect law |
-| `feature_model` | Optional object satisfying `UnitFeatureModel` |
-| `time_feature_model` | Optional object satisfying `TimeFeatureModel` |
-| `unit_ids`, `time_ids` | Optional external axis identifiers |
-| `unit_annotations`, `time_annotations` | Optional axis-aligned labels |
-
-### Pipeline
-
-1. Resolve one NumPy generator.
-2. Draw shared observed and latent unit features, if configured.
-3. Draw and validate binary treatment.
-4. Draw shared time features, if configured.
-5. Build `SimulationContext`.
-6. Draw and validate untreated outcomes.
-7. Draw the effect surface and validate realized effects.
-8. Return `PanelDataset(outcome=untreated+effect, ...)`.
-
-Component metadata is namespaced under `features`, `time_features`,
-`assignment`, `outcome`, and `effect`. The simulator name and dimensions are
-stored under `simulator`.
-
-A callable supplied directly as `effect_model` is wrapped in
-`CallableEffect`. It receives `SimulationContext` and may return a scalar, an
-`(N,)` or `(N,1)` unit law, a `(T,)` or `(1,T)` time law, or an `(N,T)` surface.
-The normalized surface is multiplied by realized treatment. For square panels,
-use `(1,T)` rather than `(T,)` to distinguish a time law from the legacy unit
-vector form.
+## `PanelTruth`
 
 ```{python}
-print(f"simulate{inspect.signature(pps.PanelSimulator.simulate)}")
-print(f"iter_simulations{inspect.signature(pps.PanelSimulator.iter_simulations)}")
+for name in ("cohort_event", "event_study", "att_by_cohort"):
+    print(name, inspect.signature(getattr(core.PanelTruth, name)))
 ```
 
-`simulate(seed=..., rng=..., streams=...)` accepts a legacy shared stream or
-`SimulationSeeds`, never more than one. `iter_simulations(replications, seed=...)`
-requires a positive replication count and uses `SeedSequence.spawn()` for child
-streams.
+- `cohort_event(event_times)` returns supported cohort-by-event-time cells.
+- `event_study(event_times, weighting=...)` aggregates over supported cohorts.
+- `att_by_cohort()` returns a treated-cell ATT for each adoption cohort.
 
-## `resolve_rng`
-
-::: {.api-signature}
-```{python}
-print(f"resolve_rng{inspect.signature(pps.resolve_rng)}")
-```
-:::
-
-Returns the supplied `numpy.random.Generator` after type validation or constructs
-`numpy.random.default_rng(seed)`. Passing both `seed` and `rng` raises
-`ValueError`; passing a non-generator `rng` raises `TypeError`.
+The weighting options are `cohort_size` and `equal_cohort`. Unsupported
+cohort-event cells remain explicit and are never silently treated as zeros.

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-import pypanelsim as pps
+from pypanelsim import core, primitives
 
 
 @dataclass(frozen=True, slots=True)
@@ -16,9 +16,9 @@ class UnitTrendOutcome:
 
     def generate(
         self,
-        context: pps.SimulationContext,
+        context: core.SimulationContext,
         rng: np.random.Generator,
-    ) -> pps.ComponentDraw:
+    ) -> core.ComponentDraw:
         shape = (context.dimensions.n_units, context.dimensions.n_periods)
         intercepts = rng.normal(size=(context.dimensions.n_units, 1))
         slopes = rng.normal(
@@ -34,7 +34,7 @@ class UnitTrendOutcome:
                 size=shape,
             )
         )
-        return pps.ComponentDraw(
+        return core.ComponentDraw(
             values,
             {
                 "trend_scale": self.trend_scale,
@@ -43,12 +43,12 @@ class UnitTrendOutcome:
         )
 
 
-simulator = pps.PanelSimulator(
+simulator = core.PanelSimulator(
     name="staggered_unit_trends",
-    dimensions=pps.PanelDimensions(n_units=50, n_periods=20),
-    assignment=pps.StaggeredAdoption({40: 12, 41: 12, 42: 14, 43: 14}),
+    dimensions=core.PanelDimensions(n_units=50, n_periods=20),
+    assignment=primitives.StaggeredAdoption({40: 12, 41: 12, 42: 14, 43: 14}),
     outcome_model=UnitTrendOutcome(),
-    effect_model=pps.LinearRampEffect(slope=0.25),
+    effect_model=primitives.LinearRampEffect(slope=0.25),
 )
 
 panel = simulator.simulate(seed=20260819)

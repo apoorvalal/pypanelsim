@@ -14,69 +14,93 @@ from pathlib import Path
 import crabbymetrics as cm
 import numpy as np
 
-from pypanelsim import (
-    classic_factor,
-    mixed_factor,
-    synthetic_control,
-    time_series,
-    weak_factor,
-)
+from pypanelsim import designs
 
 from .outcome_models import OUTCOME_MODELS
 
 CASES = {
-    "classic_a0": ("classic_factor", "NN=200;a=0", classic_factor, {"overlap": 0.0}),
-    "classic_a1": ("classic_factor", "NN=200;a=1", classic_factor, {"overlap": 1.0}),
-    "weak_a0": ("weak_factor", "NN=200;a=0", weak_factor, {"overlap": 0.0}),
-    "weak_a1": ("weak_factor", "NN=200;a=1", weak_factor, {"overlap": 1.0}),
-    "mixed_a0": ("mixed_factor", "NN=200;a=0", mixed_factor, {"overlap": 0.0}),
-    "mixed_a1": ("mixed_factor", "NN=200;a=1", mixed_factor, {"overlap": 1.0}),
+    "classic_a0": (
+        "classic_factor",
+        "NN=200;a=0",
+        designs.classic_factor,
+        {"overlap": 0.0},
+    ),
+    "classic_a1": (
+        "classic_factor",
+        "NN=200;a=1",
+        designs.classic_factor,
+        {"overlap": 1.0},
+    ),
+    "weak_a0": (
+        "weak_factor",
+        "NN=200;a=0",
+        designs.weak_factor,
+        {"overlap": 0.0},
+    ),
+    "weak_a1": (
+        "weak_factor",
+        "NN=200;a=1",
+        designs.weak_factor,
+        {"overlap": 1.0},
+    ),
+    "mixed_a0": (
+        "mixed_factor",
+        "NN=200;a=0",
+        designs.mixed_factor,
+        {"overlap": 0.0},
+    ),
+    "mixed_a1": (
+        "mixed_factor",
+        "NN=200;a=1",
+        designs.mixed_factor,
+        {"overlap": 1.0},
+    ),
     "time_a02_i0": (
         "time_series",
         "NN=200;a=0.2;I=0",
-        time_series,
+        designs.time_series,
         {"coefficient": 0.2, "integrated": False},
     ),
     "time_a02_i1": (
         "time_series",
         "NN=200;a=0.2;I=1",
-        time_series,
+        designs.time_series,
         {"coefficient": 0.2, "integrated": True},
     ),
     "time_a09_i0": (
         "time_series",
         "NN=200;a=0.9;I=0",
-        time_series,
+        designs.time_series,
         {"coefficient": 0.9, "integrated": False},
     ),
     "time_a09_i1": (
         "time_series",
         "NN=200;a=0.9;I=1",
-        time_series,
+        designs.time_series,
         {"coefficient": 0.9, "integrated": True},
     ),
     "synth_active01": (
         "synthetic_control",
         "NN=200;active=0.1;unitb=ridge",
-        synthetic_control,
+        designs.synthetic_control,
         {"active_share": 0.1},
     ),
     "synth_active05": (
         "synthetic_control",
         "NN=200;active=0.5;unitb=ridge",
-        synthetic_control,
+        designs.synthetic_control,
         {"active_share": 0.5},
     ),
     "synth_active01_penscm": (
         "synthetic_control",
         "NN=200;active=0.1;unitb=penSCM",
-        synthetic_control,
+        designs.synthetic_control,
         {"active_share": 0.1},
     ),
     "synth_active05_penscm": (
         "synthetic_control",
         "NN=200;active=0.5;unitb=penSCM",
-        synthetic_control,
+        designs.synthetic_control,
         {"active_share": 0.5},
     ),
 }

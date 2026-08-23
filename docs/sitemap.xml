@@ -1,91 +1,87 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://apoorvalal.github.io/pypanelsim/vignettes/balancing-reproduction.html</loc>
-    <lastmod>2026-08-21T19:01:00.000Z</lastmod>
-  </url>
-  <url>
-    <loc>https://apoorvalal.github.io/pypanelsim/getting-started.html</loc>
-    <lastmod>2026-08-23T03:39:53.787Z</lastmod>
-  </url>
-  <url>
-    <loc>https://apoorvalal.github.io/pypanelsim/reference/core.html</loc>
-    <lastmod>2026-08-23T03:42:09.269Z</lastmod>
+    <loc>https://apoorvalal.github.io/pypanelsim/vignettes/ftest-heterogeneity.html</loc>
+    <lastmod>2026-08-23T20:22:24.218Z</lastmod>
   </url>
   <url>
     <loc>https://apoorvalal.github.io/pypanelsim/assignment.html</loc>
-    <lastmod>2026-08-22T04:11:06.000Z</lastmod>
+    <lastmod>2026-08-23T20:22:24.215Z</lastmod>
   </url>
   <url>
-    <loc>https://apoorvalal.github.io/pypanelsim/reference/ftest.html</loc>
-    <lastmod>2026-08-22T02:01:42.000Z</lastmod>
-  </url>
-  <url>
-    <loc>https://apoorvalal.github.io/pypanelsim/reference/canonical.html</loc>
-    <lastmod>2026-08-21T19:01:00.000Z</lastmod>
-  </url>
-  <url>
-    <loc>https://apoorvalal.github.io/pypanelsim/reference/registry.html</loc>
-    <lastmod>2026-08-21T14:29:25.000Z</lastmod>
-  </url>
-  <url>
-    <loc>https://apoorvalal.github.io/pypanelsim/reference/research-designs.html</loc>
-    <lastmod>2026-08-23T03:41:04.096Z</lastmod>
-  </url>
-  <url>
-    <loc>https://apoorvalal.github.io/pypanelsim/api.html</loc>
-    <lastmod>2026-08-23T03:41:38.176Z</lastmod>
-  </url>
-  <url>
-    <loc>https://apoorvalal.github.io/pypanelsim/index.html</loc>
-    <lastmod>2026-08-23T03:41:38.177Z</lastmod>
-  </url>
-  <url>
-    <loc>https://apoorvalal.github.io/pypanelsim/migration.html</loc>
-    <lastmod>2026-08-21T14:29:25.000Z</lastmod>
-  </url>
-  <url>
-    <loc>https://apoorvalal.github.io/pypanelsim/architecture.html</loc>
-    <lastmod>2026-08-23T03:42:21.277Z</lastmod>
-  </url>
-  <url>
-    <loc>https://apoorvalal.github.io/pypanelsim/validation.html</loc>
-    <lastmod>2026-08-23T03:43:05.362Z</lastmod>
+    <loc>https://apoorvalal.github.io/pypanelsim/vignettes/large-panels.html</loc>
+    <lastmod>2026-08-23T20:22:24.218Z</lastmod>
   </url>
   <url>
     <loc>https://apoorvalal.github.io/pypanelsim/research-designs.html</loc>
-    <lastmod>2026-08-23T03:54:07.684Z</lastmod>
+    <lastmod>2026-08-23T20:22:24.216Z</lastmod>
   </url>
   <url>
-    <loc>https://apoorvalal.github.io/pypanelsim/reference/primitives.html</loc>
-    <lastmod>2026-08-23T03:54:07.684Z</lastmod>
+    <loc>https://apoorvalal.github.io/pypanelsim/reference/designs.html</loc>
+    <lastmod>2026-08-23T17:47:08.025Z</lastmod>
   </url>
   <url>
-    <loc>https://apoorvalal.github.io/pypanelsim/reference/baker.html</loc>
-    <lastmod>2026-08-21T16:28:43.000Z</lastmod>
+    <loc>https://apoorvalal.github.io/pypanelsim/vignettes/conditional-trends.html</loc>
+    <lastmod>2026-08-23T20:22:24.218Z</lastmod>
+  </url>
+  <url>
+    <loc>https://apoorvalal.github.io/pypanelsim/vignettes/balancing-reproduction.html</loc>
+    <lastmod>2026-08-23T20:22:24.219Z</lastmod>
   </url>
   <url>
     <loc>https://apoorvalal.github.io/pypanelsim/interoperability.html</loc>
-    <lastmod>2026-08-21T14:29:25.000Z</lastmod>
+    <lastmod>2026-08-23T17:43:27.556Z</lastmod>
   </url>
   <url>
-    <loc>https://apoorvalal.github.io/pypanelsim/vignettes/research-suites.html</loc>
-    <lastmod>2026-08-23T03:59:20.254Z</lastmod>
+    <loc>https://apoorvalal.github.io/pypanelsim/index.html</loc>
+    <lastmod>2026-08-23T17:47:35.434Z</lastmod>
   </url>
   <url>
-    <loc>https://apoorvalal.github.io/pypanelsim/vignettes/baker-twfe.html</loc>
-    <lastmod>2026-08-22T04:10:59.000Z</lastmod>
+    <loc>https://apoorvalal.github.io/pypanelsim/migration.html</loc>
+    <lastmod>2026-08-23T17:48:01.166Z</lastmod>
   </url>
   <url>
-    <loc>https://apoorvalal.github.io/pypanelsim/vignettes/ftest-heterogeneity.html</loc>
-    <lastmod>2026-08-22T04:10:59.000Z</lastmod>
+    <loc>https://apoorvalal.github.io/pypanelsim/architecture.html</loc>
+    <lastmod>2026-08-23T17:41:55.833Z</lastmod>
   </url>
   <url>
-    <loc>https://apoorvalal.github.io/pypanelsim/reference/assignment.html</loc>
-    <lastmod>2026-08-23T03:50:38.202Z</lastmod>
+    <loc>https://apoorvalal.github.io/pypanelsim/validation.html</loc>
+    <lastmod>2026-08-23T17:50:08.703Z</lastmod>
+  </url>
+  <url>
+    <loc>https://apoorvalal.github.io/pypanelsim/api.html</loc>
+    <lastmod>2026-08-23T17:46:04.163Z</lastmod>
+  </url>
+  <url>
+    <loc>https://apoorvalal.github.io/pypanelsim/reference/registry.html</loc>
+    <lastmod>2026-08-23T17:47:24.948Z</lastmod>
+  </url>
+  <url>
+    <loc>https://apoorvalal.github.io/pypanelsim/vignettes/composite-panels.html</loc>
+    <lastmod>2026-08-23T20:22:24.219Z</lastmod>
+  </url>
+  <url>
+    <loc>https://apoorvalal.github.io/pypanelsim/vignettes/support-aware-event-studies.html</loc>
+    <lastmod>2026-08-23T20:22:24.218Z</lastmod>
+  </url>
+  <url>
+    <loc>https://apoorvalal.github.io/pypanelsim/reference/primitives.html</loc>
+    <lastmod>2026-08-23T17:46:48.569Z</lastmod>
   </url>
   <url>
     <loc>https://apoorvalal.github.io/pypanelsim/canonical-designs.html</loc>
-    <lastmod>2026-08-22T04:10:59.000Z</lastmod>
+    <lastmod>2026-08-23T20:22:24.216Z</lastmod>
+  </url>
+  <url>
+    <loc>https://apoorvalal.github.io/pypanelsim/vignettes/baker-twfe.html</loc>
+    <lastmod>2026-08-23T20:22:24.217Z</lastmod>
+  </url>
+  <url>
+    <loc>https://apoorvalal.github.io/pypanelsim/reference/core.html</loc>
+    <lastmod>2026-08-23T17:46:24.879Z</lastmod>
+  </url>
+  <url>
+    <loc>https://apoorvalal.github.io/pypanelsim/getting-started.html</loc>
+    <lastmod>2026-08-23T20:22:24.215Z</lastmod>
   </url>
 </urlset>

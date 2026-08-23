@@ -1,653 +1,200 @@
 # pypanelsim
 
-`pypanelsim` is a composable, estimator-neutral Python library for synthetic
-panel data. It separates shared unit features, treatment assignment, untreated
-outcomes, and treatment effects. Each simulation returns a validated
-`PanelDataset` with a small NumPy interchange contract. The package can
-therefore feed `crabbymetrics`, another panel-estimator library, or a
-project-specific estimator without importing that estimator into the
-simulation layer.
+`pypanelsim` builds synthetic panel data with explicit treatment assignment,
+untreated outcomes, treatment effects, and causal truth. It is an
+estimator-neutral simulation package: use the same generated panel with matrix,
+formula, pandas, Polars, Arrow, R, or custom estimators.
 
-The package began as an extraction of the data-generating processes used in an
-augmented-balancing experiment. The original reproduction remains a downstream
-consumer. This repository contains only simulation infrastructure, canonical
-designs, tests, examples, and documentation.
+Every simulation answers four separate questions:
 
-## Design principles
+1. Which features exist?
+2. Who receives treatment, and when?
+3. What would outcomes be without treatment?
+4. How does treatment change those outcomes?
 
-- **Estimator neutral.** No estimator is imported by the package. NumPy powers
-  simulation and Matplotlib supports the runnable DGP visualizations.
-- **Composable.** Assignment, untreated outcomes, and treatment effects are
-  independent protocols.
-- **Explicit randomness.** Every draw accepts `seed=`, `rng=`, or independent
-  named component streams. The package does not use global random state.
-- **Validated output.** All matrices have `(unit, time)` shape. Treatment is
-  binary, realized effects are zero when untreated, and observed outcomes must
-  equal untreated outcomes plus realized effects.
-- **Immutable results.** `PanelDataset` owns read-only copies of its arrays and
-  metadata. Downstream code can request writable copies when necessary.
-- **Stable canonical factories.** Named designs are available through a
-  registry, class-based simulator factories, and concise one-draw functions.
+This separation makes simulation assumptions visible and lets you change one
+part of a design without rewriting the others.
 
-## Feature set
+## Install
 
-- **Assignment mechanisms:** fixed treatment, fixed-size random assignment,
-  exact fixed-size randomized adoption cohorts, sigmoid selection on observed
-  or latent unit features, and multinomial generalized propensity scores over
-  adoption cohorts.
-- **Treatment effects:** constant and event-time ramp effects plus callables for
-  heterogeneity driven by baseline covariates, unobserved unit factors, and
-  shared time-varying features, plus generic cohort/event-time profile maps.
-- **Untreated outcomes:** a basic additive unit/time factor model, weighted
-  component composition, generic rank-$k$ factors, feature-linear trends, unit
-  trends, periodic time effects, ARMA errors, clustered trends, and the
-  canonical DGPs extracted from the original balancing study.
-- **Staggered adoption:** a self-contained Baker DGP with cohort-specific
-  dynamic effects that reproduces vanilla TWFE event-study contamination.
-- **F-test paper DGPs:** all seven single-cohort temporal-effect laws and all
-  seven randomized three-cohort heterogeneity designs, exposed as profiles,
-  reusable simulators, and one-draw functions.
-- **Research suites:** all fourteen many-cohort designs from the Lepskii draft,
-  the ATT-DML conditional-trend, latent-factor, and clustered-ARMA laws, the
-  regression-compression benchmark and Anscombe quartet, and the gsynth2
-  weighted composite.
-- **Causal truth:** the full effect surface, realized effects, cohort/event
-  truth, support-aware event-study targets, and cohort ATTs.
-- **Executable documentation:** side-by-side `matshow` views of $Y$ and $W$ for
-  every canonical DGP, the complete 398-cell balancing experiment, and a
-  PyFixest comparison of vanilla and saturated cohort/event-time estimators.
-- **Estimator interoperability:** NumPy-wide and dependency-free long-column
-  interchange, with optional documentation integrations for crabbymetrics,
-  pandas, and PyFixest.
-
-## Requirements and installation
-
-Python 3.10 or later is required.
-
-For development:
+The package requires Python 3.10 or later.
 
 ```bash
-git clone git@github.com:apoorvalal/pypanelsim.git
+uv add "pypanelsim @ git+https://github.com/apoorvalal/pypanelsim.git"
+```
+
+To work on the repository:
+
+```bash
+git clone https://github.com/apoorvalal/pypanelsim.git
 cd pypanelsim
-uv sync
+uv sync --extra docs
 ```
 
-As a dependency of another `uv` project:
+## Public namespaces
 
-```bash
-uv add "pypanelsim @ git+ssh://git@github.com/apoorvalal/pypanelsim.git"
-```
+The public API has three descriptive namespaces:
 
-For a sibling checkout during development:
+- `pypanelsim.core` contains the simulator, data container, random streams, and
+  component protocols.
+- `pypanelsim.primitives` contains reusable feature, assignment, outcome, and
+  effect laws.
+- `pypanelsim.designs` contains configured design families and direct simulation
+  functions.
 
-```toml
-[project]
-dependencies = ["pypanelsim"]
+Old root-level imports remain available for compatibility. New code should use
+the descriptive namespaces.
 
-[tool.uv.sources]
-pypanelsim = { path = "../pypanelsim", editable = true }
-```
-
-The repository is public. The SSH installation form requires a configured
-GitHub SSH identity; use the corresponding HTTPS URL otherwise.
-
-The rendered documentation is available at
-[apoorvalal.github.io/pypanelsim](https://apoorvalal.github.io/pypanelsim/).
-
-## Quick start
-
-Use a design factory when the simulator will be reused:
+## Simulate a configured design
 
 ```python
-import pypanelsim as pps
+from pypanelsim import designs
 
-simulator = pps.classic_factor_design(overlap=1.0)
+panel = designs.classic_factor(overlap=1.0, seed=42)
+
+print(panel.shape)
+print(panel.true_att)
+print(panel.outcome.shape, panel.treatment.shape)
+```
+
+A function such as `designs.classic_factor(...)` returns a simulated
+`PanelDataset`. Its matching `designs.classic_factor_design(...)` function
+returns a reusable `PanelSimulator`.
+
+```python
+simulator = designs.classic_factor_design(overlap=1.0)
+panels = list(simulator.iter_simulations(100, seed=42))
+```
+
+## Compose a design from primitives
+
+This example combines two-way fixed effects and a low-rank factor structure in
+the untreated outcome:
+
+```python
+from pypanelsim import core, primitives
+
+simulator = core.PanelSimulator(
+    name="fixed_effects_plus_factors",
+    dimensions=core.PanelDimensions(n_units=200, n_periods=40),
+    feature_model=primitives.GaussianUnitFeatures(
+        n_observables=2,
+        n_unobservables=1,
+    ),
+    assignment=primitives.RandomizedSingleCohortAssignment(
+        n_treated=80,
+        adoption_period=25,
+    ),
+    outcome_model=primitives.SumOutcomeModel(
+        models=(
+            primitives.TwoWayFixedEffectsOutcome(
+                unit_effect_scale=1.0,
+                time_effect_scale=0.5,
+                noise_scale=0.2,
+            ),
+            primitives.LowRankFactorOutcome(rank=2, factor_scale=0.7),
+        )
+    ),
+    effect_model=primitives.LinearRampEffect(slope=0.2),
+)
+
 panel = simulator.simulate(seed=42)
-
-print(panel.shape)  # (200, 50)
-print(panel.true_att)  # 1.1
-print(panel.name)  # classic_factor
 ```
 
-Use a convenience function for one draw:
+## Data contract
 
-```python
-panel = pps.time_series(
-    coefficient=0.9,
-    integrated=True,
-    seed=42,
-)
-```
-
-Custom dimensions use `CanonicalPanelConfig`:
-
-```python
-config = pps.CanonicalPanelConfig(
-    n_control=80,
-    n_treated=20,
-    n_pre=24,
-    n_post=6,
-    effect_slope=0.1,
-    noise_variance=0.25,
-)
-panel = pps.weak_factor(config=config, overlap=1.0, seed=42)
-```
-
-The Baker staggered-adoption design reproduces the dynamic cohort
-heterogeneity that biases a vanilla two-way fixed-effects event study:
-
-```python
-config = pps.BakerPanelConfig()
-panel = pps.baker(config=config, seed=28101695)
-
-print(panel.shape)  # (1000, 36)
-print(config.adoption_years)  # (1989, 1998, 2007)
-print(config.cohort_effect_slopes)  # (0.10, 0.05, 0.01)
-```
-
-Run `uv run python examples/baker_twfe.py` for the PyFixest comparison between
-vanilla relative-time TWFE and a saturated cohort-by-event-time estimator. The
-executable [Baker vignette](website/vignettes/baker-twfe.qmd) explains the
-construction and identifying comparisons.
-
-The complete heterogeneous-effect catalog from the F-test paper is available
-without paper-specific effect classes:
-
-```python
-print(pps.available_ftest_temporal_designs())  # seven temporal paths
-print(pps.available_ftest_cohort_designs())    # seven cohort surfaces
-
-config = pps.FTestCohortConfig(n_units=2_000)
-simulator = pps.ftest_cohort_design(
-    "selection_on_gains",
-    config=config,
-)
-panel = simulator.simulate(seed=42)
-
-profiles = pps.ftest_cohort_profiles("selection_on_gains", config=config)
-```
-
-`RandomizedStaggeredAdoption` fixes every cohort count while randomizing unit
-membership, and `CohortEventTimeEffect` consumes the returned profile mapping.
-The [F-test DGP vignette](website/vignettes/ftest-heterogeneity.qmd) gives every
-formula and visualizes all fourteen designs plus representative $Y$ and $W$
-matrices.
-
-## The data contract
-
-`PanelDataset` stores five same-shaped float matrices.
+All panel matrices have shape `(n_units, n_periods)`.
 
 | Field | Meaning |
 |---|---|
-| `outcome` | Observed outcome $Y$ |
-| `treatment` | Binary treatment matrix $W$ |
-| `untreated_outcome` | Untreated potential outcome $Y(0)$ |
-| `treatment_effect` | Realized cell effect, zero when $W=0$ |
-| `effect_surface` | Full effect law before multiplication by $W$ |
+| `outcome` | Observed outcome, $Y_{it}$ |
+| `treatment` | Binary treatment state, $D_{it}$ |
+| `untreated_outcome` | Untreated potential outcome, $Y_{it}(0)$ |
+| `effect_surface` | Cell-level effect if treated, $\tau_{it}$ |
+| `treatment_effect` | Realized effect, $D_{it}\tau_{it}$ |
 
-The class enforces
-
-$$
-Y = Y(0) + \tau^{\mathrm{realized}},
-\qquad
-\tau^{\mathrm{realized}}=\tau^{\mathrm{surface}}W.
-$$
-
-`treatment_effect` contains the realized effect only in treated cells. The
-class also stores
-unique `unit_ids`, unique `time_ids`, a stable design `name`, and namespaced
-component metadata. Optional time-invariant observed covariates are exposed as
-`unit_covariates` with matching `unit_covariate_names` and are expanded by
-`as_long_dict()`. Unit and time annotations are separate from identifiers and
-can be included in long output on request.
-
-Useful properties include:
-
-```python
-panel.n_units
-panel.n_periods
-panel.control_units
-panel.treated_units
-panel.ever_treated
-panel.is_absorbing
-panel.adoption_times
-panel.true_att
-panel.effect_surface
-panel.truth.event_study(event_times=range(-5, 13))
-```
-
-### Wide NumPy interchange
-
-Most panel estimators accept two matrices:
-
-```python
-y, w = panel.as_arrays()
-estimator.fit(y, w)
-```
-
-The returned views are read-only. Request copies if an estimator modifies its
-inputs:
-
-```python
-y, w = panel.as_arrays(copy=True)
-```
-
-Select any causal matrices in a fixed order:
-
-```python
-y0, tau = panel.arrays(
-    ("untreated_outcome", "treatment_effect"),
-    copy=False,
-)
-```
-
-### Long-column interchange
-
-`as_long_dict()` returns flat columns without adding pandas or Polars as a
-dependency:
-
-```python
-columns = panel.as_long_dict()
-
-# Optional downstream conversions
-# pandas.DataFrame(dict(columns))
-# polars.DataFrame(columns)
-# pyarrow.table(columns)
-```
-
-The columns are `unit`, `time`, `outcome`, `treatment`,
-`untreated_outcome`, and `treatment_effect`.
-
-The default schema remains stable. Request the expanded causal and label
-columns explicitly:
-
-```python
-columns = panel.as_long_dict(
-    include_effect_surface=True,
-    include_annotations=True,
-)
-```
-
-## Reusable research suites
-
-```python
-lepskii = pps.lepskii_design("tensor_blocks")
-att_dml = pps.att_dml_design("conditional_parallel_trends_nonlinear")
-compression = pps.regression_compression_design()
-gsynth = pps.gsynth_composite_design()
-
-panel = lepskii.simulate(
-    streams=pps.SimulationSeeds.from_seed(42),
-)
-```
-
-The [research design map](website/research-designs.qmd) links each downstream
-project to its configuration and factory. Estimators, tuners, Monte Carlo
-runners, and reports stay outside this package.
-
-## Canonical designs
-
-The default canonical panel has 160 never-treated units, 40 treated units, 40
-pre-treatment periods, and 10 post-treatment periods. The last 40 units adopt
-treatment in period 40. The effect increases by 0.2 per post-treatment period,
-so the true ATT is 1.1.
-
-The balancing report crosses these families to form 12 statistically distinct
-DGP settings. Its 14 named Monte Carlo cases arise because the two synthetic
-settings are each paired with two estimator loss functions; those duplicated
-names do not represent additional panel laws.
-
-| Registry name | Factory | Main parameters | Untreated process |
-|---|---|---|---|
-| `classic_factor` | `classic_factor_design()` | `overlap` | Two drifting factors |
-| `weak_factor` | `weak_factor_design()` | `overlap` | Five weak drift and five weak cyclical factors |
-| `synthetic_control` | `synthetic_control_design()` | `active_share` | Sparse convex donor signal |
-| `factor_synthetic` | `factor_synthetic_design()` | `overlap` | Equal factor and donor mixture |
-| `time_series` | `time_series_design()` | `coefficient`, `integrated` | AR(1) or ARIMA(1,1,0) unit paths |
-| `mixed_factor` | `mixed_factor_design()` | `overlap` | Drift-factor and cyclical-factor half-panels |
-
-The Baker design is intentionally separate from the stable canonical registry:
-use `baker_design()` for a reusable simulator or `baker()` for one draw.
-
-For the factor designs, `overlap=0` gives overlapping treated and control
-loading distributions. `overlap=1` separates their means. For the synthetic
-control design, `active_share` controls donor sparsity. For the time-series
-design, `integrated=True` cumulatively sums the stationary AR increments.
-
-The exact probability laws, construction code, and visualizations are in the
-[`Balancing DGP catalog`](website/canonical-designs.qmd).
-
-## Registry API
-
-Create a canonical simulator by stable name:
-
-```python
-print(pps.available_canonical_designs())
-
-simulator = pps.make_canonical(
-    "synthetic_control",
-    active_share=0.25,
-)
-panel = simulator.simulate(seed=7)
-```
-
-Projects can maintain their own registry:
-
-```python
-registry = pps.DGPRegistry()
-registry.register("my_design", my_simulator_factory)
-simulator = registry.create("my_design", scale=2.0)
-```
-
-Registration rejects invalid names and accidental replacement. Pass
-`replace=True` only when replacement is intentional.
-
-## Compose a new DGP
-
-A `PanelSimulator` requires four objects and accepts optional shared unit and
-time feature models:
-
-1. `PanelDimensions` defines the rectangular shape.
-2. An `AssignmentModel` produces binary treatment.
-3. An `OutcomeModel` produces untreated outcomes.
-4. An `EffectModel` produces realized treatment effects.
-5. An optional `UnitFeatureModel` draws observed covariates and latent unit
-   features before assignment. Assignment and outcomes receive the same draw.
-6. An optional `TimeFeatureModel` draws $V_t$ for outcomes and effects.
-
-The interfaces use structural typing. A custom component does not need to
-inherit from a package base class. It only needs the documented method.
-
-```python
-from dataclasses import dataclass
-
-import numpy as np
-import pypanelsim as pps
-
-
-@dataclass(frozen=True)
-class UnitTrendOutcome:
-    trend_scale: float = 0.1
-    noise_scale: float = 1.0
-
-    def generate(self, context, rng):
-        unit_intercepts = rng.normal(size=(context.dimensions.n_units, 1))
-        unit_slopes = rng.normal(
-            scale=self.trend_scale,
-            size=(context.dimensions.n_units, 1),
-        )
-        time = np.arange(context.dimensions.n_periods)[None, :]
-        noise = rng.normal(
-            scale=self.noise_scale,
-            size=(context.dimensions.n_units, context.dimensions.n_periods),
-        )
-        values = unit_intercepts + unit_slopes * time + noise
-        return pps.ComponentDraw(values, {"trend_scale": self.trend_scale})
-
-
-simulator = pps.PanelSimulator(
-    name="unit_trends",
-    dimensions=pps.PanelDimensions(n_units=100, n_periods=30),
-    assignment=pps.StaggeredAdoption({80: 20, 81: 21, 82: 22}),
-    outcome_model=UnitTrendOutcome(),
-    effect_model=pps.LinearRampEffect(slope=0.25),
-)
-
-panel = simulator.simulate(seed=123)
-```
-
-Plain functions can be wrapped with `CallableOutcomeModel`. Built-in
-assignment components include fixed single-cohort and staggered assignments,
-fixed-size randomized single and staggered assignments, binary logit selection,
-and multinomial-logit generalized propensity scores for adoption cohorts.
-Built-in effects are `ConstantEffect`, `LinearRampEffect`,
-`CohortEventTimeEffect`, and `CallableEffect`.
-`CallableUnitEffect` remains as a compatibility name. A lambda can be passed
-directly to `effect_model` to define
-$\tau_{it}=f(X_i,U_i,V_t)$:
-
-```python
-simulator = pps.PanelSimulator(
-    name="heterogeneous_effects",
-    dimensions=pps.PanelDimensions(120, 40),
-    feature_model=pps.GaussianUnitFeatures(2, 1),
-    time_feature_model=pps.GaussianTimeFeatures(1),
-    assignment=pps.RandomizedSingleCohortAssignment(40, 28),
-    outcome_model=pps.CallableOutcomeModel(
-        lambda x, rng: rng.normal(size=(x.dimensions.n_units, x.dimensions.n_periods))
-    ),
-    effect_model=lambda x: (
-        (
-            1.0
-            + 0.45 * x.observables[:, 0]
-            - 0.30 * x.observables[:, 1]
-            + 0.80 * x.unobservables[:, 0]
-        )[:, None]
-        * (1.0 + 0.35 * x.time_features[:, 0])[None, :]
-    ),
-)
-```
-
-The lambda receives `SimulationContext`. It may return a scalar, one value per
-unit, one value per period, or a complete `(n_units, n_periods)` surface;
-pypanelsim broadcasts as needed and zeros effects in untreated cells. The
-complete visual example is
-[`examples/heterogeneous_effects.py`](examples/heterogeneous_effects.py), with
-rendered output in
-[`examples/heterogeneous_effects.png`](examples/heterogeneous_effects.png).
-
-## Assignment mechanisms
-
-`RandomizedSingleCohortAssignment` samples a fixed number of eligible units
-without replacement. `BinaryLogitAssignment` instead draws eventual treatment
-from
+The container validates
 
 $$
-P(D_i=1\mid X_i,U_i)
-=\operatorname{logit}^{-1}(\alpha+X_i^\top\beta+U_i^\top\gamma).
+Y_{it} = Y_{it}(0) + D_{it}\tau_{it}.
 $$
 
-Setting $\gamma=0$ gives selection on recorded observables and is unconfounded
-conditional on $X_i$ when the outcome model shares those covariates. Nonzero
-$\gamma$ selects on latent unit features; factor and trajectory estimators may
-still recover the outcome structure from pre-treatment histories, but the
-assignment is not unconfounded given the exposed covariates.
-
-`RandomizedStaggeredAdoption` randomly partitions eligible units into adoption
-cohorts with exact user-supplied counts, leaving all unsampled units untreated.
-Its metadata reports the marginal generalized propensity over the fixed
-cohorts and never treatment.
-
-`GeneralizedPropensityAssignment` uses multinomial logits for user-supplied
-adoption periods plus a never-treated baseline. Its metadata records the full
-unit-by-category generalized propensity score matrix, realized categories, and
-adoption times.
-
-See [`examples/assignment_mechanisms.py`](examples/assignment_mechanisms.py) and
-the rendered [`examples/assignment_mechanisms.png`](examples/assignment_mechanisms.png)
-for randomized, observed-selection, latent-selection, and cohort-GPS DGPs.
-
-See [`website/architecture.md`](website/architecture.md) and
-[`examples/custom_dgp.py`](examples/custom_dgp.py) for the extension contract.
-
-## Downstream estimator integration
-
-`pypanelsim` does not define an estimator interface. It produces standard
-arrays and lets the estimator own its API.
-
-For crabbymetrics:
+It also provides cohort and event-time truth, unit and time identifiers,
+annotations, covariates, and conversion helpers:
 
 ```python
-import crabbymetrics as cm
-import pypanelsim as pps
+long_columns = panel.as_long_dict(include_annotations=True)
 
-panel = pps.classic_factor(overlap=1.0, seed=42)
+import pandas as pd
 
-model = cm.AugmentedBalancing(balance="double")
-model.fit(panel.outcome, panel.treatment)
-
-estimate = float(model.summary()["att"])
-error = estimate - panel.true_att
+frame = pd.DataFrame(long_columns)
+truth = panel.truth.event_study()
 ```
 
-An outcome-model matrix can be passed without changing the simulation object:
+Pandas and Polars are optional. The NumPy arrays and long dictionary have no
+data-frame dependency.
+
+## Design families
+
+| Scientific question | Constructors |
+|---|---|
+| Canonical panel prediction | `classic_factor`, `weak_factor`, `synthetic_control`, `time_series`, `mixed_factor` |
+| TWFE under dynamic cohort effects | `baker` |
+| Event-study heterogeneity tests | `ftest_temporal`, `ftest_cohort` |
+| Adaptive pooling across cohorts | `lepskii` |
+| Conditional or latent trend adjustment | `att_dml` |
+| Large-panel regression summaries | `regression_compression`, `anscombe` |
+| Composite estimator stress test | `gsynth_composite` |
+
+Use `available_*_designs()` functions in `pypanelsim.designs` to list named
+variants.
+
+The `gsynth_composite` family is a package benchmark assembled from reusable
+components. It is not presented as a reproduction of a published design.
+
+## Reproducible random streams
+
+`simulate(seed=...)` uses one shared NumPy stream. Use named streams when you
+want changes in one component to leave the other component draws unchanged:
 
 ```python
-model.fit(
-    panel.outcome,
-    panel.treatment,
-    estimated_untreated_surface,
-)
+from pypanelsim import core, designs
+
+simulator = designs.lepskii_design("tensor_blocks")
+panel = simulator.simulate(streams=core.SimulationSeeds.from_seed(42))
 ```
-
-This separation is deliberate. Simulation truth remains in `PanelDataset`;
-estimation state remains in the downstream library.
-
-## Reproducibility and repeated draws
-
-One draw accepts either an integer seed, a NumPy `SeedSequence`, or an existing
-`numpy.random.Generator`:
-
-```python
-panel_a = simulator.simulate(seed=10)
-panel_b = simulator.simulate(seed=10)
-np.testing.assert_array_equal(panel_a.outcome, panel_b.outcome)
-```
-
-Providing both `seed` and `rng` is an error. Passing an existing generator
-advances that generator.
-
-Use spawned seed sequences for independent Monte Carlo replications:
-
-```python
-for replication, panel in enumerate(
-    simulator.iter_simulations(200, seed=20260819),
-    start=1,
-):
-    estimate = fit_estimator(*panel.as_arrays())
-```
-
-The canonical NumPy implementation preserves the seeded draw order of the
-extracted `panel_dgps` code. NumPy and R use different random streams, so an
-integer seed does not produce the same realized panel across languages.
-
-## Metadata
-
-Metadata is separated by simulation component:
-
-```python
-panel.metadata["simulator"]
-panel.metadata["features"]
-panel.metadata["time_features"]
-panel.metadata["assignment"]
-panel.metadata["outcome"]
-panel.metadata["effect"]
-```
-
-Canonical factor designs store factors and unit-aligned loadings under
-`metadata["outcome"]`. Sparse-donor designs also store active donor positions
-and both unit-aligned and control-only donor weights. Time-series designs store
-the latent process before observation noise.
-
-Metadata is diagnostic truth, not an estimator input. Latent unit features are
-stored there. Observed assignment covariates intended for estimators are exposed
-separately as `panel.unit_covariates`. All values are recursively frozen and
-copied when the dataset is created.
-
-## Fail-fast validation
-
-The package raises `ValueError` for malformed simulations, including:
-
-- nonpositive dimensions;
-- invalid treatment positions or adoption periods;
-- nonbinary treatment;
-- mismatched component shapes;
-- nonfinite outcomes or effects;
-- effects outside treated cells;
-- inconsistent observed and untreated outcomes;
-- duplicate unit or time identifiers;
-- ambiguous `seed` and `rng` arguments.
-
-## Migration from `panel_dgps`
-
-The one-draw functions keep their prior names and seeded numerical behavior.
-The main changes are the package name, the primary class names, and namespaced
-metadata.
-
-```python
-# Before
-from panel_dgps import PanelConfig, classic_factor
-
-# After
-from pypanelsim import CanonicalPanelConfig, classic_factor
-```
-
-`PanelConfig` and `PanelData` remain available as compatibility aliases for
-`CanonicalPanelConfig` and `PanelDataset`. New code should use the explicit
-names. See [`website/migration.md`](website/migration.md) for the full map.
-
-## Repository layout
-
-```text
-pypanelsim/
-├── src/pypanelsim/
-│   ├── data.py          # PanelDataset and interchange
-│   ├── components.py    # component protocols and built-ins
-│   ├── simulator.py     # orchestration and RNG policy
-│   ├── registry.py      # named simulator factories
-│   ├── canonical.py     # canonical balancing-experiment designs
-│   └── baker.py         # staggered-adoption TWFE failure design
-├── tests/               # contract, invariant, and regression tests
-├── examples/            # runnable composition and interop examples
-├── website/             # Quarto source, API docs, and vignettes
-└── docs/                # rendered GitHub Pages site
-```
-
-## Development
-
-All development commands use `uv`:
-
-```bash
-uv sync --locked
-uv run ruff format --check .
-uv run ruff check .
-uv run pytest
-uv build
-```
-
-Build the Quarto documentation site, including the optional crabbymetrics and
-PyFixest interoperability examples, with:
-
-```bash
-uv sync --extra docs
-uv run quarto render website
-```
-
-The rendered site is written to `docs/` for branch-based GitHub Pages. Its
-source includes detailed core, assignment, canonical-design, Baker, and
-registry API pages; the visual DGP catalog; the complete 398-cell balancing
-reproduction; and the Baker/PyFixest event-study vignette.
-
-Run the examples with:
-
-```bash
-uv run python examples/custom_dgp.py
-uv run python examples/estimator_interop.py
-uv run python examples/assignment_mechanisms.py
-uv run python examples/heterogeneous_effects.py
-uv run python examples/baker_twfe.py
-```
-
-The test suite covers immutable data contracts, assignment and effect
-components, custom outcome composition, registry behavior, canonical DGP
-invariants, seeded reproducibility, and downstream array interchange. The
-separate migration audit verifies exact cell-by-cell parity with the extracted
-implementation. See [`website/validation.md`](website/validation.md).
 
 ## Scope
 
-`pypanelsim` generates balanced rectangular panels with binary treatment. It
-does not fit estimators, provide inference, manage experiment results, or render
-reports. Those tasks belong in downstream projects. New assignment and outcome
-components can support multiple cohorts and arbitrary treated-unit order while
-preserving the same dataset contract.
+`pypanelsim` owns simulation components, validated data, truth, and export
+adapters. It does not own estimators, Monte Carlo runners, result caches, or
+paper-specific reports. Keeping these concerns outside the package prevents an
+estimator dependency from defining the simulation interface.
+
+## Scientific sources
+
+Several configured families translate public research designs:
+
+- Baker's dynamic-treatment example: [JFE_DID](https://github.com/andrewchbaker/JFE_DID)
+- TWFE heterogeneity tests: [TestingInEventStudies](https://github.com/apoorvalal/TestingInEventStudies) and [the paper](https://arxiv.org/abs/2503.05125)
+- Large-scale longitudinal experiments: [paper](https://arxiv.org/abs/2410.09952) and [code](https://github.com/py-econometrics/panel-at-scale-code)
+- Augmented balancing estimators: [paper](https://apoorvalal.github.io/files/papers/augbal.pdf) and [crabbymetrics](https://github.com/apoorvalal/crabbymetrics)
+
+The documentation states where a family follows a public source, adapts a
+working design, or serves only as a package benchmark.
+
+## Development
+
+```bash
+uv run pytest
+uv run ruff check src tests
+uv run quarto render website
+uv build
+```
+
+See the [documentation site](https://apoorvalal.github.io/pypanelsim) for the
+first tutorial, design catalog, research tutorials, and API reference.
+
+## License
+
+MIT

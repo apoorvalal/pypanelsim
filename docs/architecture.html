@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="description" content="The component sequence, public namespaces, validation rules, and package boundary.">
 
-<title>architecture – pypanelsim</title>
+<title>Architecture and data contract – pypanelsim</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -4925,56 +4926,29 @@ height: auto;
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./index.html"> 
+    <a class="nav-link active" href="./index.html" aria-current="page"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./getting-started.html" aria-current="page"> 
+    <a class="nav-link" href="./getting-started.html"> 
 <span class="menu-text">Get started</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./canonical-designs.html"> 
-<span class="menu-text">DGP catalog</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./assignment.html"> 
-<span class="menu-text">Assignment</span></a>
+<span class="menu-text">Design catalog</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./research-designs.html"> 
-<span class="menu-text">Research suites</span></a>
+<span class="menu-text">Research designs</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./interoperability.html"> 
+<span class="menu-text">Export</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./api.html"> 
 <span class="menu-text">API</span></a>
   </li>  
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-vignettes" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Vignettes</span>
-    </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-vignettes">    
-        <li>
-    <a class="dropdown-item" href="./vignettes/balancing-reproduction.html">
- <span class="dropdown-text">Balancing reproduction</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./vignettes/baker-twfe.html">
- <span class="dropdown-text">Baker TWFE failure</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./vignettes/ftest-heterogeneity.html">
- <span class="dropdown-text">F-test heterogeneity DGPs</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./vignettes/research-suites.html">
- <span class="dropdown-text">Four research suites</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./interoperability.html">
- <span class="dropdown-text">Estimator interoperability</span></a>
-  </li>  
-    </ul>
-  </li>
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item compact">
@@ -4994,7 +4968,7 @@ height: auto;
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./architecture.html">Concepts</a></li><li class="breadcrumb-item"><a href="./architecture.html">Architecture and extension contract</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html">Start here</a></li><li class="breadcrumb-item"><a href="./architecture.html">Architecture and data contract</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -5009,12 +4983,18 @@ height: auto;
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
- <span class="menu-text">Use pypanelsim</span></a>
+ <span class="menu-text">Start here</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Synthetic panels with visible assumptions</span></a>
+  </div>
+</li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./getting-started.html" class="sidebar-item-text sidebar-link">
@@ -5023,20 +5003,8 @@ height: auto;
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./assignment.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Assignment mechanisms</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./research-designs.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Research design suites</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./interoperability.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Estimator interoperability</span></a>
+  <a href="./architecture.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Architecture and data contract</span></a>
   </div>
 </li>
       </ul>
@@ -5044,7 +5012,7 @@ height: auto;
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
- <span class="menu-text">Concepts</span></a>
+ <span class="menu-text">Build a design</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -5052,26 +5020,26 @@ height: auto;
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./architecture.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Architecture and extension contract</span></a>
+  <a href="./assignment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Treatment assignment</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./canonical-designs.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Balancing DGP catalog</span></a>
+ <span class="menu-text">Design catalog</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./migration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Migration from <code>panel_dgps</code></span></a>
+  <a href="./research-designs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Research designs</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./validation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Validation record</span></a>
+  <a href="./interoperability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Export and interoperability</span></a>
   </div>
 </li>
       </ul>
@@ -5079,7 +5047,7 @@ height: auto;
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
- <span class="menu-text">API reference</span></a>
+ <span class="menu-text">Research tutorials</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -5087,8 +5055,61 @@ height: auto;
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./api.html" class="sidebar-item-text sidebar-link">
+  <a href="./vignettes/baker-twfe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Baker’s dynamic-effects example</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vignettes/ftest-heterogeneity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">F-test heterogeneity designs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vignettes/support-aware-event-studies.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Support-aware event studies</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vignettes/conditional-trends.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Conditional and latent trends</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vignettes/large-panels.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Large panels and compressed regressions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vignettes/composite-panels.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Composite panel benchmark</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vignettes/balancing-reproduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Balancing validation snapshot</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
  <span class="menu-text">API reference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">API map</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -5105,32 +5126,8 @@ height: auto;
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./reference/research-designs.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Research design API</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./reference/assignment.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Assignment, feature, and effect API</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./reference/baker.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Baker staggered-adoption API</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./reference/ftest.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">F-test paper DGP API</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./reference/canonical.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Canonical design API</span></a>
+  <a href="./reference/designs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Design API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -5143,35 +5140,23 @@ height: auto;
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
- <span class="menu-text">Vignettes</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Maintenance and provenance</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./vignettes/baker-twfe.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Baker DGP: why vanilla TWFE event studies fail</span></a>
+  <a href="./validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Validation and provenance</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./vignettes/ftest-heterogeneity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">F-test paper heterogeneous-effect DGPs</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./vignettes/research-suites.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Four research projects, one simulation contract</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./vignettes/balancing-reproduction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Balancing estimators in synthetic panels</span></a>
+  <a href="./migration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Migration guide</span></a>
   </div>
 </li>
       </ul>
@@ -5181,209 +5166,178 @@ height: auto;
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#the-simulation-sequence" id="toc-the-simulation-sequence" class="nav-link active" data-scroll-target="#the-simulation-sequence"><span class="header-section-number">1</span> The simulation sequence</a></li>
+  <li><a href="#three-public-namespaces" id="toc-three-public-namespaces" class="nav-link" data-scroll-target="#three-public-namespaces"><span class="header-section-number">2</span> Three public namespaces</a></li>
+  <li><a href="#core-protocols" id="toc-core-protocols" class="nav-link" data-scroll-target="#core-protocols"><span class="header-section-number">3</span> Core protocols</a></li>
+  <li><a href="#matrix-conventions" id="toc-matrix-conventions" class="nav-link" data-scroll-target="#matrix-conventions"><span class="header-section-number">4</span> Matrix conventions</a></li>
+  <li><a href="#immutable-results" id="toc-immutable-results" class="nav-link" data-scroll-target="#immutable-results"><span class="header-section-number">5</span> Immutable results</a></li>
+  <li><a href="#randomness" id="toc-randomness" class="nav-link" data-scroll-target="#randomness"><span class="header-section-number">6</span> Randomness</a></li>
+  <li><a href="#package-boundary" id="toc-package-boundary" class="nav-link" data-scroll-target="#package-boundary"><span class="header-section-number">7</span> Package boundary</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/website/architecture.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
 <!-- main -->
-<main class="content column-page-right" id="quarto-document-content">
+<main class="content column-body" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html">Start here</a></li><li class="breadcrumb-item"><a href="./architecture.html">Architecture and data contract</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Architecture and data contract</h1>
+</div>
+
+<div>
+  <div class="description">
+    The component sequence, public namespaces, validation rules, and package boundary.
+  </div>
+</div>
 
 
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
 
 
-<section id="architecture-and-extension-contract" class="level1" data-number="1">
-<h1 data-number="1"><span class="header-section-number">1</span> Architecture and extension contract</h1>
-<section id="one-way-simulation-pipeline" class="level2" data-number="1.1">
-<h2 data-number="1.1" class="anchored" data-anchor-id="one-way-simulation-pipeline"><span class="header-section-number">1.1</span> One-way simulation pipeline</h2>
-<p><code>PanelSimulator</code> evaluates components in a fixed order:</p>
-<pre class="text"><code>PanelDimensions
-      |
-      v
-UnitFeatureModel.generate(dimensions, rng) [optional]
-      |
-      v
-AssignmentContext(dimensions, observables, unobservables)
-      |
-      v
-AssignmentModel.assign(context, rng)
-      |
-      v
-TimeFeatureModel.generate(dimensions, rng) [optional]
-      |
-      v
-SimulationContext(dimensions, treatment, unit features, time features)
-      |
-      +-------------------------+
-      |                         |
-      v                         v
-OutcomeModel.generate()   EffectModel.generate()
-      |                         |
-      +------------+------------+
-                   |
-                   v
-              PanelDataset</code></pre>
-<p>Shared unit features are drawn before assignment and can reach assignment, outcomes, and effects. Time features are drawn after assignment and reach outcomes and effects, so adding <span class="math inline">\(V_t\)</span> does not perturb a randomized assignment stream. This permits <span class="math inline">\(\tau_{it}=f(X_i,U_i,V_t)\)</span> without passing arrays through diagnostic metadata. Assignment still precedes the outcome draw, and the untreated outcome model does not receive realized effects. The effect model does not receive outcomes. This keeps the causal decomposition explicit.</p>
-</section>
-<section id="core-objects" class="level2" data-number="1.2">
-<h2 data-number="1.2" class="anchored" data-anchor-id="core-objects"><span class="header-section-number">1.2</span> Core objects</h2>
-<section id="paneldimensions" class="level3" data-number="1.2.1">
-<h3 data-number="1.2.1" class="anchored" data-anchor-id="paneldimensions"><span class="header-section-number">1.2.1</span> <code>PanelDimensions</code></h3>
-<p><code>PanelDimensions(n_units, n_periods)</code> defines only shape. It does not assume a control-first unit order, one treatment cohort, or a specific intervention date.</p>
-</section>
-<section id="componentdraw" class="level3" data-number="1.2.2">
-<h3 data-number="1.2.2" class="anchored" data-anchor-id="componentdraw"><span class="header-section-number">1.2.2</span> <code>ComponentDraw</code></h3>
-<p>Every component returns <code>ComponentDraw(values, metadata)</code>. <code>values</code> must be a matrix with the configured shape. Metadata can contain diagnostics or latent simulation truth. The final dataset copies and recursively freezes metadata.</p>
-</section>
-<section id="assignmentcontext" class="level3" data-number="1.2.3">
-<h3 data-number="1.2.3" class="anchored" data-anchor-id="assignmentcontext"><span class="header-section-number">1.2.3</span> <code>AssignmentContext</code></h3>
-<p>The assignment context contains dimensions, observed unit covariates, and latent unit features. Its matrices have shape <code>(n_units, n_features)</code>. The feature model is optional, so legacy and canonical assignments receive empty feature matrices without consuming additional random draws.</p>
-</section>
-<section id="simulationcontext" class="level3" data-number="1.2.4">
-<h3 data-number="1.2.4" class="anchored" data-anchor-id="simulationcontext"><span class="header-section-number">1.2.4</span> <code>SimulationContext</code></h3>
-<p>The context contains dimensions, realized treatment, the unit features used by assignment, and a <code>(n_periods, n_time_features)</code> <code>time_features</code> matrix. It derives:</p>
-<ul>
-<li><code>ever_treated</code>;</li>
-<li><code>control_units</code>;</li>
-<li><code>treated_units</code>;</li>
-<li><code>is_absorbing</code>;</li>
-<li><code>adoption_times</code> for absorbing treatment.</li>
-</ul>
-<p>Outcome models can therefore depend on treatment status without assuming that controls appear before treated units.</p>
-</section>
-<section id="paneldataset" class="level3" data-number="1.2.5">
-<h3 data-number="1.2.5" class="anchored" data-anchor-id="paneldataset"><span class="header-section-number">1.2.5</span> <code>PanelDataset</code></h3>
-<p>The dataset owns the final arrays. It validates shape, finiteness, binary treatment, effect support, and the causal decomposition. Its read-only arrays are safe to share among estimators. <code>copy=True</code> creates writable estimator inputs when required. Observed time-invariant covariates are available through <code>unit_covariates</code>; latent features remain namespaced simulation metadata.</p>
-</section>
-</section>
-<section id="protocols" class="level2" data-number="1.3">
-<h2 data-number="1.3" class="anchored" data-anchor-id="protocols"><span class="header-section-number">1.3</span> Protocols</h2>
-<p>The component interfaces use <code>typing.Protocol</code>. Inheritance is optional.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> UnitFeatureModel(Protocol):</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> generate(<span class="va">self</span>, dimensions, rng) <span class="op">-&gt;</span> UnitFeatureDraw: ...</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TimeFeatureModel(Protocol):</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> generate(<span class="va">self</span>, dimensions, rng) <span class="op">-&gt;</span> TimeFeatureDraw: ...</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> AssignmentModel(Protocol):</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> assign(<span class="va">self</span>, context, rng) <span class="op">-&gt;</span> ComponentDraw: ...</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> OutcomeModel(Protocol):</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> generate(<span class="va">self</span>, context, rng) <span class="op">-&gt;</span> ComponentDraw: ...</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> EffectModel(Protocol):</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> generate(<span class="va">self</span>, context, rng) <span class="op">-&gt;</span> ComponentDraw: ...</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The package validates the returned matrices at the composition boundary. A custom class can focus on its probability law.</p>
-</section>
-<section id="random-number-policy" class="level2" data-number="1.4">
-<h2 data-number="1.4" class="anchored" data-anchor-id="random-number-policy"><span class="header-section-number">1.4</span> Random-number policy</h2>
-<p><code>PanelSimulator.simulate()</code> supports a legacy shared generator and opt-in named component streams. A deterministic component should not consume random draws.</p>
-<p>Accepted inputs are:</p>
-<ul>
-<li><code>seed=&lt;integer&gt;</code>;</li>
-<li><code>seed=&lt;numpy.random.SeedSequence&gt;</code>;</li>
-<li><code>rng=&lt;numpy.random.Generator&gt;</code>;</li>
-<li><code>streams=SimulationSeeds.from_seed(&lt;integer&gt;)</code>;</li>
-<li>neither, for a fresh entropy-seeded generator.</li>
-</ul>
-<p>Passing more than one mode is an error. The named mode separates feature, assignment, time-feature, outcome, and effect draws. Adding an unrelated component then leaves other streams unchanged. The shared mode preserves exact canonical output. <code>iter_simulations()</code> uses <code>SeedSequence.spawn()</code> to create independent child streams instead of using adjacent integer seeds.</p>
-<p>When a design needs two components to restart from the same state, it must clone the generator explicitly and document that choice. The canonical mixed-factor design does this because it reproduces two half-panels that restart from the same random stream.</p>
-</section>
-<section id="built-in-composition-components" class="level2" data-number="1.5">
-<h2 data-number="1.5" class="anchored" data-anchor-id="built-in-composition-components"><span class="header-section-number">1.5</span> Built-in composition components</h2>
-<section id="assignment" class="level3" data-number="1.5.1">
-<h3 data-number="1.5.1" class="anchored" data-anchor-id="assignment"><span class="header-section-number">1.5.1</span> Assignment</h3>
-<ul>
-<li><code>SingleCohortAssignment</code> creates one absorbing cohort. It supports explicit treated-unit positions.</li>
-<li><code>StaggeredAdoption</code> accepts a mapping from unit position to adoption period.</li>
-<li><code>RandomizedSingleCohortAssignment</code> samples a fixed-size cohort without replacement.</li>
-<li><code>RandomizedStaggeredAdoption</code> randomly partitions units into exact fixed-size adoption cohorts.</li>
-<li><code>BinaryLogitAssignment</code> draws treatment from observed and latent unit-feature logits.</li>
-<li><code>GeneralizedPropensityAssignment</code> draws adoption cohorts from multinomial logits with never treated as the baseline category.</li>
-</ul>
-</section>
-<section id="unit-features" class="level3" data-number="1.5.2">
-<h3 data-number="1.5.2" class="anchored" data-anchor-id="unit-features"><span class="header-section-number">1.5.2</span> Unit features</h3>
-<ul>
-<li><code>GaussianUnitFeatures</code> draws independent standard-normal observed covariates and latent unit factors.</li>
-<li><code>CorrelatedGaussianFeatures</code> supports Toeplitz or explicit covariance, callable transforms, and separate estimator-visible raw covariates.</li>
-<li><code>LatentGradientFeatures</code> supplies the ATT-DML latent-selection factor.</li>
-</ul>
-</section>
-<section id="time-features" class="level3" data-number="1.5.3">
-<h3 data-number="1.5.3" class="anchored" data-anchor-id="time-features"><span class="header-section-number">1.5.3</span> Time features</h3>
-<ul>
-<li><code>GaussianTimeFeatures</code> draws independent standard-normal <span class="math inline">\(V_t\)</span>. Custom time feature models can generate trends, cycles, shocks, or observed calendars.</li>
-</ul>
-</section>
-<section id="effects" class="level3" data-number="1.5.4">
-<h3 data-number="1.5.4" class="anchored" data-anchor-id="effects"><span class="header-section-number">1.5.4</span> Effects</h3>
-<ul>
-<li><code>ConstantEffect</code> applies one effect to every treated cell.</li>
-<li><code>LinearRampEffect</code> uses unit-specific event time and supports staggered adoption.</li>
-<li><code>CohortEventTimeEffect</code> maps adoption periods to supplied post-adoption profiles.</li>
-<li><code>CallableEffect</code> evaluates scalar, unit, time, or full unit-by-time laws against the shared <code>SimulationContext</code>; <code>PanelSimulator</code> automatically wraps a lambda passed as <code>effect_model</code>. <code>CallableUnitEffect</code> is retained as a compatibility name.</li>
-</ul>
-</section>
-<section id="outcome-adapter" class="level3" data-number="1.5.5">
-<h3 data-number="1.5.5" class="anchored" data-anchor-id="outcome-adapter"><span class="header-section-number">1.5.5</span> Outcome adapter</h3>
-<p><code>CallableOutcomeModel</code> turns a function into an outcome component. The function can return a matrix or a <code>ComponentDraw</code> with metadata.</p>
-</section>
-<section id="outcome-primitives" class="level3" data-number="1.5.6">
-<h3 data-number="1.5.6" class="anchored" data-anchor-id="outcome-primitives"><span class="header-section-number">1.5.6</span> Outcome primitives</h3>
-<ul>
-<li><code>TwoWayFixedEffectsOutcome</code> generates additive unit and period effects.</li>
-<li><code>LowRankFactorOutcome</code> generates a rank-<span class="math inline">\(k\)</span> interactive fixed-effects law.</li>
-<li><code>LinearFeatureOutcome</code> generates feature-linear levels and trends.</li>
-<li><code>UnitTrendOutcome</code>, <code>PeriodicTimeOutcome</code>, <code>ARMAErrorOutcome</code>, and <code>ClusteredTrendOutcome</code> are independent composable terms.</li>
-</ul>
-</section>
-<section id="causal-truth-and-labels" class="level3" data-number="1.5.7">
-<h3 data-number="1.5.7" class="anchored" data-anchor-id="causal-truth-and-labels"><span class="header-section-number">1.5.7</span> Causal truth and labels</h3>
-<p><code>effect_surface</code> is the full effect law. <code>treatment_effect</code> is its realized contribution and must equal <code>effect_surface * treatment</code>. <code>PanelTruth</code> derives cohort/event cells, supported event-study targets, and cohort ATTs without a dataframe dependency.</p>
-<p>Unit and time identifiers remain separate from annotations. The simulator adds <code>ever_treated</code> and <code>adoption_period</code> to unit annotations and preserves any project-specific axis labels.</p>
-</section>
-</section>
-<section id="add-a-component" class="level2" data-number="1.6">
-<h2 data-number="1.6" class="anchored" data-anchor-id="add-a-component"><span class="header-section-number">1.6</span> Add a component</h2>
+</header>
+
+
+<section id="the-simulation-sequence" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="the-simulation-sequence"><span class="header-section-number">1</span> The simulation sequence</h2>
+<p>A <code>PanelSimulator</code> evaluates components in this order:</p>
 <ol type="1">
-<li>Define an immutable configuration object, normally a frozen dataclass.</li>
-<li>Validate scalar parameters in <code>__post_init__</code>.</li>
-<li>Implement the relevant protocol method.</li>
-<li>Use only the provided generator for random draws.</li>
-<li>Return a full <code>(n_units, n_periods)</code> matrix.</li>
-<li>Put diagnostic truth in metadata, not global state.</li>
-<li>Add contract, invalid-input, and seeded-reproducibility tests.</li>
+<li>The unit-feature model draws observed and latent features.</li>
+<li>The assignment model draws the binary treatment matrix.</li>
+<li>The time-feature model draws shared time features, if present.</li>
+<li>The outcome model draws untreated outcomes.</li>
+<li>The effect model draws a complete effect surface and realized effects.</li>
+<li>The simulator validates and freezes the result.</li>
 </ol>
-<p>An outcome model should use <code>context.control_units</code> and <code>context.treated_units</code> rather than assume a row order. An effect model must return zero outside treated cells.</p>
+<p>Later components can use earlier draws through typed contexts. For example, an outcome model can use both unit features and treatment timing. This permits selection on untreated trends. The package keeps that dependence visible in the component definition.</p>
 </section>
-<section id="add-a-named-dgp" class="level2" data-number="1.7">
-<h2 data-number="1.7" class="anchored" data-anchor-id="add-a-named-dgp"><span class="header-section-number">1.7</span> Add a named DGP</h2>
-<p>Write a factory that returns a configured <code>PanelSimulator</code>:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> unit_trend_design(<span class="op">*</span>, scale<span class="op">=</span><span class="fl">1.0</span>):</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> PanelSimulator(</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        name<span class="op">=</span><span class="st">&quot;unit_trend&quot;</span>,</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        dimensions<span class="op">=</span>PanelDimensions(<span class="dv">100</span>, <span class="dv">30</span>),</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        assignment<span class="op">=</span>SingleCohortAssignment(<span class="dv">20</span>, <span class="dv">20</span>),</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        outcome_model<span class="op">=</span>UnitTrendOutcome(scale<span class="op">=</span>scale),</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        effect_model<span class="op">=</span>ConstantEffect(<span class="fl">1.0</span>),</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Register it in a project registry:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>registry <span class="op">=</span> DGPRegistry()</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>registry.register(<span class="st">&quot;unit_trend&quot;</span>, unit_trend_design)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Do not add estimator options to a simulation factory. Estimator configuration belongs in the downstream experiment runner.</p>
+<section id="three-public-namespaces" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="three-public-namespaces"><span class="header-section-number">2</span> Three public namespaces</h2>
+<p>Use imports that state what an object does:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> core, designs, primitives</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Namespace</th>
+<th>Contents</th>
+<th>Typical use</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>core</code></td>
+<td>contracts, simulator, data, truth, random streams</td>
+<td>compose and inspect simulations</td>
+</tr>
+<tr class="even">
+<td><code>primitives</code></td>
+<td>feature, assignment, outcome, and effect laws</td>
+<td>build a DGP from parts</td>
+</tr>
+<tr class="odd">
+<td><code>designs</code></td>
+<td>configured scientific and benchmark families</td>
+<td>run a named design</td>
+</tr>
+</tbody>
+</table>
+<p>Root-level imports remain available for compatibility. New examples do not use them because a call such as <code>designs.baker(...)</code> or <code>primitives.LowRankFactorOutcome(...)</code> carries useful meaning.</p>
 </section>
-<section id="data-ownership" class="level2" data-number="1.8">
-<h2 data-number="1.8" class="anchored" data-anchor-id="data-ownership"><span class="header-section-number">1.8</span> Data ownership</h2>
-<p>The dataset copies arrays before setting them read-only. Mutating an input array after construction cannot change the dataset. Nested mappings, arrays, lists, and sets in metadata are also copied or converted to immutable forms.</p>
-<p>The package does not promise that arbitrary scalar objects inside metadata are deeply immutable. Store simple scalars, arrays, mappings, and sequences.</p>
+<section id="core-protocols" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="core-protocols"><span class="header-section-number">3</span> Core protocols</h2>
+<p>Each component satisfies a small protocol:</p>
+<ul>
+<li><code>UnitFeatureModel.generate(dimensions, rng)</code> returns a <code>UnitFeatureDraw</code>.</li>
+<li><code>AssignmentModel.assign(context, rng)</code> returns a <code>ComponentDraw</code>.</li>
+<li><code>TimeFeatureModel.generate(dimensions, rng)</code> returns a <code>TimeFeatureDraw</code>.</li>
+<li><code>OutcomeModel.generate(context, rng)</code> returns untreated outcomes.</li>
+<li><code>EffectModel.generate(context, rng)</code> returns realized effects.</li>
+</ul>
+<p>The protocols are structural. A custom dataclass does not need to inherit from a package base class. It only needs the correct method and return type.</p>
 </section>
-<section id="extension-limits" class="level2" data-number="1.9">
-<h2 data-number="1.9" class="anchored" data-anchor-id="extension-limits"><span class="header-section-number">1.9</span> Extension limits</h2>
-<p>The current <code>PanelDataset</code> contract requires a balanced rectangular panel and binary treatment. Missing outcomes can be represented by a separate custom metadata mask, but the core outcome matrices must remain finite. A future missing-data extension should add an explicit observation mask instead of using <code>NaN</code> as an implicit contract.</p>
+<section id="matrix-conventions" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="matrix-conventions"><span class="header-section-number">4</span> Matrix conventions</h2>
+<p>All panel matrices use <code>(unit, time)</code> order. For <span class="math inline">\(N\)</span> units and <span class="math inline">\(T\)</span> periods, each matrix has shape <span class="math inline">\(N \times T\)</span>.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Matrix</th>
+<th>Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>outcome</code></td>
+<td>observed outcome <span class="math inline">\(Y\)</span></td>
+</tr>
+<tr class="even">
+<td><code>treatment</code></td>
+<td>binary assignment <span class="math inline">\(D\)</span></td>
+</tr>
+<tr class="odd">
+<td><code>untreated_outcome</code></td>
+<td>untreated potential outcome <span class="math inline">\(Y(0)\)</span></td>
+</tr>
+<tr class="even">
+<td><code>effect_surface</code></td>
+<td>effect if treated, <span class="math inline">\(\tau\)</span></td>
+</tr>
+<tr class="odd">
+<td><code>treatment_effect</code></td>
+<td>realized effect <span class="math inline">\(D \odot \tau\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>The simulator enforces</p>
+<p><span class="math display">\[
+Y = Y(0) + D \odot \tau.
+\]</span></p>
+<p>It rejects non-finite values, incompatible shapes, non-binary treatment, a realized effect outside treated cells, and a broken causal identity.</p>
+</section>
+<section id="immutable-results" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="immutable-results"><span class="header-section-number">5</span> Immutable results</h2>
+<p><code>PanelDataset</code> copies its input arrays and marks them read-only. This prevents an estimator from changing the stored causal truth by accident. Metadata and annotations are also frozen.</p>
+<p>The result supplies:</p>
+<ul>
+<li><code>as_arrays()</code> for matrix estimators;</li>
+<li><code>as_long_dict()</code> for data-frame and formula estimators;</li>
+<li><code>true_att</code> for the average realized treated-cell effect;</li>
+<li><code>truth.cohort_event()</code> for supported cohort-by-event-time cells;</li>
+<li><code>truth.event_study()</code> for event-time aggregates;</li>
+<li><code>truth.att_by_cohort()</code> for cohort ATT values.</li>
+</ul>
+</section>
+<section id="randomness" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="randomness"><span class="header-section-number">6</span> Randomness</h2>
+<p><code>simulate(seed=42)</code> uses one shared NumPy generator. This is convenient and preserves earlier package behavior.</p>
+<p><code>SimulationSeeds.from_seed(42)</code> creates separate feature, assignment, time-feature, outcome, and effect streams. Use it when adding a new outcome component must not change the assignment draw.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> core, designs</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>simulator <span class="op">=</span> designs.baker_design()</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> simulator.simulate(streams<span class="op">=</span>core.SimulationSeeds.from_seed(<span class="dv">42</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Never set NumPy’s process-wide random seed for package simulations.</p>
+</section>
+<section id="package-boundary" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="package-boundary"><span class="header-section-number">7</span> Package boundary</h2>
+<p>The package contains reusable simulation infrastructure and configured data laws. It does not contain estimator implementations, paper build systems, Monte Carlo schedulers, or cached reports. Research tutorials can call an external estimator, but the estimator does not become part of the core API.</p>
+<p>This boundary has two benefits. A DGP remains usable after an estimator library changes, and different estimators can receive exactly the same immutable panel.</p>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->
@@ -5956,4 +5910,4 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/architecture.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/website/architecture.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

@@ -1,0 +1,148 @@
+---
+title: "Design API"
+description: "Configured benchmark and research design families."
+jupyter: python3
+---
+
+```{python}
+import inspect
+
+from pypanelsim import designs
+
+def show(names):
+    for name in names:
+        value = getattr(designs, name)
+        print(f"{name}{inspect.signature(value)}")
+```
+
+## Canonical benchmarks
+
+```{python}
+show((
+    "CanonicalPanelConfig",
+    "classic_factor_design",
+    "weak_factor_design",
+    "synthetic_control_design",
+    "factor_synthetic_design",
+    "time_series_design",
+    "mixed_factor_design",
+    "make_canonical",
+    "available_canonical_designs",
+))
+```
+
+Direct-draw functions have the same base name without `_design`:
+`classic_factor`, `weak_factor`, `synthetic_control`, `factor_synthetic`,
+`time_series`, and `mixed_factor`.
+
+`CanonicalPanelConfig` controls control and treated unit counts, pre and post
+periods, the linear-effect slope, and noise variance. Family-specific arguments
+control loading overlap, active donor share, or autoregressive persistence.
+
+## Baker design
+
+```{python}
+show(("BakerPanelConfig", "baker_design", "baker"))
+```
+
+The configuration gives calendar years, adoption years, cohort sizes, dynamic
+effect slopes, and noise scales. `n_units` may exceed the sum of cohort sizes;
+remaining units are never treated.
+
+## F-test designs
+
+```{python}
+show((
+    "FTestTemporalConfig",
+    "FTestCohortConfig",
+    "ftest_temporal_profile",
+    "ftest_cohort_profiles",
+    "ftest_temporal_design",
+    "ftest_cohort_design",
+    "ftest_temporal",
+    "ftest_cohort",
+    "available_ftest_temporal_designs",
+    "available_ftest_cohort_designs",
+))
+```
+
+The temporal configuration controls one cohort and one effect path. The cohort
+configuration controls three adoption periods, their unit shares, correlated
+error scales, and periodic time effects.
+
+## Adaptive pooling designs
+
+```{python}
+show((
+    "LepskiiPanelConfig",
+    "lepskii_profiles",
+    "lepskii_design",
+    "lepskii",
+    "available_lepskii_designs",
+))
+```
+
+The configuration controls nine default adoption cohorts, cohort shares,
+fixed-effect scales, two-way error correlation, and periodic time terms. The
+named variant controls only the cohort-event effect surface.
+
+## Conditional and latent trend designs
+
+```{python}
+show((
+    "ATTDMConditionalConfig",
+    "ATTDMLatentConfig",
+    "ATTDMClusteredConfig",
+    "att_dml_design",
+    "att_dml",
+    "available_att_dml_designs",
+))
+```
+
+The design name determines which configuration type is valid:
+
+| Names | Configuration |
+|---|---|
+| `conditional_parallel_trends`, `conditional_parallel_trends_nonlinear` | `ATTDMConditionalConfig` |
+| `latent_parallel`, `latent_nonparallel` | `ATTDMLatentConfig` |
+| `clustered_arma` | `ATTDMClusteredConfig` |
+
+Passing a configuration from the wrong row raises a type error.
+
+## Regression-compression designs
+
+```{python}
+show((
+    "RegressionCompressionConfig",
+    "regression_compression_design",
+    "regression_compression",
+    "AnscombePanelConfig",
+    "anscombe_design",
+    "anscombe",
+    "available_anscombe_designs",
+))
+```
+
+`RegressionCompressionConfig` controls sample size, adoption, effect profile,
+heterogeneity, fixed-effect and trend scales, and AR(1) error. The Anscombe
+family places heterogeneity at zero, unit, time, or cohort-time level.
+
+## Composite benchmark
+
+```{python}
+show((
+    "GSynthCompositeConfig",
+    "gsynth_composite_design",
+    "gsynth_composite",
+))
+```
+
+The four component weights correspond to factor, time-series, sparse-synthetic,
+and two-way fixed-effects outcome components. This family is a package stress
+test, not a paper reproduction.
+
+## Seed inputs
+
+All direct-draw functions accept `seed` or `rng`. Research-family direct draws
+also accept named `streams` where shown in their signature. The simulator
+constructor always permits `SimulationSeeds` through `simulate(streams=...)`.

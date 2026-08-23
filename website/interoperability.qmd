@@ -1,86 +1,154 @@
 ---
-title: "Estimator interoperability"
-subtitle: "Wide arrays for crabbymetrics and long panels for PyFixest"
+title: "Export and interoperability"
+description: "Use one immutable panel with matrix, data-frame, formula, Arrow, or R estimators."
+jupyter: python3
 ---
 
-`pypanelsim` does not impose an estimator interface. A panel exposes wide NumPy
-arrays, long columns, observed unit covariates, treatment timing, and causal
-truth for evaluation.
+`pypanelsim` does not require an estimator library. It returns NumPy arrays and
+a dependency-free long-column mapping. Convert that mapping at the boundary of
+your analysis.
 
 ```{python}
-import crabbymetrics as cm
-import numpy as np
+from pypanelsim import designs
+
+panel = designs.classic_factor(overlap=0.0, seed=91)
+```
+
+## Matrix estimators
+
+Use `as_arrays()` when an estimator accepts outcome and treatment matrices in
+`(unit, time)` order.
+
+```{python}
+outcome, treatment = panel.as_arrays()
+print(outcome.shape, treatment.shape)
+```
+
+Use `arrays()` when the estimator also needs untreated truth or the effect
+surface.
+
+```{python}
+y, d, y0, tau = panel.arrays(
+    ("outcome", "treatment", "untreated_outcome", "effect_surface")
+)
+print(y.shape, d.shape, y0.shape, tau.shape)
+```
+
+The returned arrays are read-only unless `copy=True` is requested.
+
+## pandas and formula estimators
+
+```{python}
 import pandas as pd
+
+frame = pd.DataFrame(
+    panel.as_long_dict(
+        include_effect_surface=True,
+        include_annotations=True,
+    )
+)
+
+print(frame.columns.tolist())
+print(frame.shape)
+```
+
+The core columns are `unit`, `time`, `outcome`, `treatment`,
+`untreated_outcome`, and `treatment_effect`. Unit covariates are repeated over
+time. Annotations such as adoption period and treatment status are optional.
+
+A formula estimator can now refer to ordinary column names. For example, a
+TWFE call in PyFixest can use:
+
+```python
 import pyfixest as pf
-import pypanelsim as pps
 
-panel = pps.classic_factor(overlap=0.0, seed=91)
+fit = pf.feols("outcome ~ treatment | unit + time", data=frame)
 ```
 
-## crabbymetrics
+PyFixest is not a package dependency. Install and version it in the analysis
+that uses it.
 
-crabbymetrics panel estimators consume the wide `(unit, period)` arrays directly.
+## Polars
 
-```{python}
-model = cm.AugmentedBalancing(balance="double")
-model.fit(panel.outcome, panel.treatment)
-balancing_att = float(model.summary()["att"])
-pd.DataFrame(
-    {
-        "quantity": ["estimated ATT", "true ATT", "error"],
-        "value": [balancing_att, panel.true_att, balancing_att - panel.true_att],
-    }
+```python
+import polars as pl
+
+frame = pl.DataFrame(panel.as_long_dict(include_annotations=True))
+```
+
+## Arrow and Parquet
+
+```python
+import pyarrow as pa
+import pyarrow.parquet as pq
+
+table = pa.table(panel.as_long_dict(include_annotations=True))
+pq.write_table(table, "simulation.parquet")
+```
+
+Parquet is a useful interchange format because it preserves typed columns and
+can be read by Python, R, Julia, DuckDB, and other systems.
+
+## R
+
+Write one replication in Python:
+
+```python
+import pandas as pd
+
+pd.DataFrame(panel.as_long_dict(include_annotations=True)).to_parquet(
+    "simulation.parquet",
+    index=False,
 )
 ```
 
-An outcome model can be supplied as a same-shaped nuisance surface. The oracle
-surface below is for interface demonstration only; a real estimator must fit its
-nuisance model without treated post-treatment leakage.
+Read it in R:
 
-```{python}
-oracle = cm.AugmentedBalancing(balance="none")
-oracle.fit(panel.outcome, panel.treatment, panel.untreated_outcome)
-print(float(oracle.summary()["att"]), panel.true_att)
+```r
+library(arrow)
+
+panel <- read_parquet("simulation.parquet")
 ```
 
-## PyFixest
+When exact cross-language array comparisons matter, also save the seed,
+configuration, package version, and matrix-order convention. Different random
+number generators do not normally produce matched draws from the same integer
+seed.
 
-PyFixest consumes a long DataFrame and formula. `as_long_dict()` supplies all
-core panel columns and repeats observed unit covariates over time.
+## Estimator adapters
 
-```{python}
-long = pd.DataFrame(dict(panel.as_long_dict()))
-twfe = pf.feols(
-    "outcome ~ treatment | unit + time",
-    data=long,
-    vcov={"CRV1": "unit"},
-)
-pd.DataFrame(
-    {
-        "estimate": [float(twfe.coef()["treatment"])],
-        "standard error": [float(twfe.se()["treatment"])],
-        "simulation ATT": [panel.true_att],
-    }
-)
+Keep adapters small and local:
+
+```python
+def fit_matrix_estimator(panel, estimator):
+    outcome, treatment = panel.as_arrays(copy=True)
+    return estimator.fit(outcome=outcome, treatment=treatment)
 ```
 
-The regression coefficient and `panel.true_att` need not target the same
-weighted estimand under heterogeneous effects or staggered adoption. The point
-of the interchange is to make this comparison explicit, not to force agreement.
+An adapter may reshape data or rename columns. It should not change the DGP or
+recompute causal truth. This boundary lets several estimators use the same
+panel object.
 
-## Writable inputs
-
-The package returns read-only arrays by default. Ask for copies when an estimator
-modifies its inputs:
+## Repeated experiments
 
 ```{python}
-y_copy, w_copy = panel.as_arrays(copy=True)
-print(y_copy.flags.writeable, w_copy.flags.writeable)
+simulator = designs.classic_factor_design(overlap=0.0)
+
+records = []
+for replication, draw in enumerate(
+    simulator.iter_simulations(5, seed=91),
+    start=1,
+):
+    records.append(
+        {
+            "replication": replication,
+            "true_att": draw.true_att,
+            "n_treated": draw.treated_units.size,
+        }
+    )
+
+print(pd.DataFrame(records))
 ```
 
-For selected truth matrices:
-
-```{python}
-y0, tau = panel.arrays(("untreated_outcome", "treatment_effect"))
-np.testing.assert_allclose(panel.outcome, y0 + tau)
-```
+Store small estimator summaries in the experiment project. Do not add Monte
+Carlo result caches to the simulation package.

@@ -10,12 +10,12 @@ import numpy as np
 import pandas as pd
 import pyfixest as pf
 
-import pypanelsim as pps
+from pypanelsim import core, designs
 
 
 def baker_frame(
-    panel: pps.PanelDataset,
-    config: pps.BakerPanelConfig,
+    panel: core.PanelDataset,
+    config: designs.BakerPanelConfig,
 ) -> pd.DataFrame:
     """Convert a Baker panel to PyFixest's long-form cohort convention."""
 
@@ -123,8 +123,8 @@ def _saturated_results(
 
 
 def fit_baker_event_studies(
-    panel: pps.PanelDataset,
-    config: pps.BakerPanelConfig,
+    panel: core.PanelDataset,
+    config: designs.BakerPanelConfig,
     *,
     window: int = 5,
 ) -> dict[str, object]:
@@ -250,8 +250,8 @@ def render_baker_event_study(
 
     if output is None:
         output = Path(__file__).with_name("baker_twfe_event_study.png")
-    config = pps.BakerPanelConfig()
-    panel = pps.baker(config=config, seed=seed)
+    config = designs.BakerPanelConfig()
+    panel = designs.baker(config=config, seed=seed)
     estimates = fit_baker_event_studies(panel, config)
 
     figure, _ = plot_baker_event_studies(estimates)

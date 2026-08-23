@@ -666,8 +666,8 @@ wheels = [
 
 [[package]]
 name = "crabbymetrics"
-version = "0.8.1"
-source = { git = "ssh://git@github.com/apoorvalal/crabbymetrics.git#251261a7a53c962f92391f29370e80f79fcdf529" }
+version = "0.8.2"
+source = { git = "https://github.com/apoorvalal/crabbymetrics.git#81df43632f74cb3f7ea4bed0652fbfb794698d94" }
 dependencies = [
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
@@ -2867,10 +2867,12 @@ dependencies = [
 
 [package.optional-dependencies]
 docs = [
-    { name = "crabbymetrics" },
     { name = "jupyter" },
     { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "pandas", version = "3.0.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+]
+estimators = [
+    { name = "crabbymetrics" },
     { name = "pyfixest" },
 ]
 
@@ -2882,14 +2884,14 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "crabbymetrics", marker = "extra == 'docs'", git = "ssh://git@github.com/apoorvalal/crabbymetrics.git" },
+    { name = "crabbymetrics", marker = "extra == 'estimators'", git = "https://github.com/apoorvalal/crabbymetrics.git" },
     { name = "jupyter", marker = "extra == 'docs'", specifier = ">=1.1.1" },
     { name = "matplotlib", specifier = ">=3.10" },
     { name = "numpy", specifier = ">=1.26" },
     { name = "pandas", marker = "extra == 'docs'", specifier = ">=2.3.3" },
-    { name = "pyfixest", marker = "extra == 'docs'", specifier = ">=0.50.1" },
+    { name = "pyfixest", marker = "extra == 'estimators'", specifier = ">=0.50.1" },
 ]
-provides-extras = ["docs"]
+provides-extras = ["docs", "estimators"]
 
 [package.metadata.requires-dev]
 dev = [

@@ -1,143 +1,200 @@
 ---
-title: "Research design suites"
-subtitle: "Named simulators for FTestEventStudy, ATT-DML, regression compression, and gsynth2"
-format:
-  html:
-    page-layout: full
-    embed-resources: true
-    code-fold: true
-execute:
-  enabled: false
+title: "Research designs"
+description: "Select a simulation family by scientific question, identifying assumption, and target."
+jupyter: python3
 ---
 
-## Scope
+This catalog describes each research-motivated family without assuming access
+to a private repository. A family can translate a public design, adapt a
+working-paper design, or serve as a package benchmark. Its status and source
+are stated below.
 
-The package separates reusable probability laws from named research designs.
-Primitives live in `features`, `assignments`, `outcomes`, `profiles`, and the
-core component module. The `designs` package fixes those primitives to the
-parameters used by a paper or experiment.
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np
 
-Estimators, cross-fitting, Lepskii selection, Monte Carlo runners, and report
-tables stay in the downstream projects. This boundary lets the same simulated
-panel feed several estimators without making an estimator a package dependency.
-
-## Project map
-
-| Downstream project | Public factory | Main contract |
-|---|---|---|
-| FTestEventStudy, original paper | `ftest_temporal_design()`, `ftest_cohort_design()` | Seven temporal and seven three-cohort effect laws |
-| FTestEventStudy, Lepskii draft | `lepskii_design()` | Fourteen nine-cohort effect surfaces with uneven cohort sizes |
-| ATT-DML, two-period study | `att_dml_design("conditional_parallel_trends")` | Correlated covariates, sparse logit assignment, sparse conditional trends |
-| ATT-DML, factor study | `att_dml_design("latent_parallel")`, `att_dml_design("latent_nonparallel")` | Treatment selection on a latent outcome factor |
-| ATT-DML, panel study | `att_dml_design("clustered_arma")` | 2WFE, clustered trends, and unit ARMA errors |
-| regression_compression, main benchmark | `regression_compression_design()` | 2WFE, unit trends, AR(1) errors, and dynamic effects |
-| regression_compression, Anscombe study | `anscombe_design()` | Four zero-mean effect surfaces under a rank-$k$ outcome law |
-| gsynth2, formal composite | `gsynth_composite_design()` | Weighted factor, time-series, synthetic-control, and 2WFE components |
-| gsynth2/dgps balancing study | Canonical factories such as `classic_factor_design()` | Exact Python parity with the extracted canonical designs |
-
-## Lepskii draft
-
-The default draft design uses $T=36$, adoption periods
-$(8,10,12,14,16,18,20,22,24)$, and cohort shares
-$(.05,.07,.09,.12,.14,.13,.10,.07,.05)$. The remaining units are never
-treated. `available_lepskii_designs()` returns all fourteen effect surfaces.
-
-```python
-config = pps.LepskiiPanelConfig(n_units=1_200)
-simulator = pps.lepskii_design("tensor_blocks", config=config)
-panel = simulator.simulate(seed=42)
-
-target = panel.truth.event_study(event_times=range(-5, 13))
+from pypanelsim import designs
 ```
 
-`target` is the cohort-size-weighted effect on the cohorts supported at each
-event time. It reports the number of supported cohorts and target units. It
-does not extrapolate a late cohort beyond the observed panel.
+## At a glance
 
-## ATT-DML
+| Question | Family | Treatment timing | Main truth |
+|---|---|---|---|
+| How does TWFE weight dynamic cohort effects? | Baker | staggered cohorts | cohort-event effects |
+| Can a joint test detect effect heterogeneity? | F-test | one or several cohorts | temporal or cohort surfaces |
+| How much should event-study cohorts be pooled? | Lepskii | many staggered cohorts | support-aware cohort paths |
+| What happens when parallel trends holds only conditionally? | ATT-DML | one cohort or clustered timing | ATT and conditional trends |
+| Can small regression summaries preserve a large experiment? | regression compression | one or two cohorts | event-time effects and sufficient summaries |
+| How do mixed panel structures affect a counterfactual estimator? | composite panel | one cohort | treated counterfactual surface |
 
-The conditional-trends design can expose raw Gaussian covariates to the
-estimator while assignment and outcomes use an expanded nonlinear basis. This
-supports an explicit nuisance-model misspecification experiment.
+## Baker dynamic effects
 
-```python
-config = pps.ATTDMConditionalConfig(
-    n_units=2_000,
-    n_features=20,
-    n_active=5,
-    trend_strength=2.0,
+**Question.** Why can a two-way fixed-effects coefficient differ from the
+average effect when cohorts adopt at different times and effects grow at
+different rates?
+
+**Law.** States enter one of three adoption cohorts. Untreated outcomes contain
+state and year effects. A cohort's effect grows linearly with exposure length.
+
+**Target.** The stored effect surface supplies cohort-event truth and the
+treated-cell ATT.
+
+```{python}
+baker_panel = designs.baker(
+    config=designs.BakerPanelConfig(n_units=200),
+    seed=42,
 )
-panel = pps.att_dml_design(
+print(baker_panel.shape, round(baker_panel.true_att, 3))
+```
+
+**Source.** This is a Python translation of Andrew Baker's public
+[JFE_DID](https://github.com/andrewchbaker/JFE_DID) simulation. See [Baker TWFE
+failure](vignettes/baker-twfe.qmd).
+
+## F-test heterogeneity designs
+
+**Question.** Can a joint test distinguish a common effect path from temporal
+or cohort heterogeneity?
+
+**Law.** The temporal family has one adoption date and seven effect paths. The
+cohort family has three adoption cohorts and seven cohort-effect surfaces.
+Untreated outcomes include fixed effects, trends, periodic components, and
+correlated errors.
+
+```{python}
+print(designs.available_ftest_temporal_designs())
+print(designs.available_ftest_cohort_designs())
+
+ftest_panel = designs.ftest_cohort(
+    "selection_on_gains",
+    config=designs.FTestCohortConfig(n_units=240),
+    seed=42,
+)
+print(ftest_panel.truth.att_by_cohort()["att"])
+```
+
+**Source.** The family follows the public
+[TestingInEventStudies](https://github.com/apoorvalal/TestingInEventStudies)
+project and its paper, [When can we get away with using the two-way fixed
+effects regression?](https://arxiv.org/abs/2503.05125). See [F-test
+heterogeneity designs](vignettes/ftest-heterogeneity.qmd).
+
+## Adaptive partial pooling
+
+**Question.** Which cohorts have similar enough event-time paths to pool, and
+which comparisons lack calendar-time support?
+
+**Law.** Nine adoption cohorts receive paths that range from complete
+homogeneity to cohort-specific signed shapes. Untreated outcomes combine fixed
+effects, periodic time effects, and two-way correlated errors.
+
+```{python}
+print(designs.available_lepskii_designs())
+
+lepskii_panel = designs.lepskii(
+    "tensor_blocks",
+    config=designs.LepskiiPanelConfig(n_units=360),
+    seed=42,
+)
+cells = lepskii_panel.truth.cohort_event(event_times=(-2, -1, 0, 1, 2))
+print(cells.keys())
+```
+
+**Status.** This family adapts an unpublished working-paper design. It is not
+presented as a published-paper reproduction. See [Support-aware event
+studies](vignettes/support-aware-event-studies.qmd).
+
+## Conditional and latent trends
+
+**Question.** Does an estimator recover the ATT when unconditional parallel
+trends fails but a conditional or latent version holds?
+
+**Law.** Five variants cover linear and nonlinear conditional trends, stable
+and unstable latent trends, and clustered ARMA outcomes.
+
+```{python}
+print(designs.available_att_dml_designs())
+
+conditional_panel = designs.att_dml(
     "conditional_parallel_trends_nonlinear",
-    config=config,
-).simulate(seed=42)
-```
-
-The old executable R function constructs a treated baseline law but returns
-the untreated baseline for every unit. The manuscript describes a treated
-baseline shift. `treated_baseline_shift=False` reproduces the executable
-return law. Set it to `True` to use the manuscript interpretation. The choice
-is stored in outcome metadata.
-
-The treated post-period outcome also contains its original Gaussian shock.
-Thus `treatment_effect` is an individual effect draw around `treatment_effect`,
-and `panel.true_att` is the realized sample ATT rather than the configured mean.
-
-The clustered panel design draws a common stationary ARMA order and
-coefficients within the configured bounds. Set `randomize_arma=False` to use
-the fixed `ar_coefficients` and `ma_coefficients` fields instead.
-
-## Regression compression
-
-The main factory composes four public objects: randomized or Bernoulli
-assignment, a 2WFE outcome, a unit trend, and an AR(1) error. It supports the
-seven effect profiles in the original benchmark.
-
-```python
-config = pps.RegressionCompressionConfig(
-    n_units=1_000_000,
-    effect_profile="concave",
+    config=designs.ATTDMConditionalConfig(n_units=500),
+    seed=42,
 )
-simulator = pps.regression_compression_design(config=config)
+print(conditional_panel.unit_covariate_names[:5])
 ```
 
-Use smaller `n_units` values for estimator development. The law and array
-contract do not change.
+**Status.** These package designs isolate assumptions used in augmented
+balancing and double-machine-learning work. The related public source is
+[Augmented Balancing Estimators of the ATT](https://apoorvalal.github.io/files/papers/augbal.pdf).
+See [Conditional and latent trends](vignettes/conditional-trends.qmd).
 
-The Anscombe suite keeps the outcome law fixed and varies only the effect
-surface:
+## Large-panel regression summaries
 
-```python
-pps.available_anscombe_designs()
-# ('zero', 'unit', 'time', 'cohort_time')
-```
+**Question.** Can an experiment be reduced to small regression summaries
+without losing the treatment-effect signal?
 
-## gsynth2
+**Law.** The main design combines fixed effects, unit trends, serially
+correlated errors, and a configurable effect path. The Anscombe variants hold
+selected summaries similar while changing unit, time, or cohort-time
+structure.
 
-`gsynth_composite_design()` normalizes four nonnegative component weights and
-passes them to `SumOutcomeModel`. Each component remains in metadata, so a
-downstream report can audit its realized contribution.
-
-```python
-config = pps.GSynthCompositeConfig(
-    factor_weight=0.4,
-    time_series_weight=0.2,
-    synthetic_weight=0.2,
-    fixed_effect_weight=0.2,
+```{python}
+compression_panel = designs.regression_compression(
+    config=designs.RegressionCompressionConfig(n_units=400),
+    seed=42,
 )
-panel = pps.gsynth_composite_design(config=config).simulate(seed=42)
+print(compression_panel.shape)
+print(designs.available_anscombe_designs())
 ```
 
-## What remains downstream
+**Source.** This family is connected to [Large Scale Longitudinal
+Experiments](https://arxiv.org/abs/2410.09952) and its [public
+code](https://github.com/py-econometrics/panel-at-scale-code). See [Large
+panels and compressed regressions](vignettes/large-panels.qmd).
 
-The following objects are not simulation primitives:
+## Composite panel benchmark
 
-- F-test statistics, feasible GLS maps, and Lepskii tuning;
-- ATT-DML nuisance learners, orthogonal scores, and cross-fitting;
-- regression-compression solvers and storage benchmarks;
-- gsynth, synthetic-control, matrix-completion, and balancing estimators;
-- Monte Carlo replication, aggregation, and publication plots.
+**Question.** How does one estimator behave when untreated outcomes mix fixed
+effects, factors, time-series persistence, and sparse donor structure?
 
-Downstream projects can request writable arrays with
-`panel.as_arrays(copy=True)` or dependency-free long columns with
-`panel.as_long_dict()`.
+```{python}
+composite_panel = designs.gsynth_composite(
+    config=designs.GSynthCompositeConfig(n_control=80, n_treated=20),
+    seed=42,
+)
+print(composite_panel.metadata["outcome"]["model"])
+```
+
+**Status.** This is a package stress test assembled from primitives. It is not
+a formal reproduction of a paper or another repository. See [Composite panel
+benchmark](vignettes/composite-panels.qmd).
+
+## One draw from each family
+
+The gallery is descriptive, not an estimator comparison. Units are sorted by
+adoption time so treatment timing and untreated structure can be read together.
+
+```{python}
+#| label: fig-research-design-gallery
+#| fig-cap: "Observed outcome matrices from six research-motivated design families."
+#| fig-alt: "Six heatmaps compare observed outcome structure across the Baker, F-test, Lepskii, conditional-trend, large-panel, and composite design families."
+
+gallery = {
+    "Baker dynamic effects": baker_panel,
+    "F-test cohort surface": ftest_panel,
+    "Adaptive pooling": lepskii_panel,
+    "Conditional trends": conditional_panel,
+    "Large-panel regression": compression_panel,
+    "Composite benchmark": composite_panel,
+}
+
+figure, axes = plt.subplots(3, 2, figsize=(13, 12), constrained_layout=True)
+for axis, (label, draw) in zip(axes.ravel(), gallery.items(), strict=True):
+    order = np.argsort(draw.adoption_times, kind="stable")
+    image = axis.matshow(draw.outcome[order], aspect="auto", cmap="coolwarm")
+    axis.set_title(label)
+    axis.set_xlabel("period")
+    axis.set_ylabel("units, sorted by adoption")
+    figure.colorbar(image, ax=axis, fraction=0.035, pad=0.02)
+plt.show()
+```

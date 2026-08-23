@@ -6,32 +6,32 @@ project:
   render:
     - index.qmd
     - getting-started.qmd
+    - architecture.md
     - assignment.qmd
+    - canonical-designs.qmd
     - research-designs.qmd
     - interoperability.qmd
-    - architecture.md
-    - canonical-designs.qmd
-    - migration.md
-    - validation.md
+    - vignettes/baker-twfe.qmd
+    - vignettes/ftest-heterogeneity.qmd
+    - vignettes/support-aware-event-studies.qmd
+    - vignettes/conditional-trends.qmd
+    - vignettes/large-panels.qmd
+    - vignettes/composite-panels.qmd
+    - vignettes/balancing-reproduction.qmd
     - api.qmd
     - reference/core.qmd
     - reference/primitives.qmd
-    - reference/research-designs.qmd
-    - reference/assignment.qmd
-    - reference/baker.qmd
-    - reference/ftest.qmd
-    - reference/canonical.qmd
+    - reference/designs.qmd
     - reference/registry.qmd
-    - vignettes/baker-twfe.qmd
-    - vignettes/ftest-heterogeneity.qmd
-    - vignettes/research-suites.qmd
-    - vignettes/balancing-reproduction.qmd
+    - validation.md
+    - migration.md
 
 website:
   title: "pypanelsim"
   description: "Composable synthetic panel data with explicit assignment and causal truth."
   site-url: "https://apoorvalal.github.io/pypanelsim"
   repo-url: "https://github.com/apoorvalal/pypanelsim"
+  repo-subdir: website
   repo-actions: [edit, issue]
   search: true
   navbar:
@@ -42,25 +42,13 @@ website:
       - href: getting-started.qmd
         text: Get started
       - href: canonical-designs.qmd
-        text: DGP catalog
-      - href: assignment.qmd
-        text: Assignment
+        text: Design catalog
       - href: research-designs.qmd
-        text: Research suites
+        text: Research designs
+      - href: interoperability.qmd
+        text: Export
       - href: api.qmd
         text: API
-      - text: Vignettes
-        menu:
-          - href: vignettes/balancing-reproduction.qmd
-            text: Balancing reproduction
-          - href: vignettes/baker-twfe.qmd
-            text: Baker TWFE failure
-          - href: vignettes/ftest-heterogeneity.qmd
-            text: F-test heterogeneity DGPs
-          - href: vignettes/research-suites.qmd
-            text: Four research suites
-          - href: interoperability.qmd
-            text: Estimator interoperability
     right:
       - icon: github
         href: "https://github.com/apoorvalal/pypanelsim"
@@ -68,35 +56,37 @@ website:
   sidebar:
     style: docked
     contents:
-      - section: "Use pypanelsim"
+      - section: "Start here"
         contents:
+          - index.qmd
           - getting-started.qmd
+          - architecture.md
+      - section: "Build a design"
+        contents:
           - assignment.qmd
+          - canonical-designs.qmd
           - research-designs.qmd
           - interoperability.qmd
-      - section: "Concepts"
+      - section: "Research tutorials"
         contents:
-          - architecture.md
-          - canonical-designs.qmd
-          - migration.md
-          - validation.md
+          - vignettes/baker-twfe.qmd
+          - vignettes/ftest-heterogeneity.qmd
+          - vignettes/support-aware-event-studies.qmd
+          - vignettes/conditional-trends.qmd
+          - vignettes/large-panels.qmd
+          - vignettes/composite-panels.qmd
+          - vignettes/balancing-reproduction.qmd
       - section: "API reference"
         contents:
           - api.qmd
           - reference/core.qmd
           - reference/primitives.qmd
-          - reference/research-designs.qmd
-          - reference/assignment.qmd
-          - reference/baker.qmd
-          - reference/ftest.qmd
-          - reference/canonical.qmd
+          - reference/designs.qmd
           - reference/registry.qmd
-      - section: "Vignettes"
+      - section: "Maintenance and provenance"
         contents:
-          - vignettes/baker-twfe.qmd
-          - vignettes/ftest-heterogeneity.qmd
-          - vignettes/research-suites.qmd
-          - vignettes/balancing-reproduction.qmd
+          - validation.md
+          - migration.md
 
 format:
   html:
@@ -104,7 +94,8 @@ format:
       light: [cosmo, custom.scss]
       dark: [darkly, custom.scss]
     css: styles.css
-    toc: false
+    toc: true
+    toc-depth: 3
     page-layout: full
     embed-resources: true
     number-sections: true

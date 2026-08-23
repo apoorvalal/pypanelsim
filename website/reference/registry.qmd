@@ -1,74 +1,74 @@
 ---
 title: "Registry API"
-subtitle: "Stable names for simulator factories"
+description: "Store local simulator factories behind explicit names."
+jupyter: python3
 ---
+
+Most code should call an explicit design constructor. Use `DGPRegistry` when an
+experiment reads design names from configuration or when a downstream project
+maintains its own design catalog.
 
 ```{python}
 import inspect
 
-import pypanelsim as pps
+from pypanelsim import core, designs
 
-print(f"DGPRegistry{inspect.signature(pps.DGPRegistry)}")
+print(inspect.signature(core.DGPRegistry))
+for name in ("register", "create", "names"):
+    print(name, inspect.signature(getattr(core.DGPRegistry, name)))
 ```
 
-## `DGPRegistry`
+## Register a factory
 
-`DGPRegistry` maps normalized public names to callables that return
-`PanelSimulator` objects.
-
-### `register`
+A factory must return a `PanelSimulator`.
 
 ```{python}
-print(f"register{inspect.signature(pps.DGPRegistry.register)}")
-```
+registry = core.DGPRegistry()
 
-- `name` must start with a lowercase letter and otherwise contain only lowercase
-  letters, digits, and underscores.
-- `factory` must be callable.
-- duplicate registration raises `ValueError` unless `replace=True`.
-- the registry does not invoke or introspect the factory at registration time.
-
-### `create`
-
-```{python}
-print(f"create{inspect.signature(pps.DGPRegistry.create)}")
-```
-
-Looks up `name` and forwards keyword arguments to the factory. An unknown name
-raises `KeyError` with the available names. Type and parameter errors from the
-selected factory propagate to the caller.
-
-### Inspection
-
-```{python}
-for name in ("names", "__contains__", "__iter__", "__len__"):
-    print(f"{name}{inspect.signature(getattr(pps.DGPRegistry, name))}")
-```
-
-`names()` returns sorted names. Membership, iteration, and `len()` provide the
-standard container interface.
-
-## Example
-
-```{python}
-registry = pps.DGPRegistry()
-
-
-def small_factor(*, overlap=0.0):
-    config = pps.CanonicalPanelConfig(
-        n_control=24,
-        n_treated=6,
-        n_pre=16,
-        n_post=4,
+def classic_small(*, overlap=0.0):
+    config = designs.CanonicalPanelConfig(
+        n_control=60,
+        n_treated=20,
+        n_pre=24,
+        n_post=8,
     )
-    return pps.classic_factor_design(config=config, overlap=overlap)
+    return designs.classic_factor_design(
+        config=config,
+        overlap=overlap,
+    )
 
-
-registry.register("small_factor", small_factor)
-simulator = registry.create("small_factor", overlap=1.0)
-panel = simulator.simulate(seed=12)
-print(registry.names(), panel.shape)
+registry.register("classic_small", classic_small)
+print(registry.names())
 ```
 
-The package-level `canonical_registry` is prepopulated with the six canonical
-designs. Project-specific registries avoid mutating that global namespace.
+Names must start with a lowercase letter and contain only lowercase letters,
+digits, and underscores. Registering the same name twice raises an error unless
+`replace=True` is supplied.
+
+## Create and simulate
+
+```{python}
+simulator = registry.create("classic_small", overlap=1.0)
+panel = simulator.simulate(seed=42)
+
+print(simulator.name)
+print(panel.shape)
+```
+
+`create` forwards keyword arguments to the registered factory. An unknown name
+raises a key error that lists the available names.
+
+## Keep registries local
+
+Do not add every paper-specific experiment to the package-wide namespace.
+Downstream projects can define a registry near their experiment configuration:
+
+```python
+EXPERIMENTS = core.DGPRegistry()
+EXPERIMENTS.register("main_null", make_main_null)
+EXPERIMENTS.register("main_power", make_main_power)
+```
+
+The functions remain ordinary Python and can be tested directly. The registry
+adds name-based dispatch; it does not replace documentation of the scientific
+law.

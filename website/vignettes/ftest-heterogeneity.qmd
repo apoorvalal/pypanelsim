@@ -1,299 +1,237 @@
 ---
-title: "F-test paper heterogeneous-effect DGPs"
-subtitle: "All seven temporal paths and all seven staggered-cohort designs"
-date: last-modified
-format:
-  html:
-    embed-resources: true
-    page-layout: full
-    code-fold: true
-    code-summary: "Show code"
-    fig-responsive: true
+title: "F-test heterogeneity designs"
+description: "Generate temporal and cohort alternatives for joint tests of treatment-effect homogeneity."
 jupyter: python3
-execute:
-  echo: true
-  warning: false
-  message: false
 ---
 
-```{python}
-from __future__ import annotations
+These designs support the public
+[TestingInEventStudies](https://github.com/apoorvalal/TestingInEventStudies)
+project and the paper [When can we get away with using the two-way fixed effects
+regression?](https://arxiv.org/abs/2503.05125). The package generates the null
+and alternative effect surfaces. It does not implement the test statistic.
 
+```{python}
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
-from matplotlib.colors import BoundaryNorm, ListedColormap
 
-import pypanelsim as pps
-
-TREATMENT_CMAP = ListedColormap(["#f7f7f7", "#252525"])
-TREATMENT_NORM = BoundaryNorm([-0.5, 0.5, 1.5], TREATMENT_CMAP.N)
-
-plt.rcParams.update(
-    {
-        "axes.spines.top": False,
-        "axes.spines.right": False,
-        "figure.dpi": 115,
-    }
-)
+from pypanelsim import designs
 ```
 
-## What was ported
+## Two different heterogeneity questions
 
-The F-test paper contains two separate simulation suites:
+The temporal family asks whether the effect is constant over exposure time. It
+uses one treatment cohort.
 
-1. Seven single-adoption DGPs test whether effects are constant over event
-   time.
-2. Seven randomized three-cohort DGPs test whether dynamic effects are equal
-   across adoption cohorts.
-
-`pypanelsim` implements all fourteen. The port follows the executable formulas
-in `1dyn_het_sims.py` and `1multi_F_power.py`. This matters because the later
-`ftest_dgps.py` helper accidentally omits `novelty_effects`, even though that
-design appears in both the simulation script and manuscript. It is included
-here.
-
-The implementation is data driven. A DGP is a mapping from adoption periods to
-effect vectors, passed to the generic `CohortEventTimeEffect`; randomized
-three-cohort assignment uses the generic `RandomizedStaggeredAdoption`. There
-is no class hardcoded for any named effect shape.
+The cohort family asks whether adoption cohorts share the same event-time path.
+It uses three cohorts and correlated untreated errors.
 
 ```{python}
-pps.available_ftest_temporal_designs(), pps.available_ftest_cohort_designs()
+print("temporal:", designs.available_ftest_temporal_designs())
+print("cohort:", designs.available_ftest_cohort_designs())
 ```
 
-## Single-cohort temporal heterogeneity
+## Temporal alternatives
 
-The paper uses $N=50{,}000$, $T=35$, adoption at $T_0=15$, and a fixed-size
-half-treated cohort. The untreated outcome is
+The seven paths are constant, linear, concave, positive-then-negative,
+exponential, sinusoidal, and random walk.
 
-$$
-Y_{it}(0)=\alpha_i+\gamma_t+\delta_i t+e_{it},
-\qquad
-e_{it}=0.7e_{i,t-1}+2\sqrt{1-0.7^2}\,\epsilon_{it},
-$$
+```{python}
+temporal_config = designs.FTestTemporalConfig(
+    n_units=240,
+    n_periods=35,
+    adoption_period=15,
+    max_effect=1.0,
+)
 
-with $\alpha_i\sim N(0,5^2)$, $\gamma_t\sim N(0,2^2)$,
-$\delta_i\sim N(0,0.01^2)$, and $e_{i0}\sim N(0,2^2)$. The package defaults
-to $N=1{,}000$ for a cheap interactive draw; setting `n_units=50_000`
-reproduces the paper's Monte Carlo scale.
-
-Let $j=0,\ldots,L-1$, where $L=T-T_0$, and let $M$ be `max_effect`.
-
-| Name | Post-adoption profile |
-|---|---|
-| `constant` | $M$ |
-| `linear` | equally spaced from $0$ to $M$ |
-| `concave` | $\frac{M}{2}\log(1+2(j+1)/L)$ |
-| `positive_then_negative` | linear $0\to M$, then linear $M\to -M$ |
-| `exponential` | $M[1-\exp\{-\operatorname{linspace}(0,5)_j\}]$ |
-| `sinusoidal` | $M\sin\{\operatorname{linspace}(0,2\pi)_j\}$ |
-| `random_walk` | $M\sum_{s=0}^j z_s$, $z_s\sim N(0,1)$ |
-
-The factor $1/2$ in the concave law is the one used by the paper's actual
-single-cohort experiment. `profile_seed` fixes the random-walk truth separately
-from the panel draw seed.
+for name in designs.available_ftest_temporal_designs():
+    profile = designs.ftest_temporal_profile(
+        name,
+        config=temporal_config,
+        seed=42,
+    )
+    print(name, np.round(profile[:6], 2))
+```
 
 ```{python}
 #| label: fig-ftest-temporal-profiles
-#| fig-cap: "The seven true post-adoption profiles from the paper's temporal-heterogeneity experiment."
-#| fig-width: 13
-#| fig-height: 7
+#| fig-cap: "The seven single-cohort temporal effect alternatives."
+#| fig-alt: "Seven small line charts show constant, linear, plateau, hump, delayed, sign-changing, and fading temporal effect paths."
 
-temporal_config = pps.FTestTemporalConfig(n_units=240, max_effect=1.0)
-temporal_names = pps.available_ftest_temporal_designs()
-figure, axes = plt.subplots(2, 4, figsize=(13, 7), sharex=True)
-
-for axis, name in zip(axes.flat, temporal_names):
-    profile = pps.ftest_temporal_profile(
+temporal_names = designs.available_ftest_temporal_designs()
+figure, axes = plt.subplots(
+    2,
+    4,
+    figsize=(13, 7),
+    sharex=True,
+    constrained_layout=True,
+)
+for axis, name in zip(axes.ravel(), temporal_names, strict=False):
+    profile = designs.ftest_temporal_profile(
         name,
         config=temporal_config,
         seed=42,
     )
     axis.plot(np.arange(profile.size), profile, marker="o", markersize=3)
-    axis.axhline(0, color="0.3", linewidth=0.8, linestyle=":")
-    axis.set_title(name.replace("_", " ").title())
-    axis.set_xlabel("Event time")
-    axis.set_ylabel("True effect")
-
-axes.flat[-1].axis("off")
-figure.tight_layout()
+    axis.axhline(0.0, color="black", linewidth=0.6)
+    axis.set_title(name.replace("_", " "))
+    axis.set_xlabel("event time")
+    axis.set_ylabel("effect")
+for axis in axes.ravel()[len(temporal_names):]:
+    axis.set_visible(False)
 plt.show()
 ```
 
-Construct and reuse a simulator, or draw once:
+The untreated outcome contains unit effects, time effects, small unit trends,
+and AR(1) error. The treatment path begins at `adoption_period`.
 
 ```{python}
-temporal_simulator = pps.ftest_temporal_design(
+temporal_panel = designs.ftest_temporal(
     "positive_then_negative",
     config=temporal_config,
+    profile_seed=42,
+    seed=17,
 )
-temporal_panel = temporal_simulator.simulate(seed=2026)
 
-temporal_panel.shape, temporal_panel.treated_units.size
+print(temporal_panel.shape)
+print(round(temporal_panel.true_att, 3))
 ```
 
-## Across-cohort dynamic heterogeneity
+`profile_seed` fixes the random-walk alternative itself. `seed` controls the
+panel draw. Keeping these inputs separate prevents a change in outcome noise
+from changing the effect profile.
 
-The staggered suite fixes $T=30$, adoption periods $(10,15,20)$, and cohort
-shares $(1/8,1/4,1/8)$; the remaining half of the panel is never treated.
-Assignment is a random partition with those exact cohort counts. The paper uses
-$N=20{,}000$.
+## Cohort alternatives
 
-The untreated outcome combines unit effects, a seven-period calendar pattern,
-an AR(1) time effect, and unit-level AR(1) errors:
+The cohort family uses three adoption dates. Named surfaces range from a
+homogeneous null to large cohort differences and selection on gains.
 
-$$
-Y_{it}(0)=\alpha_i+\gamma_t+e_{it},
-\qquad e_{it}=0.8e_{i,t-1}+\epsilon_{it}.
-$$
+```{python}
+cohort_config = designs.FTestCohortConfig(n_units=240)
 
-Here $\alpha_i\sim N(0,2^2)$, $\epsilon_{it}\sim N(0,1)$, and the innovations
-in the AR(1) time effect have standard deviation one and coefficient 0.2.
-
-For cohort index $c\in\{0,1,2\}$, adoption period $g_c$, and event time $j$,
-the seven effect surfaces are:
-
-| Name | Cohort/event-time law |
-|---|---|
-| `homogeneous` | $\log(j+1)$ in every cohort |
-| `log_vs_linear_vs_sin` | earliest: linear $2\to0$ then ten zeros; middle: $\log(2(j+1))$; latest: $\sin(j+1)$ |
-| `small_differences` | $(1+0.1c)\log(j+1)$ |
-| `large_differences` | $(g_c/10)\log(j+1)$ |
-| `selection_on_gains` | $(1-0.1c)\log(j+1)$, so larger gains adopt earlier |
-| `novelty_effects` | $2e^{-0.3j}+0.5$ in every cohort |
-| `activity_bias` | earliest cohort: $2.5$; later cohorts: $\log(j+1)$ |
-
-`homogeneous` and `novelty_effects` vary over event time but are homogeneous
-across cohorts. The remaining five are cohort heterogeneous.
+for name in designs.available_ftest_cohort_designs():
+    profiles = designs.ftest_cohort_profiles(name, config=cohort_config)
+    first_values = {
+        cohort: round(float(path[0]), 2)
+        for cohort, path in profiles.items()
+    }
+    print(name, first_values)
+```
 
 ```{python}
 #| label: fig-ftest-cohort-profiles
-#| fig-cap: "All seven cohort-effect designs. Each line is the true path for one adoption cohort."
-#| fig-width: 13
-#| fig-height: 7
+#| fig-cap: "Cohort-specific paths for the seven effect-surface alternatives."
+#| fig-alt: "Seven small line charts compare cohort-specific effect paths under the F-test heterogeneity alternatives."
 
-cohort_config = pps.FTestCohortConfig(n_units=240)
-cohort_names = pps.available_ftest_cohort_designs()
-colors = ("#6a3d9a", "#1b9e77", "#e6ab02")
-figure, axes = plt.subplots(2, 4, figsize=(13, 7), sharex=True)
-
-for axis, name in zip(axes.flat, cohort_names):
-    profiles = pps.ftest_cohort_profiles(name, config=cohort_config)
-    for color, (period, profile) in zip(colors, profiles.items()):
+cohort_names = designs.available_ftest_cohort_designs()
+figure, axes = plt.subplots(
+    2,
+    4,
+    figsize=(14, 7),
+    sharex=True,
+    constrained_layout=True,
+)
+for axis, name in zip(axes.ravel(), cohort_names, strict=False):
+    profiles = designs.ftest_cohort_profiles(name, config=cohort_config)
+    for cohort, profile in profiles.items():
         axis.plot(
             np.arange(profile.size),
             profile,
-            marker="o",
-            markersize=2.5,
-            color=color,
-            label=f"adopt {period}",
+            label=f"cohort {cohort}",
         )
-    axis.axhline(0, color="0.3", linewidth=0.8, linestyle=":")
-    axis.set_title(name.replace("_", " ").title())
-    axis.set_xlabel("Event time")
-    axis.set_ylabel("True effect")
-
-axes.flat[0].legend(frameon=False)
-axes.flat[-1].axis("off")
-figure.tight_layout()
+    axis.axhline(0.0, color="black", linewidth=0.6)
+    axis.set_title(name.replace("_", " "))
+    axis.set_xlabel("event time")
+    axis.set_ylabel("effect")
+for axis in axes.ravel()[len(cohort_names):]:
+    axis.set_visible(False)
+axes.ravel()[0].legend(fontsize=7)
 plt.show()
 ```
 
-The public profiles are directly composable:
+Run one surface and inspect its supported cohort-event truth:
 
 ```{python}
-profiles = pps.ftest_cohort_profiles(
+cohort_panel = designs.ftest_cohort(
     "selection_on_gains",
     config=cohort_config,
-)
-effect_model = pps.CohortEventTimeEffect(profiles)
-assignment = pps.RandomizedStaggeredAdoption(
-    adoption_periods=cohort_config.adoption_periods,
-    cohort_sizes=cohort_config.cohort_sizes,
+    seed=17,
 )
 
-cohort_simulator = pps.ftest_cohort_design(
-    "selection_on_gains",
-    config=cohort_config,
-)
-cohort_panel = cohort_simulator.simulate(seed=2026)
-
-type(cohort_simulator.assignment).__name__, type(cohort_simulator.effect_model).__name__
+truth = cohort_panel.truth.cohort_event(event_times=(-2, -1, 0, 1, 2, 3))
+for cohort in np.unique(truth["cohort"]):
+    selected = truth["cohort"] == cohort
+    print(
+        int(cohort),
+        np.round(truth["effect"][selected], 2),
+        truth["supported"][selected],
+    )
 ```
 
-## What the realized panels look like
+Pre-treatment effects are zero. An unsupported cohort-event cell has `NaN`
+effect and `supported=False`.
 
-These matrices show one draw from each suite. Rows are sorted by adoption time;
-the left column is observed $Y$ and the right column is treatment $W$.
+## Realized panel structure
+
+The temporal design has one adoption block. The cohort design has three. The
+outcome heatmaps also show their different untreated dependence structures.
 
 ```{python}
-#| label: fig-ftest-matrices
-#| fig-cap: "Representative F-test paper panels. Top: a single cohort with positive-then-negative effects. Bottom: staggered adoption with selection on gains."
-#| fig-width: 13
-#| fig-height: 8
+#| label: fig-ftest-realized-panels
+#| fig-cap: "Observed outcomes and treatment for one temporal and one cohort-heterogeneity design."
+#| fig-alt: "Four heatmaps show observed outcomes and treatment for one temporal-effect alternative and one cohort-heterogeneity alternative."
 
+realized_panels = (
+    ("Temporal alternative", temporal_panel),
+    ("Cohort alternative", cohort_panel),
+)
 figure, axes = plt.subplots(2, 2, figsize=(13, 8), constrained_layout=True)
-
-for row, (label, panel) in enumerate(
-    (
-        ("Temporal: positive then negative", temporal_panel),
-        ("Cohorts: selection on gains", cohort_panel),
-    )
-):
-    order = np.argsort(panel.adoption_times, kind="stable")
-    y_image = axes[row, 0].matshow(
-        panel.outcome[order], aspect="auto", cmap="viridis"
-    )
-    axes[row, 0].set_title(f"{label} — observed Y")
-    axes[row, 0].set_ylabel("Units ordered by adoption")
-    figure.colorbar(y_image, ax=axes[row, 0], fraction=0.03)
-
-    w_image = axes[row, 1].matshow(
-        panel.treatment[order],
+for row, (label, draw) in enumerate(realized_panels):
+    order = np.argsort(draw.adoption_times, kind="stable")
+    outcome_image = axes[row, 0].matshow(
+        draw.outcome[order],
         aspect="auto",
-        cmap=TREATMENT_CMAP,
-        norm=TREATMENT_NORM,
+        cmap="coolwarm",
     )
-    axes[row, 1].set_title(f"{label} — treatment W")
-    treatment_bar = figure.colorbar(
-        w_image,
-        ax=axes[row, 1],
-        fraction=0.03,
-        ticks=(0, 1),
+    axes[row, 1].matshow(
+        draw.treatment[order],
+        aspect="auto",
+        cmap="Greys",
+        vmin=0.0,
+        vmax=1.0,
     )
-    treatment_bar.ax.set_yticklabels(["Untreated", "Treated"])
-
-for axis in axes.flat:
-    axis.set_xlabel("Panel period")
-
+    axes[row, 0].set_title(f"{label}: outcome")
+    axes[row, 1].set_title(f"{label}: treatment")
+    axes[row, 0].set_ylabel("units, sorted by adoption")
+    figure.colorbar(outcome_image, ax=axes[row, 0], fraction=0.03, pad=0.02)
+    for axis in axes[row]:
+        axis.set_xlabel("period")
 plt.show()
 ```
 
-Every draw retains the realized causal truth. For example, verify cohort counts
-and recover the exact profile from any member of a cohort:
+## Build a custom cohort surface
+
+The configured family uses the same primitives that are available to user
+code. A cohort surface is a map from adoption period to an event-time array.
 
 ```{python}
-summary = []
-for period, size in zip(
-    cohort_config.adoption_periods,
-    cohort_config.cohort_sizes,
-    strict=True,
-):
-    units = np.flatnonzero(cohort_panel.adoption_times == period)
-    summary.append(
-        {
-            "adoption period": period,
-            "configured units": size,
-            "realized units": units.size,
-            "first effect": cohort_panel.treatment_effect[units[0], period],
-        }
-    )
+from pypanelsim import primitives
 
-pd.DataFrame(summary)
+profiles = designs.ftest_cohort_profiles(
+    "novelty_effects",
+    config=cohort_config,
+)
+effect_model = primitives.CohortEventTimeEffect(profiles)
+
+print(type(effect_model).__name__)
 ```
 
-Use `panel.as_long_dict()` or a dataframe adapter to pass the result to
-PyFixest. The simulation package remains estimator neutral; the paper's F-tests
-can therefore be compared against any pooled, partially pooled, or saturated
-event-study estimator using the identical draw.
+Pass this effect model to a custom `core.PanelSimulator` when the built-in
+untreated outcome or assignment law is not appropriate.
+
+## Simulation-study use
+
+A size experiment should use a homogeneous design as its null. A power
+experiment should vary the form and magnitude of heterogeneity. Report the
+exact named surface, configuration, panel seed, and any profile seed. Do not
+refer only to “the F-test DGP”; that phrase does not identify one probability
+law.

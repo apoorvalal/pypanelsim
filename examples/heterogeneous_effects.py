@@ -8,7 +8,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-import pypanelsim as pps
+from pypanelsim import core, primitives
 
 
 @dataclass(frozen=True, slots=True)
@@ -26,7 +26,7 @@ class FeatureDrivenOutcome:
             + 1.1 * context.unobservables[:, :1] * cycle
         )
         values += rng.normal(scale=self.noise_scale, size=values.shape)
-        return pps.ComponentDraw(values, {"kind": "feature_driven_outcome"})
+        return core.ComponentDraw(values, {"kind": "feature_driven_outcome"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -37,24 +37,24 @@ class TrendCycleTimeFeatures:
         del rng
         trend = np.linspace(-1.0, 1.0, dimensions.n_periods)
         cycle = np.sin(np.linspace(0.0, 2.5 * np.pi, dimensions.n_periods))
-        return pps.TimeFeatureDraw(
+        return core.TimeFeatureDraw(
             np.column_stack((trend, cycle)),
             {"kind": "trend_cycle", "feature_names": ("trend", "cycle")},
         )
 
 
-def heterogeneous_effect_dgp() -> pps.PanelSimulator:
+def heterogeneous_effect_dgp() -> core.PanelSimulator:
     """Build a randomized panel with tau_it = f(X_i, U_i, V_t)."""
 
-    return pps.PanelSimulator(
+    return core.PanelSimulator(
         name="heterogeneous_effects",
-        dimensions=pps.PanelDimensions(n_units=120, n_periods=40),
-        feature_model=pps.GaussianUnitFeatures(
+        dimensions=core.PanelDimensions(n_units=120, n_periods=40),
+        feature_model=primitives.GaussianUnitFeatures(
             n_observables=2,
             n_unobservables=1,
         ),
         time_feature_model=TrendCycleTimeFeatures(),
-        assignment=pps.RandomizedSingleCohortAssignment(
+        assignment=primitives.RandomizedSingleCohortAssignment(
             n_treated=40,
             adoption_period=28,
         ),
@@ -83,7 +83,7 @@ def render_heterogeneous_effects(
     if output is None:
         output = Path(__file__).with_name("heterogeneous_effects.png")
     panel = heterogeneous_effect_dgp().simulate(seed=seed)
-    effect_surface = panel.metadata["effect"]["effect_surface"]
+    effect_surface = panel.effect_surface
     order = np.argsort(effect_surface.mean(axis=1), kind="stable")
 
     figure, axes = plt.subplots(1, 3, figsize=(14, 5), constrained_layout=True)

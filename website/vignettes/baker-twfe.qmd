@@ -1,260 +1,193 @@
 ---
-title: "Baker DGP: why vanilla TWFE event studies fail"
-subtitle: "Dynamic cohort heterogeneity, contaminated comparisons, and a saturated PyFixest correction"
-date: last-modified
-format:
-  html:
-    embed-resources: true
-    page-layout: full
-    code-fold: true
-    code-summary: "Show code"
-    fig-responsive: true
+title: "Baker's dynamic-effects example"
+description: "See why one TWFE coefficient need not equal the treated-cell ATT."
 jupyter: python3
-execute:
-  echo: true
-  warning: false
-  message: false
 ---
 
+This tutorial translates the public simulation in Andrew Baker's
+[JFE_DID](https://github.com/andrewchbaker/JFE_DID) repository. It shows a
+specific problem: staggered adoption and cohort-specific dynamic effects can
+make a two-way fixed-effects coefficient differ from a natural average effect.
+
+## Data-generating process
+
+The default panel has 1,000 states observed from 1980 through 2015. Fifty
+states enter three treatment cohorts:
+
+| Adoption year | States | Effect increase per exposed year |
+|---:|---:|---:|
+| 1989 | 17 | 0.10 |
+| 1998 | 18 | 0.05 |
+| 2007 | 15 | 0.01 |
+
+The untreated outcome is
+
+$$
+Y_{it}(0)=\alpha_i+\gamma_t+\varepsilon_{it}.
+$$
+
+For a state in cohort $g$, the effect grows with exposure time:
+
+$$
+\tau_{it}=s_g(t-g+1), \qquad t\ge g.
+$$
+
 ```{python}
-from __future__ import annotations
-
-import sys
-from pathlib import Path
-
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
-import pyfixest as pf
-from matplotlib.colors import BoundaryNorm, ListedColormap
 
-import pypanelsim as pps
+from pypanelsim import designs
 
-TREATMENT_CMAP = ListedColormap(["#f7f7f7", "#252525"])
-TREATMENT_NORM = BoundaryNorm([-0.5, 0.5, 1.5], TREATMENT_CMAP.N)
+config = designs.BakerPanelConfig()
+panel = designs.baker(config=config, seed=28101695)
 
-VIGNETTE = Path.cwd()
-ROOT = VIGNETTE.parents[1]
-sys.path.insert(0, str(ROOT))
-
-from examples.baker_twfe import (  # noqa: E402
-    baker_frame,
-    fit_baker_event_studies,
-    plot_baker_event_studies,
-)
+print(panel.shape)
+print(panel.truth.att_by_cohort())
 ```
 
-## The failure design
-
-[Baker, Larcker, and Wang's JFE replication](https://github.com/andrewchbaker/JFE_DID)
-contains a deliberately simple staggered-adoption design in
-`Code/1g. Failures With Event Studies and Heterogeneity.R`. Fifty state
-clusters are randomly divided into three adoption cohorts: 17 states adopt in
-1989, 18 in 1998, and 15 in 2007. Cohort effects are positive and grow linearly
-after adoption, but their slopes decline from 0.10 to 0.05 to 0.01.
-
-For unit $i$ in cohort $G_i=g$, `pypanelsim` implements
-
-$$
-Y_{it} = \alpha_i + \gamma_t + \varepsilon_{it}
-       + W_{it}s_g(t-g+1),
-\qquad
-W_{it}=\mathbb{1}\{t\geq g\}.
-$$
-
-There are no anticipation effects and no structural pre-trends. Yet a vanilla
-relative-time TWFE regression combines valid not-yet-treated comparisons with
-comparisons that use already-treated units as controls. Because treatment
-effects differ across cohorts and event time, those comparisons contaminate
-one another.
-
-The original code samples unit effects, time effects, and residuals from a
-private Compustat panel. The self-contained implementation uses centered
-Gaussian additive effects and errors instead. It preserves the part of the DGP
-that causes the failure: the calendar, randomized state cohorts, treatment
-timing, and dynamic cohort heterogeneity.
+The outcome matrix contains the state and year effects, while the treatment
+matrix shows the three adoption cohorts.
 
 ```{python}
-SEED = 28101695
-config = pps.BakerPanelConfig()
-panel = pps.baker(config=config, seed=SEED)
-
-pd.DataFrame(
-    {
-        "adoption year": config.adoption_years,
-        "states": config.cohort_state_counts,
-        "units in this draw": [
-            np.sum(panel.adoption_times == period)
-            for period in config.adoption_periods
-        ],
-        "effect slope": config.cohort_effect_slopes,
-    }
-)
-```
-
-The default draw has 1,000 units over 1980--2015. Assignment is randomized at
-the state level, so every unit within a state adopts together.
-
-```{python}
-#| label: fig-baker-matrices
-#| fig-cap: "One Baker draw. Rows are units ordered by randomized state cohort; columns are calendar years."
-#| fig-width: 13
-#| fig-height: 5
+#| label: fig-baker-panel
+#| fig-cap: "Observed outcomes and staggered treatment in Baker's dynamic-effects design."
+#| fig-alt: "Two heatmaps show observed outcomes and staggered treatment after sorting units by adoption cohort."
 
 order = np.argsort(panel.adoption_times, kind="stable")
 figure, axes = plt.subplots(1, 2, figsize=(13, 5), constrained_layout=True)
-
-outcome_image = axes[0].matshow(panel.outcome[order], aspect="auto", cmap="viridis")
-axes[0].set_title("Observed outcome Y")
-axes[0].set_xlabel("Calendar year")
-axes[0].set_ylabel("Units ordered by adoption cohort")
-figure.colorbar(outcome_image, ax=axes[0], fraction=0.03)
-
+outcome_image = axes[0].matshow(
+    panel.outcome[order],
+    aspect="auto",
+    cmap="viridis",
+)
 treatment_image = axes[1].matshow(
     panel.treatment[order],
     aspect="auto",
-    cmap=TREATMENT_CMAP,
-    norm=TREATMENT_NORM,
+    cmap="Greys",
+    vmin=0.0,
+    vmax=1.0,
 )
-axes[1].set_title("Treatment W")
-axes[1].set_xlabel("Calendar year")
-treatment_bar = figure.colorbar(
-    treatment_image,
-    ax=axes[1],
-    fraction=0.03,
-    ticks=(0, 1),
-)
-treatment_bar.ax.set_yticklabels(["Untreated", "Treated"])
-
-ticks = np.arange(0, config.n_periods, 5)
+axes[0].set_title("Observed outcome")
+axes[1].set_title("Treatment")
+axes[0].set_ylabel("states, sorted by adoption")
 for axis in axes:
-    axis.set_xticks(ticks, config.years[ticks])
-
+    axis.set_xlabel("year position")
+figure.colorbar(outcome_image, ax=axes[0], fraction=0.035, pad=0.02)
+figure.colorbar(treatment_image, ax=axes[1], fraction=0.035, pad=0.02)
 plt.show()
 ```
 
-## Vanilla relative-time TWFE
+## The causal target
 
-We bin all leads before $-6$ and lags after $6$, omit event time $-1$, and fit
-unit and period fixed effects with state-clustered standard errors. The
-executable PyFixest call is:
+The treated-cell ATT gives each observed treated cell equal weight:
 
 ```{python}
-frame = baker_frame(panel, config)
-window = 5
-frame["event_time_binned"] = frame["rel_time"].clip(
-    lower=-(window + 1), upper=window + 1
-)
-
-twfe_fit = pf.feols(
-    "outcome ~ i(event_time_binned, ref=-1) | unit + time",
-    frame,
-    vcov={"CRV1": "state"},
-)
+print("true treated-cell ATT:", round(panel.true_att, 4))
 ```
 
-This is the conventional event-study regression, not a cohort-specific design.
-The [PyFixest difference-in-differences guide](https://pyfixest.org/difference-in-differences.html)
-uses the same `i(relative_time, ref=-1) | unit + year` construction for a
-vanilla TWFE event study.
+It is available without fitting an estimator because the simulation stores the
+full causal decomposition.
 
-## Saturated cohort-by-event-time estimator
+## The TWFE coefficient
 
-The correction fully interacts treatment cohort with event time, then
-aggregates the cohort-specific estimates using cohort shares. This is the
-saturated Sun--Abraham-style estimator exposed by PyFixest:
+For a balanced panel, residualize a matrix against unit and time fixed effects
+by double demeaning:
+
+$$
+\widetilde Z_{it}
+=Z_{it}-\bar Z_{i\cdot}-\bar Z_{\cdot t}+\bar Z_{\cdot\cdot}.
+$$
+
+The coefficient from $Y_{it}=\alpha_i+\gamma_t+\beta D_{it}+u_{it}$ is then
+
+$$
+\widehat\beta
+=\frac{\sum_{it}\widetilde D_{it}\widetilde Y_{it}}
+{\sum_{it}\widetilde D_{it}^2}.
+$$
 
 ```{python}
-last_cohort = config.adoption_periods[-1]
-saturated_frame = frame.loc[
-    (frame["time"] < last_cohort)
-    & ((frame["treatment"] == 0.0) | (frame["rel_time"] <= window))
-].copy()
-saturated_frame["cohort_for_estimator"] = saturated_frame["cohort_period"].mask(
-    saturated_frame["cohort_period"] == last_cohort, 0
-)
+def double_demean(values):
+    return (
+        values
+        - values.mean(axis=1, keepdims=True)
+        - values.mean(axis=0, keepdims=True)
+        + values.mean()
+    )
 
-saturated_fit = pf.event_study(
-    saturated_frame,
-    yname="outcome",
-    idname="unit",
-    tname="time",
-    gname="cohort_for_estimator",
-    estimator="saturated",
-    att=False,
-    cluster="state",
-)
-saturated_fit.aggregate(agg="period", weighting="shares").head()
+d_tilde = double_demean(panel.treatment)
+y_tilde = double_demean(panel.outcome)
+twfe = float(np.sum(d_tilde * y_tilde) / np.sum(d_tilde**2))
+
+print("TWFE coefficient:", round(twfe, 4))
+print("true treated-cell ATT:", round(panel.true_att, 4))
+print("difference:", round(twfe - panel.true_att, 4))
 ```
 
-All units eventually adopt in the original design. Following the comparison
-sample used in the Baker replication, we stop before the 2007 cohort adopts.
-That cohort is consequently not yet treated throughout this estimation sample
-and is encoded as `g=0`, PyFixest's convention for control units. Treated
-cohort observations are retained through event time 5. This prevents
-already-treated cohorts from supplying the comparison outcome.
+The difference is not a software error. The regression coefficient uses the
+residualized treatment as its weighting object. With staggered adoption,
+already-treated cohorts can act as comparisons for later cohorts. Dynamic and
+cohort-varying effects then enter with weights that do not match treated-cell
+ATT weights.
 
-PyFixest documents `estimator="saturated"` as a fully interacted cohort/event-
-time specification and provides `aggregate(weighting="shares")` for the
-event-time averages; see the
-[`SaturatedEventStudy` API](https://pyfixest.org/reference/did.saturated_twfe.SaturatedEventStudy.html).
-
-## Estimates versus known truth
+## Inspect cohort-event truth
 
 ```{python}
-#| label: fig-baker-event-study
-#| fig-cap: "Vanilla TWFE is contaminated by dynamic cohort heterogeneity; the saturated event study follows its cohort-weighted estimand."
-#| fig-width: 13
-#| fig-height: 5
+cohort_truth = panel.truth.cohort_event(event_times=range(0, 8))
 
-estimates = fit_baker_event_studies(panel, config, window=window)
-figure, _ = plot_baker_event_studies(estimates)
+for cohort in np.unique(cohort_truth["cohort"]):
+    selected = cohort_truth["cohort"] == cohort
+    effects = cohort_truth["effect"][selected]
+    print(int(cohort), np.round(effects, 2))
+```
+
+```{python}
+#| label: fig-baker-cohort-paths
+#| fig-cap: "True treatment-effect paths by adoption cohort."
+#| fig-alt: "A line chart shows a distinct true event-time treatment-effect path for each adoption cohort."
+
+figure, axis = plt.subplots(figsize=(9, 5), constrained_layout=True)
+for cohort in np.unique(cohort_truth["cohort"]):
+    selected = cohort_truth["cohort"] == cohort
+    axis.plot(
+        cohort_truth["event_time"][selected],
+        cohort_truth["effect"][selected],
+        marker="o",
+        label=f"cohort {config.start_year + int(cohort)}",
+    )
+axis.axhline(0.0, color="black", linewidth=0.8)
+axis.set_xlabel("event time")
+axis.set_ylabel("true effect")
+axis.legend(title="adoption year")
 plt.show()
 ```
 
-The dashed line is computed directly from `panel.treatment_effect`, not from a
-regression. The two panels have different cohort-weighted truths because the
-saturated comparison intentionally excludes the final cohort after truncating
-the sample.
+The early cohort has both the steepest slope and the longest observed exposure.
+That combination makes the mismatch visible.
+
+## Isolate design from noise
+
+Set `noise_scale=0` to remove sampling noise while keeping the same assignment
+and effect structure:
 
 ```{python}
-def post_rmse(results):
-    post = results.loc[results["event_time"] >= 0]
-    return float(np.sqrt(np.mean((post["estimate"] - post["truth"]) ** 2)))
+noiseless = designs.BakerPanelConfig(n_units=200, noise_scale=0.0)
+noiseless_panel = designs.baker(config=noiseless, seed=42)
 
-comparison = pd.DataFrame(
-    {
-        "estimator": ["Vanilla TWFE", "Saturated cohort × event time"],
-        "post-period RMSE": [
-            post_rmse(estimates["twfe"]),
-            post_rmse(estimates["saturated"]),
-        ],
-    }
-)
-comparison
+d_tilde = double_demean(noiseless_panel.treatment)
+y_tilde = double_demean(noiseless_panel.outcome)
+noiseless_twfe = float(np.sum(d_tilde * y_tilde) / np.sum(d_tilde**2))
+
+print("noiseless TWFE:", round(noiseless_twfe, 4))
+print("noiseless ATT:", round(noiseless_panel.true_att, 4))
 ```
 
-In this seeded draw, the vanilla estimates eventually become negative even
-though all true effects are positive. Its apparent lead coefficients are also
-sampling and contamination artifacts: the DGP's pre-treatment effects are
-exactly zero. The saturated estimates remain close to the increasing true
-effect path because they form cohort-appropriate comparisons before
-aggregation.
+If the gap remains without noise, it comes from the estimand and design rather
+than sampling variation.
 
-## Reproduce outside the vignette
+## What this design does not prove
 
-The standalone script uses the same seed and writes the comparison figure:
-
-```bash
-uv run python examples/baker_twfe.py
-```
-
-For a reusable simulator or a different noise scale:
-
-```{python}
-noiseless = pps.BakerPanelConfig(n_units=200, noise_scale=0.0)
-simulator = pps.baker_design(noiseless)
-another_panel = simulator.simulate(seed=7)
-
-another_panel.shape, another_panel.is_absorbing
-```
+One simulation does not show that TWFE always fails. It shows a transparent
+case where its coefficient and a common ATT target differ. Change effect slopes,
+cohort sizes, timing, and noise across replications before making a performance
+claim about an estimator.

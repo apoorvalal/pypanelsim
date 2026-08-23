@@ -1,46 +1,30 @@
 ---
-title: "Balancing DGP catalog"
-subtitle: "Construct and visualize every panel design in the original balancing experiments"
-date: last-modified
-format:
-  html:
-    page-layout: full
-    embed-resources: true
-    code-fold: show
-    fig-responsive: true
+title: "Design catalog"
+description: "Standard benchmarks for untreated panel prediction and treatment-effect recovery."
 jupyter: python3
-execute:
-  echo: true
-  warning: false
-  message: false
 ---
 
-This is the construction guide for the data-generating processes behind the
-[balancing reproduction](vignettes/balancing-reproduction.qmd). That vignette
-answers *how the estimators perform*. This page answers the more basic question:
-*what is each DGP, and how do I actually draw it with `pypanelsim`?*
+The canonical designs vary the untreated outcome law while holding a common
+panel layout and treatment-effect law. Use them to compare estimators across
+distinct sources of panel dependence.
 
-The report contains **12 statistically distinct settings** across five DGP
-families. Its results contain 14 named cases because each of the two
-synthetic-control settings is fitted once with ridge unit balancing and once
-with penalized-SCM unit balancing. Those are estimator choices, not four
-different DGPs. The archived package also contains a sixth,
-factor--synthetic mixture, which was not used in the 398-cell comparison; it is
-documented and plotted here as well.
+## Common structure
 
-## Setup and the shared experiment
+`CanonicalPanelConfig` defines the sample:
+
+- 160 control and 40 treated units by default;
+- 40 pre-treatment and 10 post-treatment periods;
+- one treated cohort at the first post-treatment period;
+- a linear post-treatment effect;
+- Gaussian observation noise.
 
 ```{python}
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
-import pypanelsim as pps
-from matplotlib.colors import BoundaryNorm, ListedColormap
 
-TREATMENT_CMAP = ListedColormap(["#f7f7f7", "#252525"])
-TREATMENT_NORM = BoundaryNorm([-0.5, 0.5, 1.5], TREATMENT_CMAP.N)
+from pypanelsim import designs
 
-config = pps.CanonicalPanelConfig(
+config = designs.CanonicalPanelConfig(
     n_control=160,
     n_treated=40,
     n_pre=40,
@@ -48,398 +32,196 @@ config = pps.CanonicalPanelConfig(
     effect_slope=0.2,
     noise_variance=0.36,
 )
-config
+
+print(designs.available_canonical_designs())
 ```
 
-Every factory on this page uses that configuration by default. Thus each draw
-has 200 units by 50 periods. Units 0--159 are never treated; units 160--199
-adopt at zero-based period 40. The treatment effect on every treated unit is
-the deterministic ramp
-
-$$
-\tau_{it}=0.2(t-39),\qquad t=40,\ldots,49,
-$$
-
-so treated-period effects run from 0.2 through 2.0 and the true ATT is 1.1.
-Independent observation noise has standard deviation 0.6. Only the untreated
-outcome law changes across the sections below.
-
-There are two equivalent ways to use a canonical DGP. The `*_design` form
-returns a reusable simulator; the shorter form draws one panel immediately.
+All direct functions return a `PanelDataset`. Add `_design` to obtain a
+reusable `PanelSimulator`.
 
 ```{python}
-# Reusable simulator: use this for Monte Carlo work.
-simulator = pps.classic_factor_design(overlap=1.0, config=config)
-panel_17 = simulator.simulate(seed=17)
-panel_18 = simulator.simulate(seed=18)
-
-# One-draw convenience function: same result for the same seed.
-same_panel = pps.classic_factor(overlap=1.0, config=config, seed=17)
-np.array_equal(panel_17.outcome, same_panel.outcome)
+panel = designs.classic_factor(overlap=1.0, config=config, seed=42)
+simulator = designs.classic_factor_design(overlap=1.0, config=config)
+print(panel.shape, simulator.name)
 ```
 
-Each returned `PanelDataset` exposes `(unit, time)` arrays named `outcome`,
-`treatment`, `untreated_outcome`, and `treatment_effect`. The plots below put
-the observed outcome $Y$ and assignment $W$ side by side. The horizontal
-boundary separates controls from treated units; the vertical boundary is the
-common adoption date.
+## Select an untreated outcome law
+
+| Family | Untreated outcome structure | Main stress |
+|---|---|---|
+| `classic_factor` | one strong latent factor | treated-control loading overlap |
+| `weak_factor` | several weaker factors | diffuse low-rank signal |
+| `synthetic_control` | treated loadings generated from sparse donor weights | donor sparsity |
+| `factor_synthetic` | factor signal plus donor-weight relation | joint factor and sparse-synthetic structure |
+| `time_series` | unit-specific stationary or integrated autoregression | temporal persistence |
+| `mixed_factor` | different factor laws across unit groups | outcome-law heterogeneity |
+
+These are benchmark laws. A family name describes the generated untreated
+outcome, not an estimator that must be used on it.
+
+## Factor overlap
+
+In the factor designs, `overlap=0` gives treated and control units similar
+loading distributions. Larger values separate those distributions.
 
 ```{python}
-#| code-summary: "Show the plotting helper"
-def matshow_panels(draws, *, title, n_pre=config.n_pre):
-    """Plot a sequence of (label, PanelDataset) pairs on a common Y scale."""
-    scale = np.quantile(
-        np.abs(np.concatenate([panel.outcome.ravel() for _, panel in draws])),
-        0.98,
-    )
-    fig, axes = plt.subplots(
-        len(draws),
-        2,
-        figsize=(11.5, 2.45 * len(draws)),
-        squeeze=False,
-        constrained_layout=True,
-    )
-    for row, (label, panel) in enumerate(draws):
-        treated_boundary = panel.control_units.size - 0.5
-        y_axis, w_axis = axes[row]
-        y_axis.matshow(
-            panel.outcome,
+overlap_panels = {
+    value: designs.classic_factor(overlap=value, seed=110)
+    for value in (0.0, 1.0)
+}
+
+for value, item in overlap_panels.items():
+    outcome_metadata = item.metadata["outcome"]
+    print(value, outcome_metadata["model"])
+```
+
+The complete component draw is stored in metadata. This permits direct checks
+of factor paths, loadings, donor weights, and innovations.
+
+## Synthetic-control sparsity
+
+`active_share` is the share of controls with nonzero donor weights for each
+treated unit.
+
+```{python}
+sparse = designs.synthetic_control(active_share=0.1, seed=140)
+dense = designs.synthetic_control(active_share=0.5, seed=140)
+
+print(sparse.metadata["outcome"]["active_share"])
+print(dense.metadata["outcome"]["active_share"])
+```
+
+This parameter changes the untreated outcome law. It does not select or fit a
+synthetic-control estimator.
+
+## Temporal persistence
+
+`time_series` supports stationary AR(1) paths and integrated ARIMA(1,1,0)
+paths. `coefficient` controls persistence.
+
+```{python}
+stationary = designs.time_series(
+    coefficient=0.9,
+    integrated=False,
+    seed=150,
+)
+integrated = designs.time_series(
+    coefficient=0.9,
+    integrated=True,
+    seed=150,
+)
+
+print(stationary.metadata["outcome"]["integrated"])
+print(integrated.metadata["outcome"]["integrated"])
+```
+
+## Change the panel, not the law
+
+Pass one configuration to several constructors. This keeps sample dimensions,
+treatment timing, effects, and noise variance aligned.
+
+```{python}
+small = designs.CanonicalPanelConfig(
+    n_control=60,
+    n_treated=20,
+    n_pre=24,
+    n_post=8,
+)
+
+panels = {
+    "classic": designs.classic_factor(config=small, seed=17),
+    "weak": designs.weak_factor(config=small, seed=17),
+    "time": designs.time_series(config=small, seed=17),
+}
+
+print({name: item.shape for name, item in panels.items()})
+```
+
+## Use the dispatcher
+
+Use a named dispatcher when design names come from a configuration file:
+
+```{python}
+simulator = designs.make_canonical(
+    "time_series",
+    coefficient=0.5,
+    integrated=False,
+    config=small,
+)
+print(simulator.simulate(seed=7).shape)
+```
+
+Use the explicit constructor in ordinary Python code. It gives static tools and
+readers more information.
+
+## Visual catalog
+
+Each row below compares two variants of one untreated-outcome family. Treatment
+timing and the effect law remain common.
+
+```{python}
+#| label: fig-canonical-catalog
+#| fig-cap: "Outcome and treatment matrices for the six canonical panel families."
+#| fig-alt: "For each canonical design, paired heatmaps show observed outcomes and the treatment matrix after sorting units by adoption time."
+
+visual_config = designs.CanonicalPanelConfig(
+    n_control=60,
+    n_treated=20,
+    n_pre=24,
+    n_post=8,
+)
+visual_cases = {
+    "Classic factor": (
+        ("overlap 0", designs.classic_factor(config=visual_config, overlap=0, seed=110)),
+        ("overlap 1", designs.classic_factor(config=visual_config, overlap=1, seed=110)),
+    ),
+    "Weak factor": (
+        ("overlap 0", designs.weak_factor(config=visual_config, overlap=0, seed=120)),
+        ("overlap 1", designs.weak_factor(config=visual_config, overlap=1, seed=120)),
+    ),
+    "Mixed factor": (
+        ("overlap 0", designs.mixed_factor(config=visual_config, overlap=0, seed=130)),
+        ("overlap 1", designs.mixed_factor(config=visual_config, overlap=1, seed=130)),
+    ),
+    "Synthetic control": (
+        ("active share 0.1", designs.synthetic_control(config=visual_config, active_share=0.1, seed=140)),
+        ("active share 0.5", designs.synthetic_control(config=visual_config, active_share=0.5, seed=140)),
+    ),
+    "Time series": (
+        ("stationary", designs.time_series(config=visual_config, coefficient=0.9, integrated=False, seed=150)),
+        ("integrated", designs.time_series(config=visual_config, coefficient=0.9, integrated=True, seed=150)),
+    ),
+    "Factor-synthetic": (
+        ("overlap 0", designs.factor_synthetic(config=visual_config, overlap=0, seed=160)),
+        ("overlap 1", designs.factor_synthetic(config=visual_config, overlap=1, seed=160)),
+    ),
+}
+
+for family, variants in visual_cases.items():
+    figure, axes = plt.subplots(2, 2, figsize=(12, 7), constrained_layout=True)
+    for row, (label, draw) in enumerate(variants):
+        order = np.argsort(draw.adoption_times, kind="stable")
+        outcome_image = axes[row, 0].matshow(
+            draw.outcome[order],
             aspect="auto",
-            cmap="RdBu_r",
-            vmin=-scale,
-            vmax=scale,
+            cmap="coolwarm",
         )
-        w_axis.matshow(
-            panel.treatment,
+        axes[row, 1].matshow(
+            draw.treatment[order],
             aspect="auto",
-            cmap=TREATMENT_CMAP,
-            norm=TREATMENT_NORM,
+            cmap="Greys",
+            vmin=0.0,
+            vmax=1.0,
         )
-        for axis in (y_axis, w_axis):
-            axis.axvline(n_pre - 0.5, color="#f5a623", linewidth=1.2)
-            axis.axhline(treated_boundary, color="#f5a623", linewidth=1.2)
-            axis.xaxis.set_ticks_position("bottom")
+        axes[row, 0].set_title(f"{label}: outcome")
+        axes[row, 1].set_title(f"{label}: treatment")
+        axes[row, 0].set_ylabel("units")
+        figure.colorbar(outcome_image, ax=axes[row, 0], fraction=0.025, pad=0.02)
+        for axis in axes[row]:
             axis.set_xlabel("period")
-        y_axis.set_ylabel(f"{label}\nunit")
-        y_axis.set_title("Observed outcome Y")
-        w_axis.set_title("Treatment W")
-    fig.suptitle(title, fontsize=14)
+    figure.suptitle(family)
     plt.show()
 ```
 
-## Construction map
-
-This table is the shortest map from the original experiment labels to the
-current reusable factories. Add the listed parameters, then call
-`.simulate(seed=s)`. The corresponding one-draw function has the same name
-without the `_design` suffix.
-
-| Original family | Reusable factory | Parameter grid in the report |
-|---|---|---|
-| Classic factor | `classic_factor_design` | `overlap = 0, 1` |
-| Weak factor | `weak_factor_design` | `overlap = 0, 1` |
-| Mixed factor | `mixed_factor_design` | `overlap = 0, 1` |
-| Synthetic control | `synthetic_control_design` | `active_share = 0.1, 0.5` |
-| Time series | `time_series_design` | `coefficient = 0.2, 0.9`; `integrated = False, True` |
-| Factor--synthetic | `factor_synthetic_design` | Archived; not in the 398-cell grid |
-
-The same factories are available by name when a program chooses the design at
-runtime:
-
-```{python}
-simulator = pps.make_canonical("time_series", coefficient=0.9, integrated=True)
-panel = simulator.simulate(seed=202)
-print(pps.available_canonical_designs())
-```
-
-## 1. Classic factor
-
-Use this design for an interactive-fixed-effects panel with two strong,
-drifting common factors:
-
-$$
-Y_{it}(0)=\lambda_i^\top f_t+\varepsilon_{it},
-\qquad
-\lambda_i\sim
-\begin{cases}
-N(-a,I_2),&i\text{ control},\\
-N(a,I_2),&i\text{ treated}.
-\end{cases}
-$$
-
-Each $f_t$ is a standardized AR(1) path with coefficient 0.5 plus a linear
-drift $0.5t$. `overlap=0` gives the treated and control loadings the same
-distribution. `overlap=1` moves their means to opposite sides of factor space,
-making the treated counterfactual harder to recover from controls.
-
-```{python}
-classic_draws = [
-    ("a = 0: overlapping loadings", pps.classic_factor(overlap=0, seed=110)),
-    ("a = 1: separated loadings", pps.classic_factor(overlap=1, seed=110)),
-]
-matshow_panels(classic_draws, title="Classic factor DGP")
-```
-
-The realized latent objects are available for diagnosis:
-
-```{python}
-classic = classic_draws[1][1]
-print("loadings:", classic.metadata["outcome"]["loadings"].shape)
-print("factors:", classic.metadata["outcome"]["factors"].shape)
-print("true ATT:", classic.true_att)
-```
-
-## 2. Weak factor
-
-Use this to make the factor structure diffuse and individually weak. The law
-is again $Y_{it}(0)=\lambda_i^\top f_t+\varepsilon_{it}$, but there are ten
-factors: five drifting paths and five cycles
-$\sin(\pi t/15)$. Every standardized factor is multiplied by 0.2. The same
-`overlap` parameter controls the treated--control loading gap.
-
-```{python}
-weak_draws = [
-    ("a = 0: overlapping loadings", pps.weak_factor(overlap=0, seed=120)),
-    ("a = 1: separated loadings", pps.weak_factor(overlap=1, seed=120)),
-]
-matshow_panels(weak_draws, title="Weak-factor DGP")
-```
-
-```{python}
-weak = weak_draws[0][1]
-factor_sd = weak.metadata["outcome"]["factors"].std(axis=1, ddof=1)
-print("number of factors:", factor_sd.size)
-print("sample SD of every factor:", np.round(factor_sd, 3))
-```
-
-## 3. Mixed factor
-
-Use this when one factor model is not shared by the whole population. The 200
-units are split into two 100-unit blocks:
-
-- the first block contains 60 controls and all 40 treated units and follows two
-  drift factors;
-- the second block contains 100 controls only and follows two cyclical factors.
-
-The two blocks restart from the same RNG state, matching the archived
-implementation. `overlap` separates treated loadings from the controls in the
-first block. It does not turn overlap into a treatment-assignment probability.
-
-```{python}
-mixed_draws = [
-    ("a = 0: overlap in drift block", pps.mixed_factor(overlap=0, seed=130)),
-    ("a = 1: separated in drift block", pps.mixed_factor(overlap=1, seed=130)),
-]
-matshow_panels(mixed_draws, title="Mixed-factor DGP")
-```
-
-```{python}
-mixed = mixed_draws[0][1]
-outcome_meta = mixed.metadata["outcome"]
-print("drift-block controls:", outcome_meta["first_group_controls"].size)
-print("cyclical-block controls:", outcome_meta["second_group_controls"].size)
-print("treated units:", mixed.treated_units.size)
-```
-
-## 4. Sparse synthetic control
-
-Use this when treated counterfactuals are convex combinations of a sparse set
-of donors. Control outcomes first follow a two-drift-factor model. Let
-$m=\lceil qN_0\rceil$, where `q=active_share`. Controls with the $m$ largest
-loading scores get sampling weight 1 and all other controls get weight 0.1.
-Then $m$ donors are sampled without replacement and receive equal convex
-weights:
-
-$$
-Y_{it}(0)=\frac{1}{m}\sum_{j\in\mathcal A}Y_{jt}^{\text{factor}}
-+u_{it}+\varepsilon_{it},\qquad i\text{ treated}.
-$$
-
-The favored controls are *more likely* to be donors; the active set is not
-simply the exact top-$m$ set. `active_share=0.1` gives 16 donors and
-`active_share=0.5` gives 80 under the default configuration.
-
-```{python}
-synthetic_draws = [
-    ("q = 0.1: 16 active donors", pps.synthetic_control(active_share=0.1, seed=140)),
-    ("q = 0.5: 80 active donors", pps.synthetic_control(active_share=0.5, seed=140)),
-]
-matshow_panels(synthetic_draws, title="Sparse synthetic-control DGP")
-```
-
-```{python}
-for label, draw in synthetic_draws:
-    metadata = draw.metadata["outcome"]
-    positive_weights = metadata["control_donor_weights"][
-        metadata["control_donor_weights"] > 0
-    ]
-    print(label, "->", metadata["active_donors"].size,
-          "donors; unique positive weight", np.unique(positive_weights))
-```
-
-The ridge and penalized-SCM rows in the report reuse these same two panel laws.
-For example, both `synth_active01` and `synth_active01_penscm` call
-`pps.synthetic_control(active_share=0.1, seed=seed)`; only the estimator's unit
-loss changes afterward.
-
-## 5. Time series
-
-Use this when independent unit dynamics, rather than shared factors or donors,
-generate untreated outcomes. For each unit,
-
-$$
-x_{it}=\phi x_{i,t-1}+\mu_i+\eta_{it},\qquad
-\mu_i=0\ \text{for controls},\quad \mu_i=0.25\ \text{for treated units}.
-$$
-
-With `integrated=False`, $Y_{it}(0)=x_{it}+\varepsilon_{it}$. With
-`integrated=True`, $Y_{it}(0)=\sum_{s\leq t}x_{is}+\varepsilon_{it}$, an
-ARIMA(1,1,0)-type path. The report crosses low or high persistence
-`coefficient=0.2, 0.9` with stationary or integrated paths.
-
-```{python}
-time_draws = [
-    ("phi = 0.2, stationary", pps.time_series(coefficient=0.2, integrated=False, seed=150)),
-    ("phi = 0.2, integrated", pps.time_series(coefficient=0.2, integrated=True, seed=150)),
-    ("phi = 0.9, stationary", pps.time_series(coefficient=0.9, integrated=False, seed=150)),
-    ("phi = 0.9, integrated", pps.time_series(coefficient=0.9, integrated=True, seed=150)),
-]
-matshow_panels(time_draws, title="Time-series DGP")
-```
-
-The outcome metadata records both choices and the process before observation
-noise:
-
-```{python}
-integrated = time_draws[-1][1]
-{
-    key: integrated.metadata["outcome"][key]
-    for key in ("coefficient", "integrated")
-}
-```
-
-## 6. Factor--synthetic mixture
-
-This archived design is useful even though it is not one of the 12 unique
-settings in the final balancing grid. It forms one drift factor and one
-cyclical factor, constructs a synthetic component using 40 active donors, and
-then mixes the two signals equally:
-
-$$
-Y_{it}(0)=0.5Y_{it}^{\text{factor}}+0.5Y_{it}^{\text{SCM}}
-+\varepsilon_{it}.
-$$
-
-The treated-specific noise in the SCM component has standard deviation 2.
-`overlap` controls factor-loading separation exactly as in the other factor
-designs.
-
-```{python}
-factor_synthetic_draws = [
-    ("a = 0: overlapping loadings", pps.factor_synthetic(overlap=0, seed=160)),
-    ("a = 1: separated loadings", pps.factor_synthetic(overlap=1, seed=160)),
-]
-matshow_panels(factor_synthetic_draws, title="Factor--synthetic mixture DGP")
-```
-
-## The exact report case dictionary
-
-This is a self-contained version of the case map used by the balancing runner.
-If the goal is to reproduce that experiment rather than choose one design
-interactively, copy this dictionary.
-
-```{python}
-REPORT_DGPS = {
-    "classic_a0": (pps.classic_factor_design, {"overlap": 0.0}),
-    "classic_a1": (pps.classic_factor_design, {"overlap": 1.0}),
-    "weak_a0": (pps.weak_factor_design, {"overlap": 0.0}),
-    "weak_a1": (pps.weak_factor_design, {"overlap": 1.0}),
-    "mixed_a0": (pps.mixed_factor_design, {"overlap": 0.0}),
-    "mixed_a1": (pps.mixed_factor_design, {"overlap": 1.0}),
-    "time_a02_i0": (pps.time_series_design, {"coefficient": 0.2, "integrated": False}),
-    "time_a02_i1": (pps.time_series_design, {"coefficient": 0.2, "integrated": True}),
-    "time_a09_i0": (pps.time_series_design, {"coefficient": 0.9, "integrated": False}),
-    "time_a09_i1": (pps.time_series_design, {"coefficient": 0.9, "integrated": True}),
-    "synth_active01": (pps.synthetic_control_design, {"active_share": 0.1}),
-    "synth_active05": (pps.synthetic_control_design, {"active_share": 0.5}),
-}
-
-# Build reusable simulators once, then vary only the seed.
-simulators = {
-    name: factory(config=config, **parameters)
-    for name, (factory, parameters) in REPORT_DGPS.items()
-}
-replication_37 = {
-    name: simulator.simulate(seed=37)
-    for name, simulator in simulators.items()
-}
-
-pd.DataFrame(
-    [
-        {
-            "case": name,
-            "shape": panel.shape,
-            "treated": panel.treated_units.size,
-            "adoption period": np.unique(panel.adoption_times[panel.ever_treated]).item(),
-            "true ATT": panel.true_att,
-        }
-        for name, panel in replication_37.items()
-    ]
-)
-```
-
-To obtain the runner's 14 case names, alias the two synthetic DGPs and attach
-the different estimator configuration separately:
-
-```{python}
-ESTIMATOR_ONLY_CASES = {
-    "synth_active01_penscm": ("synth_active01", "penalized_scm"),
-    "synth_active05_penscm": ("synth_active05", "penalized_scm"),
-}
-```
-
-## Mapping the original R generator
-
-The canonical factories are named presets extracted from the original generic
-`gen.simdata()` function. This is the parameter map for the presets used in the
-balancing study:
-
-| Original argument or label | `pypanelsim` equivalent |
-|---|---|
-| `N = 200`, `N.tr = 40` | `CanonicalPanelConfig(n_control=160, n_treated=40)` |
-| `TT = 50`, `T.post = 10` | `CanonicalPanelConfig(n_pre=40, n_post=10)` |
-| `eff.size = 0.2`, cumulative effect | `effect_slope=0.2` and `LinearRampEffect` |
-| `error.noise = 0.6` | `noise_variance=0.36` |
-| treated/control loading means `a` and `-a` | `overlap=a` |
-| `num.active / N.co` | `active_share` |
-| `ar.coef` | `coefficient` |
-| integration order `I = 0, 1` | `integrated=False, True` |
-| factor, time-series, SCM mixture weights | choose the named factory above |
-
-This API reproduces the experiment presets and their NumPy draw order; it is
-not a one-to-one wrapper around every possible mixture accepted by the generic
-R function. In particular, arbitrary factor/time-series/SCM/fixed-effect
-weights, arbitrary covariate arrays, and arbitrary donor weights should be
-assembled with the composable `PanelSimulator` API. The preset that combines
-factor and SCM components is `factor_synthetic_design`, with a fixed 50/50
-mixture.
-
-R and NumPy use different random-number generators, so the same integer seed is
-not expected to produce cell-identical R and Python panels. The probability
-laws, dimensions, and simulation-index convention are the reproduction target.
-
-## Which design should I use?
-
-| If you want to stress-test... | Start with... | Turn the difficulty knob... |
-|---|---|---|
-| Interactive fixed effects | `classic_factor_design()` | `overlap=1` |
-| Many weak latent factors | `weak_factor_design()` | `overlap=1` |
-| Population-specific factor structure | `mixed_factor_design()` | `overlap=1` |
-| Sparse donor reconstruction | `synthetic_control_design()` | reduce `active_share` |
-| Persistence and stochastic trends | `time_series_design()` | `coefficient=0.9, integrated=True` |
-| Simultaneous factor and donor structure | `factor_synthetic_design()` | `overlap=1` |
-
-For estimator-ready reshaping, use `panel.as_long_dict()` or the adapters on
-the [interoperability page](interoperability.qmd). For the complete estimator
-experiment and its results, continue to the
-[balancing reproduction](vignettes/balancing-reproduction.qmd).
+For dynamic cohort effects, conditional trends, or support-aware event
+studies, continue to [Research designs](research-designs.qmd).

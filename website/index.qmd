@@ -1,80 +1,93 @@
 ---
-title: "pypanelsim"
-subtitle: "Composable assignment, untreated outcomes, and treatment effects for panel simulations"
-page-layout: full
-execute:
-  enabled: false
+title: "Synthetic panels with visible assumptions"
+description: "Build treatment assignment, untreated outcomes, and causal effects as separate components."
+jupyter: python3
 ---
 
-::: {.hero-banner}
-# Synthetic panels with causal structure you can inspect
+`pypanelsim` generates synthetic panel data for causal and forecasting
+experiments. It keeps four parts of a data-generating process separate:
+features, treatment assignment, untreated outcomes, and treatment effects.
 
-`pypanelsim` generates balanced panel data while keeping assignment, untreated
-potential outcomes, treatment effects, observed covariates, and latent unit
-features explicit. Treatment effects can vary jointly over units and time as
-$\tau_{it}=f(X_i,U_i,V_t)$. The package includes explicit 2WFE and rank-$k$
-factor primitives plus named designs for four research projects. Every draw is
-reproducible, validated, and estimator-neutral.
-:::
+This separation answers the questions that matter in a simulation study:
 
-## Start with a canonical design
+- What information does the estimator observe?
+- Why does a unit receive treatment?
+- What is the untreated outcome law?
+- Which causal effect is the estimator trying to recover?
 
-```python
-import pypanelsim as pps
+## Install
 
-panel = pps.classic_factor(overlap=1.0, seed=42)
-y, w = panel.as_arrays()
-
-print(panel.shape)       # (200, 50)
-print(panel.true_att)    # 1.1
+```bash
+uv add "pypanelsim @ git+https://github.com/apoorvalal/pypanelsim.git"
 ```
 
-## Or compose the assignment law
+Python 3.10 or later is required.
 
-```python
-simulator = pps.PanelSimulator(
-    name="observed_selection",
-    dimensions=pps.PanelDimensions(120, 48),
-    feature_model=pps.GaussianUnitFeatures(2, 2),
-    assignment=pps.BinaryLogitAssignment(
-        adoption_period=32,
-        intercept=-1.1,
-        observable_coefficients=(1.2, -0.8),
-        unobservable_coefficients=(0.0, 0.0),
+## Run a design
+
+```{python}
+from pypanelsim import designs
+
+panel = designs.classic_factor(overlap=1.0, seed=42)
+
+print("shape:", panel.shape)
+print("treated units:", panel.treated_units.size)
+print("true ATT:", round(panel.true_att, 3))
+```
+
+The result is a validated `PanelDataset`. Its main identity is
+
+$$
+Y_{it} = Y_{it}(0) + D_{it}\tau_{it}.
+$$
+
+The container stores all three terms. It also stores the complete effect
+surface $\tau_{it}$, including cells that were not treated.
+
+## Build a design
+
+```{python}
+from pypanelsim import core, primitives
+
+simulator = core.PanelSimulator(
+    name="fixed_effects_plus_factors",
+    dimensions=core.PanelDimensions(n_units=200, n_periods=40),
+    assignment=primitives.RandomizedSingleCohortAssignment(
+        n_treated=80,
+        adoption_period=25,
     ),
-    outcome_model=my_outcome_model,
-    effect_model=pps.LinearRampEffect(0.12),
+    outcome_model=primitives.SumOutcomeModel(
+        models=(
+            primitives.TwoWayFixedEffectsOutcome(noise_scale=0.2),
+            primitives.LowRankFactorOutcome(rank=2, factor_scale=0.7),
+        )
+    ),
+    effect_model=primitives.LinearRampEffect(slope=0.2),
 )
+
+custom_panel = simulator.simulate(seed=42)
+print(custom_panel.metadata["outcome"]["model"])
 ```
 
-The same shared features reach assignment and the untreated-outcome model.
-Observed features are exposed to downstream estimators; latent features remain
-simulation truth.
+This is the main composition interface. Two-way fixed effects and low-rank
+factor models are ordinary outcome primitives. Neither is a special estimator
+mode.
 
-## Documentation map
+## Choose the next page
 
 | Goal | Page |
 |---|---|
-| Simulate and estimate rank-2 and rank-3 factor panels | [Get started](getting-started.qmd) |
-| Construct and visualize every balancing DGP | [Balancing DGP catalog](canonical-designs.qmd) |
-| Randomization, logit selection, and cohort GPS | [Assignment mechanisms](assignment.qmd) |
-| Simulate FTestEventStudy, ATT-DML, regression compression, and gsynth2 | [Research design suites](research-designs.qmd) |
-| Understand component order and RNG semantics | [Architecture](architecture.md) |
-| Inspect every public object and function | [API reference](api.qmd) |
-| Simulate all 14 F-test paper effect designs | [F-test heterogeneity DGPs](vignettes/ftest-heterogeneity.qmd) |
-| Compare four downstream projects under one contract | [Research-suite vignette](vignettes/research-suites.qmd) |
-| See heterogeneous adoption bias vanilla TWFE | [Baker TWFE failure](vignettes/baker-twfe.qmd) |
-| Reproduce 398 estimator-design RMSE cells | [Balancing reproduction](vignettes/balancing-reproduction.qmd) |
-| Pass panels to crabbymetrics or PyFixest | [Estimator interoperability](interoperability.qmd) |
+| Run and inspect one simulation | [Get started](getting-started.qmd) |
+| Understand the component boundary | [Architecture](architecture.md) |
+| Specify who receives treatment | [Assignment](assignment.qmd) |
+| Select a standard benchmark | [Design catalog](canonical-designs.qmd) |
+| Select a research-motivated design | [Research designs](research-designs.qmd) |
+| Send data to an estimator | [Export and interoperability](interoperability.qmd) |
+| Find a class or function | [API map](api.qmd) |
 
-## Installation
+## Package boundary
 
-```bash
-uv add "pypanelsim @ git+ssh://git@github.com/apoorvalal/pypanelsim.git"
-```
-
-Install the documentation and estimator interoperability stack with:
-
-```bash
-uv sync --extra docs
-```
+`pypanelsim` owns simulation components, causal truth, validated data, and
+export adapters. Estimators, Monte Carlo runners, cached results, and paper
+reports remain outside the package. This keeps the simulation contract usable
+with any estimator library.

@@ -6,6 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="description" content="Simulation contracts, data, truth, random streams, and orchestration.">
 
 <title>Core API – pypanelsim</title>
 <style>
@@ -4925,56 +4926,29 @@ height: auto;
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../index.html"> 
+    <a class="nav-link active" href="../index.html" aria-current="page"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="../getting-started.html" aria-current="page"> 
+    <a class="nav-link" href="../getting-started.html"> 
 <span class="menu-text">Get started</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="../canonical-designs.html"> 
-<span class="menu-text">DGP catalog</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="../assignment.html"> 
-<span class="menu-text">Assignment</span></a>
+<span class="menu-text">Design catalog</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="../research-designs.html"> 
-<span class="menu-text">Research suites</span></a>
+<span class="menu-text">Research designs</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../interoperability.html"> 
+<span class="menu-text">Export</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="../api.html"> 
 <span class="menu-text">API</span></a>
   </li>  
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-vignettes" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Vignettes</span>
-    </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-vignettes">    
-        <li>
-    <a class="dropdown-item" href="../vignettes/balancing-reproduction.html">
- <span class="dropdown-text">Balancing reproduction</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/baker-twfe.html">
- <span class="dropdown-text">Baker TWFE failure</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/ftest-heterogeneity.html">
- <span class="dropdown-text">F-test heterogeneity DGPs</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../vignettes/research-suites.html">
- <span class="dropdown-text">Four research suites</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../interoperability.html">
- <span class="dropdown-text">Estimator interoperability</span></a>
-  </li>  
-    </ul>
-  </li>
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item compact">
@@ -5009,12 +4983,18 @@ height: auto;
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
- <span class="menu-text">Use pypanelsim</span></a>
+ <span class="menu-text">Start here</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Synthetic panels with visible assumptions</span></a>
+  </div>
+</li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../getting-started.html" class="sidebar-item-text sidebar-link">
@@ -5023,20 +5003,8 @@ height: auto;
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../assignment.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Assignment mechanisms</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../research-designs.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Research design suites</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../interoperability.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Estimator interoperability</span></a>
+  <a href="../architecture.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Architecture and data contract</span></a>
   </div>
 </li>
       </ul>
@@ -5044,7 +5012,7 @@ height: auto;
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
- <span class="menu-text">Concepts</span></a>
+ <span class="menu-text">Build a design</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -5052,26 +5020,26 @@ height: auto;
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../architecture.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Architecture and extension contract</span></a>
+  <a href="../assignment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Treatment assignment</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../canonical-designs.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Balancing DGP catalog</span></a>
+ <span class="menu-text">Design catalog</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../migration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Migration from <code>panel_dgps</code></span></a>
+  <a href="../research-designs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Research designs</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../validation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Validation record</span></a>
+  <a href="../interoperability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Export and interoperability</span></a>
   </div>
 </li>
       </ul>
@@ -5079,7 +5047,7 @@ height: auto;
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
- <span class="menu-text">API reference</span></a>
+ <span class="menu-text">Research tutorials</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -5087,8 +5055,61 @@ height: auto;
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../api.html" class="sidebar-item-text sidebar-link">
+  <a href="../vignettes/baker-twfe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Baker’s dynamic-effects example</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../vignettes/ftest-heterogeneity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">F-test heterogeneity designs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../vignettes/support-aware-event-studies.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Support-aware event studies</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../vignettes/conditional-trends.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Conditional and latent trends</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../vignettes/large-panels.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Large panels and compressed regressions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../vignettes/composite-panels.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Composite panel benchmark</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../vignettes/balancing-reproduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Balancing validation snapshot</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
  <span class="menu-text">API reference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">API map</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -5105,32 +5126,8 @@ height: auto;
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../reference/research-designs.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Research design API</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../reference/assignment.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Assignment, feature, and effect API</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../reference/baker.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Baker staggered-adoption API</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../reference/ftest.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">F-test paper DGP API</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../reference/canonical.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Canonical design API</span></a>
+  <a href="../reference/designs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Design API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -5143,35 +5140,23 @@ height: auto;
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
- <span class="menu-text">Vignettes</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Maintenance and provenance</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../vignettes/baker-twfe.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Baker DGP: why vanilla TWFE event studies fail</span></a>
+  <a href="../validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Validation and provenance</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../vignettes/ftest-heterogeneity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">F-test paper heterogeneous-effect DGPs</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../vignettes/research-suites.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Four research projects, one simulation contract</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../vignettes/balancing-reproduction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Balancing estimators in synthetic panels</span></a>
+  <a href="../migration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Migration guide</span></a>
   </div>
 </li>
       </ul>
@@ -5181,19 +5166,44 @@ height: auto;
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#paneldimensions" id="toc-paneldimensions" class="nav-link active" data-scroll-target="#paneldimensions"><span class="header-section-number">1</span> <code>PanelDimensions</code></a></li>
+  <li><a href="#component-draws" id="toc-component-draws" class="nav-link" data-scroll-target="#component-draws"><span class="header-section-number">2</span> Component draws</a></li>
+  <li><a href="#component-contexts" id="toc-component-contexts" class="nav-link" data-scroll-target="#component-contexts"><span class="header-section-number">3</span> Component contexts</a></li>
+  <li><a href="#component-protocols" id="toc-component-protocols" class="nav-link" data-scroll-target="#component-protocols"><span class="header-section-number">4</span> Component protocols</a></li>
+  <li><a href="#panelsimulator" id="toc-panelsimulator" class="nav-link" data-scroll-target="#panelsimulator"><span class="header-section-number">5</span> <code>PanelSimulator</code></a></li>
+  <li><a href="#simulationseeds" id="toc-simulationseeds" class="nav-link" data-scroll-target="#simulationseeds"><span class="header-section-number">6</span> <code>SimulationSeeds</code></a></li>
+  <li><a href="#resolve_rng" id="toc-resolve_rng" class="nav-link" data-scroll-target="#resolve_rng"><span class="header-section-number">7</span> <code>resolve_rng</code></a></li>
+  <li><a href="#paneldataset" id="toc-paneldataset" class="nav-link" data-scroll-target="#paneldataset"><span class="header-section-number">8</span> <code>PanelDataset</code></a>
+  <ul class="collapse">
+  <li><a href="#stored-matrices" id="toc-stored-matrices" class="nav-link" data-scroll-target="#stored-matrices"><span class="header-section-number">8.1</span> Stored matrices</a></li>
+  <li><a href="#properties" id="toc-properties" class="nav-link" data-scroll-target="#properties"><span class="header-section-number">8.2</span> Properties</a></li>
+  <li><a href="#conversion-methods" id="toc-conversion-methods" class="nav-link" data-scroll-target="#conversion-methods"><span class="header-section-number">8.3</span> Conversion methods</a></li>
+  </ul></li>
+  <li><a href="#paneltruth" id="toc-paneltruth" class="nav-link" data-scroll-target="#paneltruth"><span class="header-section-number">9</span> <code>PanelTruth</code></a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/website/reference/core.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
 <!-- main -->
-<main class="content column-page-right" id="quarto-document-content">
+<main class="content column-body" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../api.html">API reference</a></li><li class="breadcrumb-item"><a href="../reference/core.html">Core API</a></li></ol></nav>
 <div class="quarto-title">
 <h1 class="title">Core API</h1>
-<p class="subtitle lead">Dimensions, contexts, datasets, simulation orchestration, and randomness</p>
+</div>
+
+<div>
+  <div class="description">
+    Simulation contracts, data, truth, random streams, and orchestration.
+  </div>
 </div>
 
 
-
-<div class="quarto-title-meta column-page-right">
+<div class="quarto-title-meta column-body">
 
     
   
@@ -5205,108 +5215,92 @@ height: auto;
 </header>
 
 
-<div id="ac7632f0" class="cell" data-execution_count="1">
+<div id="3b408547" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> inspect</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pypanelsim <span class="im">as</span> pps</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> signature(object_):</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ss">f&quot;</span><span class="sc">{</span>object_<span class="sc">.</span><span class="va">__name__</span><span class="sc">}{</span>inspect<span class="sc">.</span>signature(object_)<span class="sc">}</span><span class="ss">&quot;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> core</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <section id="paneldimensions" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="paneldimensions"><span class="header-section-number">1</span> <code>PanelDimensions</code></h2>
-<div class="api-signature">
-<div id="2bd591ff" class="cell" data-execution_count="2">
+<div id="ffe4706e" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.PanelDimensions))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.signature(core.PanelDimensions))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>PanelDimensions(n_units: &#39;int&#39; = 200, n_periods: &#39;int&#39; = 50) -&gt; None</code></pre>
+<pre><code>(n_units: &#39;int&#39; = 200, n_periods: &#39;int&#39; = 50) -&gt; None</code></pre>
 </div>
 </div>
-</div>
-<p>Immutable rectangular panel dimensions.</p>
+<p><code>n_units</code> and <code>n_periods</code> must be positive integers. Every component draw uses these dimensions.</p>
+</section>
+<section id="component-draws" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="component-draws"><span class="header-section-number">2</span> Component draws</h2>
 <table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
 <thead>
 <tr class="header">
-<th>Parameter</th>
 <th>Type</th>
-<th style="text-align: right;">Default</th>
-<th>Validation</th>
+<th>Required values</th>
+<th>Other fields</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>n_units</code></td>
-<td><code>int</code></td>
-<td style="text-align: right;"><code>200</code></td>
-<td>Strictly positive</td>
+<td><code>ComponentDraw</code></td>
+<td>one <code>(unit, time)</code> matrix</td>
+<td>metadata</td>
 </tr>
 <tr class="even">
-<td><code>n_periods</code></td>
-<td><code>int</code></td>
-<td style="text-align: right;"><code>50</code></td>
-<td>Strictly positive</td>
+<td><code>UnitFeatureDraw</code></td>
+<td>observed and latent <code>(unit, feature)</code> matrices</td>
+<td>estimator-visible features, metadata, unit annotations</td>
 </tr>
-</tbody>
-</table>
-<p>The object intentionally carries no assumptions about unit order, treatment cohorts, or pre/post periods.</p>
-</section>
-<section id="componentdraw" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="componentdraw"><span class="header-section-number">2</span> <code>ComponentDraw</code></h2>
-<div class="api-signature">
-<div id="24b98e74" class="cell" data-execution_count="3">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.ComponentDraw))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>ComponentDraw(values: &#39;FloatMatrix&#39;, metadata: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;) -&gt; None</code></pre>
-</div>
-</div>
-</div>
-<p>Return type for assignment, outcome, and effect components.</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Field</th>
-<th>Contract</th>
-</tr>
-</thead>
-<tbody>
 <tr class="odd">
-<td><code>values</code></td>
-<td>Full <code>(n_units, n_periods)</code> numeric matrix</td>
-</tr>
-<tr class="even">
-<td><code>metadata</code></td>
-<td>Optional mapping of diagnostics or latent truth</td>
+<td><code>TimeFeatureDraw</code></td>
+<td>one <code>(time, feature)</code> matrix</td>
+<td>metadata, time annotations</td>
 </tr>
 </tbody>
 </table>
-<p>The simulator validates shape and finiteness at the composition boundary. The final dataset recursively copies and freezes metadata.</p>
-</section>
-<section id="unitfeaturedraw" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="unitfeaturedraw"><span class="header-section-number">3</span> <code>UnitFeatureDraw</code></h2>
-<div class="api-signature">
-<div id="a23f3829" class="cell" data-execution_count="4">
+<div id="38c60d86" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.UnitFeatureDraw))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> (<span class="st">&quot;ComponentDraw&quot;</span>, <span class="st">&quot;UnitFeatureDraw&quot;</span>, <span class="st">&quot;TimeFeatureDraw&quot;</span>):</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(name, inspect.signature(<span class="bu">getattr</span>(core, name)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>UnitFeatureDraw(observables: &#39;FloatMatrix&#39;, unobservables: &#39;FloatMatrix&#39;, metadata: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;, estimator_observables: &#39;FloatMatrix | None&#39; = None, unit_annotations: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;) -&gt; None</code></pre>
+<pre><code>ComponentDraw (values: &#39;FloatMatrix&#39;, metadata: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;) -&gt; None
+UnitFeatureDraw (observables: &#39;FloatMatrix&#39;, unobservables: &#39;FloatMatrix&#39;, metadata: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;, estimator_observables: &#39;FloatMatrix | None&#39; = None, unit_annotations: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;) -&gt; None
+TimeFeatureDraw (values: &#39;FloatMatrix&#39;, metadata: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;, time_annotations: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;) -&gt; None</code></pre>
 </div>
 </div>
+<p>Draw objects are return values for custom components. They are not complete panels.</p>
+</section>
+<section id="component-contexts" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="component-contexts"><span class="header-section-number">3</span> Component contexts</h2>
+<p><code>AssignmentContext</code> contains dimensions, observed features, latent features, and feature metadata.</p>
+<p><code>SimulationContext</code> adds the treatment matrix and optional time features. It is passed to outcome and effect models.</p>
+<div id="dc75030d" class="cell" data-execution_count="4">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.signature(core.AssignmentContext))</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.signature(core.SimulationContext))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>(dimensions: &#39;PanelDimensions&#39;, observables: &#39;FloatMatrix | None&#39; = None, unobservables: &#39;FloatMatrix | None&#39; = None, feature_metadata: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;) -&gt; None
+(dimensions: &#39;PanelDimensions&#39;, treatment: &#39;FloatMatrix&#39;, observables: &#39;FloatMatrix | None&#39; = None, unobservables: &#39;FloatMatrix | None&#39; = None, feature_metadata: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;, time_features: &#39;FloatMatrix | None&#39; = None, time_feature_metadata: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;) -&gt; None</code></pre>
 </div>
-<p>Return type for <code>UnitFeatureModel.generate()</code>.</p>
+</div>
+</section>
+<section id="component-protocols" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="component-protocols"><span class="header-section-number">4</span> Component protocols</h2>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 33%">
@@ -5315,295 +5309,147 @@ height: auto;
 </colgroup>
 <thead>
 <tr class="header">
-<th>Field</th>
-<th>Shape</th>
-<th>Meaning</th>
+<th>Protocol</th>
+<th>Required method</th>
+<th>Output</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>observables</code></td>
-<td><code>(n_units, k_x)</code></td>
-<td>Covariates used by assignment and outcomes</td>
+<td><code>UnitFeatureModel</code></td>
+<td><code>generate(dimensions, rng)</code></td>
+<td><code>UnitFeatureDraw</code></td>
 </tr>
 <tr class="even">
-<td><code>unobservables</code></td>
-<td><code>(n_units, k_u)</code></td>
-<td>Latent features retained as simulation truth</td>
+<td><code>AssignmentModel</code></td>
+<td><code>assign(context, rng)</code></td>
+<td><code>ComponentDraw</code></td>
 </tr>
 <tr class="odd">
-<td><code>metadata</code></td>
-<td>Mapping</td>
-<td>Names and feature-model diagnostics</td>
+<td><code>TimeFeatureModel</code></td>
+<td><code>generate(dimensions, rng)</code></td>
+<td><code>TimeFeatureDraw</code></td>
 </tr>
 <tr class="even">
-<td><code>estimator_observables</code></td>
-<td><code>(n_units, k_e)</code> or <code>None</code></td>
-<td>Optional estimator-visible covariates</td>
+<td><code>OutcomeModel</code></td>
+<td><code>generate(context, rng)</code></td>
+<td><code>ComponentDraw</code> for <span class="math inline">\(Y(0)\)</span></td>
 </tr>
 <tr class="odd">
-<td><code>unit_annotations</code></td>
-<td>Mapping</td>
-<td>Optional unit-aligned labels</td>
+<td><code>EffectModel</code></td>
+<td><code>generate(context, rng)</code></td>
+<td>realized effect plus <code>effect_surface</code> metadata</td>
 </tr>
 </tbody>
 </table>
-<p>Zero feature columns are valid. All supplied values must be finite.</p>
+<p>Protocols use structural typing. A custom class can satisfy one without inheritance.</p>
 </section>
-<section id="timefeaturedraw" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="timefeaturedraw"><span class="header-section-number">4</span> <code>TimeFeatureDraw</code></h2>
-<div class="api-signature">
-<div id="a69a08d5" class="cell" data-execution_count="5">
+<section id="panelsimulator" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="panelsimulator"><span class="header-section-number">5</span> <code>PanelSimulator</code></h2>
+<div id="3223a1f9" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.TimeFeatureDraw))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.signature(core.PanelSimulator))</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;simulate&quot;</span>, inspect.signature(core.PanelSimulator.simulate))</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;iter_simulations&quot;</span>, inspect.signature(core.PanelSimulator.iter_simulations))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>TimeFeatureDraw(values: &#39;FloatMatrix&#39;, metadata: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;, time_annotations: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;) -&gt; None</code></pre>
+<pre><code>(name: &#39;str&#39;, dimensions: &#39;PanelDimensions&#39;, assignment: &#39;AssignmentModel&#39;, outcome_model: &#39;OutcomeModel&#39;, effect_model: &#39;EffectModel | EffectCallable&#39;, feature_model: &#39;UnitFeatureModel | None&#39; = None, time_feature_model: &#39;TimeFeatureModel | None&#39; = None, unit_ids: &#39;Sequence[Any] | None&#39; = None, time_ids: &#39;Sequence[Any] | None&#39; = None, unit_annotations: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;, time_annotations: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;) -&gt; None
+simulate (self, *, seed: &#39;int | np.random.SeedSequence | None&#39; = None, rng: &#39;np.random.Generator | None&#39; = None, streams: &#39;SimulationSeeds | None&#39; = None) -&gt; &#39;PanelDataset&#39;
+iter_simulations (self, replications: &#39;int&#39;, *, seed: &#39;int | np.random.SeedSequence | None&#39; = None) -&gt; &#39;Iterator[PanelDataset]&#39;</code></pre>
 </div>
 </div>
-</div>
-<p>Return type for <code>TimeFeatureModel.generate()</code>. <code>values</code> has shape <code>(n_periods, k_v)</code> and is available to both outcome and effect models as <code>context.time_features</code>. Metadata can name columns or record the generating law. <code>time_annotations</code> can hold period-aligned labels. Zero feature columns are valid.</p>
+<p>Required constructor fields are:</p>
+<ul>
+<li><code>name</code>: a nonempty design identifier;</li>
+<li><code>dimensions</code>: one <code>PanelDimensions</code> value;</li>
+<li><code>assignment</code>: an <code>AssignmentModel</code>;</li>
+<li><code>outcome_model</code>: an <code>OutcomeModel</code>;</li>
+<li><code>effect_model</code>: an <code>EffectModel</code> or compatible callable.</li>
+</ul>
+<p>Feature models, custom unit and time identifiers, and axis annotations are optional.</p>
+<p><code>simulate</code> accepts exactly one of <code>seed</code>, <code>rng</code>, or <code>streams</code>. It returns one <code>PanelDataset</code>. <code>iter_simulations</code> spawns independent seed sequences and yields the requested number of draws.</p>
 </section>
-<section id="assignmentcontext" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="assignmentcontext"><span class="header-section-number">5</span> <code>AssignmentContext</code></h2>
-<div class="api-signature">
-<div id="888d188b" class="cell" data-execution_count="6">
+<section id="simulationseeds" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="simulationseeds"><span class="header-section-number">6</span> <code>SimulationSeeds</code></h2>
+<div id="fd30c88f" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.AssignmentContext))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.signature(core.SimulationSeeds))</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.signature(core.SimulationSeeds.from_seed))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>AssignmentContext(dimensions: &#39;PanelDimensions&#39;, observables: &#39;FloatMatrix | None&#39; = None, unobservables: &#39;FloatMatrix | None&#39; = None, feature_metadata: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;) -&gt; None</code></pre>
+<pre><code>(features: &#39;SeedInput&#39; = None, assignment: &#39;SeedInput&#39; = None, time_features: &#39;SeedInput&#39; = None, outcome: &#39;SeedInput&#39; = None, effect: &#39;SeedInput&#39; = None) -&gt; None
+(seed: &#39;int | np.random.SeedSequence&#39;) -&gt; &#39;SimulationSeeds&#39;</code></pre>
 </div>
 </div>
-</div>
-<p>Immutable input to feature-aware assignment mechanisms. It owns read-only copies of observed and latent unit features. <code>n_units</code> and <code>n_periods</code> proxy the enclosed <code>PanelDimensions</code>, which keeps legacy assignments that only inspect dimensions operational.</p>
+<p>The five streams are <code>features</code>, <code>assignment</code>, <code>time_features</code>, <code>outcome</code>, and <code>effect</code>. <code>from_seed</code> derives them from one NumPy <code>SeedSequence</code>.</p>
 </section>
-<section id="simulationcontext" class="level2" data-number="6">
-<h2 data-number="6" class="anchored" data-anchor-id="simulationcontext"><span class="header-section-number">6</span> <code>SimulationContext</code></h2>
-<div class="api-signature">
-<div id="94502acf" class="cell" data-execution_count="7">
+<section id="resolve_rng" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="resolve_rng"><span class="header-section-number">7</span> <code>resolve_rng</code></h2>
+<div id="ee49d368" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.SimulationContext))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.signature(core.resolve_rng))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>SimulationContext(dimensions: &#39;PanelDimensions&#39;, treatment: &#39;FloatMatrix&#39;, observables: &#39;FloatMatrix | None&#39; = None, unobservables: &#39;FloatMatrix | None&#39; = None, feature_metadata: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;, time_features: &#39;FloatMatrix | None&#39; = None, time_feature_metadata: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;) -&gt; None</code></pre>
+<pre><code>(*, seed: &#39;int | np.random.SeedSequence | None&#39; = None, rng: &#39;np.random.Generator | None&#39; = None) -&gt; &#39;np.random.Generator&#39;</code></pre>
 </div>
 </div>
+<p>This helper accepts a seed or an existing <code>numpy.random.Generator</code>, but not both. Custom components normally receive an existing generator from the simulator and do not call this helper.</p>
+</section>
+<section id="paneldataset" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="paneldataset"><span class="header-section-number">8</span> <code>PanelDataset</code></h2>
+<div id="85c07612" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.signature(core.PanelDataset))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>(outcome: &#39;FloatMatrix&#39;, treatment: &#39;FloatMatrix&#39;, untreated_outcome: &#39;FloatMatrix&#39;, treatment_effect: &#39;FloatMatrix&#39;, name: &#39;str&#39;, unit_ids: &#39;NDArray[Any] | None&#39; = None, time_ids: &#39;NDArray[Any] | None&#39; = None, metadata: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;, unit_covariates: &#39;FloatMatrix | None&#39; = None, unit_covariate_names: &#39;Sequence[str] | None&#39; = None, effect_surface: &#39;FloatMatrix | None&#39; = None, unit_annotations: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;, time_annotations: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;) -&gt; None</code></pre>
 </div>
-<p>Input to outcome and effect components.</p>
+</div>
+<section id="stored-matrices" class="level3" data-number="8.1">
+<h3 data-number="8.1" class="anchored" data-anchor-id="stored-matrices"><span class="header-section-number">8.1</span> Stored matrices</h3>
+<p>All matrices are read-only and have the same <code>(unit, time)</code> shape.</p>
 <table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Attribute</th>
-<th>Contract</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>dimensions</code></td>
-<td><code>PanelDimensions</code></td>
-</tr>
-<tr class="even">
-<td><code>treatment</code></td>
-<td>Read-only finite binary <code>(n_units, n_periods)</code> matrix</td>
-</tr>
-<tr class="odd">
-<td><code>observables</code></td>
-<td>Read-only <code>(n_units, k_x)</code> matrix</td>
-</tr>
-<tr class="even">
-<td><code>unobservables</code></td>
-<td>Read-only <code>(n_units, k_u)</code> matrix</td>
-</tr>
-<tr class="odd">
-<td><code>feature_metadata</code></td>
-<td>Read-only feature metadata mapping</td>
-</tr>
-<tr class="even">
-<td><code>time_features</code></td>
-<td>Read-only <code>(n_periods, k_v)</code> matrix</td>
-</tr>
-<tr class="odd">
-<td><code>time_feature_metadata</code></td>
-<td>Read-only time-feature metadata mapping</td>
-</tr>
-</tbody>
-</table>
-<p>Derived properties:</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Property</th>
-<th>Return</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>ever_treated</code></td>
-<td>Boolean unit mask</td>
-</tr>
-<tr class="even">
-<td><code>treated_units</code></td>
-<td>Integer positions treated at least once</td>
-</tr>
-<tr class="odd">
-<td><code>control_units</code></td>
-<td>Integer positions never treated</td>
-</tr>
-<tr class="even">
-<td><code>is_absorbing</code></td>
-<td>Whether treatment never switches off</td>
-</tr>
-<tr class="odd">
-<td><code>adoption_times</code></td>
-<td>First treated period; never treated uses <code>n_periods</code></td>
-</tr>
-</tbody>
-</table>
-<p><code>adoption_times</code> raises <code>ValueError</code> for nonabsorbing treatment.</p>
-</section>
-<section id="component-protocols" class="level2" data-number="7">
-<h2 data-number="7" class="anchored" data-anchor-id="component-protocols"><span class="header-section-number">7</span> Component protocols</h2>
-<p>The protocols are runtime-checkable but inheritance is optional.</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> UnitFeatureModel(Protocol):</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> generate(<span class="va">self</span>, dimensions, rng) <span class="op">-&gt;</span> UnitFeatureDraw: ...</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TimeFeatureModel(Protocol):</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> generate(<span class="va">self</span>, dimensions, rng) <span class="op">-&gt;</span> TimeFeatureDraw: ...</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> AssignmentModel(Protocol):</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> assign(<span class="va">self</span>, context, rng) <span class="op">-&gt;</span> ComponentDraw: ...</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> OutcomeModel(Protocol):</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> generate(<span class="va">self</span>, context, rng) <span class="op">-&gt;</span> ComponentDraw: ...</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> EffectModel(Protocol):</span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> generate(<span class="va">self</span>, context, rng) <span class="op">-&gt;</span> ComponentDraw: ...</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>All randomness must come from the supplied <code>numpy.random.Generator</code>.</p>
-</section>
-<section id="additivefactoroutcome" class="level2" data-number="8">
-<h2 data-number="8" class="anchored" data-anchor-id="additivefactoroutcome"><span class="header-section-number">8</span> <code>AdditiveFactorOutcome</code></h2>
-<div class="api-signature">
-<div id="65e3aec7" class="cell" data-execution_count="8">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.AdditiveFactorOutcome))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>AdditiveFactorOutcome(unit_effect_scale: &#39;float&#39; = 1.0, time_effect_scale: &#39;float&#39; = 1.0, noise_scale: &#39;float&#39; = 0.0) -&gt; None</code></pre>
-</div>
-</div>
-</div>
-<p>The basic additive panel outcome model:</p>
-<p><span class="math display">\[
-Y_{it}(0)=\alpha_i+\gamma_t+\varepsilon_{it}.
-\]</span></p>
-<p><code>unit_effect_scale</code>, <code>time_effect_scale</code>, and <code>noise_scale</code> are finite, nonnegative Gaussian standard deviations. The systematic surface has rank at most two and lies exactly in a 2WFE model. Metadata retains the three realized components separately.</p>
-</section>
-<section id="sumoutcomemodel" class="level2" data-number="9">
-<h2 data-number="9" class="anchored" data-anchor-id="sumoutcomemodel"><span class="header-section-number">9</span> <code>SumOutcomeModel</code></h2>
-<div class="api-signature">
-<div id="a460054a" class="cell" data-execution_count="9">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.SumOutcomeModel))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>SumOutcomeModel(models: &#39;Sequence[OutcomeModel]&#39;, weights: &#39;Sequence[float] | None&#39; = None) -&gt; None</code></pre>
-</div>
-</div>
-</div>
-<p>Adds any nonempty sequence of public <code>OutcomeModel</code> components, optionally after multiplying them by finite <code>weights</code>. Component draw order is the model order supplied to the constructor. Metadata preserves each component’s model name, weight, and diagnostic truth. For example, a unit effect plus the canonical two-factor outcome is:</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>outcome_model <span class="op">=</span> pps.SumOutcomeModel(</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    (</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>        pps.AdditiveFactorOutcome(</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>            time_effect_scale<span class="op">=</span><span class="fl">0.0</span>,</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>            noise_scale<span class="op">=</span><span class="fl">0.0</span>,</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>        pps.ClassicFactorOutcome(overlap<span class="op">=</span><span class="fl">1.0</span>),</span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="paneldataset" class="level2" data-number="10">
-<h2 data-number="10" class="anchored" data-anchor-id="paneldataset"><span class="header-section-number">10</span> <code>PanelDataset</code></h2>
-<div class="api-signature">
-<div id="62746311" class="cell" data-execution_count="10">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.PanelDataset))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>PanelDataset(outcome: &#39;FloatMatrix&#39;, treatment: &#39;FloatMatrix&#39;, untreated_outcome: &#39;FloatMatrix&#39;, treatment_effect: &#39;FloatMatrix&#39;, name: &#39;str&#39;, effect_surface: &#39;FloatMatrix | None&#39; = None, unit_ids: &#39;NDArray[Any] | None&#39; = None, time_ids: &#39;NDArray[Any] | None&#39; = None, metadata: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;, unit_covariates: &#39;FloatMatrix | None&#39; = None, unit_covariate_names: &#39;Sequence[str] | None&#39; = None, unit_annotations: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;, time_annotations: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;) -&gt; None</code></pre>
-</div>
-</div>
-</div>
-<p>The immutable output of every simulation.</p>
-<section id="constructor-arrays" class="level3" data-number="10.1">
-<h3 data-number="10.1" class="anchored" data-anchor-id="constructor-arrays"><span class="header-section-number">10.1</span> Constructor arrays</h3>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Field</th>
-<th>Shape</th>
-<th>Validation</th>
+<th>Invariant</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td><code>outcome</code></td>
-<td><code>(N,T)</code></td>
-<td>Finite, nonempty, two-dimensional</td>
+<td>equals <code>untreated_outcome + treatment_effect</code></td>
 </tr>
 <tr class="even">
 <td><code>treatment</code></td>
-<td><code>(N,T)</code></td>
-<td>Same shape; binary</td>
+<td>contains only zero and one</td>
 </tr>
 <tr class="odd">
 <td><code>untreated_outcome</code></td>
-<td><code>(N,T)</code></td>
-<td>Same shape; finite</td>
+<td>finite untreated potential outcomes</td>
 </tr>
 <tr class="even">
-<td><code>treatment_effect</code></td>
-<td><code>(N,T)</code></td>
-<td>Same shape; zero where untreated</td>
+<td><code>effect_surface</code></td>
+<td>complete cell effect if treated</td>
 </tr>
 <tr class="odd">
-<td><code>effect_surface</code></td>
-<td><code>(N,T)</code></td>
-<td>Full effect law; realized effect equals surface times treatment</td>
-</tr>
-<tr class="even">
-<td><code>unit_covariates</code></td>
-<td><code>(N,K)</code></td>
-<td>Optional finite time-invariant covariates</td>
+<td><code>treatment_effect</code></td>
+<td>equals <code>effect_surface * treatment</code></td>
 </tr>
 </tbody>
 </table>
-<p>The constructor enforces</p>
-<p><span class="math display">\[Y=Y(0)+\tau\]</span></p>
-<p>cell by cell. It copies arrays before making them read-only, so later mutation of caller-owned inputs cannot alter the dataset.</p>
 </section>
-<section id="identifiers-and-metadata" class="level3" data-number="10.2">
-<h3 data-number="10.2" class="anchored" data-anchor-id="identifiers-and-metadata"><span class="header-section-number">10.2</span> Identifiers and metadata</h3>
-<p><code>unit_ids</code> and <code>time_ids</code> default to zero-based integer positions and must be unique. <code>unit_covariate_names</code> defaults to <code>x1</code>, <code>x2</code>, and so on; names must be unique and cannot collide with the long-form core columns. <code>metadata</code> is copied and recursively frozen for mappings, arrays, lists, tuples, and sets. <code>unit_annotations</code> and <code>time_annotations</code> hold immutable axis-aligned labels.</p>
-</section>
-<section id="properties" class="level3" data-number="10.3">
-<h3 data-number="10.3" class="anchored" data-anchor-id="properties"><span class="header-section-number">10.3</span> Properties</h3>
+<section id="properties" class="level3" data-number="8.2">
+<h3 data-number="8.2" class="anchored" data-anchor-id="properties"><span class="header-section-number">8.2</span> Properties</h3>
 <table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
 <thead>
 <tr class="header">
 <th>Property</th>
@@ -5613,185 +5459,76 @@ Y_{it}(0)=\alpha_i+\gamma_t+\varepsilon_{it}.
 <tbody>
 <tr class="odd">
 <td><code>shape</code>, <code>n_units</code>, <code>n_periods</code></td>
-<td>Panel dimensions</td>
+<td>dimensions</td>
 </tr>
 <tr class="even">
 <td><code>ever_treated</code></td>
-<td>Unit-level treatment mask</td>
+<td>unit mask</td>
 </tr>
 <tr class="odd">
 <td><code>treated_units</code>, <code>control_units</code></td>
-<td>Integer row positions</td>
+<td>integer unit positions</td>
 </tr>
 <tr class="even">
 <td><code>is_absorbing</code></td>
-<td>Monotone treatment indicator</td>
+<td>treatment never switches off</td>
 </tr>
 <tr class="odd">
 <td><code>adoption_times</code></td>
-<td>First treated period or horizon sentinel</td>
+<td>first treatment position; <code>n_periods</code> for controls</td>
 </tr>
 <tr class="even">
 <td><code>true_att</code></td>
-<td>Mean realized effect over cells with <code>treatment == 1</code></td>
+<td>mean realized effect over treated cells</td>
 </tr>
 <tr class="odd">
 <td><code>truth</code></td>
-<td><code>PanelTruth</code> cohort and event-time summaries</td>
+<td>a <code>PanelTruth</code> view</td>
+</tr>
+<tr class="even">
+<td><code>counterfactual_target_mask</code></td>
+<td>treated cells whose <span class="math inline">\(Y(0)\)</span> is hidden</td>
 </tr>
 </tbody>
 </table>
-<p><code>true_att</code> raises <code>ValueError</code> when the panel has no treated cells.</p>
 </section>
-<section id="interchange-methods" class="level3" data-number="10.4">
-<h3 data-number="10.4" class="anchored" data-anchor-id="interchange-methods"><span class="header-section-number">10.4</span> Interchange methods</h3>
-<div id="db08580c" class="cell" data-execution_count="11">
+<section id="conversion-methods" class="level3" data-number="8.3">
+<h3 data-number="8.3" class="anchored" data-anchor-id="conversion-methods"><span class="header-section-number">8.3</span> Conversion methods</h3>
+<div id="c69242fa" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> (<span class="st">&quot;as_arrays&quot;</span>, <span class="st">&quot;arrays&quot;</span>, <span class="st">&quot;as_long_dict&quot;</span>):</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    method <span class="op">=</span> <span class="bu">getattr</span>(pps.PanelDataset, name)</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span>name<span class="sc">}{</span>inspect<span class="sc">.</span>signature(method)<span class="sc">}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> (<span class="st">&quot;as_arrays&quot;</span>, <span class="st">&quot;arrays&quot;</span>, <span class="st">&quot;as_long_dict&quot;</span>):</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(name, inspect.signature(<span class="bu">getattr</span>(core.PanelDataset, name)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>as_arrays(self, *, copy: &#39;bool&#39; = False) -&gt; &#39;tuple[FloatMatrix, FloatMatrix]&#39;
-arrays(self, fields: &#39;Sequence[str]&#39;, *, copy: &#39;bool&#39; = False) -&gt; &#39;tuple[FloatMatrix, ...]&#39;
-as_long_dict(self, *, copy: &#39;bool&#39; = False, include_effect_surface: &#39;bool&#39; = False, include_annotations: &#39;bool&#39; = False) -&gt; &#39;Mapping[str, NDArray[Any]]&#39;</code></pre>
+<pre><code>as_arrays (self, *, copy: &#39;bool&#39; = False) -&gt; &#39;tuple[FloatMatrix, FloatMatrix]&#39;
+arrays (self, fields: &#39;Sequence[str]&#39;, *, copy: &#39;bool&#39; = False) -&gt; &#39;tuple[FloatMatrix, ...]&#39;
+as_long_dict (self, *, copy: &#39;bool&#39; = False, include_effect_surface: &#39;bool&#39; = False, include_annotations: &#39;bool&#39; = False) -&gt; &#39;Mapping[str, NDArray[Any]]&#39;</code></pre>
 </div>
 </div>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Method</th>
-<th>Return contract</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>as_arrays(copy=False)</code></td>
-<td><code>(outcome, treatment)</code> wide matrices</td>
-</tr>
-<tr class="even">
-<td><code>arrays(fields, copy=False)</code></td>
-<td>Requested causal matrices in caller order</td>
-</tr>
-<tr class="odd">
-<td><code>as_long_dict(...)</code></td>
-<td>Flat core columns plus optional surface and annotations</td>
-</tr>
-</tbody>
-</table>
-<p>Views are read-only unless <code>copy=True</code>. <code>arrays()</code> accepts <code>outcome</code>, <code>treatment</code>, <code>untreated_outcome</code>, and <code>treatment_effect</code>; an unknown name raises <code>ValueError</code>. <code>arrays()</code> also accepts <code>effect_surface</code>. The default long schema is backward compatible. Set <code>include_effect_surface=True</code> or <code>include_annotations=True</code> for the expanded columns.</p>
+<p><code>as_arrays()</code> returns outcome and treatment. <code>arrays(fields)</code> returns selected matrices. <code>as_long_dict()</code> returns columns for data-frame construction. Pass <code>include_effect_surface=True</code> or <code>include_annotations=True</code> only when those columns are needed.</p>
 </section>
 </section>
-<section id="panelsimulator" class="level2" data-number="11">
-<h2 data-number="11" class="anchored" data-anchor-id="panelsimulator"><span class="header-section-number">11</span> <code>PanelSimulator</code></h2>
-<div class="api-signature">
-<div id="92a62530" class="cell" data-execution_count="12">
+<section id="paneltruth" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="paneltruth"><span class="header-section-number">9</span> <code>PanelTruth</code></h2>
+<div id="c7717019" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(signature(pps.PanelSimulator))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> (<span class="st">&quot;cohort_event&quot;</span>, <span class="st">&quot;event_study&quot;</span>, <span class="st">&quot;att_by_cohort&quot;</span>):</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(name, inspect.signature(<span class="bu">getattr</span>(core.PanelTruth, name)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>PanelSimulator(name: &#39;str&#39;, dimensions: &#39;PanelDimensions&#39;, assignment: &#39;AssignmentModel&#39;, outcome_model: &#39;OutcomeModel&#39;, effect_model: &#39;EffectModel | EffectCallable&#39;, feature_model: &#39;UnitFeatureModel | None&#39; = None, time_feature_model: &#39;TimeFeatureModel | None&#39; = None, unit_ids: &#39;Sequence[Any] | None&#39; = None, time_ids: &#39;Sequence[Any] | None&#39; = None, unit_annotations: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;, time_annotations: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;) -&gt; None</code></pre>
+<pre><code>cohort_event (self, event_times: &#39;Any | None&#39; = None) -&gt; &#39;MappingProxyType[str, NDArray[Any]]&#39;
+event_study (self, event_times: &#39;Any | None&#39; = None, *, weighting: &#39;str&#39; = &#39;cohort_size&#39;) -&gt; &#39;MappingProxyType[str, NDArray[Any]]&#39;
+att_by_cohort (self) -&gt; &#39;MappingProxyType[str, NDArray[Any]]&#39;</code></pre>
 </div>
 </div>
-</div>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Field</th>
-<th>Contract</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>name</code></td>
-<td>Nonempty design identifier</td>
-</tr>
-<tr class="even">
-<td><code>dimensions</code></td>
-<td><code>PanelDimensions</code></td>
-</tr>
-<tr class="odd">
-<td><code>assignment</code></td>
-<td>Object satisfying <code>AssignmentModel</code></td>
-</tr>
-<tr class="even">
-<td><code>outcome_model</code></td>
-<td>Object satisfying <code>OutcomeModel</code></td>
-</tr>
-<tr class="odd">
-<td><code>effect_model</code></td>
-<td>Object satisfying <code>EffectModel</code>, or a callable effect law</td>
-</tr>
-<tr class="even">
-<td><code>feature_model</code></td>
-<td>Optional object satisfying <code>UnitFeatureModel</code></td>
-</tr>
-<tr class="odd">
-<td><code>time_feature_model</code></td>
-<td>Optional object satisfying <code>TimeFeatureModel</code></td>
-</tr>
-<tr class="even">
-<td><code>unit_ids</code>, <code>time_ids</code></td>
-<td>Optional external axis identifiers</td>
-</tr>
-<tr class="odd">
-<td><code>unit_annotations</code>, <code>time_annotations</code></td>
-<td>Optional axis-aligned labels</td>
-</tr>
-</tbody>
-</table>
-<section id="pipeline" class="level3" data-number="11.1">
-<h3 data-number="11.1" class="anchored" data-anchor-id="pipeline"><span class="header-section-number">11.1</span> Pipeline</h3>
-<ol type="1">
-<li>Resolve one NumPy generator.</li>
-<li>Draw shared observed and latent unit features, if configured.</li>
-<li>Draw and validate binary treatment.</li>
-<li>Draw shared time features, if configured.</li>
-<li>Build <code>SimulationContext</code>.</li>
-<li>Draw and validate untreated outcomes.</li>
-<li>Draw the effect surface and validate realized effects.</li>
-<li>Return <code>PanelDataset(outcome=untreated+effect, ...)</code>.</li>
-</ol>
-<p>Component metadata is namespaced under <code>features</code>, <code>time_features</code>, <code>assignment</code>, <code>outcome</code>, and <code>effect</code>. The simulator name and dimensions are stored under <code>simulator</code>.</p>
-<p>A callable supplied directly as <code>effect_model</code> is wrapped in <code>CallableEffect</code>. It receives <code>SimulationContext</code> and may return a scalar, an <code>(N,)</code> or <code>(N,1)</code> unit law, a <code>(T,)</code> or <code>(1,T)</code> time law, or an <code>(N,T)</code> surface. The normalized surface is multiplied by realized treatment. For square panels, use <code>(1,T)</code> rather than <code>(T,)</code> to distinguish a time law from the legacy unit vector form.</p>
-<div id="96140a64" class="cell" data-execution_count="13">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;simulate</span><span class="sc">{</span>inspect<span class="sc">.</span>signature(pps.PanelSimulator.simulate)<span class="sc">}</span><span class="ss">&quot;</span>)</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;iter_simulations</span><span class="sc">{</span>inspect<span class="sc">.</span>signature(pps.PanelSimulator.iter_simulations)<span class="sc">}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>simulate(self, *, seed: &#39;int | np.random.SeedSequence | None&#39; = None, rng: &#39;np.random.Generator | None&#39; = None, streams: &#39;SimulationSeeds | None&#39; = None) -&gt; &#39;PanelDataset&#39;
-iter_simulations(self, replications: &#39;int&#39;, *, seed: &#39;int | np.random.SeedSequence | None&#39; = None) -&gt; &#39;Iterator[PanelDataset]&#39;</code></pre>
-</div>
-</div>
-<p><code>simulate(seed=..., rng=..., streams=...)</code> accepts a legacy shared stream or <code>SimulationSeeds</code>, never more than one. <code>iter_simulations(replications, seed=...)</code> requires a positive replication count and uses <code>SeedSequence.spawn()</code> for child streams.</p>
-</section>
-</section>
-<section id="resolve_rng" class="level2" data-number="12">
-<h2 data-number="12" class="anchored" data-anchor-id="resolve_rng"><span class="header-section-number">12</span> <code>resolve_rng</code></h2>
-<div class="api-signature">
-<div id="574ab7fa" class="cell" data-execution_count="14">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;resolve_rng</span><span class="sc">{</span>inspect<span class="sc">.</span>signature(pps.resolve_rng)<span class="sc">}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>resolve_rng(*, seed: &#39;int | np.random.SeedSequence | None&#39; = None, rng: &#39;np.random.Generator | None&#39; = None) -&gt; &#39;np.random.Generator&#39;</code></pre>
-</div>
-</div>
-</div>
-<p>Returns the supplied <code>numpy.random.Generator</code> after type validation or constructs <code>numpy.random.default_rng(seed)</code>. Passing both <code>seed</code> and <code>rng</code> raises <code>ValueError</code>; passing a non-generator <code>rng</code> raises <code>TypeError</code>.</p>
+<ul>
+<li><code>cohort_event(event_times)</code> returns supported cohort-by-event-time cells.</li>
+<li><code>event_study(event_times, weighting=...)</code> aggregates over supported cohorts.</li>
+<li><code>att_by_cohort()</code> returns a treated-cell ATT for each adoption cohort.</li>
+</ul>
+<p>The weighting options are <code>cohort_size</code> and <code>equal_cohort</code>. Unsupported cohort-event cells remain explicit and are never silently treated as zeros.</p>
 
 
 </section>
@@ -6366,4 +6103,4 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/reference/core.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/website/reference/core.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

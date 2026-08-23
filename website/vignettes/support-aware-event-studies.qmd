@@ -1,0 +1,185 @@
+---
+title: "Support-aware event studies"
+description: "Use Lepskii-style designs to separate pooling structure from calendar-time support."
+jupyter: python3
+---
+
+This family adapts an unpublished working-paper design for adaptive partial
+pooling across staggered-adoption cohorts. It is documented as a working design,
+not as a published-paper reproduction.
+
+## Scientific question
+
+An event-study estimator faces two distinct problems:
+
+1. Cohorts can have different effect paths.
+2. A cohort-event comparison can fall outside the observed calendar.
+
+Pooling can reduce variance when cohort paths are similar. It can add bias when
+they differ. No amount of pooling creates a missing calendar-time observation.
+
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np
+
+from pypanelsim import designs
+
+print(designs.available_lepskii_designs())
+```
+
+## Panel law
+
+The default panel has 1,200 units, 36 periods, and nine adoption cohorts. The
+untreated outcome combines unit effects, time effects, periodic time terms,
+and errors correlated across units and time.
+
+Each named variant changes only the cohort-specific effect paths. The variants
+cover:
+
+- complete or common-path homogeneity;
+- cohort blocks, time blocks, and cohort-time tensor blocks;
+- early-versus-late cohorts and three time epochs;
+- smooth dose gradients and response-timing differences;
+- local shocks and damped waves;
+- fully cohort-specific signatures, peaks, or signed paths.
+
+## Compare pooling structures
+
+```{python}
+config = designs.LepskiiPanelConfig(n_units=360)
+
+for name in (
+    "complete_homogeneity",
+    "tensor_blocks",
+    "no_pool_signed_paths",
+):
+    profiles = designs.lepskii_profiles(name, config=config)
+    first_cohort = min(profiles)
+    print(name, np.round(profiles[first_cohort][:6], 2))
+```
+
+The mapping key is the adoption period. Each value is the post-adoption path
+for that cohort.
+
+## Run a tensor-block design
+
+```{python}
+panel = designs.lepskii(
+    "tensor_blocks",
+    config=config,
+    seed=42,
+)
+
+print(panel.shape)
+print(np.unique(panel.adoption_times[panel.ever_treated]))
+print(round(panel.true_att, 3))
+```
+
+## Cohort paths and calendar support
+
+The left panel shows the tensor-block effect paths. The right panel shows which
+cohort-event cells lie inside the observed calendar.
+
+```{python}
+#| label: fig-lepskii-paths-support
+#| fig-cap: "Cohort effect paths and the calendar-time support mask for a tensor-block design."
+#| fig-alt: "A line chart shows cohort effect paths, and a heatmap shows the cohort-by-calendar-time support mask for the tensor-block design."
+
+profiles = designs.lepskii_profiles("tensor_blocks", config=config)
+event_grid = np.arange(-12, 22)
+truth_grid = panel.truth.cohort_event(event_times=event_grid)
+cohorts = np.unique(truth_grid["cohort"])
+support = truth_grid["supported"].reshape(cohorts.size, event_grid.size)
+
+figure, axes = plt.subplots(1, 2, figsize=(13, 5), constrained_layout=True)
+for cohort, profile in profiles.items():
+    axes[0].plot(
+        np.arange(profile.size),
+        profile,
+        label=f"cohort {cohort}",
+    )
+axes[0].axhline(0.0, color="black", linewidth=0.7)
+axes[0].set_xlabel("event time")
+axes[0].set_ylabel("true effect")
+axes[0].set_title("Tensor-block effect paths")
+axes[0].legend(ncol=2, fontsize=7)
+
+axes[1].imshow(support, aspect="auto", cmap="Greys", vmin=0, vmax=1)
+axes[1].set_xticks(np.arange(0, event_grid.size, 5))
+axes[1].set_xticklabels(event_grid[::5])
+axes[1].set_yticks(np.arange(cohorts.size))
+axes[1].set_yticklabels(cohorts)
+axes[1].set_xlabel("event time")
+axes[1].set_ylabel("adoption cohort")
+axes[1].set_title("Supported cohort-event cells")
+plt.show()
+```
+
+## Track support explicitly
+
+For cohort $g$ and event time $e$, the calendar period is $t=g+e$. The cell is
+supported only when $0\le t<T$.
+
+```{python}
+cells = panel.truth.cohort_event(event_times=(-12, -4, 0, 4, 12, 20))
+
+for cohort in np.unique(cells["cohort"]):
+    selected = cells["cohort"] == cohort
+    print(
+        "cohort",
+        int(cohort),
+        "events",
+        cells["event_time"][selected],
+        "support",
+        cells["supported"][selected],
+    )
+```
+
+Unsupported effects are `NaN`. They are not zeros. This distinction prevents
+an estimator or plot from treating “not observed” as “no effect.”
+
+## Define the event-time target
+
+At a fixed event time, different cohorts can contribute because of calendar
+support. The target population therefore changes with event time.
+
+```{python}
+size_weighted = panel.truth.event_study(
+    event_times=range(-4, 13),
+    weighting="cohort_size",
+)
+equal_cohort = panel.truth.event_study(
+    event_times=range(-4, 13),
+    weighting="equal_cohort",
+)
+
+for index in range(0, len(size_weighted["event_time"]), 4):
+    print(
+        int(size_weighted["event_time"][index]),
+        round(float(size_weighted["effect"][index]), 3),
+        round(float(equal_cohort["effect"][index]), 3),
+        int(size_weighted["supported_cohorts"][index]),
+    )
+```
+
+The two weighting rules answer different questions. A simulation report should
+name the rule and show the number of supported cohorts at each event time.
+
+## A clean Monte Carlo grid
+
+A useful grid crosses pooling structure with noise and sample size:
+
+```python
+design_names = (
+    "complete_homogeneity",
+    "cohort_only_blocks",
+    "tensor_blocks",
+    "no_pool_signed_paths",
+)
+noise_scales = (0.5, 1.0, 2.0)
+unit_counts = (600, 1200, 2400)
+```
+
+Hold the event-time target and support rule fixed across this grid. Then changes
+in bias or coverage can be attributed to the estimator's pooling decision,
+rather than to a silent change in the estimand.

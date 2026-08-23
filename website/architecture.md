@@ -1,259 +1,116 @@
-# Architecture and extension contract
+---
+title: "Architecture and data contract"
+description: "The component sequence, public namespaces, validation rules, and package boundary."
+---
 
-## One-way simulation pipeline
+## The simulation sequence
 
-`PanelSimulator` evaluates components in a fixed order:
+A `PanelSimulator` evaluates components in this order:
 
-```text
-PanelDimensions
-      |
-      v
-UnitFeatureModel.generate(dimensions, rng) [optional]
-      |
-      v
-AssignmentContext(dimensions, observables, unobservables)
-      |
-      v
-AssignmentModel.assign(context, rng)
-      |
-      v
-TimeFeatureModel.generate(dimensions, rng) [optional]
-      |
-      v
-SimulationContext(dimensions, treatment, unit features, time features)
-      |
-      +-------------------------+
-      |                         |
-      v                         v
-OutcomeModel.generate()   EffectModel.generate()
-      |                         |
-      +------------+------------+
-                   |
-                   v
-              PanelDataset
-```
+1. The unit-feature model draws observed and latent features.
+2. The assignment model draws the binary treatment matrix.
+3. The time-feature model draws shared time features, if present.
+4. The outcome model draws untreated outcomes.
+5. The effect model draws a complete effect surface and realized effects.
+6. The simulator validates and freezes the result.
 
-Shared unit features are drawn before assignment and can reach assignment,
-outcomes, and effects. Time features are drawn after assignment and reach
-outcomes and effects, so adding $V_t$ does not perturb a randomized assignment
-stream. This permits $\tau_{it}=f(X_i,U_i,V_t)$ without passing arrays through
-diagnostic metadata. Assignment still precedes the outcome draw, and the
-untreated outcome model does not receive realized effects. The effect model
-does not receive outcomes. This keeps the causal decomposition explicit.
+Later components can use earlier draws through typed contexts. For example, an
+outcome model can use both unit features and treatment timing. This permits
+selection on untreated trends. The package keeps that dependence visible in
+the component definition.
 
-## Core objects
+## Three public namespaces
 
-### `PanelDimensions`
-
-`PanelDimensions(n_units, n_periods)` defines only shape. It does not assume a
-control-first unit order, one treatment cohort, or a specific intervention
-date.
-
-### `ComponentDraw`
-
-Every component returns `ComponentDraw(values, metadata)`. `values` must be a
-matrix with the configured shape. Metadata can contain diagnostics or latent
-simulation truth. The final dataset copies and recursively freezes metadata.
-
-### `AssignmentContext`
-
-The assignment context contains dimensions, observed unit covariates, and
-latent unit features. Its matrices have shape `(n_units, n_features)`. The
-feature model is optional, so legacy and canonical assignments receive empty
-feature matrices without consuming additional random draws.
-
-### `SimulationContext`
-
-The context contains dimensions, realized treatment, the unit features used by
-assignment, and a `(n_periods, n_time_features)` `time_features` matrix. It
-derives:
-
-- `ever_treated`;
-- `control_units`;
-- `treated_units`;
-- `is_absorbing`;
-- `adoption_times` for absorbing treatment.
-
-Outcome models can therefore depend on treatment status without assuming that
-controls appear before treated units.
-
-### `PanelDataset`
-
-The dataset owns the final arrays. It validates shape, finiteness, binary
-treatment, effect support, and the causal decomposition. Its read-only arrays
-are safe to share among estimators. `copy=True` creates writable estimator
-inputs when required. Observed time-invariant covariates are available through
-`unit_covariates`; latent features remain namespaced simulation metadata.
-
-## Protocols
-
-The component interfaces use `typing.Protocol`. Inheritance is optional.
+Use imports that state what an object does:
 
 ```python
-class UnitFeatureModel(Protocol):
-    def generate(self, dimensions, rng) -> UnitFeatureDraw: ...
-
-
-class TimeFeatureModel(Protocol):
-    def generate(self, dimensions, rng) -> TimeFeatureDraw: ...
-
-
-class AssignmentModel(Protocol):
-    def assign(self, context, rng) -> ComponentDraw: ...
-
-
-class OutcomeModel(Protocol):
-    def generate(self, context, rng) -> ComponentDraw: ...
-
-
-class EffectModel(Protocol):
-    def generate(self, context, rng) -> ComponentDraw: ...
+from pypanelsim import core, designs, primitives
 ```
 
-The package validates the returned matrices at the composition boundary. A
-custom class can focus on its probability law.
+| Namespace | Contents | Typical use |
+|---|---|---|
+| `core` | contracts, simulator, data, truth, random streams | compose and inspect simulations |
+| `primitives` | feature, assignment, outcome, and effect laws | build a DGP from parts |
+| `designs` | configured scientific and benchmark families | run a named design |
 
-## Random-number policy
+Root-level imports remain available for compatibility. New examples do not use
+them because a call such as `designs.baker(...)` or
+`primitives.LowRankFactorOutcome(...)` carries useful meaning.
 
-`PanelSimulator.simulate()` supports a legacy shared generator and opt-in named
-component streams. A deterministic component should not consume random draws.
+## Core protocols
 
-Accepted inputs are:
+Each component satisfies a small protocol:
 
-- `seed=<integer>`;
-- `seed=<numpy.random.SeedSequence>`;
-- `rng=<numpy.random.Generator>`;
-- `streams=SimulationSeeds.from_seed(<integer>)`;
-- neither, for a fresh entropy-seeded generator.
+- `UnitFeatureModel.generate(dimensions, rng)` returns a `UnitFeatureDraw`.
+- `AssignmentModel.assign(context, rng)` returns a `ComponentDraw`.
+- `TimeFeatureModel.generate(dimensions, rng)` returns a `TimeFeatureDraw`.
+- `OutcomeModel.generate(context, rng)` returns untreated outcomes.
+- `EffectModel.generate(context, rng)` returns realized effects.
 
-Passing more than one mode is an error. The named mode separates feature,
-assignment, time-feature, outcome, and effect draws. Adding an unrelated
-component then leaves other streams unchanged. The shared mode preserves exact
-canonical output. `iter_simulations()` uses `SeedSequence.spawn()` to create
-independent child streams instead of using adjacent integer seeds.
+The protocols are structural. A custom dataclass does not need to inherit from
+a package base class. It only needs the correct method and return type.
 
-When a design needs two components to restart from the same state, it must clone
-the generator explicitly and document that choice. The canonical mixed-factor
-design does this because it reproduces two half-panels that restart from the
-same random stream.
+## Matrix conventions
 
-## Built-in composition components
+All panel matrices use `(unit, time)` order. For $N$ units and $T$ periods,
+each matrix has shape $N \times T$.
 
-### Assignment
+| Matrix | Definition |
+|---|---|
+| `outcome` | observed outcome $Y$ |
+| `treatment` | binary assignment $D$ |
+| `untreated_outcome` | untreated potential outcome $Y(0)$ |
+| `effect_surface` | effect if treated, $\tau$ |
+| `treatment_effect` | realized effect $D \odot \tau$ |
 
-- `SingleCohortAssignment` creates one absorbing cohort. It supports explicit
-  treated-unit positions.
-- `StaggeredAdoption` accepts a mapping from unit position to adoption period.
-- `RandomizedSingleCohortAssignment` samples a fixed-size cohort without
-  replacement.
-- `RandomizedStaggeredAdoption` randomly partitions units into exact fixed-size
-  adoption cohorts.
-- `BinaryLogitAssignment` draws treatment from observed and latent unit-feature
-  logits.
-- `GeneralizedPropensityAssignment` draws adoption cohorts from multinomial
-  logits with never treated as the baseline category.
+The simulator enforces
 
-### Unit features
+$$
+Y = Y(0) + D \odot \tau.
+$$
 
-- `GaussianUnitFeatures` draws independent standard-normal observed covariates
-  and latent unit factors.
-- `CorrelatedGaussianFeatures` supports Toeplitz or explicit covariance,
-  callable transforms, and separate estimator-visible raw covariates.
-- `LatentGradientFeatures` supplies the ATT-DML latent-selection factor.
+It rejects non-finite values, incompatible shapes, non-binary treatment, a
+realized effect outside treated cells, and a broken causal identity.
 
-### Time features
+## Immutable results
 
-- `GaussianTimeFeatures` draws independent standard-normal $V_t$. Custom time
-  feature models can generate trends, cycles, shocks, or observed calendars.
+`PanelDataset` copies its input arrays and marks them read-only. This prevents
+an estimator from changing the stored causal truth by accident. Metadata and
+annotations are also frozen.
 
-### Effects
+The result supplies:
 
-- `ConstantEffect` applies one effect to every treated cell.
-- `LinearRampEffect` uses unit-specific event time and supports staggered
-  adoption.
-- `CohortEventTimeEffect` maps adoption periods to supplied post-adoption
-  profiles.
-- `CallableEffect` evaluates scalar, unit, time, or full unit-by-time laws
-  against the shared `SimulationContext`; `PanelSimulator` automatically wraps
-  a lambda passed as `effect_model`. `CallableUnitEffect` is retained as a
-  compatibility name.
+- `as_arrays()` for matrix estimators;
+- `as_long_dict()` for data-frame and formula estimators;
+- `true_att` for the average realized treated-cell effect;
+- `truth.cohort_event()` for supported cohort-by-event-time cells;
+- `truth.event_study()` for event-time aggregates;
+- `truth.att_by_cohort()` for cohort ATT values.
 
-### Outcome adapter
+## Randomness
 
-`CallableOutcomeModel` turns a function into an outcome component. The function
-can return a matrix or a `ComponentDraw` with metadata.
+`simulate(seed=42)` uses one shared NumPy generator. This is convenient and
+preserves earlier package behavior.
 
-### Outcome primitives
-
-- `TwoWayFixedEffectsOutcome` generates additive unit and period effects.
-- `LowRankFactorOutcome` generates a rank-$k$ interactive fixed-effects law.
-- `LinearFeatureOutcome` generates feature-linear levels and trends.
-- `UnitTrendOutcome`, `PeriodicTimeOutcome`, `ARMAErrorOutcome`, and
-  `ClusteredTrendOutcome` are independent composable terms.
-
-### Causal truth and labels
-
-`effect_surface` is the full effect law. `treatment_effect` is its realized
-contribution and must equal `effect_surface * treatment`. `PanelTruth` derives
-cohort/event cells, supported event-study targets, and cohort ATTs without a
-dataframe dependency.
-
-Unit and time identifiers remain separate from annotations. The simulator adds
-`ever_treated` and `adoption_period` to unit annotations and preserves any
-project-specific axis labels.
-
-## Add a component
-
-1. Define an immutable configuration object, normally a frozen dataclass.
-2. Validate scalar parameters in `__post_init__`.
-3. Implement the relevant protocol method.
-4. Use only the provided generator for random draws.
-5. Return a full `(n_units, n_periods)` matrix.
-6. Put diagnostic truth in metadata, not global state.
-7. Add contract, invalid-input, and seeded-reproducibility tests.
-
-An outcome model should use `context.control_units` and
-`context.treated_units` rather than assume a row order. An effect model must
-return zero outside treated cells.
-
-## Add a named DGP
-
-Write a factory that returns a configured `PanelSimulator`:
+`SimulationSeeds.from_seed(42)` creates separate feature, assignment,
+time-feature, outcome, and effect streams. Use it when adding a new outcome
+component must not change the assignment draw.
 
 ```python
-def unit_trend_design(*, scale=1.0):
-    return PanelSimulator(
-        name="unit_trend",
-        dimensions=PanelDimensions(100, 30),
-        assignment=SingleCohortAssignment(20, 20),
-        outcome_model=UnitTrendOutcome(scale=scale),
-        effect_model=ConstantEffect(1.0),
-    )
+from pypanelsim import core, designs
+
+simulator = designs.baker_design()
+panel = simulator.simulate(streams=core.SimulationSeeds.from_seed(42))
 ```
 
-Register it in a project registry:
+Never set NumPy's process-wide random seed for package simulations.
 
-```python
-registry = DGPRegistry()
-registry.register("unit_trend", unit_trend_design)
-```
+## Package boundary
 
-Do not add estimator options to a simulation factory. Estimator configuration
-belongs in the downstream experiment runner.
+The package contains reusable simulation infrastructure and configured data
+laws. It does not contain estimator implementations, paper build systems,
+Monte Carlo schedulers, or cached reports. Research tutorials can call an
+external estimator, but the estimator does not become part of the core API.
 
-## Data ownership
-
-The dataset copies arrays before setting them read-only. Mutating an input array
-after construction cannot change the dataset. Nested mappings, arrays, lists,
-and sets in metadata are also copied or converted to immutable forms.
-
-The package does not promise that arbitrary scalar objects inside metadata are
-deeply immutable. Store simple scalars, arrays, mappings, and sequences.
-
-## Extension limits
-
-The current `PanelDataset` contract requires a balanced rectangular panel and
-binary treatment. Missing outcomes can be represented by a separate custom
-metadata mask, but the core outcome matrices must remain finite. A future
-missing-data extension should add an explicit observation mask instead of
-using `NaN` as an implicit contract.
+This boundary has two benefits. A DGP remains usable after an estimator library
+changes, and different estimators can receive exactly the same immutable panel.

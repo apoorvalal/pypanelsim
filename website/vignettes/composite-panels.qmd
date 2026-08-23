@@ -1,0 +1,139 @@
+---
+title: "Composite panel benchmark"
+description: "Combine fixed effects, factors, time-series paths, and sparse donor structure in one stress test."
+jupyter: python3
+---
+
+The composite family is a package benchmark. It is not a reproduction of a
+published paper. Its purpose is to test an estimator when several familiar
+untreated-outcome structures are present at once.
+
+## Outcome decomposition
+
+The untreated outcome is a weighted sum of four components:
+
+$$
+Y(0)
+=w_FY_F+w_TY_T+w_SY_S+w_AY_A+\varepsilon,
+$$
+
+where $Y_F$ is a low-rank factor component, $Y_T$ is a persistent time-series
+component, $Y_S$ has sparse synthetic-control donor structure, and $Y_A$ is an
+additive two-way fixed-effects component.
+
+The weights are explicit configuration fields. They need not sum to one, but a
+sum of one makes their relative scale easier to interpret.
+
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np
+
+from pypanelsim import designs
+
+config = designs.GSynthCompositeConfig(
+    n_control=160,
+    n_treated=40,
+    n_pre=40,
+    n_post=10,
+    factor_weight=0.25,
+    time_series_weight=0.25,
+    synthetic_weight=0.25,
+    fixed_effect_weight=0.25,
+    factor_rank=2,
+    ar_coefficient=0.5,
+    effect_slope=0.2,
+    noise_scale=0.6,
+)
+
+panel = designs.gsynth_composite(config=config, seed=42)
+print(panel.shape)
+print(round(panel.true_att, 3))
+```
+
+## Inspect provenance in metadata
+
+```{python}
+outcome_metadata = panel.metadata["outcome"]
+print(outcome_metadata["model"])
+print(outcome_metadata.keys())
+```
+
+The outer model is a sum. Its metadata preserves the component results so an
+experiment can verify which structure was active.
+
+## Vary one component at a time
+
+Use ablations before interpreting a result from the full mixture.
+
+```{python}
+factor_only = designs.GSynthCompositeConfig(
+    n_control=80,
+    n_treated=20,
+    factor_weight=1.0,
+    time_series_weight=0.0,
+    synthetic_weight=0.0,
+    fixed_effect_weight=0.0,
+)
+
+fixed_effect_only = designs.GSynthCompositeConfig(
+    n_control=80,
+    n_treated=20,
+    factor_weight=0.0,
+    time_series_weight=0.0,
+    synthetic_weight=0.0,
+    fixed_effect_weight=1.0,
+)
+
+factor_panel = designs.gsynth_composite(config=factor_only, seed=17)
+fixed_effect_panel = designs.gsynth_composite(
+    config=fixed_effect_only,
+    seed=17,
+)
+
+print(factor_panel.shape, fixed_effect_panel.shape)
+```
+
+```{python}
+#| label: fig-composite-ablation
+#| fig-cap: "Observed outcomes for the full composite benchmark and two single-component ablations."
+#| fig-alt: "Three heatmaps compare the full composite panel with factor-only and two-way-fixed-effects-only ablations."
+
+ablation_panels = (
+    ("Full composite", panel),
+    ("Factor only", factor_panel),
+    ("Two-way fixed effects only", fixed_effect_panel),
+)
+figure, axes = plt.subplots(1, 3, figsize=(15, 5), constrained_layout=True)
+for axis, (label, draw) in zip(axes, ablation_panels, strict=True):
+    order = np.argsort(draw.adoption_times, kind="stable")
+    image = axis.matshow(draw.outcome[order], aspect="auto", cmap="coolwarm")
+    axis.set_title(label)
+    axis.set_xlabel("period")
+    axis.set_ylabel("units, sorted by adoption")
+    figure.colorbar(image, ax=axis, fraction=0.04, pad=0.02)
+plt.show()
+```
+
+An estimator that fails only in the full mixture may be sensitive to
+interactions among structures. An estimator that fails in a single-component
+ablation has a more specific problem.
+
+## Why this is not the first benchmark
+
+A composite law is useful late in a validation sequence. It is hard to diagnose
+first. Start with the [canonical designs](../canonical-designs.qmd), then add
+one complication at a time:
+
+1. two-way fixed effects;
+2. one strong factor;
+3. treated-control loading separation;
+4. time-series persistence;
+5. sparse donor structure;
+6. the full composite.
+
+## Naming and claims
+
+The constructor retains the historical name `gsynth_composite` for API
+compatibility. The name does not mean that it reproduces a particular
+generalized synthetic-control implementation. Reports should call it the
+“pypanelsim composite benchmark” and list the component weights.

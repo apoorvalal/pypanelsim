@@ -1,317 +1,283 @@
 ---
-title: "Assignment mechanisms"
-subtitle: "Randomization, binary propensity scores, latent selection, and adoption-cohort GPS"
+title: "Treatment assignment"
+description: "Choose randomized, selected, or fixed treatment timing."
+jupyter: python3
 ---
 
-## Shared unit features
+Assignment is a separate probability law. It receives panel dimensions and,
+when present, observed and latent unit features. It returns an $N \times T$
+binary treatment matrix.
 
-Assignment and untreated outcomes often depend on the same unit attributes.
-`UnitFeatureModel` draws these attributes before assignment and splits them into:
+## Choose an assignment family
 
-- `observables`, exposed as `panel.unit_covariates`; and
-- `unobservables`, retained under `panel.metadata["features"]` as simulation truth.
+| Scientific design | Primitive | Main inputs |
+|---|---|---|
+| One fixed treated cohort | `SingleCohortAssignment` | treated unit positions, adoption period |
+| One randomized cohort | `RandomizedSingleCohortAssignment` | cohort size, adoption period |
+| Fixed staggered adoption | `StaggeredAdoption` | unit-to-period map |
+| Randomized staggered adoption | `RandomizedStaggeredAdoption` | periods and cohort sizes |
+| Binary selection | `BinaryLogitAssignment` | observed and latent logit coefficients |
+| Sparse binary selection | `SparseLogitAssignment` | selected covariate indices and coefficients |
+| Multiple adoption categories | `GeneralizedPropensityAssignment` | category-specific logits |
 
-`GaussianUnitFeatures(k_x, k_u)` supplies independent standard-normal features.
-A custom feature model can instead introduce correlation, discrete covariates,
-or application-specific population structure.
+Use randomized assignment to study estimator behavior under known overlap. Use
+feature-dependent assignment to study confounding or conditional identifying
+assumptions. Use fixed assignment to reproduce a specific schedule.
 
-`TimeFeatureModel` analogously draws a `(n_periods, k_v)` matrix $V_t$ shared
-by untreated outcomes and treatment effects. `GaussianTimeFeatures(k_v)` is the
-built-in independent-normal version; a custom model can supply trends, cycles,
-shocks, or calendar variables.
+## Common simulation components
+
+The examples below share the same features, untreated outcome, and treatment
+effect. Only the assignment law changes.
 
 ```{python}
-from dataclasses import dataclass
-
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
-import pypanelsim as pps
-from matplotlib.colors import BoundaryNorm, ListedColormap
 
-TREATMENT_CMAP = ListedColormap(["#f7f7f7", "#252525"])
-TREATMENT_NORM = BoundaryNorm([-0.5, 0.5, 1.5], TREATMENT_CMAP.N)
+from pypanelsim import core, primitives
 
+dimensions = core.PanelDimensions(n_units=240, n_periods=48)
+features = primitives.GaussianUnitFeatures(
+    n_observables=2,
+    n_unobservables=1,
+)
+outcome = primitives.SumOutcomeModel(
+    models=(
+        primitives.TwoWayFixedEffectsOutcome(noise_scale=0.4),
+        primitives.LinearFeatureOutcome(
+            level_coefficients=(1.0, -0.5),
+            trend_coefficients=(0.0, 0.0),
+            source="observables",
+        ),
+        primitives.LinearFeatureOutcome(
+            level_coefficients=(0.8,),
+            trend_coefficients=(0.0,),
+            source="unobservables",
+        ),
+    )
+)
+effect = primitives.LinearRampEffect(slope=0.12)
 
-@dataclass(frozen=True, slots=True)
-class FeatureOutcome:
-    def generate(self, context, rng):
-        t = np.linspace(-1.0, 1.0, context.dimensions.n_periods)
-        factor = np.sin(np.linspace(0.0, 3.0 * np.pi, context.dimensions.n_periods))
-        y0 = (
-            0.8 * context.observables[:, :1]
-            + 0.6 * context.observables[:, 1:2] * t
-            + 1.2 * context.unobservables[:, :1] * (t + 1.0)
-            + 0.8 * context.unobservables[:, 1:2] * factor
-        )
-        y0 += rng.normal(scale=0.35, size=y0.shape)
-        return pps.ComponentDraw(y0, {"kind": "feature_outcome"})
-
-
-dimensions = pps.PanelDimensions(120, 48)
-features = pps.GaussianUnitFeatures(2, 2)
-
-
-def build(name, assignment):
-    return pps.PanelSimulator(
+def make_simulator(name, assignment):
+    return core.PanelSimulator(
         name=name,
         dimensions=dimensions,
         feature_model=features,
         assignment=assignment,
-        outcome_model=FeatureOutcome(),
-        effect_model=pps.LinearRampEffect(0.12),
+        outcome_model=outcome,
+        effect_model=effect,
     )
 ```
 
-## Fixed-size randomization
+## Randomized assignment
 
-`RandomizedSingleCohortAssignment` samples exactly `n_treated` eligible units
-without replacement. Every eligible unit has marginal treatment probability
-`n_treated / n_eligible`; ineligible units have probability zero.
+One cohort starts treatment in period 30:
 
 ```{python}
-randomized = build(
-    "randomized",
-    pps.RandomizedSingleCohortAssignment(
-        n_treated=30,
-        adoption_period=32,
+randomized = make_simulator(
+    "randomized_single_cohort",
+    primitives.RandomizedSingleCohortAssignment(
+        n_treated=96,
+        adoption_period=30,
     ),
-)
-random_panel = randomized.simulate(seed=2026)
-print(random_panel.treated_units.size)
-print(np.unique(random_panel.metadata["assignment"]["propensity_scores"]))
+).simulate(seed=42)
+
+print(randomized.treated_units.size)
+print(randomized.adoption_times[randomized.ever_treated][:5])
 ```
 
-Use `eligible_units=` to encode design restrictions. This remains randomized
-only within that prespecified eligible set.
-
-For several exact-size adoption cohorts, use
-`RandomizedStaggeredAdoption`:
+For staggered adoption, give one size for each adoption period:
 
 ```{python}
-staggered_randomized = pps.PanelSimulator(
-    name="staggered_randomized",
-    dimensions=dimensions,
-    feature_model=features,
-    assignment=pps.RandomizedStaggeredAdoption(
-        adoption_periods=(24, 28, 32),
-        cohort_sizes=(12, 18, 24),
-    ),
-    outcome_model=FeatureOutcome(),
-    effect_model=pps.LinearRampEffect(0.12),
-)
-staggered_panel = staggered_randomized.simulate(seed=2026)
-np.unique(staggered_panel.adoption_times, return_counts=True)
-```
-
-This is complete randomization over schedules with fixed cohort totals. Units
-not selected into a cohort remain never treated.
-
-## Binary logit selection
-
-`BinaryLogitAssignment` independently draws eventual treatment from
-
-$$
-e_i=P(D_i=1\mid X_i,U_i)
-=\Lambda\!\left(\alpha+X_i^\top\beta+U_i^\top\gamma\right),
-$$
-
-where $\Lambda(z)=1/(1+e^{-z})$. The selected units adopt at one common period.
-The assignment metadata records every linear predictor and propensity score.
-
-### Selection on observables
-
-Set $\gamma=0$:
-
-```{python}
-observed_selection = build(
-    "observed_selection",
-    pps.BinaryLogitAssignment(
-        adoption_period=32,
-        intercept=-1.1,
-        observable_coefficients=(1.2, -0.8),
-        unobservable_coefficients=(0.0, 0.0),
-    ),
-)
-observed_panel = observed_selection.simulate(seed=2026)
-print(observed_panel.unit_covariate_names)
-print(observed_panel.metadata["assignment"]["propensity_scores"][:5])
-```
-
-When the potential-outcome law also depends on $X$ but treatment does not depend
-on $U$, assignment is unconfounded conditional on the exposed covariates. The
-unadjusted treated and control groups need not be comparable.
-
-### Selection on latent factors
-
-Set $\beta=0$ and $\gamma\ne0$:
-
-```{python}
-latent_selection = build(
-    "latent_selection",
-    pps.BinaryLogitAssignment(
-        adoption_period=32,
-        intercept=-1.1,
-        observable_coefficients=(0.0, 0.0),
-        unobservable_coefficients=(1.4, -1.0),
-    ),
-)
-latent_panel = latent_selection.simulate(seed=2026)
-print(latent_panel.metadata["features"]["unobservables"].shape)
-```
-
-This assignment is confounded relative to estimators that see only $X$. Panel
-factor, matrix-completion, trajectory-balancing, and synthetic-control methods
-may nevertheless learn part of the latent structure from pre-treatment paths.
-How well they do is an estimand- and DGP-specific numerical question.
-
-## Adoption-cohort generalized propensity scores
-
-For adoption periods $g\in\mathcal G$, `GeneralizedPropensityAssignment` uses
-the multinomial-logit generalized propensity score
-
-$$
-r_g(X_i,U_i)=P(G_i=g\mid X_i,U_i)
-=\frac{\exp(\alpha_g+X_i^\top\beta_g+U_i^\top\gamma_g)}
-{1+\sum_{h\in\mathcal G}\exp(\alpha_h+X_i^\top\beta_h+U_i^\top\gamma_h)}.
-$$
-
-Never treated is the baseline category with normalized logit zero. Each sampled
-cohort produces absorbing treatment from its adoption period onward.
-
-```{python}
-cohort_gps = build(
-    "cohort_gps",
-    pps.GeneralizedPropensityAssignment(
+staggered = make_simulator(
+    "randomized_staggered",
+    primitives.RandomizedStaggeredAdoption(
         adoption_periods=(24, 30, 36),
-        intercepts=(-0.7, -0.9, -1.1),
+        cohort_sizes=(32, 32, 32),
+    ),
+).simulate(seed=42)
+
+print(sorted(set(staggered.adoption_times[staggered.ever_treated])))
+```
+
+These laws sample without replacement. Any unit not sampled is never treated.
+
+## Selection with a binary logit
+
+For unit $i$, `BinaryLogitAssignment` uses
+
+$$
+P(A_i=1 \mid X_i,U_i)
+= \operatorname{logit}^{-1}
+\left(\alpha + X_i'\beta + U_i'\gamma\right).
+$$
+
+Here $X_i$ is observable to the estimator and $U_i$ is latent.
+
+```{python}
+selected = make_simulator(
+    "selected_single_cohort",
+    primitives.BinaryLogitAssignment(
+        adoption_period=30,
+        intercept=-0.3,
+        observable_coefficients=(0.8, -0.4),
+        unobservable_coefficients=(0.9,),
+    ),
+).simulate(seed=42)
+
+print(selected.treated_units.size)
+print(selected.unit_covariate_names)
+```
+
+The same latent feature affects untreated outcomes and assignment. The design
+therefore has unobserved selection by construction.
+
+## Multiple adoption categories
+
+`GeneralizedPropensityAssignment` assigns each unit to never treated or to one
+of several adoption periods. Its logits compare each treated category with the
+never-treated reference category.
+
+```{python}
+multi = make_simulator(
+    "selected_staggered",
+    primitives.GeneralizedPropensityAssignment(
+        adoption_periods=(24, 30, 36),
+        intercepts=(-0.8, -0.6, -0.9),
         observable_coefficients=(
-            (1.0, -0.5),
-            (0.2, 0.8),
-            (-0.8, 0.3),
+            (0.8, 0.0),
+            (0.0, -0.7),
+            (0.4, 0.4),
         ),
-        unobservable_coefficients=((0.0, 0.0),) * 3,
+        unobservable_coefficients=((0.6,), (0.3,), (-0.4,)),
     ),
-)
-cohort_panel = cohort_gps.simulate(seed=2026)
-gps = cohort_panel.metadata["assignment"]["generalized_propensity_scores"]
-print(gps.shape)
-print(np.max(np.abs(gps.sum(axis=1) - 1.0)))
-print(np.unique(cohort_panel.adoption_times, return_counts=True))
+).simulate(seed=42)
+
+print(sorted(set(multi.adoption_times[multi.ever_treated])))
 ```
 
-Metadata includes `generalized_propensity_scores`, `assigned_categories`,
-`adoption_times`, cohort logits, coefficient matrices, and the never-treated
-category index.
-
-## Unit and time heterogeneous treatment effects
-
-The effect input may be a lambda defining the complete effect surface
-
-$$
-\tau_{it}=f(X_i,U_i,V_t).
-$$
-
-The lambda receives `SimulationContext`, so the same observed covariates and
-latent factors used by assignment and untreated outcomes are available as
-`x.observables` and `x.unobservables`, while shared time modifiers are available
-as `x.time_features`. Return an `(N,T)` matrix for joint unit-time
-heterogeneity; scalar, unit-vector, and time-vector results are broadcast to
-that surface. `PanelSimulator` then multiplies it by realized treatment.
-
-```{python}
-heterogeneous = pps.PanelSimulator(
-    name="heterogeneous_effects",
-    dimensions=dimensions,
-    feature_model=features,
-    time_feature_model=pps.GaussianTimeFeatures(1),
-    assignment=pps.RandomizedSingleCohortAssignment(
-        n_treated=40,
-        adoption_period=32,
-    ),
-    outcome_model=FeatureOutcome(),
-    effect_model=lambda x: (
-        (
-            1.0
-            + 0.45 * x.observables[:, 0]
-            - 0.30 * x.observables[:, 1]
-            + 0.80 * x.unobservables[:, 0]
-        )[:, None]
-        * (1.0 + 0.30 * x.time_features[:, 0])[None, :]
-    ),
-)
-heterogeneous_panel = heterogeneous.simulate(seed=2026)
-effect_surface = heterogeneous_panel.metadata["effect"]["effect_surface"]
-print(effect_surface.min(), effect_surface.mean(), effect_surface.max())
-print(heterogeneous_panel.true_att)
-```
-
-The complete $\tau_{it}$ surface is stored as simulation truth in effect
-metadata. The realized `treatment_effect` matrix is that surface multiplied by
-$W$. Observed unit modifiers remain available in `unit_covariates`; latent unit
-and time modifiers remain under metadata unless explicitly retrieved for
-diagnostics.
-
-```{python}
-#| fig-cap: "Observed outcomes, assignment, and realized effects under tau_it = f(X_i, U_i, V_t). Units are sorted by their mean effect."
-order = np.argsort(effect_surface.mean(axis=1), kind="stable")
-fig, axes = plt.subplots(1, 3, figsize=(13, 4), constrained_layout=True)
-for axis, values, title, cmap in (
-    (axes[0], heterogeneous_panel.outcome, "Y", "coolwarm"),
-    (axes[1], heterogeneous_panel.treatment, "W", TREATMENT_CMAP),
-    (
-        axes[2],
-        heterogeneous_panel.treatment_effect,
-        r"$\tau_{it} W_{it}$",
-        "coolwarm",
-    ),
-):
-    image_kwargs = {"cmap": cmap}
-    if title == "W":
-        image_kwargs = {"cmap": TREATMENT_CMAP, "norm": TREATMENT_NORM}
-    axis.matshow(values[order], aspect="auto", **image_kwargs)
-    axis.set_title(title)
-    axis.set_xlabel("period")
-axes[0].set_ylabel(r"units, sorted by mean $\tau_{it}$")
-plt.show()
-```
+The selected category is stored as the unit annotation
+`assignment_category`.
 
 ## Visual comparison
 
+The following panels use the same feature and outcome laws. Their treatment
+patterns differ because assignment changes.
+
 ```{python}
-#| fig-cap: "A common feature-outcome law under four assignment mechanisms. Units are sorted by adoption time."
-designs = {
-    "Randomized": randomized,
-    "Observed logit": observed_selection,
-    "Latent logit": latent_selection,
-    "Cohort GPS": cohort_gps,
+#| label: fig-assignment-comparison
+#| fig-cap: "A common outcome law under randomized, selected, and staggered treatment assignment."
+#| fig-alt: "Four pairs of heatmaps compare outcomes and treatment under randomized, observed selection, latent selection, and staggered assignment."
+
+assignment_panels = {
+    "Randomized cohort": randomized,
+    "Randomized staggered": staggered,
+    "Selected cohort": selected,
+    "Selected staggered": multi,
 }
-fig, axes = plt.subplots(4, 2, figsize=(11, 12), constrained_layout=True)
-for row, (label, simulator) in enumerate(designs.items()):
-    panel = simulator.simulate(seed=2026)
-    order = np.argsort(panel.adoption_times, kind="stable")
-    axes[row, 0].matshow(panel.outcome[order], aspect="auto", cmap="coolwarm")
-    axes[row, 1].matshow(
-        panel.treatment[order],
+
+figure, axes = plt.subplots(4, 2, figsize=(12, 13), constrained_layout=True)
+for row, (label, draw) in enumerate(assignment_panels.items()):
+    order = np.argsort(draw.adoption_times, kind="stable")
+    outcome_image = axes[row, 0].matshow(
+        draw.outcome[order],
         aspect="auto",
-        cmap=TREATMENT_CMAP,
-        norm=TREATMENT_NORM,
+        cmap="coolwarm",
     )
-    axes[row, 0].set_title(f"{label}: Y")
-    axes[row, 1].set_title(f"{label}: W")
-    axes[row, 0].set_ylabel("unit")
+    treatment_image = axes[row, 1].matshow(
+        draw.treatment[order],
+        aspect="auto",
+        cmap="Greys",
+        vmin=0.0,
+        vmax=1.0,
+    )
+    axes[row, 0].set_title(f"{label}: outcome")
+    axes[row, 1].set_title(f"{label}: treatment")
+    axes[row, 0].set_ylabel("units, sorted by adoption")
+    figure.colorbar(outcome_image, ax=axes[row, 0], fraction=0.025, pad=0.02)
+    figure.colorbar(treatment_image, ax=axes[row, 1], fraction=0.025, pad=0.02)
     for axis in axes[row]:
         axis.set_xlabel("period")
 plt.show()
 ```
 
-## Choosing a mechanism
+## Unit-time effect heterogeneity
 
-| Scientific design | Assignment object | Identifying information exposed to estimators |
-|---|---|---|
-| Complete randomization with fixed treated count | `RandomizedSingleCohortAssignment` | Design propensity |
-| Complete randomization with exact adoption-cohort counts | `RandomizedStaggeredAdoption` | Marginal cohort propensities |
-| Bernoulli assignment based on measured baseline attributes | `BinaryLogitAssignment`, latent coefficients zero | `unit_covariates` |
-| Assignment based on latent unit type | `BinaryLogitAssignment`, latent coefficients nonzero | Pre-treatment outcome history; latent truth only for diagnostics |
-| Multiple adoption cohorts | `GeneralizedPropensityAssignment` | Full unit-by-cohort GPS and observed covariates |
-| Fixed externally specified adoption | `SingleCohortAssignment` or `StaggeredAdoption` | The supplied schedule |
+An effect callable receives the same observed, latent, and time features as the
+other components. It returns the complete effect surface. The simulator masks
+that surface by realized treatment.
+
+```{python}
+heterogeneous_simulator = core.PanelSimulator(
+    name="heterogeneous_effects",
+    dimensions=dimensions,
+    feature_model=features,
+    time_feature_model=primitives.GaussianTimeFeatures(1),
+    assignment=primitives.RandomizedSingleCohortAssignment(
+        n_treated=80,
+        adoption_period=30,
+    ),
+    outcome_model=outcome,
+    effect_model=lambda context: (
+        (
+            1.0
+            + 0.45 * context.observables[:, 0]
+            - 0.30 * context.observables[:, 1]
+            + 0.80 * context.unobservables[:, 0]
+        )[:, None]
+        * (1.0 + 0.30 * context.time_features[:, 0])[None, :]
+    ),
+)
+heterogeneous_panel = heterogeneous_simulator.simulate(seed=42)
+```
+
+```{python}
+#| label: fig-heterogeneous-effects
+#| fig-cap: "Observed outcomes, treatment, and the realized heterogeneous effect."
+#| fig-alt: "Three heatmaps show observed outcomes, treatment, and realized heterogeneous effects after sorting units by average effect."
+
+order = np.argsort(heterogeneous_panel.effect_surface.mean(axis=1), kind="stable")
+figure, axes = plt.subplots(1, 3, figsize=(14, 4.5), constrained_layout=True)
+surfaces = (
+    (heterogeneous_panel.outcome, "Observed outcome", "coolwarm", None, None),
+    (heterogeneous_panel.treatment, "Treatment", "Greys", 0.0, 1.0),
+    (
+        heterogeneous_panel.treatment_effect,
+        "Realized effect",
+        "coolwarm",
+        None,
+        None,
+    ),
+)
+for axis, (values, title, color_map, lower, upper) in zip(
+    axes,
+    surfaces,
+    strict=True,
+):
+    image = axis.matshow(
+        values[order],
+        aspect="auto",
+        cmap=color_map,
+        vmin=lower,
+        vmax=upper,
+    )
+    axis.set_title(title)
+    axis.set_xlabel("period")
+    figure.colorbar(image, ax=axis, fraction=0.035, pad=0.02)
+axes[0].set_ylabel("units, sorted by mean effect")
+plt.show()
+```
+
+## Assignment metadata
+
+Every simulated panel records the assignment class and its draw metadata:
+
+```{python}
+print(selected.metadata["assignment"]["model"])
+print(selected.unit_annotations.keys())
+```
+
+Use metadata for audit and diagnostics. Do not infer a study's identifying
+assumption from a design name alone. State whether assignment is random,
+observed-feature dependent, or latent-feature dependent in each experiment.
+
+See the [primitive API](reference/primitives.qmd) for parameter definitions.

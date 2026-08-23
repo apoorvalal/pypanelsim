@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-import pypanelsim as pps
+from pypanelsim import designs
 
 
 @dataclass(slots=True)
@@ -20,7 +20,7 @@ class TreatedCellMean:
         return self
 
 
-panel = pps.classic_factor(overlap=1.0, seed=42)
+panel = designs.classic_factor(overlap=1.0, seed=42)
 estimator = TreatedCellMean().fit(*panel.as_arrays())
 
 print(f"Estimator input shape: {panel.shape}")

@@ -1,77 +1,95 @@
-# Validation record
+---
+title: "Validation and provenance"
+description: "What package checks establish and how research translations are classified."
+---
 
-## Package checks
+## Validation layers
 
-The 0.1.0 repository was validated with:
+The repository uses four layers of checks.
+
+### Contract tests
+
+Unit tests check component shapes, binary and absorbing treatment, immutable
+arrays, effect-surface identities, event-time support, annotations, and random
+stream behavior.
+
+### Design tests
+
+Every named design is constructed and simulated. Tests also cover invalid
+configurations and public namespace aliases.
+
+### Artifact tests
+
+The wheel is built and installed into a fresh environment. A smoke test imports
+`core`, `primitives`, and `designs`, then creates and exports a panel.
+
+### Downstream tests
+
+The separate `dgps` analysis consumes `pypanelsim` as a dependency. Its test
+suite checks that the extracted package still supports the balancing experiment
+runner. This does not make its estimators part of `pypanelsim`.
+
+## Standard commands
 
 ```bash
-uv sync --locked
-uv run ruff format --check .
-uv run ruff check .
+uv sync --extra docs
+uv run ruff format --check src tests examples website
+uv run ruff check src tests examples website
 uv run pytest
-uv run python examples/custom_dgp.py
-uv run python examples/estimator_interop.py
-uv run python examples/assignment_mechanisms.py
+uv run quarto render website
 uv build
 ```
 
-The source tree contains no crabbymetrics import. NumPy and Matplotlib are the
-runtime dependencies declared in `pyproject.toml`.
+The exact commands that pass for a release should appear in its release or CI
+record. This page describes the required classes of checks; it is not a live CI
+status badge.
 
-The wheel was installed into a fresh temporary `uv` environment. A smoke test
-then created a registered classic-factor design, generated a `(200, 50)` panel,
-extracted estimator arrays, and recovered the canonical true ATT of 1.1.
+## Canonical migration parity
 
-The expanded suite adds contract tests for the full effect surface, immutable
-annotations, support-aware cohort/event truth, named random streams, explicit
-2WFE and rank-$k$ factor primitives, and every named Lepskii, ATT-DML,
-regression-compression, and gsynth2 factory.
+Before the earlier embedded implementation was removed, the extraction audit
+loaded the old and new Python implementations together. It compared
+`outcome`, `untreated_outcome`, `treatment`, and `treatment_effect` with exact
+NumPy equality for the same small configuration and seed.
 
-## Migration parity
-
-Before the embedded implementation was removed from the balancing reproduction
-project, the old and new packages were loaded together. Each design used the
-same small configuration and seed 101:
-
-```python
-CanonicalPanelConfig(
-    n_control=12,
-    n_treated=4,
-    n_pre=8,
-    n_post=3,
-)
-```
-
-The audit compared `outcome`, `untreated_outcome`, `treatment`, and
-`treatment_effect` with exact NumPy array equality.
-
-| Design | Parameters | Result |
+| Design | Parameters | Extraction result |
 |---|---|---|
-| Classic factor | `overlap=1.0` | Exact |
-| Weak factor | `overlap=1.0` | Exact |
-| Synthetic control | `active_share=0.25` | Exact |
-| Factor-synthetic | `overlap=1.0` | Exact |
-| Stationary time series | `coefficient=0.9`, `integrated=False` | Exact |
-| Integrated time series | `coefficient=0.2`, `integrated=True` | Exact |
-| Mixed factor | `overlap=1.0` | Exact |
+| Classic factor | `overlap=1.0` | exact arrays |
+| Weak factor | `overlap=1.0` | exact arrays |
+| Synthetic control | `active_share=0.25` | exact arrays |
+| Factor-synthetic | `overlap=1.0` | exact arrays |
+| Stationary time series | `coefficient=0.9`, `integrated=False` | exact arrays |
+| Integrated time series | `coefficient=0.2`, `integrated=True` | exact arrays |
+| Mixed factor | `overlap=1.0` | exact arrays |
 
-The migration changes object ownership and metadata layout, not canonical
-outcomes or treatment arrays.
+This was a one-time Python-to-Python extraction check. Current releases rely on
+the repository tests and stored fixtures.
 
-## Downstream reproduction check
+## Cross-language validation
 
-The separate balancing reproduction was changed to consume `pypanelsim` as an
-editable sibling dependency. Its tests passed after removal of the embedded
-source. Its self-contained Quarto report then executed all 25 code cells and
-rendered successfully with the same cached 398-cell R/Python comparison.
+R and NumPy do not share seeded random streams. The [balancing validation
+snapshot](vignettes/balancing-reproduction.qmd) therefore compares Monte Carlo
+RMSE values relative to their combined Monte Carlo standard errors. It does not
+claim matched R and Python draws.
 
-This downstream check establishes array-contract compatibility with the
-current crabbymetrics experiment runner. It does not make crabbymetrics a
-runtime or test dependency of `pypanelsim`.
+## Provenance labels
 
-## What is not asserted
+Research pages use three labels:
 
-NumPy and R do not share seeded random streams. The migration audit verifies
-Python-to-Python extraction parity. The separate reproduction report evaluates
-R/Python agreement with same-panel estimator fixtures and Monte Carlo standard
-errors.
+- **Public translation:** a design follows a cited public repository or paper.
+- **Working design:** a design adapts an unpublished research specification and
+  can change as that work develops.
+- **Package benchmark:** maintainers assembled the law to test software or an
+  estimator; it is not attributed to a paper.
+
+These labels prevent a constructor name from making a stronger provenance claim
+than the evidence supports.
+
+## Sources
+
+- Baker dynamic effects: [JFE_DID](https://github.com/andrewchbaker/JFE_DID)
+- TWFE heterogeneity tests: [repository](https://github.com/apoorvalal/TestingInEventStudies) and [paper](https://arxiv.org/abs/2503.05125)
+- Large longitudinal experiments: [paper](https://arxiv.org/abs/2410.09952) and [code](https://github.com/py-econometrics/panel-at-scale-code)
+- Augmented balancing: [paper](https://apoorvalal.github.io/files/papers/augbal.pdf) and [estimator source](https://github.com/apoorvalal/crabbymetrics)
+
+The adaptive-pooling family is a working design. The composite family is a
+package benchmark.

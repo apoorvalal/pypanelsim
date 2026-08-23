@@ -1,0 +1,192 @@
+---
+title: "Conditional and latent trends"
+description: "Distinguish unconditional, conditional, latent, and clustered trend assumptions."
+jupyter: python3
+---
+
+The ATT-DML family is a set of assumption tests. Its designs differ in what
+must be conditioned on for untreated trends to be comparable. This page makes
+those differences explicit.
+
+The related public paper is [Augmented Balancing Estimators of the Average
+Treatment Effect on the Treated in Cross-Sectional and Panel
+Designs](https://apoorvalal.github.io/files/papers/augbal.pdf).
+
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np
+
+from pypanelsim import designs
+
+print(designs.available_att_dml_designs())
+```
+
+## Design map
+
+| Variant | Information that restores comparability | Main failure when omitted |
+|---|---|---|
+| `conditional_parallel_trends` | observed linear features | unconditional trends differ |
+| `conditional_parallel_trends_nonlinear` | nonlinear functions of observed features | a linear nuisance model is misspecified |
+| `latent_parallel` | stable latent structure | observed covariates are insufficient |
+| `latent_nonparallel` | no stable latent comparison | latent parallel trends fails |
+| `clustered_arma` | group trend and serial dependence structure | independent-error approximations fail |
+
+These labels describe data laws. They do not claim that a specific estimator
+identifies the ATT under every configuration.
+
+## Conditional parallel trends
+
+The conditional designs have two periods and high-dimensional unit features.
+Assignment uses a sparse feature index. Untreated trends use the same features.
+
+```{python}
+conditional_config = designs.ATTDMConditionalConfig(
+    n_units=600,
+    n_features=20,
+    n_active=5,
+    treatment_effect=3.0,
+)
+
+linear = designs.att_dml(
+    "conditional_parallel_trends",
+    config=conditional_config,
+    seed=42,
+)
+nonlinear = designs.att_dml(
+    "conditional_parallel_trends_nonlinear",
+    config=conditional_config,
+    seed=42,
+)
+
+print(linear.shape, nonlinear.shape)
+print(linear.unit_covariate_names[:5])
+print(round(linear.true_att, 3), round(nonlinear.true_att, 3))
+```
+
+The nonlinear variant exposes transformed covariates to the DGP while keeping
+the raw observed features available to estimators. It is a nuisance-model
+stress test, not a different ATT target.
+
+## Diagnose trend imbalance
+
+For a two-period panel, each unit's observed change is
+$\Delta Y_i=Y_{i1}-Y_{i0}$. Compare changes by treatment status before fitting
+an adjusted estimator.
+
+```{python}
+def change_gap(panel):
+    changes = np.diff(panel.outcome, axis=1).ravel()
+    treated = panel.ever_treated
+    return float(changes[treated].mean() - changes[~treated].mean())
+
+print("linear raw change gap:", round(change_gap(linear), 3))
+print("nonlinear raw change gap:", round(change_gap(nonlinear), 3))
+```
+
+The figure plots each unit's outcome change against its first observed feature.
+The nonlinear design changes the conditional shape, not only the mean gap.
+
+```{python}
+#| label: fig-conditional-trends
+#| fig-cap: "Observed feature-outcome-change relationships under linear and nonlinear conditional trend laws."
+#| fig-alt: "Two scatter plots compare a linear feature-outcome-change relationship with a nonlinear relationship."
+
+figure, axes = plt.subplots(1, 2, figsize=(12, 5), constrained_layout=True)
+for axis, (label, draw) in zip(
+    axes,
+    (("Linear conditional trend", linear), ("Nonlinear conditional trend", nonlinear)),
+    strict=True,
+):
+    changes = np.diff(draw.outcome, axis=1).ravel()
+    x1 = draw.unit_covariates[:, 0]
+    axis.scatter(
+        x1[~draw.ever_treated],
+        changes[~draw.ever_treated],
+        s=10,
+        alpha=0.45,
+        label="control",
+    )
+    axis.scatter(
+        x1[draw.ever_treated],
+        changes[draw.ever_treated],
+        s=10,
+        alpha=0.45,
+        label="treated",
+    )
+    axis.axhline(0.0, color="black", linewidth=0.7)
+    axis.set_xlabel("first observed feature")
+    axis.set_ylabel("outcome change")
+    axis.set_title(label)
+axes[0].legend()
+plt.show()
+```
+
+A raw gap is expected because the assumption is conditional, not
+unconditional.
+
+## Latent parallel and nonparallel trends
+
+The latent designs have seven periods. The stable variant preserves a latent
+comparison structure. The nonparallel variant changes it over time.
+
+```{python}
+latent_config = designs.ATTDMLatentConfig(
+    n_units=400,
+    n_periods=7,
+    treatment_effect=1.0,
+)
+
+stable = designs.att_dml("latent_parallel", config=latent_config, seed=7)
+unstable = designs.att_dml("latent_nonparallel", config=latent_config, seed=7)
+
+print(stable.shape, unstable.shape)
+print(stable.metadata["outcome"]["model"])
+print(unstable.metadata["outcome"]["model"])
+```
+
+This pair separates estimator failure from generic panel complexity. If an
+estimator succeeds only in the stable design, the contrast points to the latent
+trend assumption.
+
+## Clustered ARMA panels
+
+The clustered design adds group-specific trends and serially correlated error.
+Treatment can start at one common date or follow a staggered pattern.
+
+```{python}
+clustered_config = designs.ATTDMClusteredConfig(
+    n_units=60,
+    n_periods=40,
+    n_treated=12,
+    adoption_period=28,
+    n_clusters=6,
+    assignment_pattern="simultaneous",
+)
+
+clustered = designs.att_dml(
+    "clustered_arma",
+    config=clustered_config,
+    seed=21,
+)
+
+print(clustered.shape)
+print(clustered.unit_annotations.keys())
+```
+
+Use cluster-level resampling or inference when an estimator assumes independent
+units. The simulation's cluster annotations make that grouping available to an
+adapter.
+
+## Report the assumption, not only the name
+
+For each result, state:
+
+- whether trends are unconditional, observed-feature conditional, or latent;
+- which features the estimator receives;
+- whether the outcome relation is linear or nonlinear;
+- whether assignment is confounded;
+- whether errors are serially or cluster dependent;
+- the ATT target and its true value.
+
+This information is enough for another person or agent to understand the
+experiment without access to its original research directory.

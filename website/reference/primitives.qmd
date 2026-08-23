@@ -1,137 +1,190 @@
 ---
 title: "Primitive API"
-subtitle: "Features, untreated outcomes, profiles, truth, annotations, and random streams"
-format:
-  html:
-    page-layout: full
-    embed-resources: true
-    code-fold: true
+description: "Reusable feature, assignment, untreated-outcome, and effect laws."
+jupyter: python3
 ---
 
 ```{python}
 import inspect
 
-import pypanelsim as pps
+from pypanelsim import primitives
 
-
-def show_signature(object_):
-    print(f"{object_.__name__}{inspect.signature(object_)}")
+def show(names):
+    for name in names:
+        value = getattr(primitives, name)
+        print(f"{name}{inspect.signature(value)}")
 ```
 
-## Outcome primitives
+## Unit features
 
-| Object | Untreated-outcome law |
+```{python}
+show((
+    "GaussianUnitFeatures",
+    "CorrelatedGaussianFeatures",
+    "LatentGradientFeatures",
+))
+```
+
+| Primitive | Use |
+|---|---|
+| `GaussianUnitFeatures` | independent observed and latent standard-normal features |
+| `CorrelatedGaussianFeatures` | observed proxies correlated with latent features |
+| `LatentGradientFeatures` | ordered latent position with optional observed proxies |
+
+Feature models return both DGP-visible features and estimator-visible
+covariates. These need not be the same matrix.
+
+`att_dml_nonlinear_basis(values)` is a deterministic feature transform used by
+the nonlinear conditional-trends design.
+
+## Time features
+
+```{python}
+show(("GaussianTimeFeatures",))
+```
+
+`n_features` is the number of independent time series. A value of zero returns
+an empty time-feature matrix.
+
+## Assignment laws
+
+```{python}
+show((
+    "SingleCohortAssignment",
+    "RandomizedSingleCohortAssignment",
+    "StaggeredAdoption",
+    "RandomizedStaggeredAdoption",
+    "BinaryLogitAssignment",
+    "SparseLogitAssignment",
+    "GeneralizedPropensityAssignment",
+))
+```
+
+### Parameter semantics
+
+| Parameter | Meaning |
+|---|---|
+| `n_treated` | number of treated units |
+| `adoption_period` | zero-based first treated time position |
+| `adoption_periods` | ordered treated-category start positions |
+| `cohort_sizes` | sample size for each randomized adoption category |
+| `eligible_units` | optional positions from which randomized cohorts are drawn |
+| `intercept` or `intercepts` | logit constants |
+| `observable_coefficients` | assignment coefficients on observed features |
+| `unobservable_coefficients` | assignment coefficients on latent features |
+
+`SingleCohortAssignment` treats the first `n_treated` units unless
+`treated_units` is supplied. `StaggeredAdoption` receives an explicit mapping
+from unit position to adoption period.
+
+`BinaryLogitAssignment` draws one treated category. `GeneralizedPropensityAssignment`
+draws never treated or one of several adoption categories from a multinomial
+logit. Coefficient dimensions must match the corresponding feature counts.
+
+## Untreated-outcome laws
+
+```{python}
+show((
+    "TwoWayFixedEffectsOutcome",
+    "AdditiveFactorOutcome",
+    "LowRankFactorOutcome",
+    "LinearFeatureOutcome",
+    "UnitTrendOutcome",
+    "UnitPositionOutcome",
+    "PeriodicTimeOutcome",
+    "ARMAErrorOutcome",
+    "RandomARMAErrorOutcome",
+    "ClusteredTrendOutcome",
+    "LatentSelectionOutcome",
+    "SumOutcomeModel",
+    "CallableOutcomeModel",
+))
+```
+
+### Structural guide
+
+| Primitive | Untreated structure |
 |---|---|
 | `TwoWayFixedEffectsOutcome` | $\alpha_i+\gamma_t+\varepsilon_{it}$ |
-| `LowRankFactorOutcome` | $\lambda_i'F_t+\varepsilon_{it}$ with configurable rank |
-| `LinearFeatureOutcome` | $X_i'\beta_0+tX_i'\beta_1+\varepsilon_{it}$ |
-| `UnitTrendOutcome` | $b_i t$ |
-| `UnitPositionOutcome` | Unit levels around a position-dependent mean |
-| `PeriodicTimeOutcome` | Repeated finite calendar pattern |
-| `ARMAErrorOutcome` | Independent unit ARMA paths |
-| `RandomARMAErrorOutcome` | Random stationary ARMA law shared across units |
-| `ClusteredTrendOutcome` | Shared trend slope within latent unit clusters |
-| `LatentSelectionOutcome` | Stable or interactive latent-factor path from ATT-DML |
+| `AdditiveFactorOutcome` | compatibility form of additive unit and time factors |
+| `LowRankFactorOutcome` | $\lambda_i'f_t+\varepsilon_{it}$ |
+| `LinearFeatureOutcome` | feature-dependent level and linear trend |
+| `UnitTrendOutcome` | random or supplied unit-specific slopes |
+| `UnitPositionOutcome` | smooth outcome surface over latent unit position |
+| `PeriodicTimeOutcome` | shared sine and cosine time terms |
+| `ARMAErrorOutcome` | fixed AR and MA coefficients |
+| `RandomARMAErrorOutcome` | unit-specific random ARMA coefficients |
+| `ClusteredTrendOutcome` | cluster-specific linear trends |
+| `LatentSelectionOutcome` | outcome surface linked to latent selection |
+| `SumOutcomeModel` | weighted sum of outcome components |
+| `CallableOutcomeModel` | adapter for a compatible Python callable |
+
+`LowRankFactorOutcome.rank` is the factor rank. `loading_scale` and
+`factor_scale` set factor scales. Separate control and treated loading means can
+create limited factor overlap.
+
+`LinearFeatureOutcome.source` is `observables` or `unobservables`.
+`level_coefficients` affect the level. `trend_coefficients` multiply the time
+index. Set `center_time=True` to center that index.
+
+`SumOutcomeModel` is the main composition tool:
 
 ```{python}
-for object_ in (
-    pps.TwoWayFixedEffectsOutcome,
-    pps.LowRankFactorOutcome,
-    pps.LinearFeatureOutcome,
-    pps.UnitTrendOutcome,
-    pps.UnitPositionOutcome,
-    pps.PeriodicTimeOutcome,
-    pps.ARMAErrorOutcome,
-    pps.RandomARMAErrorOutcome,
-    pps.ClusteredTrendOutcome,
-):
-    show_signature(object_)
-```
-
-`TwoWayFixedEffectsOutcome` is an explicit public name for the additive unit
-and period factor law. `LowRankFactorOutcome(rank=k)` is the general
-interactive fixed-effects primitive. It records loadings, factors, the signal,
-and errors in component metadata.
-
-## Feature primitives
-
-`CorrelatedGaussianFeatures` draws Toeplitz-correlated Gaussian covariates or
-uses an explicit positive-definite covariance matrix. Its callable transform
-can alter features used by assignment and outcomes. When
-`estimator_uses_raw=True`, `PanelDataset.unit_covariates` retains the raw
-features.
-
-```{python}
-show_signature(pps.CorrelatedGaussianFeatures)
-show_signature(pps.LatentGradientFeatures)
-```
-
-`att_dml_nonlinear_basis()` appends the three nonlinear terms from the
-ATT-DML experiment. `LatentGradientFeatures` implements the position-dependent
-latent-factor distribution from its factor-selection study.
-
-## Effect profiles
-
-The package exposes constant, linear, concave, saturating, hump, and sinusoidal
-profile functions. `EventTimeProfileEffect` converts any callable profile into
-an effect model. `GaussianCellEffect`, `RandomUnitEffect`, and
-`RandomWalkEffect` use the effect random stream.
-
-Every effect model returns two related objects:
-
-$$
-\texttt{treatment_effect}_{it}
-=\texttt{effect_surface}_{it}W_{it}.
-$$
-
-The first is the realized causal contribution to observed outcomes. The
-second is the full effect law implied by the component.
-
-## `PanelTruth`
-
-Every dataset exposes `panel.truth`.
-
-| Method | Columns |
-|---|---|
-| `cohort_event()` | cohort, event time, calendar time, cohort size, support, effect |
-| `event_study()` | event time, supported target effect, cohort count, target unit count |
-| `att_by_cohort()` | cohort ATT, unit count, treated-cell count |
-
-`event_study(weighting="cohort_size")` uses the realized cohort sizes.
-`weighting="equal_cohort"` gives each supported cohort equal weight. Neither
-mode extrapolates unsupported cohort-event cells.
-
-## Identifiers and annotations
-
-`PanelSimulator` accepts explicit `unit_ids`, `time_ids`, `unit_annotations`,
-and `time_annotations`. It always adds `ever_treated` and `adoption_period` as
-unit annotations. Assignments with category metadata also add
-`assignment_category`.
-
-```python
-columns = panel.as_long_dict(
-    include_effect_surface=True,
-    include_annotations=True,
+combined = primitives.SumOutcomeModel(
+    models=(
+        primitives.TwoWayFixedEffectsOutcome(noise_scale=0.2),
+        primitives.LowRankFactorOutcome(rank=2),
+    ),
+    weights=(1.0, 0.5),
 )
+print(combined)
 ```
 
-The default long schema is unchanged. The effect surface and annotations are
-opt-in columns.
-
-## Named random streams
+## Treatment-effect laws
 
 ```{python}
-show_signature(pps.SimulationSeeds)
+show((
+    "ConstantEffect",
+    "LinearRampEffect",
+    "CohortEventTimeEffect",
+    "EventTimeProfileEffect",
+    "GaussianCellEffect",
+    "RandomUnitEffect",
+    "RandomWalkEffect",
+    "CallableUnitEffect",
+    "CallableEffect",
+))
 ```
 
-`SimulationSeeds.from_seed(42)` spawns separate streams for unit features,
-assignment, time features, untreated outcomes, and effects.
+| Primitive | Effect surface |
+|---|---|
+| `ConstantEffect` | same value in every treated cell |
+| `LinearRampEffect` | linear in exposure length |
+| `CohortEventTimeEffect` | one event-time array for each adoption cohort |
+| `EventTimeProfileEffect` | one callable event-time path |
+| `GaussianCellEffect` | independent cell heterogeneity around a mean |
+| `RandomUnitEffect` | one random effect level per unit |
+| `RandomWalkEffect` | stochastic common exposure-time path |
+| `CallableUnitEffect` | user callable evaluated by unit and event time |
+| `CallableEffect` | adapter for a complete effect-matrix callable |
 
-```python
-streams = pps.SimulationSeeds.from_seed(42)
-panel = simulator.simulate(streams=streams)
+Every effect model must return realized effects that are zero outside treatment.
+It should put the complete `effect_surface` in draw metadata. The simulator
+validates `realized = treatment * effect_surface`.
+
+## Profile helpers
+
+```{python}
+show((
+    "constant_profile",
+    "linear_profile",
+    "concave_profile",
+    "saturating_profile",
+    "hump_profile",
+    "sinusoidal_profile",
+))
 ```
 
-Adding an unrelated component does not shift assignment draws under this
-contract. `simulate(seed=42)` retains the original shared-stream behavior for
-exact backward compatibility with the canonical designs.
+These functions return deterministic arrays for use with
+`CohortEventTimeEffect` or `EventTimeProfileEffect`. They do not assign
+treatment and do not include pre-treatment periods.
