@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="Configured benchmark and research design families.">
+<meta name="description" content="Ready-made benchmark and research designs.">
 
 <title>Design API – pypanelsim</title>
 <style>
@@ -4865,7 +4865,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../architecture.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Architecture and data contract</span></a>
+ <span class="menu-text">How simulation works</span></a>
   </div>
 </li>
       </ul>
@@ -4900,7 +4900,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../interoperability.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Export and interoperability</span></a>
+ <span class="menu-text">Export to other tools</span></a>
   </div>
 </li>
       </ul>
@@ -4982,7 +4982,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../reference/primitives.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Primitive API</span></a>
+ <span class="menu-text">Building-block API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -5011,7 +5011,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../validation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Validation and provenance</span></a>
+ <span class="menu-text">Tests and sources</span></a>
   </div>
 </li>
       </ul>
@@ -5047,7 +5047,7 @@ height: auto;
 
 <div>
   <div class="description">
-    Configured benchmark and research design families.
+    Ready-made benchmark and research designs.
   </div>
 </div>
 
@@ -5064,7 +5064,7 @@ height: auto;
 </header>
 
 
-<div id="fdbaac79" class="cell" data-execution_count="1">
+<div id="f7d696c8" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> inspect</span>
@@ -5079,7 +5079,7 @@ height: auto;
 </div>
 <section id="canonical-benchmarks" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="canonical-benchmarks"><span class="header-section-number">1</span> Canonical benchmarks</h2>
-<div id="c12a0e10" class="cell" data-execution_count="2">
+<div id="9a70cc41" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>show((</span>
@@ -5111,7 +5111,7 @@ available_canonical_designs() -&gt; &#39;tuple[str, ...]&#39;</code></pre>
 </section>
 <section id="baker-design" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="baker-design"><span class="header-section-number">2</span> Baker design</h2>
-<div id="9cf25a81" class="cell" data-execution_count="3">
+<div id="7a491f66" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>show((<span class="st">&quot;BakerPanelConfig&quot;</span>, <span class="st">&quot;baker_design&quot;</span>, <span class="st">&quot;baker&quot;</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -5126,7 +5126,7 @@ baker(*, config: &#39;BakerPanelConfig | None&#39; = None, seed: &#39;int | np.r
 </section>
 <section id="f-test-designs" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="f-test-designs"><span class="header-section-number">3</span> F-test designs</h2>
-<div id="1d31d330" class="cell" data-execution_count="4">
+<div id="4b491158" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>show((</span>
@@ -5159,7 +5159,7 @@ available_ftest_cohort_designs() -&gt; &#39;tuple[str, ...]&#39;</code></pre>
 </section>
 <section id="adaptive-pooling-designs" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="adaptive-pooling-designs"><span class="header-section-number">4</span> Adaptive pooling designs</h2>
-<div id="52422c68" class="cell" data-execution_count="5">
+<div id="094a5c36" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>show((</span>
@@ -5178,11 +5178,11 @@ lepskii(name: &#39;str&#39;, *, config: &#39;LepskiiPanelConfig | None&#39; = No
 available_lepskii_designs() -&gt; &#39;tuple[str, ...]&#39;</code></pre>
 </div>
 </div>
-<p>The configuration controls nine default adoption cohorts, cohort shares, fixed-effect scales, two-way error correlation, and periodic time terms. The named variant controls only the cohort-event effect surface.</p>
+<p>The configuration controls nine default adoption cohorts, cohort shares, fixed-effect scales, two-way error correlation, and periodic time terms. The named variant controls only the cohort-event effect pattern.</p>
 </section>
 <section id="conditional-and-latent-trend-designs" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="conditional-and-latent-trend-designs"><span class="header-section-number">5</span> Conditional and latent trend designs</h2>
-<div id="8938bc45" class="cell" data-execution_count="6">
+<div id="359512cb" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>show((</span>
@@ -5234,7 +5234,7 @@ available_att_dml_designs() -&gt; &#39;tuple[str, ...]&#39;</code></pre>
 </section>
 <section id="regression-compression-designs" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="regression-compression-designs"><span class="header-section-number">6</span> Regression-compression designs</h2>
-<div id="b83d49e7" class="cell" data-execution_count="7">
+<div id="62c120a5" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>show((</span>
@@ -5261,7 +5261,7 @@ available_anscombe_designs() -&gt; &#39;tuple[str, ...]&#39;</code></pre>
 </section>
 <section id="composite-benchmark" class="level2" data-number="7">
 <h2 data-number="7" class="anchored" data-anchor-id="composite-benchmark"><span class="header-section-number">7</span> Composite benchmark</h2>
-<div id="d33fd720" class="cell" data-execution_count="8">
+<div id="f6e72f2d" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>show((</span>

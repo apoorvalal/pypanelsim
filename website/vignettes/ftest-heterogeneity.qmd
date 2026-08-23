@@ -4,11 +4,11 @@ description: "Generate temporal and cohort alternatives for joint tests of treat
 jupyter: python3
 ---
 
-These designs support the public
+The designs follow the public
 [TestingInEventStudies](https://github.com/apoorvalal/TestingInEventStudies)
 project and the paper [When can we get away with using the two-way fixed effects
-regression?](https://arxiv.org/abs/2503.05125). The package generates the null
-and alternative effect surfaces. It does not implement the test statistic.
+regression?](https://arxiv.org/abs/2503.05125). The package generates null and
+alternative effect patterns; the test statistic belongs in the analysis code.
 
 ```{python}
 import matplotlib.pyplot as plt
@@ -102,7 +102,7 @@ from changing the effect profile.
 
 ## Cohort alternatives
 
-The cohort family uses three adoption dates. Named surfaces range from a
+The cohort family uses three adoption dates. Named alternatives range from a
 homogeneous null to large cohort differences and selection on gains.
 
 ```{python}
@@ -119,7 +119,7 @@ for name in designs.available_ftest_cohort_designs():
 
 ```{python}
 #| label: fig-ftest-cohort-profiles
-#| fig-cap: "Cohort-specific paths for the seven effect-surface alternatives."
+#| fig-cap: "Cohort-specific paths for the seven effect-pattern alternatives."
 #| fig-alt: "Seven small line charts compare cohort-specific effect paths under the F-test heterogeneity alternatives."
 
 cohort_names = designs.available_ftest_cohort_designs()
@@ -148,7 +148,7 @@ axes.ravel()[0].legend(fontsize=7)
 plt.show()
 ```
 
-Run one surface and inspect its supported cohort-event truth:
+Run one alternative and inspect the supported cohort-event cells:
 
 ```{python}
 cohort_panel = designs.ftest_cohort(
@@ -208,10 +208,10 @@ for row, (label, draw) in enumerate(realized_panels):
 plt.show()
 ```
 
-## Build a custom cohort surface
+## Build custom cohort effects
 
-The configured family uses the same primitives that are available to user
-code. A cohort surface is a map from adoption period to an event-time array.
+The built-in family uses the same classes available to user code. Cohort effects
+are specified as a map from adoption period to an event-time array.
 
 ```{python}
 from pypanelsim import primitives
@@ -226,12 +226,12 @@ print(type(effect_model).__name__)
 ```
 
 Pass this effect model to a custom `core.PanelSimulator` when the built-in
-untreated outcome or assignment law is not appropriate.
+untreated-outcome or assignment model is not appropriate.
 
 ## Simulation-study use
 
 A size experiment should use a homogeneous design as its null. A power
 experiment should vary the form and magnitude of heterogeneity. Report the
-exact named surface, configuration, panel seed, and any profile seed. Do not
+exact variant, configuration, panel seed, and any profile seed. Do not
 refer only to “the F-test DGP”; that phrase does not identify one probability
-law.
+model.

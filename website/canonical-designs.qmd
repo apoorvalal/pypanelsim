@@ -4,9 +4,9 @@ description: "Standard benchmarks for untreated panel prediction and treatment-e
 jupyter: python3
 ---
 
-The canonical designs vary the untreated outcome law while holding a common
-panel layout and treatment-effect law. Use them to compare estimators across
-distinct sources of panel dependence.
+These designs vary how untreated outcomes are generated while keeping the
+sample layout and treatment effects fixed. Use them to compare estimators under
+different forms of panel dependence.
 
 ## Common structure
 
@@ -45,7 +45,7 @@ simulator = designs.classic_factor_design(overlap=1.0, config=config)
 print(panel.shape, simulator.name)
 ```
 
-## Select an untreated outcome law
+## Select an untreated-outcome model
 
 | Family | Untreated outcome structure | Main stress |
 |---|---|---|
@@ -54,10 +54,10 @@ print(panel.shape, simulator.name)
 | `synthetic_control` | treated loadings generated from sparse donor weights | donor sparsity |
 | `factor_synthetic` | factor signal plus donor-weight relation | joint factor and sparse-synthetic structure |
 | `time_series` | unit-specific stationary or integrated autoregression | temporal persistence |
-| `mixed_factor` | different factor laws across unit groups | outcome-law heterogeneity |
+| `mixed_factor` | different factor models across unit groups | heterogeneous outcome process |
 
-These are benchmark laws. A family name describes the generated untreated
-outcome, not an estimator that must be used on it.
+Each family describes the generated untreated outcomes, not the estimator that
+must be used on them.
 
 ## Factor overlap
 
@@ -75,8 +75,8 @@ for value, item in overlap_panels.items():
     print(value, outcome_metadata["model"])
 ```
 
-The complete component draw is stored in metadata. This permits direct checks
-of factor paths, loadings, donor weights, and innovations.
+Metadata stores factor paths, loadings, donor weights, and innovations for
+direct inspection.
 
 ## Synthetic-control sparsity
 
@@ -91,7 +91,7 @@ print(sparse.metadata["outcome"]["active_share"])
 print(dense.metadata["outcome"]["active_share"])
 ```
 
-This parameter changes the untreated outcome law. It does not select or fit a
+This parameter changes untreated outcomes. It does not select or fit a
 synthetic-control estimator.
 
 ## Temporal persistence
@@ -115,7 +115,7 @@ print(stationary.metadata["outcome"]["integrated"])
 print(integrated.metadata["outcome"]["integrated"])
 ```
 
-## Change the panel, not the law
+## Change the sample, not the model
 
 Pass one configuration to several constructors. This keeps sample dimensions,
 treatment timing, effects, and noise variance aligned.
@@ -157,7 +157,7 @@ readers more information.
 ## Visual catalog
 
 Each row below compares two variants of one untreated-outcome family. Treatment
-timing and the effect law remain common.
+timing and effects remain the same.
 
 ```{python}
 #| label: fig-canonical-catalog

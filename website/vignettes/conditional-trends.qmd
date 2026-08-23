@@ -4,9 +4,9 @@ description: "Distinguish unconditional, conditional, latent, and clustered tren
 jupyter: python3
 ---
 
-The ATT-DML family is a set of assumption tests. Its designs differ in what
-must be conditioned on for untreated trends to be comparable. This page makes
-those differences explicit.
+The ATT-DML examples vary the information needed to make untreated trends
+comparable. Some use observed features, some use latent structure, and one adds
+clustered serial dependence.
 
 The related public paper is [Augmented Balancing Estimators of the Average
 Treatment Effect on the Treated in Cross-Sectional and Panel
@@ -31,8 +31,8 @@ print(designs.available_att_dml_designs())
 | `latent_nonparallel` | no stable latent comparison | latent parallel trends fails |
 | `clustered_arma` | group trend and serial dependence structure | independent-error approximations fail |
 
-These labels describe data laws. They do not claim that a specific estimator
-identifies the ATT under every configuration.
+The names describe the simulated data, not a guarantee that a given estimator
+identifies the ATT.
 
 ## Conditional parallel trends
 
@@ -63,9 +63,9 @@ print(linear.unit_covariate_names[:5])
 print(round(linear.true_att, 3), round(nonlinear.true_att, 3))
 ```
 
-The nonlinear variant exposes transformed covariates to the DGP while keeping
-the raw observed features available to estimators. It is a nuisance-model
-stress test, not a different ATT target.
+The nonlinear variant uses transformed covariates to generate outcomes while
+estimators receive the raw features. It tests nonlinear adjustment without
+changing the ATT target.
 
 ## Diagnose trend imbalance
 
@@ -88,7 +88,7 @@ The nonlinear design changes the conditional shape, not only the mean gap.
 
 ```{python}
 #| label: fig-conditional-trends
-#| fig-cap: "Observed feature-outcome-change relationships under linear and nonlinear conditional trend laws."
+#| fig-cap: "Observed feature-outcome-change relationships under linear and nonlinear conditional trends."
 #| fig-alt: "Two scatter plots compare a linear feature-outcome-change relationship with a nonlinear relationship."
 
 figure, axes = plt.subplots(1, 2, figsize=(12, 5), constrained_layout=True)
@@ -144,9 +144,8 @@ print(stable.metadata["outcome"]["model"])
 print(unstable.metadata["outcome"]["model"])
 ```
 
-This pair separates estimator failure from generic panel complexity. If an
-estimator succeeds only in the stable design, the contrast points to the latent
-trend assumption.
+If an estimator succeeds only in the stable design, the contrast points to the
+latent-trend assumption rather than the number of periods or features.
 
 ## Clustered ARMA panels
 
@@ -188,5 +187,4 @@ For each result, state:
 - whether errors are serially or cluster dependent;
 - the ATT target and its true value.
 
-This information is enough for another person or agent to understand the
-experiment without access to its original research directory.
+These details make the experiment understandable without private context.

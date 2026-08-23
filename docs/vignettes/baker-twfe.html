@@ -5004,7 +5004,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../architecture.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Architecture and data contract</span></a>
+ <span class="menu-text">How simulation works</span></a>
   </div>
 </li>
       </ul>
@@ -5039,7 +5039,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../interoperability.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Export and interoperability</span></a>
+ <span class="menu-text">Export to other tools</span></a>
   </div>
 </li>
       </ul>
@@ -5121,7 +5121,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../reference/primitives.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Primitive API</span></a>
+ <span class="menu-text">Building-block API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -5150,7 +5150,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../validation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Validation and provenance</span></a>
+ <span class="menu-text">Tests and sources</span></a>
   </div>
 </li>
       </ul>
@@ -5168,7 +5168,7 @@ height: auto;
   <li><a href="#data-generating-process" id="toc-data-generating-process" class="nav-link active" data-scroll-target="#data-generating-process"><span class="header-section-number">1</span> Data-generating process</a></li>
   <li><a href="#the-causal-target" id="toc-the-causal-target" class="nav-link" data-scroll-target="#the-causal-target"><span class="header-section-number">2</span> The causal target</a></li>
   <li><a href="#the-twfe-coefficient" id="toc-the-twfe-coefficient" class="nav-link" data-scroll-target="#the-twfe-coefficient"><span class="header-section-number">3</span> The TWFE coefficient</a></li>
-  <li><a href="#inspect-cohort-event-truth" id="toc-inspect-cohort-event-truth" class="nav-link" data-scroll-target="#inspect-cohort-event-truth"><span class="header-section-number">4</span> Inspect cohort-event truth</a></li>
+  <li><a href="#inspect-cohort-event-effects" id="toc-inspect-cohort-event-effects" class="nav-link" data-scroll-target="#inspect-cohort-event-effects"><span class="header-section-number">4</span> Inspect cohort-event effects</a></li>
   <li><a href="#isolate-design-from-noise" id="toc-isolate-design-from-noise" class="nav-link" data-scroll-target="#isolate-design-from-noise"><span class="header-section-number">5</span> Isolate design from noise</a></li>
   <li><a href="#what-this-design-does-not-prove" id="toc-what-this-design-does-not-prove" class="nav-link" data-scroll-target="#what-this-design-does-not-prove"><span class="header-section-number">6</span> What this design does not prove</a></li>
   </ul>
@@ -5201,7 +5201,7 @@ height: auto;
 </header>
 
 
-<p>This tutorial translates the public simulation in Andrew Baker’s <a href="https://github.com/andrewchbaker/JFE_DID">JFE_DID</a> repository. It shows a specific problem: staggered adoption and cohort-specific dynamic effects can make a two-way fixed-effects coefficient differ from a natural average effect.</p>
+<p>The tutorial translates the public simulation in Andrew Baker’s <a href="https://github.com/andrewchbaker/JFE_DID">JFE_DID</a> repository. It shows a specific problem: staggered adoption and cohort-specific dynamic effects can make a two-way fixed-effects coefficient differ from a natural average effect.</p>
 <section id="data-generating-process" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="data-generating-process"><span class="header-section-number">1</span> Data-generating process</h2>
 <p>The default panel has 1,000 states observed from 1980 through 2015. Fifty states enter three treatment cohorts:</p>
@@ -5239,7 +5239,7 @@ Y_{it}(0)=\alpha_i+\gamma_t+\varepsilon_{it}.
 <p><span class="math display">\[
 \tau_{it}=s_g(t-g+1), \qquad t\ge g.
 \]</span></p>
-<div id="304aade8" class="cell" data-execution_count="1">
+<div id="6998e54f" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -5302,7 +5302,7 @@ Figure 1: Observed outcomes and staggered treatment in Baker’s dynamic-effect
 <section id="the-causal-target" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="the-causal-target"><span class="header-section-number">2</span> The causal target</h2>
 <p>The treated-cell ATT gives each observed treated cell equal weight:</p>
-<div id="950c1e01" class="cell" data-execution_count="3">
+<div id="2c8d6e1a" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;true treated-cell ATT:&quot;</span>, <span class="bu">round</span>(panel.true_att, <span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -5311,7 +5311,7 @@ Figure 1: Observed outcomes and staggered treatment in Baker’s dynamic-effect
 <pre><code>true treated-cell ATT: 0.8901</code></pre>
 </div>
 </div>
-<p>It is available without fitting an estimator because the simulation stores the full causal decomposition.</p>
+<p>It is available without fitting an estimator because the simulation stores <span class="math inline">\(Y(0)\)</span> and the realized treatment effect.</p>
 </section>
 <section id="the-twfe-coefficient" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="the-twfe-coefficient"><span class="header-section-number">3</span> The TWFE coefficient</h2>
@@ -5326,7 +5326,7 @@ Figure 1: Observed outcomes and staggered treatment in Baker’s dynamic-effect
 =\frac{\sum_{it}\widetilde D_{it}\widetilde Y_{it}}
 {\sum_{it}\widetilde D_{it}^2}.
 \]</span></p>
-<div id="d892a084" class="cell" data-execution_count="4">
+<div id="4d43d90c" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> double_demean(values):</span>
@@ -5351,11 +5351,11 @@ true treated-cell ATT: 0.8901
 difference: -1.0935</code></pre>
 </div>
 </div>
-<p>The difference is not a software error. The regression coefficient uses the residualized treatment as its weighting object. With staggered adoption, already-treated cohorts can act as comparisons for later cohorts. Dynamic and cohort-varying effects then enter with weights that do not match treated-cell ATT weights.</p>
+<p>The difference is not a software error. The regression coefficient weights cells by residualized treatment. With staggered adoption, already-treated cohorts can act as comparisons for later cohorts. Dynamic and cohort-varying effects then enter with weights that do not match treated-cell ATT weights.</p>
 </section>
-<section id="inspect-cohort-event-truth" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="inspect-cohort-event-truth"><span class="header-section-number">4</span> Inspect cohort-event truth</h2>
-<div id="176b362a" class="cell" data-execution_count="5">
+<section id="inspect-cohort-event-effects" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="inspect-cohort-event-effects"><span class="header-section-number">4</span> Inspect cohort-event effects</h2>
+<div id="0e1595e6" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>cohort_truth <span class="op">=</span> panel.truth.cohort_event(event_times<span class="op">=</span><span class="bu">range</span>(<span class="dv">0</span>, <span class="dv">8</span>))</span>
@@ -5407,7 +5407,7 @@ Figure 2: True treatment-effect paths by adoption cohort.
 <section id="isolate-design-from-noise" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="isolate-design-from-noise"><span class="header-section-number">5</span> Isolate design from noise</h2>
 <p>Set <code>noise_scale=0</code> to remove sampling noise while keeping the same assignment and effect structure:</p>
-<div id="0eb7cb00" class="cell" data-execution_count="7">
+<div id="20bde9e6" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>noiseless <span class="op">=</span> designs.BakerPanelConfig(n_units<span class="op">=</span><span class="dv">200</span>, noise_scale<span class="op">=</span><span class="fl">0.0</span>)</span>
@@ -5429,7 +5429,7 @@ noiseless ATT: 0.9363</code></pre>
 </section>
 <section id="what-this-design-does-not-prove" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="what-this-design-does-not-prove"><span class="header-section-number">6</span> What this design does not prove</h2>
-<p>One simulation does not show that TWFE always fails. It shows a transparent case where its coefficient and a common ATT target differ. Change effect slopes, cohort sizes, timing, and noise across replications before making a performance claim about an estimator.</p>
+<p>One simulation does not show that TWFE always fails. It shows a case where its coefficient and a common ATT target differ. Change effect slopes, cohort sizes, timing, and noise across replications before making a performance claim about an estimator.</p>
 
 
 </section>

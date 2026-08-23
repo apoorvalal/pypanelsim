@@ -5004,7 +5004,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../architecture.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Architecture and data contract</span></a>
+ <span class="menu-text">How simulation works</span></a>
   </div>
 </li>
       </ul>
@@ -5039,7 +5039,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../interoperability.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Export and interoperability</span></a>
+ <span class="menu-text">Export to other tools</span></a>
   </div>
 </li>
       </ul>
@@ -5121,7 +5121,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../reference/primitives.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Primitive API</span></a>
+ <span class="menu-text">Building-block API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -5150,7 +5150,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../validation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Validation and provenance</span></a>
+ <span class="menu-text">Tests and sources</span></a>
   </div>
 </li>
       </ul>
@@ -5166,7 +5166,7 @@ height: auto;
    
   <ul>
   <li><a href="#outcome-decomposition" id="toc-outcome-decomposition" class="nav-link active" data-scroll-target="#outcome-decomposition"><span class="header-section-number">1</span> Outcome decomposition</a></li>
-  <li><a href="#inspect-provenance-in-metadata" id="toc-inspect-provenance-in-metadata" class="nav-link" data-scroll-target="#inspect-provenance-in-metadata"><span class="header-section-number">2</span> Inspect provenance in metadata</a></li>
+  <li><a href="#check-component-metadata" id="toc-check-component-metadata" class="nav-link" data-scroll-target="#check-component-metadata"><span class="header-section-number">2</span> Check component metadata</a></li>
   <li><a href="#vary-one-component-at-a-time" id="toc-vary-one-component-at-a-time" class="nav-link" data-scroll-target="#vary-one-component-at-a-time"><span class="header-section-number">3</span> Vary one component at a time</a></li>
   <li><a href="#why-this-is-not-the-first-benchmark" id="toc-why-this-is-not-the-first-benchmark" class="nav-link" data-scroll-target="#why-this-is-not-the-first-benchmark"><span class="header-section-number">4</span> Why this is not the first benchmark</a></li>
   <li><a href="#naming-and-claims" id="toc-naming-and-claims" class="nav-link" data-scroll-target="#naming-and-claims"><span class="header-section-number">5</span> Naming and claims</a></li>
@@ -5210,7 +5210,7 @@ Y(0)
 \]</span></p>
 <p>where <span class="math inline">\(Y_F\)</span> is a low-rank factor component, <span class="math inline">\(Y_T\)</span> is a persistent time-series component, <span class="math inline">\(Y_S\)</span> has sparse synthetic-control donor structure, and <span class="math inline">\(Y_A\)</span> is an additive two-way fixed-effects component.</p>
 <p>The weights are explicit configuration fields. They need not sum to one, but a sum of one makes their relative scale easier to interpret.</p>
-<div id="d20ef6b9" class="cell" data-execution_count="1">
+<div id="75de2810" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -5243,9 +5243,9 @@ Y(0)
 </div>
 </div>
 </section>
-<section id="inspect-provenance-in-metadata" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="inspect-provenance-in-metadata"><span class="header-section-number">2</span> Inspect provenance in metadata</h2>
-<div id="bcae1fa9" class="cell" data-execution_count="2">
+<section id="check-component-metadata" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="check-component-metadata"><span class="header-section-number">2</span> Check component metadata</h2>
+<div id="34b6db7c" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>outcome_metadata <span class="op">=</span> panel.metadata[<span class="st">&quot;outcome&quot;</span>]</span>
@@ -5257,12 +5257,12 @@ Y(0)
 dict_keys([&#39;model&#39;, &#39;kind&#39;, &#39;components&#39;])</code></pre>
 </div>
 </div>
-<p>The outer model is a sum. Its metadata preserves the component results so an experiment can verify which structure was active.</p>
+<p>The sum model stores each component’s output in metadata, so the experiment can check which structures were active.</p>
 </section>
 <section id="vary-one-component-at-a-time" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="vary-one-component-at-a-time"><span class="header-section-number">3</span> Vary one component at a time</h2>
 <p>Use ablations before interpreting a result from the full mixture.</p>
-<div id="bdef66f0" class="cell" data-execution_count="3">
+<div id="0928e4de" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>factor_only <span class="op">=</span> designs.GSynthCompositeConfig(</span>
@@ -5330,7 +5330,7 @@ Figure 1: Observed outcomes for the full composite benchmark and two single-com
 </section>
 <section id="why-this-is-not-the-first-benchmark" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="why-this-is-not-the-first-benchmark"><span class="header-section-number">4</span> Why this is not the first benchmark</h2>
-<p>A composite law is useful late in a validation sequence. It is hard to diagnose first. Start with the <a href="../canonical-designs.html">canonical designs</a>, then add one complication at a time:</p>
+<p>A composite design is useful only after simpler cases have been checked. Start with the <a href="../canonical-designs.html">canonical designs</a>, then add one complication at a time:</p>
 <ol type="1">
 <li>two-way fixed effects;</li>
 <li>one strong factor;</li>

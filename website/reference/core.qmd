@@ -1,6 +1,6 @@
 ---
 title: "Core API"
-description: "Simulation contracts, data, truth, random streams, and orchestration."
+description: "Simulation classes, stored data, known effects, and random streams."
 jupyter: python3
 ---
 
@@ -114,7 +114,7 @@ print(inspect.signature(core.PanelDataset))
 
 All matrices are read-only and have the same `(unit, time)` shape.
 
-| Field | Invariant |
+| Field | Required property |
 |---|---|
 | `outcome` | equals `untreated_outcome + treatment_effect` |
 | `treatment` | contains only zero and one |

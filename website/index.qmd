@@ -12,7 +12,7 @@ This separation answers the questions that matter in a simulation study:
 
 - What information does the estimator observe?
 - Why does a unit receive treatment?
-- What is the untreated outcome law?
+- What process generates untreated outcomes?
 - Which causal effect is the estimator trying to recover?
 
 ## Install
@@ -41,8 +41,8 @@ $$
 Y_{it} = Y_{it}(0) + D_{it}\tau_{it}.
 $$
 
-The container stores all three terms. It also stores the complete effect
-surface $\tau_{it}$, including cells that were not treated.
+The result stores all three terms. It also stores $\tau_{it}$ for every cell,
+including cells that were not treated.
 
 ## Build a design
 
@@ -69,25 +69,25 @@ custom_panel = simulator.simulate(seed=42)
 print(custom_panel.metadata["outcome"]["model"])
 ```
 
-This is the main composition interface. Two-way fixed effects and low-rank
-factor models are ordinary outcome primitives. Neither is a special estimator
-mode.
+This is the main way to build a simulation. Two-way fixed effects and low-rank
+factors are ordinary outcome models, so they can be combined with other
+components.
 
 ## Choose the next page
 
 | Goal | Page |
 |---|---|
 | Run and inspect one simulation | [Get started](getting-started.qmd) |
-| Understand the component boundary | [Architecture](architecture.md) |
+| Understand how a simulation runs | [How simulation works](architecture.md) |
 | Specify who receives treatment | [Assignment](assignment.qmd) |
 | Select a standard benchmark | [Design catalog](canonical-designs.qmd) |
 | Select a research-motivated design | [Research designs](research-designs.qmd) |
-| Send data to an estimator | [Export and interoperability](interoperability.qmd) |
+| Send data to an estimator | [Export to other tools](interoperability.qmd) |
 | Find a class or function | [API map](api.qmd) |
 
-## Package boundary
+## What the package includes
 
-`pypanelsim` owns simulation components, causal truth, validated data, and
-export adapters. Estimators, Monte Carlo runners, cached results, and paper
-reports remain outside the package. This keeps the simulation contract usable
-with any estimator library.
+`pypanelsim` provides simulation components, known causal effects, checked
+output, and export helpers. Estimators, experiment runners, saved results, and
+paper builds belong in the analysis that uses the package. The same simulated
+panel can therefore be passed to any estimator library.

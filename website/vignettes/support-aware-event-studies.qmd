@@ -4,9 +4,8 @@ description: "Use Lepskii-style designs to separate pooling structure from calen
 jupyter: python3
 ---
 
-This family adapts an unpublished working-paper design for adaptive partial
-pooling across staggered-adoption cohorts. It is documented as a working design,
-not as a published-paper reproduction.
+The partial-pooling family adapts an ongoing working-paper design for pooling
+across staggered-adoption cohorts. Names and details may change with that work.
 
 ## Scientific question
 
@@ -27,7 +26,7 @@ from pypanelsim import designs
 print(designs.available_lepskii_designs())
 ```
 
-## Panel law
+## Panel design
 
 The default panel has 1,200 units, 36 periods, and nine adoption cohorts. The
 untreated outcome combines unit effects, time effects, periodic time terms,

@@ -5,8 +5,8 @@ jupyter: python3
 ---
 
 Most code should call an explicit design constructor. Use `DGPRegistry` when an
-experiment reads design names from configuration or when a downstream project
-maintains its own design catalog.
+experiment reads design names from configuration or a separate project keeps
+its own design catalog.
 
 ```{python}
 import inspect
@@ -60,8 +60,8 @@ raises a key error that lists the available names.
 
 ## Keep registries local
 
-Do not add every paper-specific experiment to the package-wide namespace.
-Downstream projects can define a registry near their experiment configuration:
+Do not add every paper-specific experiment to the public package. A project can
+define a registry next to its experiment configuration:
 
 ```python
 EXPERIMENTS = core.DGPRegistry()
@@ -70,5 +70,4 @@ EXPERIMENTS.register("main_power", make_main_power)
 ```
 
 The functions remain ordinary Python and can be tested directly. The registry
-adds name-based dispatch; it does not replace documentation of the scientific
-law.
+adds lookup by name; it does not explain the scientific design.

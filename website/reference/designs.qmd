@@ -1,6 +1,6 @@
 ---
 title: "Design API"
-description: "Configured benchmark and research design families."
+description: "Ready-made benchmark and research designs."
 jupyter: python3
 ---
 
@@ -84,7 +84,7 @@ show((
 
 The configuration controls nine default adoption cohorts, cohort shares,
 fixed-effect scales, two-way error correlation, and periodic time terms. The
-named variant controls only the cohort-event effect surface.
+named variant controls only the cohort-event effect pattern.
 
 ## Conditional and latent trend designs
 

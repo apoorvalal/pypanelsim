@@ -4,13 +4,13 @@ description: "Choose randomized, selected, or fixed treatment timing."
 jupyter: python3
 ---
 
-Assignment is a separate probability law. It receives panel dimensions and,
-when present, observed and latent unit features. It returns an $N \times T$
-binary treatment matrix.
+The assignment model decides which units receive treatment and when. It can use
+panel dimensions, observed features, and latent features. Its output is an
+$N \times T$ binary treatment matrix.
 
 ## Choose an assignment family
 
-| Scientific design | Primitive | Main inputs |
+| Scientific design | Class | Main inputs |
 |---|---|---|
 | One fixed treated cohort | `SingleCohortAssignment` | treated unit positions, adoption period |
 | One randomized cohort | `RandomizedSingleCohortAssignment` | cohort size, adoption period |
@@ -26,8 +26,8 @@ assumptions. Use fixed assignment to reproduce a specific schedule.
 
 ## Common simulation components
 
-The examples below share the same features, untreated outcome, and treatment
-effect. Only the assignment law changes.
+The examples below share the same features, untreated outcomes, and treatment
+effects. Only assignment changes.
 
 ```{python}
 import matplotlib.pyplot as plt
@@ -99,7 +99,7 @@ staggered = make_simulator(
 print(sorted(set(staggered.adoption_times[staggered.ever_treated])))
 ```
 
-These laws sample without replacement. Any unit not sampled is never treated.
+These classes sample without replacement. Any unit not sampled is never treated.
 
 ## Selection with a binary logit
 
@@ -160,12 +160,12 @@ The selected category is stored as the unit annotation
 
 ## Visual comparison
 
-The following panels use the same feature and outcome laws. Their treatment
+The following panels use the same feature and outcome models. Their treatment
 patterns differ because assignment changes.
 
 ```{python}
 #| label: fig-assignment-comparison
-#| fig-cap: "A common outcome law under randomized, selected, and staggered treatment assignment."
+#| fig-cap: "A common outcome model under randomized, selected, and staggered treatment assignment."
 #| fig-alt: "Four pairs of heatmaps compare outcomes and treatment under randomized, observed selection, latent selection, and staggered assignment."
 
 assignment_panels = {
@@ -203,8 +203,8 @@ plt.show()
 ## Unit-time effect heterogeneity
 
 An effect callable receives the same observed, latent, and time features as the
-other components. It returns the complete effect surface. The simulator masks
-that surface by realized treatment.
+other components. It returns the potential effect for every cell. The simulator
+sets the realized effect to zero outside treated cells.
 
 ```{python}
 heterogeneous_simulator = core.PanelSimulator(
@@ -237,7 +237,7 @@ heterogeneous_panel = heterogeneous_simulator.simulate(seed=42)
 
 order = np.argsort(heterogeneous_panel.effect_surface.mean(axis=1), kind="stable")
 figure, axes = plt.subplots(1, 3, figsize=(14, 4.5), constrained_layout=True)
-surfaces = (
+plot_panels = (
     (heterogeneous_panel.outcome, "Observed outcome", "coolwarm", None, None),
     (heterogeneous_panel.treatment, "Treatment", "Greys", 0.0, 1.0),
     (
@@ -250,7 +250,7 @@ surfaces = (
 )
 for axis, (values, title, color_map, lower, upper) in zip(
     axes,
-    surfaces,
+    plot_panels,
     strict=True,
 ):
     image = axis.matshow(
@@ -276,8 +276,8 @@ print(selected.metadata["assignment"]["model"])
 print(selected.unit_annotations.keys())
 ```
 
-Use metadata for audit and diagnostics. Do not infer a study's identifying
-assumption from a design name alone. State whether assignment is random,
-observed-feature dependent, or latent-feature dependent in each experiment.
+Metadata records what the assignment step drew. A design name alone does not
+state an identifying assumption. Report whether assignment is random, depends
+on observed features, or depends on latent features.
 
-See the [primitive API](reference/primitives.qmd) for parameter definitions.
+See the [building-block API](reference/primitives.qmd) for parameter definitions.

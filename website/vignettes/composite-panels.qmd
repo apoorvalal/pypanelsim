@@ -50,7 +50,7 @@ print(panel.shape)
 print(round(panel.true_att, 3))
 ```
 
-## Inspect provenance in metadata
+## Check component metadata
 
 ```{python}
 outcome_metadata = panel.metadata["outcome"]
@@ -58,8 +58,8 @@ print(outcome_metadata["model"])
 print(outcome_metadata.keys())
 ```
 
-The outer model is a sum. Its metadata preserves the component results so an
-experiment can verify which structure was active.
+The sum model stores each component's output in metadata, so the experiment can
+check which structures were active.
 
 ## Vary one component at a time
 
@@ -120,9 +120,9 @@ ablation has a more specific problem.
 
 ## Why this is not the first benchmark
 
-A composite law is useful late in a validation sequence. It is hard to diagnose
-first. Start with the [canonical designs](../canonical-designs.qmd), then add
-one complication at a time:
+A composite design is useful only after simpler cases have been checked. Start
+with the [canonical designs](../canonical-designs.qmd), then add one complication
+at a time:
 
 1. two-way fixed effects;
 2. one strong factor;

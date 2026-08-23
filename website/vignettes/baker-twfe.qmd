@@ -4,7 +4,7 @@ description: "See why one TWFE coefficient need not equal the treated-cell ATT."
 jupyter: python3
 ---
 
-This tutorial translates the public simulation in Andrew Baker's
+The tutorial translates the public simulation in Andrew Baker's
 [JFE_DID](https://github.com/andrewchbaker/JFE_DID) repository. It shows a
 specific problem: staggered adoption and cohort-specific dynamic effects can
 make a two-way fixed-effects coefficient differ from a natural average effect.
@@ -85,8 +85,8 @@ The treated-cell ATT gives each observed treated cell equal weight:
 print("true treated-cell ATT:", round(panel.true_att, 4))
 ```
 
-It is available without fitting an estimator because the simulation stores the
-full causal decomposition.
+It is available without fitting an estimator because the simulation stores
+$Y(0)$ and the realized treatment effect.
 
 ## The TWFE coefficient
 
@@ -124,13 +124,13 @@ print("true treated-cell ATT:", round(panel.true_att, 4))
 print("difference:", round(twfe - panel.true_att, 4))
 ```
 
-The difference is not a software error. The regression coefficient uses the
-residualized treatment as its weighting object. With staggered adoption,
+The difference is not a software error. The regression coefficient weights
+cells by residualized treatment. With staggered adoption,
 already-treated cohorts can act as comparisons for later cohorts. Dynamic and
 cohort-varying effects then enter with weights that do not match treated-cell
 ATT weights.
 
-## Inspect cohort-event truth
+## Inspect cohort-event effects
 
 ```{python}
 cohort_truth = panel.truth.cohort_event(event_times=range(0, 8))
@@ -187,7 +187,7 @@ than sampling variation.
 
 ## What this design does not prove
 
-One simulation does not show that TWFE always fails. It shows a transparent
-case where its coefficient and a common ATT target differ. Change effect slopes,
+One simulation does not show that TWFE always fails. It shows a case where its
+coefficient and a common ATT target differ. Change effect slopes,
 cohort sizes, timing, and noise across replications before making a performance
 claim about an estimator.

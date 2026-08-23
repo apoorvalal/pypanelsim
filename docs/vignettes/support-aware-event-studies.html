@@ -5004,7 +5004,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../architecture.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Architecture and data contract</span></a>
+ <span class="menu-text">How simulation works</span></a>
   </div>
 </li>
       </ul>
@@ -5039,7 +5039,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../interoperability.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Export and interoperability</span></a>
+ <span class="menu-text">Export to other tools</span></a>
   </div>
 </li>
       </ul>
@@ -5121,7 +5121,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../reference/primitives.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Primitive API</span></a>
+ <span class="menu-text">Building-block API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -5150,7 +5150,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../validation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Validation and provenance</span></a>
+ <span class="menu-text">Tests and sources</span></a>
   </div>
 </li>
       </ul>
@@ -5166,7 +5166,7 @@ height: auto;
    
   <ul>
   <li><a href="#scientific-question" id="toc-scientific-question" class="nav-link active" data-scroll-target="#scientific-question"><span class="header-section-number">1</span> Scientific question</a></li>
-  <li><a href="#panel-law" id="toc-panel-law" class="nav-link" data-scroll-target="#panel-law"><span class="header-section-number">2</span> Panel law</a></li>
+  <li><a href="#panel-design" id="toc-panel-design" class="nav-link" data-scroll-target="#panel-design"><span class="header-section-number">2</span> Panel design</a></li>
   <li><a href="#compare-pooling-structures" id="toc-compare-pooling-structures" class="nav-link" data-scroll-target="#compare-pooling-structures"><span class="header-section-number">3</span> Compare pooling structures</a></li>
   <li><a href="#run-a-tensor-block-design" id="toc-run-a-tensor-block-design" class="nav-link" data-scroll-target="#run-a-tensor-block-design"><span class="header-section-number">4</span> Run a tensor-block design</a></li>
   <li><a href="#cohort-paths-and-calendar-support" id="toc-cohort-paths-and-calendar-support" class="nav-link" data-scroll-target="#cohort-paths-and-calendar-support"><span class="header-section-number">5</span> Cohort paths and calendar support</a></li>
@@ -5203,7 +5203,7 @@ height: auto;
 </header>
 
 
-<p>This family adapts an unpublished working-paper design for adaptive partial pooling across staggered-adoption cohorts. It is documented as a working design, not as a published-paper reproduction.</p>
+<p>The partial-pooling family adapts an ongoing working-paper design for pooling across staggered-adoption cohorts. Names and details may change with that work.</p>
 <section id="scientific-question" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="scientific-question"><span class="header-section-number">1</span> Scientific question</h2>
 <p>An event-study estimator faces two distinct problems:</p>
@@ -5212,7 +5212,7 @@ height: auto;
 <li>A cohort-event comparison can fall outside the observed calendar.</li>
 </ol>
 <p>Pooling can reduce variance when cohort paths are similar. It can add bias when they differ. No amount of pooling creates a missing calendar-time observation.</p>
-<div id="581c1b29" class="cell" data-execution_count="1">
+<div id="5e8de016" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -5227,8 +5227,8 @@ height: auto;
 </div>
 </div>
 </section>
-<section id="panel-law" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="panel-law"><span class="header-section-number">2</span> Panel law</h2>
+<section id="panel-design" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="panel-design"><span class="header-section-number">2</span> Panel design</h2>
 <p>The default panel has 1,200 units, 36 periods, and nine adoption cohorts. The untreated outcome combines unit effects, time effects, periodic time terms, and errors correlated across units and time.</p>
 <p>Each named variant changes only the cohort-specific effect paths. The variants cover:</p>
 <ul>
@@ -5242,7 +5242,7 @@ height: auto;
 </section>
 <section id="compare-pooling-structures" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="compare-pooling-structures"><span class="header-section-number">3</span> Compare pooling structures</h2>
-<div id="1459a082" class="cell" data-execution_count="2">
+<div id="106c5263" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>config <span class="op">=</span> designs.LepskiiPanelConfig(n_units<span class="op">=</span><span class="dv">360</span>)</span>
@@ -5266,7 +5266,7 @@ no_pool_signed_paths [0.   0.4  0.71 0.95 1.14 1.28]</code></pre>
 </section>
 <section id="run-a-tensor-block-design" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="run-a-tensor-block-design"><span class="header-section-number">4</span> Run a tensor-block design</h2>
-<div id="c13430e1" class="cell" data-execution_count="3">
+<div id="4844efe8" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> designs.lepskii(</span>
@@ -5338,7 +5338,7 @@ Figure 1: Cohort effect paths and the calendar-time support mask for a tensor-b
 <section id="track-support-explicitly" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="track-support-explicitly"><span class="header-section-number">6</span> Track support explicitly</h2>
 <p>For cohort <span class="math inline">\(g\)</span> and event time <span class="math inline">\(e\)</span>, the calendar period is <span class="math inline">\(t=g+e\)</span>. The cell is supported only when <span class="math inline">\(0\le t&lt;T\)</span>.</p>
-<div id="a6a051a3" class="cell" data-execution_count="5">
+<div id="a8445e08" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>cells <span class="op">=</span> panel.truth.cohort_event(event_times<span class="op">=</span>(<span class="op">-</span><span class="dv">12</span>, <span class="op">-</span><span class="dv">4</span>, <span class="dv">0</span>, <span class="dv">4</span>, <span class="dv">12</span>, <span class="dv">20</span>))</span>
@@ -5371,7 +5371,7 @@ cohort 24 events [-12  -4   0   4  12  20] support [ True  True  True  True Fals
 <section id="define-the-event-time-target" class="level2" data-number="7">
 <h2 data-number="7" class="anchored" data-anchor-id="define-the-event-time-target"><span class="header-section-number">7</span> Define the event-time target</h2>
 <p>At a fixed event time, different cohorts can contribute because of calendar support. The target population therefore changes with event time.</p>
-<div id="f19aeaf5" class="cell" data-execution_count="6">
+<div id="152cfc63" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>size_weighted <span class="op">=</span> panel.truth.event_study(</span>

@@ -6,9 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="What package checks establish and how research translations are classified.">
+<meta name="description" content="See what the automated checks cover and where the research designs come from.">
 
-<title>Validation and provenance – pypanelsim</title>
+<title>Tests and sources – pypanelsim</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -4829,7 +4829,7 @@ height: auto;
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./validation.html">Validation</a></li><li class="breadcrumb-item"><a href="./validation.html">Validation and provenance</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./validation.html">Validation</a></li><li class="breadcrumb-item"><a href="./validation.html">Tests and sources</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -4865,7 +4865,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./architecture.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Architecture and data contract</span></a>
+ <span class="menu-text">How simulation works</span></a>
   </div>
 </li>
       </ul>
@@ -4900,7 +4900,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./interoperability.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Export and interoperability</span></a>
+ <span class="menu-text">Export to other tools</span></a>
   </div>
 </li>
       </ul>
@@ -4982,7 +4982,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./reference/primitives.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Primitive API</span></a>
+ <span class="menu-text">Building-block API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -5011,7 +5011,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./validation.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Validation and provenance</span></a>
+ <span class="menu-text">Tests and sources</span></a>
   </div>
 </li>
       </ul>
@@ -5026,15 +5026,15 @@ height: auto;
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#validation-layers" id="toc-validation-layers" class="nav-link active" data-scroll-target="#validation-layers"><span class="header-section-number">1</span> Validation layers</a>
+  <li><a href="#automated-checks" id="toc-automated-checks" class="nav-link active" data-scroll-target="#automated-checks"><span class="header-section-number">1</span> Automated checks</a>
   <ul class="collapse">
-  <li><a href="#contract-tests" id="toc-contract-tests" class="nav-link" data-scroll-target="#contract-tests"><span class="header-section-number">1.1</span> Contract tests</a></li>
-  <li><a href="#design-tests" id="toc-design-tests" class="nav-link" data-scroll-target="#design-tests"><span class="header-section-number">1.2</span> Design tests</a></li>
-  <li><a href="#artifact-tests" id="toc-artifact-tests" class="nav-link" data-scroll-target="#artifact-tests"><span class="header-section-number">1.3</span> Artifact tests</a></li>
+  <li><a href="#unit-tests" id="toc-unit-tests" class="nav-link" data-scroll-target="#unit-tests"><span class="header-section-number">1.1</span> Unit tests</a></li>
+  <li><a href="#ready-made-designs" id="toc-ready-made-designs" class="nav-link" data-scroll-target="#ready-made-designs"><span class="header-section-number">1.2</span> Ready-made designs</a></li>
+  <li><a href="#built-packages" id="toc-built-packages" class="nav-link" data-scroll-target="#built-packages"><span class="header-section-number">1.3</span> Built packages</a></li>
   </ul></li>
   <li><a href="#standard-commands" id="toc-standard-commands" class="nav-link" data-scroll-target="#standard-commands"><span class="header-section-number">2</span> Standard commands</a></li>
-  <li><a href="#cross-language-validation" id="toc-cross-language-validation" class="nav-link" data-scroll-target="#cross-language-validation"><span class="header-section-number">3</span> Cross-language validation</a></li>
-  <li><a href="#provenance-labels" id="toc-provenance-labels" class="nav-link" data-scroll-target="#provenance-labels"><span class="header-section-number">4</span> Provenance labels</a></li>
+  <li><a href="#r-and-python-comparison" id="toc-r-and-python-comparison" class="nav-link" data-scroll-target="#r-and-python-comparison"><span class="header-section-number">3</span> R and Python comparison</a></li>
+  <li><a href="#design-sources" id="toc-design-sources" class="nav-link" data-scroll-target="#design-sources"><span class="header-section-number">4</span> Design sources</a></li>
   <li><a href="#sources" id="toc-sources" class="nav-link" data-scroll-target="#sources"><span class="header-section-number">5</span> Sources</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/website/validation.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
@@ -5042,14 +5042,14 @@ height: auto;
 <!-- main -->
 <main class="content column-body" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./validation.html">Validation</a></li><li class="breadcrumb-item"><a href="./validation.html">Validation and provenance</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./validation.html">Validation</a></li><li class="breadcrumb-item"><a href="./validation.html">Tests and sources</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Validation and provenance</h1>
+<h1 class="title">Tests and sources</h1>
 </div>
 
 <div>
   <div class="description">
-    What package checks establish and how research translations are classified.
+    See what the automated checks cover and where the research designs come from.
   </div>
 </div>
 
@@ -5066,19 +5066,19 @@ height: auto;
 </header>
 
 
-<section id="validation-layers" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="validation-layers"><span class="header-section-number">1</span> Validation layers</h2>
-<p>The repository uses three layers of checks.</p>
-<section id="contract-tests" class="level3" data-number="1.1">
-<h3 data-number="1.1" class="anchored" data-anchor-id="contract-tests"><span class="header-section-number">1.1</span> Contract tests</h3>
-<p>Unit tests check component shapes, binary and absorbing treatment, immutable arrays, effect-surface identities, event-time support, annotations, and random stream behavior.</p>
+<section id="automated-checks" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="automated-checks"><span class="header-section-number">1</span> Automated checks</h2>
+<p>The repository checks three things.</p>
+<section id="unit-tests" class="level3" data-number="1.1">
+<h3 data-number="1.1" class="anchored" data-anchor-id="unit-tests"><span class="header-section-number">1.1</span> Unit tests</h3>
+<p>Unit tests check component shapes, binary and absorbing treatment, immutable arrays, treatment-effect identities, event-time support, annotations, and random stream behavior.</p>
 </section>
-<section id="design-tests" class="level3" data-number="1.2">
-<h3 data-number="1.2" class="anchored" data-anchor-id="design-tests"><span class="header-section-number">1.2</span> Design tests</h3>
-<p>Every named design is constructed and simulated. Tests also cover invalid configurations and public namespace aliases.</p>
+<section id="ready-made-designs" class="level3" data-number="1.2">
+<h3 data-number="1.2" class="anchored" data-anchor-id="ready-made-designs"><span class="header-section-number">1.2</span> Ready-made designs</h3>
+<p>Every named design is constructed and simulated. Tests also cover invalid configurations and public imports.</p>
 </section>
-<section id="artifact-tests" class="level3" data-number="1.3">
-<h3 data-number="1.3" class="anchored" data-anchor-id="artifact-tests"><span class="header-section-number">1.3</span> Artifact tests</h3>
+<section id="built-packages" class="level3" data-number="1.3">
+<h3 data-number="1.3" class="anchored" data-anchor-id="built-packages"><span class="header-section-number">1.3</span> Built packages</h3>
 <p>The wheel is built and installed into a fresh environment. A smoke test imports <code>core</code>, <code>primitives</code>, and <code>designs</code>, then creates and exports a panel.</p>
 </section>
 </section>
@@ -5090,21 +5090,15 @@ height: auto;
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run pytest</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run quarto render website <span class="at">--execute</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> build</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The exact commands that pass for a release should appear in its release or CI record. This page describes the required classes of checks; it is not a live CI status badge.</p>
+<p>Release notes or CI should record the exact commands that passed.</p>
 </section>
-<section id="cross-language-validation" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="cross-language-validation"><span class="header-section-number">3</span> Cross-language validation</h2>
+<section id="r-and-python-comparison" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="r-and-python-comparison"><span class="header-section-number">3</span> R and Python comparison</h2>
 <p>R and NumPy do not share seeded random streams. The <a href="./vignettes/balancing-reproduction.html">balancing validation snapshot</a> therefore compares Monte Carlo RMSE values relative to their combined Monte Carlo standard errors. It does not claim matched R and Python draws.</p>
 </section>
-<section id="provenance-labels" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="provenance-labels"><span class="header-section-number">4</span> Provenance labels</h2>
-<p>Research pages use three labels:</p>
-<ul>
-<li><strong>Public translation:</strong> a design follows a cited public repository or paper.</li>
-<li><strong>Working design:</strong> a design adapts an unpublished research specification and can change as that work develops.</li>
-<li><strong>Package benchmark:</strong> maintainers assembled the law to test software or an estimator; it is not attributed to a paper.</li>
-</ul>
-<p>These labels prevent a constructor name from making a stronger provenance claim than the evidence supports.</p>
+<section id="design-sources" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="design-sources"><span class="header-section-number">4</span> Design sources</h2>
+<p>Some designs follow public code or a paper. Others adapt ongoing work, and the composite design was made only to test the package. Each page states the origin next to the relevant source.</p>
 </section>
 <section id="sources" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="sources"><span class="header-section-number">5</span> Sources</h2>

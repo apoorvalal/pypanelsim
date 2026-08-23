@@ -1,12 +1,12 @@
 ---
-title: "Export and interoperability"
-description: "Use one immutable panel with matrix, data-frame, formula, Arrow, or R estimators."
+title: "Export to other tools"
+description: "Send one read-only panel to matrix, data-frame, formula, Arrow, or R estimators."
 jupyter: python3
 ---
 
 `pypanelsim` does not require an estimator library. It returns NumPy arrays and
-a dependency-free long-column mapping. Convert that mapping at the boundary of
-your analysis.
+a plain mapping of long-form columns. Convert those columns only when another
+tool needs a specific data-frame type.
 
 ```{python}
 from pypanelsim import designs
@@ -24,8 +24,8 @@ outcome, treatment = panel.as_arrays()
 print(outcome.shape, treatment.shape)
 ```
 
-Use `arrays()` when the estimator also needs untreated truth or the effect
-surface.
+Use `arrays()` when the estimator also needs untreated outcomes or potential
+effects.
 
 ```{python}
 y, d, y0, tau = panel.arrays(
@@ -86,7 +86,7 @@ table = pa.table(panel.as_long_dict(include_annotations=True))
 pq.write_table(table, "simulation.parquet")
 ```
 
-Parquet is a useful interchange format because it preserves typed columns and
+Parquet is useful because it preserves typed columns and
 can be read by Python, R, Julia, DuckDB, and other systems.
 
 ## R
@@ -125,9 +125,9 @@ def fit_matrix_estimator(panel, estimator):
     return estimator.fit(outcome=outcome, treatment=treatment)
 ```
 
-An adapter may reshape data or rename columns. It should not change the DGP or
-recompute causal truth. This boundary lets several estimators use the same
-panel object.
+An adapter may reshape data or rename columns. It should not change the
+simulated values or recompute known effects. Several estimators can then use
+the same panel.
 
 ## Repeated experiments
 
@@ -150,5 +150,5 @@ for replication, draw in enumerate(
 print(pd.DataFrame(records))
 ```
 
-Store small estimator summaries in the experiment project. Do not add Monte
-Carlo result caches to the simulation package.
+Store estimator summaries with the experiment that produced them, not in the
+simulation package.

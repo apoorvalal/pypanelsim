@@ -4865,7 +4865,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../architecture.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Architecture and data contract</span></a>
+ <span class="menu-text">How simulation works</span></a>
   </div>
 </li>
       </ul>
@@ -4900,7 +4900,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../interoperability.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Export and interoperability</span></a>
+ <span class="menu-text">Export to other tools</span></a>
   </div>
 </li>
       </ul>
@@ -4982,7 +4982,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../reference/primitives.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Primitive API</span></a>
+ <span class="menu-text">Building-block API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -5011,7 +5011,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../validation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Validation and provenance</span></a>
+ <span class="menu-text">Tests and sources</span></a>
   </div>
 </li>
       </ul>
@@ -5059,8 +5059,8 @@ height: auto;
 </header>
 
 
-<p>Most code should call an explicit design constructor. Use <code>DGPRegistry</code> when an experiment reads design names from configuration or when a downstream project maintains its own design catalog.</p>
-<div id="08998382" class="cell" data-execution_count="1">
+<p>Most code should call an explicit design constructor. Use <code>DGPRegistry</code> when an experiment reads design names from configuration or a separate project keeps its own design catalog.</p>
+<div id="18becb04" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> inspect</span>
@@ -5081,7 +5081,7 @@ names (self) -&gt; &#39;tuple[str, ...]&#39;</code></pre>
 <section id="register-a-factory" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="register-a-factory"><span class="header-section-number">1</span> Register a factory</h2>
 <p>A factory must return a <code>PanelSimulator</code>.</p>
-<div id="5b3f3fad" class="cell" data-execution_count="2">
+<div id="f8a07c3e" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>registry <span class="op">=</span> core.DGPRegistry()</span>
@@ -5109,7 +5109,7 @@ names (self) -&gt; &#39;tuple[str, ...]&#39;</code></pre>
 </section>
 <section id="create-and-simulate" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="create-and-simulate"><span class="header-section-number">2</span> Create and simulate</h2>
-<div id="59c84276" class="cell" data-execution_count="3">
+<div id="f9db4c9b" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>simulator <span class="op">=</span> registry.create(<span class="st">&quot;classic_small&quot;</span>, overlap<span class="op">=</span><span class="fl">1.0</span>)</span>
@@ -5127,11 +5127,11 @@ names (self) -&gt; &#39;tuple[str, ...]&#39;</code></pre>
 </section>
 <section id="keep-registries-local" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="keep-registries-local"><span class="header-section-number">3</span> Keep registries local</h2>
-<p>Do not add every paper-specific experiment to the package-wide namespace. Downstream projects can define a registry near their experiment configuration:</p>
+<p>Do not add every paper-specific experiment to the public package. A project can define a registry next to its experiment configuration:</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>EXPERIMENTS <span class="op">=</span> core.DGPRegistry()</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>EXPERIMENTS.register(<span class="st">&quot;main_null&quot;</span>, make_main_null)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>EXPERIMENTS.register(<span class="st">&quot;main_power&quot;</span>, make_main_power)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The functions remain ordinary Python and can be tested directly. The registry adds name-based dispatch; it does not replace documentation of the scientific law.</p>
+<p>The functions remain ordinary Python and can be tested directly. The registry adds lookup by name; it does not explain the scientific design.</p>
 
 
 </section>

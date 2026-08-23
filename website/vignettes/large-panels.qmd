@@ -4,12 +4,12 @@ description: "Test whether small regression summaries preserve a large longitudi
 jupyter: python3
 ---
 
-This family is connected to [Large Scale Longitudinal
+These simulations follow [Large Scale Longitudinal
 Experiments](https://arxiv.org/abs/2410.09952) by Apoorva Lal, Alexander
 Fischer, and Matthew Wardrop, with [public
-code](https://github.com/py-econometrics/panel-at-scale-code). It supplies
-panel laws for studying regression compression. It does not implement a data
-storage system or a distributed estimator.
+code](https://github.com/py-econometrics/panel-at-scale-code). The simulations
+test regression compression under several panel structures; storage and
+distributed estimation are outside this example.
 
 ## Scientific question
 
@@ -25,7 +25,7 @@ import numpy as np
 from pypanelsim import designs
 ```
 
-## Main panel law
+## Main panel design
 
 The untreated outcome contains unit effects, time effects, unit-specific linear
 trends, and AR(1) error. One cohort adopts treatment. The effect path can be
@@ -48,8 +48,8 @@ print(round(panel.true_att, 3))
 ```
 
 ```{python}
-#| label: fig-large-panel-law
-#| fig-cap: "Observed outcome structure and event-time causal truth in the regression-compression design."
+#| label: fig-large-panel-design
+#| fig-cap: "Observed outcomes and known event-time effects in the regression-compression design."
 #| fig-alt: "A heatmap shows the large panel's observed outcomes, and a line chart shows the true event-time effect path."
 
 order = np.argsort(panel.adoption_times, kind="stable")
@@ -75,7 +75,7 @@ axes[1].axhline(0.0, color="black", linewidth=0.7)
 axes[1].axvline(-0.5, color="grey", linestyle=":", linewidth=0.8)
 axes[1].set_xlabel("event time")
 axes[1].set_ylabel("true effect")
-axes[1].set_title("Supported event-study truth")
+axes[1].set_title("Known event-study effects")
 plt.show()
 ```
 
@@ -163,9 +163,9 @@ for name in designs.available_anscombe_designs():
 ```
 
 ```{python}
-#| label: fig-anscombe-surfaces
-#| fig-cap: "Treatment-effect surfaces for the four Anscombe-style panel variants."
-#| fig-alt: "Four heatmaps compare treatment-effect surfaces that share summary features but have different structures."
+#| label: fig-anscombe-effects
+#| fig-cap: "Treatment effects for the four Anscombe-style panel variants."
+#| fig-alt: "Four heatmaps compare treatment effects that share summary features but have different structures."
 
 figure, axes = plt.subplots(2, 2, figsize=(11, 8), constrained_layout=True)
 for axis, name in zip(
@@ -189,7 +189,7 @@ heterogeneity at different levels.
 
 A compression experiment should report both layers:
 
-- the causal design: assignment, untreated outcome, effect surface, and target;
+- the causal design: assignment, untreated outcomes, potential effects, and target;
 - the transmitted summary: regressors, sufficient statistics, grouping, and
   numeric precision.
 

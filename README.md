@@ -1,7 +1,7 @@
 # pypanelsim
 
-`pypanelsim` builds synthetic panel data with explicit treatment assignment,
-untreated outcomes, treatment effects, and causal truth. It is an
+`pypanelsim` builds synthetic panel data with separate treatment assignment,
+untreated outcomes, treatment effects, and known causal effects. It is an
 estimator-neutral simulation package: use the same generated panel with matrix,
 formula, pandas, Polars, Arrow, R, or custom estimators.
 
@@ -31,21 +31,21 @@ cd pypanelsim
 uv sync --extra docs
 ```
 
-## Public namespaces
+## Three modules
 
-The public API has three descriptive namespaces:
+The public API has three modules:
 
 - `pypanelsim.core` contains the simulator, data container, random streams, and
   component protocols.
 - `pypanelsim.primitives` contains reusable feature, assignment, outcome, and
-  effect laws.
-- `pypanelsim.designs` contains configured design families and direct simulation
+  effect models.
+- `pypanelsim.designs` contains ready-made design families and direct simulation
   functions.
 
-Old root-level imports remain available for compatibility. New code should use
-the descriptive namespaces.
+Root-level imports also work. The examples keep the module name because it
+shows where each object belongs.
 
-## Simulate a configured design
+## Simulate a ready-made design
 
 ```python
 from pypanelsim import designs
@@ -66,7 +66,7 @@ simulator = designs.classic_factor_design(overlap=1.0)
 panels = list(simulator.iter_simulations(100, seed=42))
 ```
 
-## Compose a design from primitives
+## Compose a design from building blocks
 
 This example combines two-way fixed effects and a low-rank factor structure in
 the untreated outcome:
@@ -101,7 +101,7 @@ simulator = core.PanelSimulator(
 panel = simulator.simulate(seed=42)
 ```
 
-## Data contract
+## Stored data
 
 All panel matrices have shape `(n_units, n_periods)`.
 
@@ -119,7 +119,7 @@ $$
 Y_{it} = Y_{it}(0) + D_{it}\tau_{it}.
 $$
 
-It also provides cohort and event-time truth, unit and time identifiers,
+It also provides known cohort and event-time effects, unit and time identifiers,
 annotations, covariates, and conversion helpers:
 
 ```python
@@ -166,14 +166,14 @@ panel = simulator.simulate(streams=core.SimulationSeeds.from_seed(42))
 
 ## Scope
 
-`pypanelsim` owns simulation components, validated data, truth, and export
-adapters. It does not own estimators, Monte Carlo runners, result caches, or
-paper-specific reports. Keeping these concerns outside the package prevents an
-estimator dependency from defining the simulation interface.
+`pypanelsim` provides simulation components, checked output, known effects, and
+export helpers. Estimators, Monte Carlo runners, saved results, and paper builds
+belong in the analysis that uses the package. This keeps estimator dependencies
+out of the simulation code.
 
-## Scientific sources
+## Research sources
 
-Several configured families translate public research designs:
+Several ready-made families translate public research designs:
 
 - Baker's dynamic-treatment example: [JFE_DID](https://github.com/andrewchbaker/JFE_DID)
 - TWFE heterogeneity tests: [TestingInEventStudies](https://github.com/apoorvalal/TestingInEventStudies) and [the paper](https://arxiv.org/abs/2503.05125)

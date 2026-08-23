@@ -1,24 +1,24 @@
 ---
-title: "Validation and provenance"
-description: "What package checks establish and how research translations are classified."
+title: "Tests and sources"
+description: "See what the automated checks cover and where the research designs come from."
 ---
 
-## Validation layers
+## Automated checks
 
-The repository uses three layers of checks.
+The repository checks three things.
 
-### Contract tests
+### Unit tests
 
 Unit tests check component shapes, binary and absorbing treatment, immutable
-arrays, effect-surface identities, event-time support, annotations, and random
+arrays, treatment-effect identities, event-time support, annotations, and random
 stream behavior.
 
-### Design tests
+### Ready-made designs
 
 Every named design is constructed and simulated. Tests also cover invalid
-configurations and public namespace aliases.
+configurations and public imports.
 
-### Artifact tests
+### Built packages
 
 The wheel is built and installed into a fresh environment. A smoke test imports
 `core`, `primitives`, and `designs`, then creates and exports a panel.
@@ -34,29 +34,20 @@ uv run quarto render website --execute
 uv build
 ```
 
-The exact commands that pass for a release should appear in its release or CI
-record. This page describes the required classes of checks; it is not a live CI
-status badge.
+Release notes or CI should record the exact commands that passed.
 
-## Cross-language validation
+## R and Python comparison
 
 R and NumPy do not share seeded random streams. The [balancing validation
 snapshot](vignettes/balancing-reproduction.qmd) therefore compares Monte Carlo
 RMSE values relative to their combined Monte Carlo standard errors. It does not
 claim matched R and Python draws.
 
-## Provenance labels
+## Design sources
 
-Research pages use three labels:
-
-- **Public translation:** a design follows a cited public repository or paper.
-- **Working design:** a design adapts an unpublished research specification and
-  can change as that work develops.
-- **Package benchmark:** maintainers assembled the law to test software or an
-  estimator; it is not attributed to a paper.
-
-These labels prevent a constructor name from making a stronger provenance claim
-than the evidence supports.
+Some designs follow public code or a paper. Others adapt ongoing work, and the
+composite design was made only to test the package. Each page states the origin
+next to the relevant source.
 
 ## Sources
 

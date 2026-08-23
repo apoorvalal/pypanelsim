@@ -1,33 +1,33 @@
 ---
 title: "API map"
-description: "Find the public object by task and namespace."
+description: "Find a public class or function by task."
 ---
 
-New code should import one of three descriptive namespaces:
+Most code starts with one of three modules:
 
 ```python
 from pypanelsim import core, designs, primitives
 ```
 
-Root-level imports are available as conveniences. The documentation uses the
-namespaced form because it states each object's role.
+Root-level imports also work. The documentation keeps the module name because
+it shows what each object does.
 
 ## By task
 
 | Task | Start with | Reference |
 |---|---|---|
 | Define dimensions and compose a simulation | `core.PanelSimulator` | [Core](reference/core.qmd) |
-| Inspect arrays, identifiers, annotations, and truth | `core.PanelDataset` | [Core](reference/core.qmd) |
+| Inspect arrays, identifiers, annotations, and known effects | `core.PanelDataset` | [Core](reference/core.qmd) |
 | Make randomness stable by component | `core.SimulationSeeds` | [Core](reference/core.qmd) |
-| Choose a feature or assignment law | `primitives` | [Primitives](reference/primitives.qmd) |
-| Choose an untreated outcome law | `primitives` | [Primitives](reference/primitives.qmd) |
-| Choose a treatment-effect law | `primitives` | [Primitives](reference/primitives.qmd) |
-| Run a configured benchmark | `designs` | [Designs](reference/designs.qmd) |
+| Choose a feature or assignment model | `primitives` | [Building blocks](reference/primitives.qmd) |
+| Choose an untreated-outcome model | `primitives` | [Building blocks](reference/primitives.qmd) |
+| Choose a treatment-effect model | `primitives` | [Building blocks](reference/primitives.qmd) |
+| Run a ready-made design | `designs` | [Designs](reference/designs.qmd) |
 | Register local design factories | `core.DGPRegistry` | [Registry](reference/registry.qmd) |
 
 ## Constructor and direct-draw convention
 
-Configured families use two related functions:
+Ready-made families use two related functions:
 
 ```python
 simulator = designs.baker_design()
@@ -37,15 +37,15 @@ panel = designs.baker(seed=42)
 The `_design` function returns a reusable `PanelSimulator`. The shorter function
 runs one draw and returns a `PanelDataset`.
 
-## Stability policy
+## Supported imports
 
-The package treats `core`, `primitives`, and `designs` as the documented public
-surface. Objects imported from internal modules can change. Public names follow
-the package's release and deprecation policy.
+`core`, `primitives`, and `designs` form the documented public API. Objects
+imported from internal modules can change. Public names follow the package's
+release and deprecation policy.
 
 ## Error conventions
 
 Constructors validate configuration values at creation. Simulation validates
 drawn matrix shapes, finite values, binary treatment, and the causal identity.
 Errors identify the failed field or component. A component should not silently
-coerce an invalid probability law into a valid one.
+turn an invalid probability model into a valid one.

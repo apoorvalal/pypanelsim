@@ -1,6 +1,6 @@
 ---
-title: "Architecture and data contract"
-description: "The component sequence, public namespaces, validation rules, and package boundary."
+title: "How simulation works"
+description: "See the order of simulation steps, stored matrices, random streams, and extension points."
 ---
 
 ## The simulation sequence
@@ -11,15 +11,14 @@ A `PanelSimulator` evaluates components in this order:
 2. The assignment model draws the binary treatment matrix.
 3. The time-feature model draws shared time features, if present.
 4. The outcome model draws untreated outcomes.
-5. The effect model draws a complete effect surface and realized effects.
+5. The effect model draws potential effects for every cell and realized effects.
 6. The simulator validates and freezes the result.
 
-Later components can use earlier draws through typed contexts. For example, an
-outcome model can use both unit features and treatment timing. This permits
-selection on untreated trends. The package keeps that dependence visible in
-the component definition.
+Each step can use results from earlier steps. For example, an outcome model can
+use both unit features and treatment timing, which permits selection on
+untreated trends. The model definition makes that dependence explicit.
 
-## Three public namespaces
+## Three modules to remember
 
 Use imports that state what an object does:
 
@@ -27,17 +26,17 @@ Use imports that state what an object does:
 from pypanelsim import core, designs, primitives
 ```
 
-| Namespace | Contents | Typical use |
+| Module | Contents | Typical use |
 |---|---|---|
-| `core` | contracts, simulator, data, truth, random streams | compose and inspect simulations |
-| `primitives` | feature, assignment, outcome, and effect laws | build a DGP from parts |
-| `designs` | configured scientific and benchmark families | run a named design |
+| `core` | simulator, results, known effects, random streams | build and inspect simulations |
+| `primitives` | feature, assignment, outcome, and effect models | assemble a design from parts |
+| `designs` | ready-made scientific examples and benchmarks | run a named design |
 
-Root-level imports remain available for compatibility. New examples do not use
-them because a call such as `designs.baker(...)` or
-`primitives.LowRankFactorOutcome(...)` carries useful meaning.
+Root-level imports also work. The documentation uses module names because
+`designs.baker(...)` and `primitives.LowRankFactorOutcome(...)` show where each
+object belongs.
 
-## Core protocols
+## Write a custom component
 
 Each component satisfies a small protocol:
 
@@ -69,14 +68,14 @@ $$
 Y = Y(0) + D \odot \tau.
 $$
 
-It rejects non-finite values, incompatible shapes, non-binary treatment, a
+It rejects non-finite values, mismatched shapes, non-binary treatment, a
 realized effect outside treated cells, and a broken causal identity.
 
-## Immutable results
+## Read-only results
 
 `PanelDataset` copies its input arrays and marks them read-only. This prevents
-an estimator from changing the stored causal truth by accident. Metadata and
-annotations are also frozen.
+an estimator from changing stored untreated outcomes or effects by accident.
+Metadata and annotations are also frozen.
 
 The result supplies:
 
@@ -105,12 +104,11 @@ panel = simulator.simulate(streams=core.SimulationSeeds.from_seed(42))
 
 Never set NumPy's process-wide random seed for package simulations.
 
-## Package boundary
+## What belongs in this package
 
-The package contains reusable simulation infrastructure and configured data
-laws. It does not contain estimator implementations, paper build systems,
-Monte Carlo schedulers, or cached reports. Research tutorials can call an
-external estimator, but the estimator does not become part of the core API.
+The package contains reusable simulation code and ready-made designs. Estimator
+implementations, paper builds, experiment schedulers, and saved results stay in
+the analysis project. Tutorials can still call external estimators.
 
-This boundary has two benefits. A DGP remains usable after an estimator library
-changes, and different estimators can receive exactly the same immutable panel.
+As a result, a design still works when an estimator library changes, and
+different estimators can receive exactly the same read-only panel.

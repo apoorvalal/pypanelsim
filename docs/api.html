@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="Find the public object by task and namespace.">
+<meta name="description" content="Find a public class or function by task.">
 
 <title>API map – pypanelsim</title>
 <style>
@@ -4865,7 +4865,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./architecture.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Architecture and data contract</span></a>
+ <span class="menu-text">How simulation works</span></a>
   </div>
 </li>
       </ul>
@@ -4900,7 +4900,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./interoperability.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Export and interoperability</span></a>
+ <span class="menu-text">Export to other tools</span></a>
   </div>
 </li>
       </ul>
@@ -4982,7 +4982,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./reference/primitives.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Primitive API</span></a>
+ <span class="menu-text">Building-block API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -5011,7 +5011,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./validation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Validation and provenance</span></a>
+ <span class="menu-text">Tests and sources</span></a>
   </div>
 </li>
       </ul>
@@ -5028,7 +5028,7 @@ height: auto;
   <ul>
   <li><a href="#by-task" id="toc-by-task" class="nav-link active" data-scroll-target="#by-task"><span class="header-section-number">1</span> By task</a></li>
   <li><a href="#constructor-and-direct-draw-convention" id="toc-constructor-and-direct-draw-convention" class="nav-link" data-scroll-target="#constructor-and-direct-draw-convention"><span class="header-section-number">2</span> Constructor and direct-draw convention</a></li>
-  <li><a href="#stability-policy" id="toc-stability-policy" class="nav-link" data-scroll-target="#stability-policy"><span class="header-section-number">3</span> Stability policy</a></li>
+  <li><a href="#supported-imports" id="toc-supported-imports" class="nav-link" data-scroll-target="#supported-imports"><span class="header-section-number">3</span> Supported imports</a></li>
   <li><a href="#error-conventions" id="toc-error-conventions" class="nav-link" data-scroll-target="#error-conventions"><span class="header-section-number">4</span> Error conventions</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/website/api.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
@@ -5043,7 +5043,7 @@ height: auto;
 
 <div>
   <div class="description">
-    Find the public object by task and namespace.
+    Find a public class or function by task.
   </div>
 </div>
 
@@ -5060,9 +5060,9 @@ height: auto;
 </header>
 
 
-<p>New code should import one of three descriptive namespaces:</p>
+<p>Most code starts with one of three modules:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> core, designs, primitives</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Root-level imports are available as conveniences. The documentation uses the namespaced form because it states each object’s role.</p>
+<p>Root-level imports also work. The documentation keeps the module name because it shows what each object does.</p>
 <section id="by-task" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="by-task"><span class="header-section-number">1</span> By task</h2>
 <table class="caption-top table">
@@ -5080,7 +5080,7 @@ height: auto;
 <td><a href="./reference/core.html">Core</a></td>
 </tr>
 <tr class="even">
-<td>Inspect arrays, identifiers, annotations, and truth</td>
+<td>Inspect arrays, identifiers, annotations, and known effects</td>
 <td><code>core.PanelDataset</code></td>
 <td><a href="./reference/core.html">Core</a></td>
 </tr>
@@ -5090,22 +5090,22 @@ height: auto;
 <td><a href="./reference/core.html">Core</a></td>
 </tr>
 <tr class="even">
-<td>Choose a feature or assignment law</td>
+<td>Choose a feature or assignment model</td>
 <td><code>primitives</code></td>
-<td><a href="./reference/primitives.html">Primitives</a></td>
+<td><a href="./reference/primitives.html">Building blocks</a></td>
 </tr>
 <tr class="odd">
-<td>Choose an untreated outcome law</td>
+<td>Choose an untreated-outcome model</td>
 <td><code>primitives</code></td>
-<td><a href="./reference/primitives.html">Primitives</a></td>
+<td><a href="./reference/primitives.html">Building blocks</a></td>
 </tr>
 <tr class="even">
-<td>Choose a treatment-effect law</td>
+<td>Choose a treatment-effect model</td>
 <td><code>primitives</code></td>
-<td><a href="./reference/primitives.html">Primitives</a></td>
+<td><a href="./reference/primitives.html">Building blocks</a></td>
 </tr>
 <tr class="odd">
-<td>Run a configured benchmark</td>
+<td>Run a ready-made design</td>
 <td><code>designs</code></td>
 <td><a href="./reference/designs.html">Designs</a></td>
 </tr>
@@ -5119,18 +5119,18 @@ height: auto;
 </section>
 <section id="constructor-and-direct-draw-convention" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="constructor-and-direct-draw-convention"><span class="header-section-number">2</span> Constructor and direct-draw convention</h2>
-<p>Configured families use two related functions:</p>
+<p>Ready-made families use two related functions:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>simulator <span class="op">=</span> designs.baker_design()</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> designs.baker(seed<span class="op">=</span><span class="dv">42</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The <code>_design</code> function returns a reusable <code>PanelSimulator</code>. The shorter function runs one draw and returns a <code>PanelDataset</code>.</p>
 </section>
-<section id="stability-policy" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="stability-policy"><span class="header-section-number">3</span> Stability policy</h2>
-<p>The package treats <code>core</code>, <code>primitives</code>, and <code>designs</code> as the documented public surface. Objects imported from internal modules can change. Public names follow the package’s release and deprecation policy.</p>
+<section id="supported-imports" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="supported-imports"><span class="header-section-number">3</span> Supported imports</h2>
+<p><code>core</code>, <code>primitives</code>, and <code>designs</code> form the documented public API. Objects imported from internal modules can change. Public names follow the package’s release and deprecation policy.</p>
 </section>
 <section id="error-conventions" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="error-conventions"><span class="header-section-number">4</span> Error conventions</h2>
-<p>Constructors validate configuration values at creation. Simulation validates drawn matrix shapes, finite values, binary treatment, and the causal identity. Errors identify the failed field or component. A component should not silently coerce an invalid probability law into a valid one.</p>
+<p>Constructors validate configuration values at creation. Simulation validates drawn matrix shapes, finite values, binary treatment, and the causal identity. Errors identify the failed field or component. A component should not silently turn an invalid probability model into a valid one.</p>
 
 
 </section>

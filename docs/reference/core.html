@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="Simulation contracts, data, truth, random streams, and orchestration.">
+<meta name="description" content="Simulation classes, stored data, known effects, and random streams.">
 
 <title>Core API – pypanelsim</title>
 <style>
@@ -5004,7 +5004,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../architecture.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Architecture and data contract</span></a>
+ <span class="menu-text">How simulation works</span></a>
   </div>
 </li>
       </ul>
@@ -5039,7 +5039,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../interoperability.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Export and interoperability</span></a>
+ <span class="menu-text">Export to other tools</span></a>
   </div>
 </li>
       </ul>
@@ -5121,7 +5121,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../reference/primitives.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Primitive API</span></a>
+ <span class="menu-text">Building-block API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -5150,7 +5150,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../validation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Validation and provenance</span></a>
+ <span class="menu-text">Tests and sources</span></a>
   </div>
 </li>
       </ul>
@@ -5192,7 +5192,7 @@ height: auto;
 
 <div>
   <div class="description">
-    Simulation contracts, data, truth, random streams, and orchestration.
+    Simulation classes, stored data, known effects, and random streams.
   </div>
 </div>
 
@@ -5209,7 +5209,7 @@ height: auto;
 </header>
 
 
-<div id="3b408547" class="cell" data-execution_count="1">
+<div id="7a1b1480" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> inspect</span>
@@ -5219,7 +5219,7 @@ height: auto;
 </div>
 <section id="paneldimensions" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="paneldimensions"><span class="header-section-number">1</span> <code>PanelDimensions</code></h2>
-<div id="ffe4706e" class="cell" data-execution_count="2">
+<div id="4f7fc69a" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.signature(core.PanelDimensions))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -5263,7 +5263,7 @@ height: auto;
 </tr>
 </tbody>
 </table>
-<div id="38c60d86" class="cell" data-execution_count="3">
+<div id="2ad70c90" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> (<span class="st">&quot;ComponentDraw&quot;</span>, <span class="st">&quot;UnitFeatureDraw&quot;</span>, <span class="st">&quot;TimeFeatureDraw&quot;</span>):</span>
@@ -5281,7 +5281,7 @@ TimeFeatureDraw (values: &#39;FloatMatrix&#39;, metadata: &#39;Mapping[str, Any]
 <h2 data-number="3" class="anchored" data-anchor-id="component-contexts"><span class="header-section-number">3</span> Component contexts</h2>
 <p><code>AssignmentContext</code> contains dimensions, observed features, latent features, and feature metadata.</p>
 <p><code>SimulationContext</code> adds the treatment matrix and optional time features. It is passed to outcome and effect models.</p>
-<div id="dc75030d" class="cell" data-execution_count="4">
+<div id="591bb948" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.signature(core.AssignmentContext))</span>
@@ -5340,7 +5340,7 @@ TimeFeatureDraw (values: &#39;FloatMatrix&#39;, metadata: &#39;Mapping[str, Any]
 </section>
 <section id="panelsimulator" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="panelsimulator"><span class="header-section-number">5</span> <code>PanelSimulator</code></h2>
-<div id="3223a1f9" class="cell" data-execution_count="5">
+<div id="734d7a3c" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.signature(core.PanelSimulator))</span>
@@ -5366,7 +5366,7 @@ iter_simulations (self, replications: &#39;int&#39;, *, seed: &#39;int | np.rand
 </section>
 <section id="simulationseeds" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="simulationseeds"><span class="header-section-number">6</span> <code>SimulationSeeds</code></h2>
-<div id="fd30c88f" class="cell" data-execution_count="6">
+<div id="a433b9a8" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.signature(core.SimulationSeeds))</span>
@@ -5381,7 +5381,7 @@ iter_simulations (self, replications: &#39;int&#39;, *, seed: &#39;int | np.rand
 </section>
 <section id="resolve_rng" class="level2" data-number="7">
 <h2 data-number="7" class="anchored" data-anchor-id="resolve_rng"><span class="header-section-number">7</span> <code>resolve_rng</code></h2>
-<div id="ee49d368" class="cell" data-execution_count="7">
+<div id="751c0a0f" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.signature(core.resolve_rng))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -5394,7 +5394,7 @@ iter_simulations (self, replications: &#39;int&#39;, *, seed: &#39;int | np.rand
 </section>
 <section id="paneldataset" class="level2" data-number="8">
 <h2 data-number="8" class="anchored" data-anchor-id="paneldataset"><span class="header-section-number">8</span> <code>PanelDataset</code></h2>
-<div id="85c07612" class="cell" data-execution_count="8">
+<div id="9f12dbbf" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.signature(core.PanelDataset))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -5410,7 +5410,7 @@ iter_simulations (self, replications: &#39;int&#39;, *, seed: &#39;int | np.rand
 <thead>
 <tr class="header">
 <th>Field</th>
-<th>Invariant</th>
+<th>Required property</th>
 </tr>
 </thead>
 <tbody>
@@ -5488,7 +5488,7 @@ iter_simulations (self, replications: &#39;int&#39;, *, seed: &#39;int | np.rand
 </section>
 <section id="conversion-methods" class="level3" data-number="8.3">
 <h3 data-number="8.3" class="anchored" data-anchor-id="conversion-methods"><span class="header-section-number">8.3</span> Conversion methods</h3>
-<div id="c69242fa" class="cell" data-execution_count="9">
+<div id="02bd4918" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> (<span class="st">&quot;as_arrays&quot;</span>, <span class="st">&quot;arrays&quot;</span>, <span class="st">&quot;as_long_dict&quot;</span>):</span>
@@ -5505,7 +5505,7 @@ as_long_dict (self, *, copy: &#39;bool&#39; = False, include_effect_surface: &#3
 </section>
 <section id="paneltruth" class="level2" data-number="9">
 <h2 data-number="9" class="anchored" data-anchor-id="paneltruth"><span class="header-section-number">9</span> <code>PanelTruth</code></h2>
-<div id="c7717019" class="cell" data-execution_count="10">
+<div id="f9a9e7aa" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> (<span class="st">&quot;cohort_event&quot;</span>, <span class="st">&quot;event_study&quot;</span>, <span class="st">&quot;att_by_cohort&quot;</span>):</span>

@@ -1,6 +1,6 @@
 ---
-title: "Primitive API"
-description: "Reusable feature, assignment, untreated-outcome, and effect laws."
+title: "Building-block API"
+description: "Reusable feature generators, assignment models, outcome models, and effect models."
 jupyter: python3
 ---
 
@@ -25,14 +25,14 @@ show((
 ))
 ```
 
-| Primitive | Use |
+| Class | Use |
 |---|---|
 | `GaussianUnitFeatures` | independent observed and latent standard-normal features |
 | `CorrelatedGaussianFeatures` | observed proxies correlated with latent features |
 | `LatentGradientFeatures` | ordered latent position with optional observed proxies |
 
-Feature models return both DGP-visible features and estimator-visible
-covariates. These need not be the same matrix.
+Feature models can return observed and latent features. Only observed features
+are exported as estimator covariates.
 
 `att_dml_nonlinear_basis(values)` is a deterministic feature transform used by
 the nonlinear conditional-trends design.
@@ -46,7 +46,7 @@ show(("GaussianTimeFeatures",))
 `n_features` is the number of independent time series. A value of zero returns
 an empty time-feature matrix.
 
-## Assignment laws
+## Assignment models
 
 ```{python}
 show((
@@ -60,7 +60,7 @@ show((
 ))
 ```
 
-### Parameter semantics
+### Parameters
 
 | Parameter | Meaning |
 |---|---|
@@ -81,7 +81,7 @@ from unit position to adoption period.
 draws never treated or one of several adoption categories from a multinomial
 logit. Coefficient dimensions must match the corresponding feature counts.
 
-## Untreated-outcome laws
+## Untreated-outcome models
 
 ```{python}
 show((
@@ -101,21 +101,21 @@ show((
 ))
 ```
 
-### Structural guide
+### Models
 
-| Primitive | Untreated structure |
+| Class | Untreated structure |
 |---|---|
 | `TwoWayFixedEffectsOutcome` | $\alpha_i+\gamma_t+\varepsilon_{it}$ |
 | `AdditiveFactorOutcome` | compatibility form of additive unit and time factors |
 | `LowRankFactorOutcome` | $\lambda_i'f_t+\varepsilon_{it}$ |
 | `LinearFeatureOutcome` | feature-dependent level and linear trend |
 | `UnitTrendOutcome` | random or supplied unit-specific slopes |
-| `UnitPositionOutcome` | smooth outcome surface over latent unit position |
+| `UnitPositionOutcome` | smooth outcomes over latent unit position |
 | `PeriodicTimeOutcome` | shared sine and cosine time terms |
 | `ARMAErrorOutcome` | fixed AR and MA coefficients |
 | `RandomARMAErrorOutcome` | unit-specific random ARMA coefficients |
 | `ClusteredTrendOutcome` | cluster-specific linear trends |
-| `LatentSelectionOutcome` | outcome surface linked to latent selection |
+| `LatentSelectionOutcome` | outcomes linked to latent selection |
 | `SumOutcomeModel` | weighted sum of outcome components |
 | `CallableOutcomeModel` | adapter for a compatible Python callable |
 
@@ -140,7 +140,7 @@ combined = primitives.SumOutcomeModel(
 print(combined)
 ```
 
-## Treatment-effect laws
+## Treatment-effect models
 
 ```{python}
 show((
@@ -156,7 +156,7 @@ show((
 ))
 ```
 
-| Primitive | Effect surface |
+| Class | Effect pattern |
 |---|---|
 | `ConstantEffect` | same value in every treated cell |
 | `LinearRampEffect` | linear in exposure length |
@@ -168,9 +168,9 @@ show((
 | `CallableUnitEffect` | user callable evaluated by unit and event time |
 | `CallableEffect` | adapter for a complete effect-matrix callable |
 
-Every effect model must return realized effects that are zero outside treatment.
-It should put the complete `effect_surface` in draw metadata. The simulator
-validates `realized = treatment * effect_surface`.
+Every effect model returns realized effects that are zero outside treatment and
+stores potential effects in `effect_surface`. The simulator checks
+`realized = treatment * effect_surface`.
 
 ## Profile helpers
 

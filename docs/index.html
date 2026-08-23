@@ -5004,7 +5004,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./architecture.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Architecture and data contract</span></a>
+ <span class="menu-text">How simulation works</span></a>
   </div>
 </li>
       </ul>
@@ -5039,7 +5039,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./interoperability.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Export and interoperability</span></a>
+ <span class="menu-text">Export to other tools</span></a>
   </div>
 </li>
       </ul>
@@ -5121,7 +5121,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./reference/primitives.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Primitive API</span></a>
+ <span class="menu-text">Building-block API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -5150,7 +5150,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./validation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Validation and provenance</span></a>
+ <span class="menu-text">Tests and sources</span></a>
   </div>
 </li>
       </ul>
@@ -5169,7 +5169,7 @@ height: auto;
   <li><a href="#run-a-design" id="toc-run-a-design" class="nav-link" data-scroll-target="#run-a-design"><span class="header-section-number">2</span> Run a design</a></li>
   <li><a href="#build-a-design" id="toc-build-a-design" class="nav-link" data-scroll-target="#build-a-design"><span class="header-section-number">3</span> Build a design</a></li>
   <li><a href="#choose-the-next-page" id="toc-choose-the-next-page" class="nav-link" data-scroll-target="#choose-the-next-page"><span class="header-section-number">4</span> Choose the next page</a></li>
-  <li><a href="#package-boundary" id="toc-package-boundary" class="nav-link" data-scroll-target="#package-boundary"><span class="header-section-number">5</span> Package boundary</a></li>
+  <li><a href="#what-the-package-includes" id="toc-what-the-package-includes" class="nav-link" data-scroll-target="#what-the-package-includes"><span class="header-section-number">5</span> What the package includes</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/website/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -5205,7 +5205,7 @@ height: auto;
 <ul>
 <li>What information does the estimator observe?</li>
 <li>Why does a unit receive treatment?</li>
-<li>What is the untreated outcome law?</li>
+<li>What process generates untreated outcomes?</li>
 <li>Which causal effect is the estimator trying to recover?</li>
 </ul>
 <section id="install" class="level2" data-number="1">
@@ -5215,7 +5215,7 @@ height: auto;
 </section>
 <section id="run-a-design" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="run-a-design"><span class="header-section-number">2</span> Run a design</h2>
-<div id="697d05bb" class="cell" data-execution_count="1">
+<div id="0a3c0df1" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> designs</span>
@@ -5236,11 +5236,11 @@ true ATT: 1.1</code></pre>
 <p><span class="math display">\[
 Y_{it} = Y_{it}(0) + D_{it}\tau_{it}.
 \]</span></p>
-<p>The container stores all three terms. It also stores the complete effect surface <span class="math inline">\(\tau_{it}\)</span>, including cells that were not treated.</p>
+<p>The result stores all three terms. It also stores <span class="math inline">\(\tau_{it}\)</span> for every cell, including cells that were not treated.</p>
 </section>
 <section id="build-a-design" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="build-a-design"><span class="header-section-number">3</span> Build a design</h2>
-<div id="252f571d" class="cell" data-execution_count="2">
+<div id="98925551" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> core, primitives</span>
@@ -5268,7 +5268,7 @@ Y_{it} = Y_{it}(0) + D_{it}\tau_{it}.
 <pre><code>SumOutcomeModel</code></pre>
 </div>
 </div>
-<p>This is the main composition interface. Two-way fixed effects and low-rank factor models are ordinary outcome primitives. Neither is a special estimator mode.</p>
+<p>This is the main way to build a simulation. Two-way fixed effects and low-rank factors are ordinary outcome models, so they can be combined with other components.</p>
 </section>
 <section id="choose-the-next-page" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="choose-the-next-page"><span class="header-section-number">4</span> Choose the next page</h2>
@@ -5285,8 +5285,8 @@ Y_{it} = Y_{it}(0) + D_{it}\tau_{it}.
 <td><a href="./getting-started.html">Get started</a></td>
 </tr>
 <tr class="even">
-<td>Understand the component boundary</td>
-<td><a href="./architecture.html">Architecture</a></td>
+<td>Understand how a simulation runs</td>
+<td><a href="./architecture.html">How simulation works</a></td>
 </tr>
 <tr class="odd">
 <td>Specify who receives treatment</td>
@@ -5302,7 +5302,7 @@ Y_{it} = Y_{it}(0) + D_{it}\tau_{it}.
 </tr>
 <tr class="even">
 <td>Send data to an estimator</td>
-<td><a href="./interoperability.html">Export and interoperability</a></td>
+<td><a href="./interoperability.html">Export to other tools</a></td>
 </tr>
 <tr class="odd">
 <td>Find a class or function</td>
@@ -5311,9 +5311,9 @@ Y_{it} = Y_{it}(0) + D_{it}\tau_{it}.
 </tbody>
 </table>
 </section>
-<section id="package-boundary" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="package-boundary"><span class="header-section-number">5</span> Package boundary</h2>
-<p><code>pypanelsim</code> owns simulation components, causal truth, validated data, and export adapters. Estimators, Monte Carlo runners, cached results, and paper reports remain outside the package. This keeps the simulation contract usable with any estimator library.</p>
+<section id="what-the-package-includes" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="what-the-package-includes"><span class="header-section-number">5</span> What the package includes</h2>
+<p><code>pypanelsim</code> provides simulation components, known causal effects, checked output, and export helpers. Estimators, experiment runners, saved results, and paper builds belong in the analysis that uses the package. The same simulated panel can therefore be passed to any estimator library.</p>
 
 
 </section>

@@ -6,9 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="Reusable feature, assignment, untreated-outcome, and effect laws.">
+<meta name="description" content="Reusable feature generators, assignment models, outcome models, and effect models.">
 
-<title>Primitive API – pypanelsim</title>
+<title>Building-block API – pypanelsim</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -4968,7 +4968,7 @@ height: auto;
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../api.html">API reference</a></li><li class="breadcrumb-item"><a href="../reference/primitives.html">Primitive API</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../api.html">API reference</a></li><li class="breadcrumb-item"><a href="../reference/primitives.html">Building-block API</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -5004,7 +5004,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../architecture.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Architecture and data contract</span></a>
+ <span class="menu-text">How simulation works</span></a>
   </div>
 </li>
       </ul>
@@ -5039,7 +5039,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../interoperability.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Export and interoperability</span></a>
+ <span class="menu-text">Export to other tools</span></a>
   </div>
 </li>
       </ul>
@@ -5121,7 +5121,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../reference/primitives.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Primitive API</span></a>
+ <span class="menu-text">Building-block API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -5150,7 +5150,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../validation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Validation and provenance</span></a>
+ <span class="menu-text">Tests and sources</span></a>
   </div>
 </li>
       </ul>
@@ -5167,15 +5167,15 @@ height: auto;
   <ul>
   <li><a href="#unit-features" id="toc-unit-features" class="nav-link active" data-scroll-target="#unit-features"><span class="header-section-number">1</span> Unit features</a></li>
   <li><a href="#time-features" id="toc-time-features" class="nav-link" data-scroll-target="#time-features"><span class="header-section-number">2</span> Time features</a></li>
-  <li><a href="#assignment-laws" id="toc-assignment-laws" class="nav-link" data-scroll-target="#assignment-laws"><span class="header-section-number">3</span> Assignment laws</a>
+  <li><a href="#assignment-models" id="toc-assignment-models" class="nav-link" data-scroll-target="#assignment-models"><span class="header-section-number">3</span> Assignment models</a>
   <ul class="collapse">
-  <li><a href="#parameter-semantics" id="toc-parameter-semantics" class="nav-link" data-scroll-target="#parameter-semantics"><span class="header-section-number">3.1</span> Parameter semantics</a></li>
+  <li><a href="#parameters" id="toc-parameters" class="nav-link" data-scroll-target="#parameters"><span class="header-section-number">3.1</span> Parameters</a></li>
   </ul></li>
-  <li><a href="#untreated-outcome-laws" id="toc-untreated-outcome-laws" class="nav-link" data-scroll-target="#untreated-outcome-laws"><span class="header-section-number">4</span> Untreated-outcome laws</a>
+  <li><a href="#untreated-outcome-models" id="toc-untreated-outcome-models" class="nav-link" data-scroll-target="#untreated-outcome-models"><span class="header-section-number">4</span> Untreated-outcome models</a>
   <ul class="collapse">
-  <li><a href="#structural-guide" id="toc-structural-guide" class="nav-link" data-scroll-target="#structural-guide"><span class="header-section-number">4.1</span> Structural guide</a></li>
+  <li><a href="#models" id="toc-models" class="nav-link" data-scroll-target="#models"><span class="header-section-number">4.1</span> Models</a></li>
   </ul></li>
-  <li><a href="#treatment-effect-laws" id="toc-treatment-effect-laws" class="nav-link" data-scroll-target="#treatment-effect-laws"><span class="header-section-number">5</span> Treatment-effect laws</a></li>
+  <li><a href="#treatment-effect-models" id="toc-treatment-effect-models" class="nav-link" data-scroll-target="#treatment-effect-models"><span class="header-section-number">5</span> Treatment-effect models</a></li>
   <li><a href="#profile-helpers" id="toc-profile-helpers" class="nav-link" data-scroll-target="#profile-helpers"><span class="header-section-number">6</span> Profile helpers</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/website/reference/primitives.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
@@ -5183,14 +5183,14 @@ height: auto;
 <!-- main -->
 <main class="content column-body" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../api.html">API reference</a></li><li class="breadcrumb-item"><a href="../reference/primitives.html">Primitive API</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../api.html">API reference</a></li><li class="breadcrumb-item"><a href="../reference/primitives.html">Building-block API</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Primitive API</h1>
+<h1 class="title">Building-block API</h1>
 </div>
 
 <div>
   <div class="description">
-    Reusable feature, assignment, untreated-outcome, and effect laws.
+    Reusable feature generators, assignment models, outcome models, and effect models.
   </div>
 </div>
 
@@ -5207,7 +5207,7 @@ height: auto;
 </header>
 
 
-<div id="71afc842" class="cell" data-execution_count="1">
+<div id="e95190f4" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> inspect</span>
@@ -5222,7 +5222,7 @@ height: auto;
 </div>
 <section id="unit-features" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="unit-features"><span class="header-section-number">1</span> Unit features</h2>
-<div id="5793e39f" class="cell" data-execution_count="2">
+<div id="279c3a84" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>show((</span>
@@ -5244,7 +5244,7 @@ LatentGradientFeatures(location_start: &#39;float&#39; = -0.5, location_stop: &#
 </colgroup>
 <thead>
 <tr class="header">
-<th>Primitive</th>
+<th>Class</th>
 <th>Use</th>
 </tr>
 </thead>
@@ -5263,12 +5263,12 @@ LatentGradientFeatures(location_start: &#39;float&#39; = -0.5, location_stop: &#
 </tr>
 </tbody>
 </table>
-<p>Feature models return both DGP-visible features and estimator-visible covariates. These need not be the same matrix.</p>
+<p>Feature models can return observed and latent features. Only observed features are exported as estimator covariates.</p>
 <p><code>att_dml_nonlinear_basis(values)</code> is a deterministic feature transform used by the nonlinear conditional-trends design.</p>
 </section>
 <section id="time-features" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="time-features"><span class="header-section-number">2</span> Time features</h2>
-<div id="b189490d" class="cell" data-execution_count="3">
+<div id="b5b53e39" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>show((<span class="st">&quot;GaussianTimeFeatures&quot;</span>,))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -5279,9 +5279,9 @@ LatentGradientFeatures(location_start: &#39;float&#39; = -0.5, location_stop: &#
 </div>
 <p><code>n_features</code> is the number of independent time series. A value of zero returns an empty time-feature matrix.</p>
 </section>
-<section id="assignment-laws" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="assignment-laws"><span class="header-section-number">3</span> Assignment laws</h2>
-<div id="8814f0c3" class="cell" data-execution_count="4">
+<section id="assignment-models" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="assignment-models"><span class="header-section-number">3</span> Assignment models</h2>
+<div id="f4edbe58" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>show((</span>
@@ -5304,8 +5304,8 @@ SparseLogitAssignment(adoption_period: &#39;int&#39;, n_active: &#39;int&#39; = 
 GeneralizedPropensityAssignment(adoption_periods: &#39;Sequence[int]&#39;, intercepts: &#39;Sequence[float]&#39; = (), observable_coefficients: &#39;Sequence[Sequence[float]]&#39; = (), unobservable_coefficients: &#39;Sequence[Sequence[float]]&#39; = ()) -&gt; None</code></pre>
 </div>
 </div>
-<section id="parameter-semantics" class="level3" data-number="3.1">
-<h3 data-number="3.1" class="anchored" data-anchor-id="parameter-semantics"><span class="header-section-number">3.1</span> Parameter semantics</h3>
+<section id="parameters" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="parameters"><span class="header-section-number">3.1</span> Parameters</h3>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 50%">
@@ -5356,9 +5356,9 @@ GeneralizedPropensityAssignment(adoption_periods: &#39;Sequence[int]&#39;, inter
 <p><code>BinaryLogitAssignment</code> draws one treated category. <code>GeneralizedPropensityAssignment</code> draws never treated or one of several adoption categories from a multinomial logit. Coefficient dimensions must match the corresponding feature counts.</p>
 </section>
 </section>
-<section id="untreated-outcome-laws" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="untreated-outcome-laws"><span class="header-section-number">4</span> Untreated-outcome laws</h2>
-<div id="6a636c0f" class="cell" data-execution_count="5">
+<section id="untreated-outcome-models" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="untreated-outcome-models"><span class="header-section-number">4</span> Untreated-outcome models</h2>
+<div id="a66821bc" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>show((</span>
@@ -5393,8 +5393,8 @@ SumOutcomeModel(models: &#39;Sequence[OutcomeModel]&#39;, weights: &#39;Sequence
 CallableOutcomeModel(function: &#39;OutcomeCallable&#39;, name: &#39;str&#39; = &#39;callable_outcome&#39;) -&gt; None</code></pre>
 </div>
 </div>
-<section id="structural-guide" class="level3" data-number="4.1">
-<h3 data-number="4.1" class="anchored" data-anchor-id="structural-guide"><span class="header-section-number">4.1</span> Structural guide</h3>
+<section id="models" class="level3" data-number="4.1">
+<h3 data-number="4.1" class="anchored" data-anchor-id="models"><span class="header-section-number">4.1</span> Models</h3>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 50%">
@@ -5402,7 +5402,7 @@ CallableOutcomeModel(function: &#39;OutcomeCallable&#39;, name: &#39;str&#39; = 
 </colgroup>
 <thead>
 <tr class="header">
-<th>Primitive</th>
+<th>Class</th>
 <th>Untreated structure</th>
 </tr>
 </thead>
@@ -5429,7 +5429,7 @@ CallableOutcomeModel(function: &#39;OutcomeCallable&#39;, name: &#39;str&#39; = 
 </tr>
 <tr class="even">
 <td><code>UnitPositionOutcome</code></td>
-<td>smooth outcome surface over latent unit position</td>
+<td>smooth outcomes over latent unit position</td>
 </tr>
 <tr class="odd">
 <td><code>PeriodicTimeOutcome</code></td>
@@ -5449,7 +5449,7 @@ CallableOutcomeModel(function: &#39;OutcomeCallable&#39;, name: &#39;str&#39; = 
 </tr>
 <tr class="odd">
 <td><code>LatentSelectionOutcome</code></td>
-<td>outcome surface linked to latent selection</td>
+<td>outcomes linked to latent selection</td>
 </tr>
 <tr class="even">
 <td><code>SumOutcomeModel</code></td>
@@ -5464,7 +5464,7 @@ CallableOutcomeModel(function: &#39;OutcomeCallable&#39;, name: &#39;str&#39; = 
 <p><code>LowRankFactorOutcome.rank</code> is the factor rank. <code>loading_scale</code> and <code>factor_scale</code> set factor scales. Separate control and treated loading means can create limited factor overlap.</p>
 <p><code>LinearFeatureOutcome.source</code> is <code>observables</code> or <code>unobservables</code>. <code>level_coefficients</code> affect the level. <code>trend_coefficients</code> multiply the time index. Set <code>center_time=True</code> to center that index.</p>
 <p><code>SumOutcomeModel</code> is the main composition tool:</p>
-<div id="f247e08e" class="cell" data-execution_count="6">
+<div id="f33e3a5a" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>combined <span class="op">=</span> primitives.SumOutcomeModel(</span>
@@ -5482,9 +5482,9 @@ CallableOutcomeModel(function: &#39;OutcomeCallable&#39;, name: &#39;str&#39; = 
 </div>
 </section>
 </section>
-<section id="treatment-effect-laws" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="treatment-effect-laws"><span class="header-section-number">5</span> Treatment-effect laws</h2>
-<div id="63c9fd45" class="cell" data-execution_count="7">
+<section id="treatment-effect-models" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="treatment-effect-models"><span class="header-section-number">5</span> Treatment-effect models</h2>
+<div id="6c9f4723" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>show((</span>
@@ -5518,8 +5518,8 @@ CallableEffect(function: &#39;EffectCallable&#39;, name: &#39;str&#39; = &#39;ca
 </colgroup>
 <thead>
 <tr class="header">
-<th>Primitive</th>
-<th>Effect surface</th>
+<th>Class</th>
+<th>Effect pattern</th>
 </tr>
 </thead>
 <tbody>
@@ -5561,11 +5561,11 @@ CallableEffect(function: &#39;EffectCallable&#39;, name: &#39;str&#39; = &#39;ca
 </tr>
 </tbody>
 </table>
-<p>Every effect model must return realized effects that are zero outside treatment. It should put the complete <code>effect_surface</code> in draw metadata. The simulator validates <code>realized = treatment * effect_surface</code>.</p>
+<p>Every effect model returns realized effects that are zero outside treatment and stores potential effects in <code>effect_surface</code>. The simulator checks <code>realized = treatment * effect_surface</code>.</p>
 </section>
 <section id="profile-helpers" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="profile-helpers"><span class="header-section-number">6</span> Profile helpers</h2>
-<div id="c87c7ae4" class="cell" data-execution_count="8">
+<div id="2fe341c8" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>show((</span>

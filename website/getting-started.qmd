@@ -4,8 +4,9 @@ description: "Run, inspect, change, and export one panel simulation."
 jupyter: python3
 ---
 
-This tutorial starts with a configured design, inspects its causal truth, and
-then rebuilds it from basic primitives. The full page runs in a few seconds.
+This tutorial runs a ready-made design, inspects the known effects, and then
+builds a second design from reusable components. The full page runs in a few
+seconds.
 
 ## Install and import
 
@@ -20,13 +21,13 @@ import numpy as np
 from pypanelsim import core, designs, primitives
 ```
 
-The three names describe their roles:
+The three modules have distinct jobs:
 
-- `core` defines simulation and data contracts.
-- `primitives` provides reusable probability laws.
-- `designs` provides configured benchmark families.
+- `core` contains the simulator, results, and random-stream tools.
+- `primitives` contains reusable feature, assignment, outcome, and effect models.
+- `designs` contains ready-made simulation designs.
 
-## Run a configured design
+## Run a ready-made design
 
 ```{python}
 panel = designs.classic_factor(overlap=1.0, seed=17)
@@ -42,7 +43,7 @@ The design has a low-rank untreated outcome and one treated cohort. The
 `overlap` argument changes the separation between treated and control factor
 loadings.
 
-## Inspect the data contract
+## Inspect the result
 
 ```{python}
 print(panel.outcome.shape)
@@ -60,7 +61,7 @@ print("largest identity error:", identity_error)
 treated. `treatment_effect[i, t]` is the realized effect and is zero when the
 cell is untreated.
 
-## Inspect causal truth
+## Inspect known effects
 
 ```{python}
 event_truth = panel.truth.event_study()
@@ -74,13 +75,13 @@ for event_time, effect in zip(
     print(int(event_time), round(float(effect), 3))
 ```
 
-Truth is computed from the stored effect surface. It does not depend on an
-estimator package.
+The simulator knows the effect in every cell, so these values do not depend on
+an estimator.
 
 ## Compose two-way fixed effects and factors
 
-Two-way fixed effects and low-rank factor models are basic untreated-outcome
-primitives. Combine them with `SumOutcomeModel`.
+Two-way fixed effects and low-rank factors are reusable outcome models. Combine
+them with `SumOutcomeModel`.
 
 ```{python}
 outcome_model = primitives.SumOutcomeModel(
@@ -117,17 +118,17 @@ print(round(composed_panel.true_att, 3))
 
 ## Compare the two panels
 
-The first panel has the configured canonical factor law. The second panel adds
-two-way fixed effects and a generic rank-two factor component. Sorting units by
-adoption time makes the treated block visible.
+The first panel uses a ready-made one-factor design. The second combines
+two-way fixed effects with two latent factors. Sorting units by adoption time
+makes the treated block visible.
 
 ```{python}
 #| label: fig-getting-started-panels
-#| fig-cap: "Observed outcomes and treatment for a configured factor design and a design composed from two-way fixed effects and low-rank factors."
-#| fig-alt: "Four heatmaps compare outcomes and treatment in a configured factor panel and a panel made from two-way fixed effects plus rank-two factors."
+#| fig-cap: "Observed outcomes and treatment for a ready-made factor design and a design built from two-way fixed effects and low-rank factors."
+#| fig-alt: "Four heatmaps compare outcomes and treatment in a ready-made factor panel and a panel made from two-way fixed effects plus rank-two factors."
 
 comparisons = (
-    ("Configured classic factor", panel),
+    ("Ready-made classic factor", panel),
     ("2WFE plus rank-two factors", composed_panel),
 )
 figure, axes = plt.subplots(2, 2, figsize=(12, 7), constrained_layout=True)
@@ -163,7 +164,7 @@ and checks the causal identity before it returns a panel.
 ## Change one assumption
 
 Replace random assignment with selection on observed and unobserved features.
-The outcome law and effect law do not change.
+The outcome and treatment-effect models do not change.
 
 ```{python}
 selected_simulator = core.PanelSimulator(
@@ -204,20 +205,20 @@ long_columns = selected_panel.as_long_dict(include_annotations=True)
 print(tuple(long_columns)[:10])
 ```
 
-See [Export and interoperability](interoperability.qmd) for pandas, Polars,
+See [Export to other tools](interoperability.qmd) for pandas, Polars,
 Arrow, and R examples.
 
 ## Apply the package with PyFixest and crabbymetrics
 
-`pypanelsim` does not require an estimator package. The optional estimator
-stack is needed for this application:
+`pypanelsim` does not require an estimator package. Install the optional
+packages to run this section:
 
 ```bash
 uv sync --extra docs --extra estimators
 ```
 
 We compare two panels with the same randomized cohort and dynamic treatment
-effect. The first untreated outcome follows a two-way fixed-effects law. The
+effect. The first untreated outcome follows a two-way fixed-effects model. The
 second adds two interactive latent factors with different mean loadings for
 treated and control units.
 
@@ -407,10 +408,10 @@ def fit_interactive_fixed_effects(draw, *, rank):
     }
 ```
 
-### Compare the applications
+### Compare the estimates
 
-The interactive-fixed-effects rank is supplied by the simulation design. Rank
-selection is outside this small application.
+The simulation supplies the rank used by interactive fixed effects. This
+example does not estimate the rank.
 
 ```{python}
 application_results = {}
@@ -444,7 +445,7 @@ pd.DataFrame(
 
 ```{python}
 #| label: fig-estimator-applications
-#| fig-cap: "PyFixest and crabbymetrics applied to additive and interactive-factor panels with known causal truth."
+#| fig-cap: "PyFixest and crabbymetrics applied to additive and interactive-factor panels with known treatment effects."
 #| fig-alt: "Two event-study charts compare the true effect path with PyFixest two-way fixed effects, crabbymetrics matrix completion, and crabbymetrics interactive fixed effects."
 
 figure, axes = plt.subplots(1, 2, figsize=(14, 5), constrained_layout=True)
@@ -521,7 +522,7 @@ plt.show()
 
 For the additive panel, 2WFE is correctly specified. For the interactive panel,
 the fixed-effects regression omits the latent factors. Matrix completion and
-the donor-factor application use low-rank structure instead. These are
+the donor-factor estimate use low-rank structure instead. These are
 illustrative seeded results, not an estimator ranking: matrix completion uses
 its default penalty fraction, IFE is given the design rank, and only the
 PyFixest curve includes sampling uncertainty.
@@ -542,6 +543,6 @@ stable_panel = simulator.simulate(streams=streams)
 print(stable_panel.shape)
 ```
 
-You can now choose a [standard benchmark](canonical-designs.qmd), specify an
+You can now choose a [standard design](canonical-designs.qmd), specify an
 [assignment mechanism](assignment.qmd), or read the [research design
 catalog](research-designs.qmd).

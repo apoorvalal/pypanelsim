@@ -1,13 +1,12 @@
 ---
 title: "Research designs"
-description: "Select a simulation family by scientific question, identifying assumption, and target."
+description: "Choose a design by treatment timing, assumptions, and known effects."
 jupyter: python3
 ---
 
-This catalog describes each research-motivated family without assuming access
-to a private repository. A family can translate a public design, adapt a
-working-paper design, or serve as a package benchmark. Its status and source
-are stated below.
+The catalog links each design to the question it studies and to a public source
+when one exists. It also marks designs from ongoing work and designs made only
+to test the package.
 
 ```{python}
 import matplotlib.pyplot as plt
@@ -18,26 +17,22 @@ from pypanelsim import designs
 
 ## At a glance
 
-| Question | Family | Treatment timing | Main truth |
+| Question | Family | Treatment timing | Known values |
 |---|---|---|---|
 | How does TWFE weight dynamic cohort effects? | Baker | staggered cohorts | cohort-event effects |
-| Can a joint test detect effect heterogeneity? | F-test | one or several cohorts | temporal or cohort surfaces |
+| Can a joint test detect effect heterogeneity? | F-test | one or several cohorts | temporal or cohort paths |
 | How much should event-study cohorts be pooled? | Lepskii | many staggered cohorts | support-aware cohort paths |
-| What happens when parallel trends holds only conditionally? | ATT-DML | one cohort or clustered timing | ATT and conditional trends |
+| What happens when parallel trends hold only conditionally? | ATT-DML | one cohort or clustered timing | ATT and conditional trends |
 | Can small regression summaries preserve a large experiment? | regression compression | one or two cohorts | event-time effects and sufficient summaries |
-| How do mixed panel structures affect a counterfactual estimator? | composite panel | one cohort | treated counterfactual surface |
+| How do mixed panel structures affect a counterfactual estimator? | composite panel | one cohort | missing treated outcomes |
 
 ## Baker dynamic effects
 
-**Question.** Why can a two-way fixed-effects coefficient differ from the
-average effect when cohorts adopt at different times and effects grow at
-different rates?
-
-**Law.** States enter one of three adoption cohorts. Untreated outcomes contain
-state and year effects. A cohort's effect grows linearly with exposure length.
-
-**Target.** The stored effect surface supplies cohort-event truth and the
-treated-cell ATT.
+Baker's design shows why a two-way fixed-effects coefficient can differ from the
+average effect when cohorts adopt at different times and their effects grow at
+different rates. States enter one of three cohorts, untreated outcomes contain
+state and year effects, and each cohort has its own linear effect path. The
+simulation records cohort-event effects and the treated-cell ATT.
 
 ```{python}
 baker_panel = designs.baker(
@@ -47,19 +42,17 @@ baker_panel = designs.baker(
 print(baker_panel.shape, round(baker_panel.true_att, 3))
 ```
 
-**Source.** This is a Python translation of Andrew Baker's public
+It translates Andrew Baker's public
 [JFE_DID](https://github.com/andrewchbaker/JFE_DID) simulation. See [Baker TWFE
 failure](vignettes/baker-twfe.qmd).
 
 ## F-test heterogeneity designs
 
-**Question.** Can a joint test distinguish a common effect path from temporal
-or cohort heterogeneity?
-
-**Law.** The temporal family has one adoption date and seven effect paths. The
-cohort family has three adoption cohorts and seven cohort-effect surfaces.
-Untreated outcomes include fixed effects, trends, periodic components, and
-correlated errors.
+The F-test designs ask whether a joint test can distinguish a common effect path
+from temporal or cohort heterogeneity. The temporal family has one adoption
+date and seven paths. The cohort family has three adoption cohorts and seven
+patterns of cohort differences. Untreated outcomes include fixed effects,
+trends, periodic components, and correlated errors.
 
 ```{python}
 print(designs.available_ftest_temporal_designs())
@@ -73,7 +66,7 @@ ftest_panel = designs.ftest_cohort(
 print(ftest_panel.truth.att_by_cohort()["att"])
 ```
 
-**Source.** The family follows the public
+The family follows the public
 [TestingInEventStudies](https://github.com/apoorvalal/TestingInEventStudies)
 project and its paper, [When can we get away with using the two-way fixed
 effects regression?](https://arxiv.org/abs/2503.05125). See [F-test
@@ -81,12 +74,11 @@ heterogeneity designs](vignettes/ftest-heterogeneity.qmd).
 
 ## Adaptive partial pooling
 
-**Question.** Which cohorts have similar enough event-time paths to pool, and
-which comparisons lack calendar-time support?
-
-**Law.** Nine adoption cohorts receive paths that range from complete
-homogeneity to cohort-specific signed shapes. Untreated outcomes combine fixed
-effects, periodic time effects, and two-way correlated errors.
+The adaptive-pooling designs ask which cohorts have similar enough event-time
+paths to pool and which comparisons lack calendar-time support. Nine adoption
+cohorts receive paths ranging from complete homogeneity to cohort-specific signed shapes.
+Untreated outcomes combine fixed effects, periodic time effects, and errors
+correlated across units and time.
 
 ```{python}
 print(designs.available_lepskii_designs())
@@ -100,17 +92,15 @@ cells = lepskii_panel.truth.cohort_event(event_times=(-2, -1, 0, 1, 2))
 print(cells.keys())
 ```
 
-**Status.** This family adapts an unpublished working-paper design. It is not
-presented as a published-paper reproduction. See [Support-aware event
-studies](vignettes/support-aware-event-studies.qmd).
+The family adapts an unpublished working-paper design. See [Support-aware
+event studies](vignettes/support-aware-event-studies.qmd).
 
 ## Conditional and latent trends
 
-**Question.** Does an estimator recover the ATT when unconditional parallel
-trends fails but a conditional or latent version holds?
-
-**Law.** Five variants cover linear and nonlinear conditional trends, stable
-and unstable latent trends, and clustered ARMA outcomes.
+The ATT-DML designs ask whether an estimator recovers the ATT when unconditional
+parallel trends fail but a conditional or latent version holds. Five variants
+cover linear and nonlinear conditional trends, stable and unstable latent
+trends, and clustered ARMA outcomes.
 
 ```{python}
 print(designs.available_att_dml_designs())
@@ -123,20 +113,18 @@ conditional_panel = designs.att_dml(
 print(conditional_panel.unit_covariate_names[:5])
 ```
 
-**Status.** These package designs isolate assumptions used in augmented
-balancing and double-machine-learning work. The related public source is
+The designs isolate assumptions used in augmented balancing and
+double-machine-learning work. The related public source is
 [Augmented Balancing Estimators of the ATT](https://apoorvalal.github.io/files/papers/augbal.pdf).
 See [Conditional and latent trends](vignettes/conditional-trends.qmd).
 
 ## Large-panel regression summaries
 
-**Question.** Can an experiment be reduced to small regression summaries
-without losing the treatment-effect signal?
-
-**Law.** The main design combines fixed effects, unit trends, serially
-correlated errors, and a configurable effect path. The Anscombe variants hold
-selected summaries similar while changing unit, time, or cohort-time
-structure.
+The large-panel designs ask whether small regression summaries preserve the
+treatment-effect information in a large experiment. The main version combines
+fixed effects, unit trends, serially correlated errors, and a configurable
+effect path. The Anscombe variants keep selected summaries similar while
+changing unit, time, or cohort-time structure.
 
 ```{python}
 compression_panel = designs.regression_compression(
@@ -147,15 +135,15 @@ print(compression_panel.shape)
 print(designs.available_anscombe_designs())
 ```
 
-**Source.** This family is connected to [Large Scale Longitudinal
+The family follows [Large Scale Longitudinal
 Experiments](https://arxiv.org/abs/2410.09952) and its [public
 code](https://github.com/py-econometrics/panel-at-scale-code). See [Large
 panels and compressed regressions](vignettes/large-panels.qmd).
 
 ## Composite panel benchmark
 
-**Question.** How does one estimator behave when untreated outcomes mix fixed
-effects, factors, time-series persistence, and sparse donor structure?
+The composite design tests an estimator when untreated outcomes mix fixed
+effects, factors, time-series persistence, and sparse donor structure.
 
 ```{python}
 composite_panel = designs.gsynth_composite(
@@ -165,9 +153,8 @@ composite_panel = designs.gsynth_composite(
 print(composite_panel.metadata["outcome"]["model"])
 ```
 
-**Status.** This is a package stress test assembled from primitives. It is not
-a formal reproduction of a paper or another repository. See [Composite panel
-benchmark](vignettes/composite-panels.qmd).
+The maintainers assembled it as a package stress test; it does not reproduce a
+paper or another repository. See [Composite panel benchmark](vignettes/composite-panels.qmd).
 
 ## One draw from each family
 
@@ -181,7 +168,7 @@ adoption time so treatment timing and untreated structure can be read together.
 
 gallery = {
     "Baker dynamic effects": baker_panel,
-    "F-test cohort surface": ftest_panel,
+    "F-test cohort effects": ftest_panel,
     "Adaptive pooling": lepskii_panel,
     "Conditional trends": conditional_panel,
     "Large-panel regression": compression_panel,

@@ -4865,7 +4865,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./architecture.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Architecture and data contract</span></a>
+ <span class="menu-text">How simulation works</span></a>
   </div>
 </li>
       </ul>
@@ -4900,7 +4900,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./interoperability.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Export and interoperability</span></a>
+ <span class="menu-text">Export to other tools</span></a>
   </div>
 </li>
       </ul>
@@ -4982,7 +4982,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./reference/primitives.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Primitive API</span></a>
+ <span class="menu-text">Building-block API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -5011,7 +5011,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./validation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Validation and provenance</span></a>
+ <span class="menu-text">Tests and sources</span></a>
   </div>
 </li>
       </ul>
@@ -5027,11 +5027,11 @@ height: auto;
    
   <ul>
   <li><a href="#common-structure" id="toc-common-structure" class="nav-link active" data-scroll-target="#common-structure"><span class="header-section-number">1</span> Common structure</a></li>
-  <li><a href="#select-an-untreated-outcome-law" id="toc-select-an-untreated-outcome-law" class="nav-link" data-scroll-target="#select-an-untreated-outcome-law"><span class="header-section-number">2</span> Select an untreated outcome law</a></li>
+  <li><a href="#select-an-untreated-outcome-model" id="toc-select-an-untreated-outcome-model" class="nav-link" data-scroll-target="#select-an-untreated-outcome-model"><span class="header-section-number">2</span> Select an untreated-outcome model</a></li>
   <li><a href="#factor-overlap" id="toc-factor-overlap" class="nav-link" data-scroll-target="#factor-overlap"><span class="header-section-number">3</span> Factor overlap</a></li>
   <li><a href="#synthetic-control-sparsity" id="toc-synthetic-control-sparsity" class="nav-link" data-scroll-target="#synthetic-control-sparsity"><span class="header-section-number">4</span> Synthetic-control sparsity</a></li>
   <li><a href="#temporal-persistence" id="toc-temporal-persistence" class="nav-link" data-scroll-target="#temporal-persistence"><span class="header-section-number">5</span> Temporal persistence</a></li>
-  <li><a href="#change-the-panel-not-the-law" id="toc-change-the-panel-not-the-law" class="nav-link" data-scroll-target="#change-the-panel-not-the-law"><span class="header-section-number">6</span> Change the panel, not the law</a></li>
+  <li><a href="#change-the-sample-not-the-model" id="toc-change-the-sample-not-the-model" class="nav-link" data-scroll-target="#change-the-sample-not-the-model"><span class="header-section-number">6</span> Change the sample, not the model</a></li>
   <li><a href="#use-the-dispatcher" id="toc-use-the-dispatcher" class="nav-link" data-scroll-target="#use-the-dispatcher"><span class="header-section-number">7</span> Use the dispatcher</a></li>
   <li><a href="#visual-catalog" id="toc-visual-catalog" class="nav-link" data-scroll-target="#visual-catalog"><span class="header-section-number">8</span> Visual catalog</a></li>
   </ul>
@@ -5064,7 +5064,7 @@ height: auto;
 </header>
 
 
-<p>The canonical designs vary the untreated outcome law while holding a common panel layout and treatment-effect law. Use them to compare estimators across distinct sources of panel dependence.</p>
+<p>These designs vary how untreated outcomes are generated while keeping the sample layout and treatment effects fixed. Use them to compare estimators under different forms of panel dependence.</p>
 <section id="common-structure" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="common-structure"><span class="header-section-number">1</span> Common structure</h2>
 <p><code>CanonicalPanelConfig</code> defines the sample:</p>
@@ -5075,7 +5075,7 @@ height: auto;
 <li>a linear post-treatment effect;</li>
 <li>Gaussian observation noise.</li>
 </ul>
-<div id="2f2b2df8" class="cell" data-execution_count="1">
+<div id="c4ebddec" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -5099,7 +5099,7 @@ height: auto;
 </div>
 </div>
 <p>All direct functions return a <code>PanelDataset</code>. Add <code>_design</code> to obtain a reusable <code>PanelSimulator</code>.</p>
-<div id="88098059" class="cell" data-execution_count="2">
+<div id="e0a603c7" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> designs.classic_factor(overlap<span class="op">=</span><span class="fl">1.0</span>, config<span class="op">=</span>config, seed<span class="op">=</span><span class="dv">42</span>)</span>
@@ -5111,8 +5111,8 @@ height: auto;
 </div>
 </div>
 </section>
-<section id="select-an-untreated-outcome-law" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="select-an-untreated-outcome-law"><span class="header-section-number">2</span> Select an untreated outcome law</h2>
+<section id="select-an-untreated-outcome-model" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="select-an-untreated-outcome-model"><span class="header-section-number">2</span> Select an untreated-outcome model</h2>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 33%">
@@ -5154,17 +5154,17 @@ height: auto;
 </tr>
 <tr class="even">
 <td><code>mixed_factor</code></td>
-<td>different factor laws across unit groups</td>
-<td>outcome-law heterogeneity</td>
+<td>different factor models across unit groups</td>
+<td>heterogeneous outcome process</td>
 </tr>
 </tbody>
 </table>
-<p>These are benchmark laws. A family name describes the generated untreated outcome, not an estimator that must be used on it.</p>
+<p>Each family describes the generated untreated outcomes, not the estimator that must be used on them.</p>
 </section>
 <section id="factor-overlap" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="factor-overlap"><span class="header-section-number">3</span> Factor overlap</h2>
 <p>In the factor designs, <code>overlap=0</code> gives treated and control units similar loading distributions. Larger values separate those distributions.</p>
-<div id="aaca4d08" class="cell" data-execution_count="3">
+<div id="64bcb950" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>overlap_panels <span class="op">=</span> {</span>
@@ -5181,12 +5181,12 @@ height: auto;
 1.0 ClassicFactorOutcome</code></pre>
 </div>
 </div>
-<p>The complete component draw is stored in metadata. This permits direct checks of factor paths, loadings, donor weights, and innovations.</p>
+<p>Metadata stores factor paths, loadings, donor weights, and innovations for direct inspection.</p>
 </section>
 <section id="synthetic-control-sparsity" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="synthetic-control-sparsity"><span class="header-section-number">4</span> Synthetic-control sparsity</h2>
 <p><code>active_share</code> is the share of controls with nonzero donor weights for each treated unit.</p>
-<div id="584d82dc" class="cell" data-execution_count="4">
+<div id="0202a264" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>sparse <span class="op">=</span> designs.synthetic_control(active_share<span class="op">=</span><span class="fl">0.1</span>, seed<span class="op">=</span><span class="dv">140</span>)</span>
@@ -5200,12 +5200,12 @@ height: auto;
 0.5</code></pre>
 </div>
 </div>
-<p>This parameter changes the untreated outcome law. It does not select or fit a synthetic-control estimator.</p>
+<p>This parameter changes untreated outcomes. It does not select or fit a synthetic-control estimator.</p>
 </section>
 <section id="temporal-persistence" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="temporal-persistence"><span class="header-section-number">5</span> Temporal persistence</h2>
 <p><code>time_series</code> supports stationary AR(1) paths and integrated ARIMA(1,1,0) paths. <code>coefficient</code> controls persistence.</p>
-<div id="0d86a723" class="cell" data-execution_count="5">
+<div id="f7188cfe" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>stationary <span class="op">=</span> designs.time_series(</span>
@@ -5228,10 +5228,10 @@ True</code></pre>
 </div>
 </div>
 </section>
-<section id="change-the-panel-not-the-law" class="level2" data-number="6">
-<h2 data-number="6" class="anchored" data-anchor-id="change-the-panel-not-the-law"><span class="header-section-number">6</span> Change the panel, not the law</h2>
+<section id="change-the-sample-not-the-model" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="change-the-sample-not-the-model"><span class="header-section-number">6</span> Change the sample, not the model</h2>
 <p>Pass one configuration to several constructors. This keeps sample dimensions, treatment timing, effects, and noise variance aligned.</p>
-<div id="b9437aca" class="cell" data-execution_count="6">
+<div id="04950628" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>small <span class="op">=</span> designs.CanonicalPanelConfig(</span>
@@ -5257,7 +5257,7 @@ True</code></pre>
 <section id="use-the-dispatcher" class="level2" data-number="7">
 <h2 data-number="7" class="anchored" data-anchor-id="use-the-dispatcher"><span class="header-section-number">7</span> Use the dispatcher</h2>
 <p>Use a named dispatcher when design names come from a configuration file:</p>
-<div id="0fcbfffd" class="cell" data-execution_count="7">
+<div id="0b2d245a" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>simulator <span class="op">=</span> designs.make_canonical(</span>
@@ -5276,7 +5276,7 @@ True</code></pre>
 </section>
 <section id="visual-catalog" class="level2" data-number="8">
 <h2 data-number="8" class="anchored" data-anchor-id="visual-catalog"><span class="header-section-number">8</span> Visual catalog</h2>
-<p>Each row below compares two variants of one untreated-outcome family. Treatment timing and the effect law remain common.</p>
+<p>Each row below compares two variants of one untreated-outcome family. Treatment timing and effects remain the same.</p>
 <div class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>

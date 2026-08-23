@@ -6,9 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="The component sequence, public namespaces, validation rules, and package boundary.">
+<meta name="description" content="See the order of simulation steps, stored matrices, random streams, and extension points.">
 
-<title>Architecture and data contract – pypanelsim</title>
+<title>How simulation works – pypanelsim</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -4968,7 +4968,7 @@ height: auto;
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html">Start here</a></li><li class="breadcrumb-item"><a href="./architecture.html">Architecture and data contract</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html">Start here</a></li><li class="breadcrumb-item"><a href="./architecture.html">How simulation works</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -5004,7 +5004,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./architecture.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Architecture and data contract</span></a>
+ <span class="menu-text">How simulation works</span></a>
   </div>
 </li>
       </ul>
@@ -5039,7 +5039,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./interoperability.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Export and interoperability</span></a>
+ <span class="menu-text">Export to other tools</span></a>
   </div>
 </li>
       </ul>
@@ -5121,7 +5121,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./reference/primitives.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Primitive API</span></a>
+ <span class="menu-text">Building-block API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -5150,7 +5150,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./validation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Validation and provenance</span></a>
+ <span class="menu-text">Tests and sources</span></a>
   </div>
 </li>
       </ul>
@@ -5166,26 +5166,26 @@ height: auto;
    
   <ul>
   <li><a href="#the-simulation-sequence" id="toc-the-simulation-sequence" class="nav-link active" data-scroll-target="#the-simulation-sequence"><span class="header-section-number">1</span> The simulation sequence</a></li>
-  <li><a href="#three-public-namespaces" id="toc-three-public-namespaces" class="nav-link" data-scroll-target="#three-public-namespaces"><span class="header-section-number">2</span> Three public namespaces</a></li>
-  <li><a href="#core-protocols" id="toc-core-protocols" class="nav-link" data-scroll-target="#core-protocols"><span class="header-section-number">3</span> Core protocols</a></li>
+  <li><a href="#three-modules-to-remember" id="toc-three-modules-to-remember" class="nav-link" data-scroll-target="#three-modules-to-remember"><span class="header-section-number">2</span> Three modules to remember</a></li>
+  <li><a href="#write-a-custom-component" id="toc-write-a-custom-component" class="nav-link" data-scroll-target="#write-a-custom-component"><span class="header-section-number">3</span> Write a custom component</a></li>
   <li><a href="#matrix-conventions" id="toc-matrix-conventions" class="nav-link" data-scroll-target="#matrix-conventions"><span class="header-section-number">4</span> Matrix conventions</a></li>
-  <li><a href="#immutable-results" id="toc-immutable-results" class="nav-link" data-scroll-target="#immutable-results"><span class="header-section-number">5</span> Immutable results</a></li>
+  <li><a href="#read-only-results" id="toc-read-only-results" class="nav-link" data-scroll-target="#read-only-results"><span class="header-section-number">5</span> Read-only results</a></li>
   <li><a href="#randomness" id="toc-randomness" class="nav-link" data-scroll-target="#randomness"><span class="header-section-number">6</span> Randomness</a></li>
-  <li><a href="#package-boundary" id="toc-package-boundary" class="nav-link" data-scroll-target="#package-boundary"><span class="header-section-number">7</span> Package boundary</a></li>
+  <li><a href="#what-belongs-in-this-package" id="toc-what-belongs-in-this-package" class="nav-link" data-scroll-target="#what-belongs-in-this-package"><span class="header-section-number">7</span> What belongs in this package</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/website/architecture.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content column-body" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html">Start here</a></li><li class="breadcrumb-item"><a href="./architecture.html">Architecture and data contract</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html">Start here</a></li><li class="breadcrumb-item"><a href="./architecture.html">How simulation works</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Architecture and data contract</h1>
+<h1 class="title">How simulation works</h1>
 </div>
 
 <div>
   <div class="description">
-    The component sequence, public namespaces, validation rules, and package boundary.
+    See the order of simulation steps, stored matrices, random streams, and extension points.
   </div>
 </div>
 
@@ -5210,13 +5210,13 @@ height: auto;
 <li>The assignment model draws the binary treatment matrix.</li>
 <li>The time-feature model draws shared time features, if present.</li>
 <li>The outcome model draws untreated outcomes.</li>
-<li>The effect model draws a complete effect surface and realized effects.</li>
+<li>The effect model draws potential effects for every cell and realized effects.</li>
 <li>The simulator validates and freezes the result.</li>
 </ol>
-<p>Later components can use earlier draws through typed contexts. For example, an outcome model can use both unit features and treatment timing. This permits selection on untreated trends. The package keeps that dependence visible in the component definition.</p>
+<p>Each step can use results from earlier steps. For example, an outcome model can use both unit features and treatment timing, which permits selection on untreated trends. The model definition makes that dependence explicit.</p>
 </section>
-<section id="three-public-namespaces" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="three-public-namespaces"><span class="header-section-number">2</span> Three public namespaces</h2>
+<section id="three-modules-to-remember" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="three-modules-to-remember"><span class="header-section-number">2</span> Three modules to remember</h2>
 <p>Use imports that state what an object does:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> core, designs, primitives</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <table class="caption-top table">
@@ -5227,7 +5227,7 @@ height: auto;
 </colgroup>
 <thead>
 <tr class="header">
-<th>Namespace</th>
+<th>Module</th>
 <th>Contents</th>
 <th>Typical use</th>
 </tr>
@@ -5235,25 +5235,25 @@ height: auto;
 <tbody>
 <tr class="odd">
 <td><code>core</code></td>
-<td>contracts, simulator, data, truth, random streams</td>
-<td>compose and inspect simulations</td>
+<td>simulator, results, known effects, random streams</td>
+<td>build and inspect simulations</td>
 </tr>
 <tr class="even">
 <td><code>primitives</code></td>
-<td>feature, assignment, outcome, and effect laws</td>
-<td>build a DGP from parts</td>
+<td>feature, assignment, outcome, and effect models</td>
+<td>assemble a design from parts</td>
 </tr>
 <tr class="odd">
 <td><code>designs</code></td>
-<td>configured scientific and benchmark families</td>
+<td>ready-made scientific examples and benchmarks</td>
 <td>run a named design</td>
 </tr>
 </tbody>
 </table>
-<p>Root-level imports remain available for compatibility. New examples do not use them because a call such as <code>designs.baker(...)</code> or <code>primitives.LowRankFactorOutcome(...)</code> carries useful meaning.</p>
+<p>Root-level imports also work. The documentation uses module names because <code>designs.baker(...)</code> and <code>primitives.LowRankFactorOutcome(...)</code> show where each object belongs.</p>
 </section>
-<section id="core-protocols" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="core-protocols"><span class="header-section-number">3</span> Core protocols</h2>
+<section id="write-a-custom-component" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="write-a-custom-component"><span class="header-section-number">3</span> Write a custom component</h2>
 <p>Each component satisfies a small protocol:</p>
 <ul>
 <li><code>UnitFeatureModel.generate(dimensions, rng)</code> returns a <code>UnitFeatureDraw</code>.</li>
@@ -5301,11 +5301,11 @@ height: auto;
 <p><span class="math display">\[
 Y = Y(0) + D \odot \tau.
 \]</span></p>
-<p>It rejects non-finite values, incompatible shapes, non-binary treatment, a realized effect outside treated cells, and a broken causal identity.</p>
+<p>It rejects non-finite values, mismatched shapes, non-binary treatment, a realized effect outside treated cells, and a broken causal identity.</p>
 </section>
-<section id="immutable-results" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="immutable-results"><span class="header-section-number">5</span> Immutable results</h2>
-<p><code>PanelDataset</code> copies its input arrays and marks them read-only. This prevents an estimator from changing the stored causal truth by accident. Metadata and annotations are also frozen.</p>
+<section id="read-only-results" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="read-only-results"><span class="header-section-number">5</span> Read-only results</h2>
+<p><code>PanelDataset</code> copies its input arrays and marks them read-only. This prevents an estimator from changing stored untreated outcomes or effects by accident. Metadata and annotations are also frozen.</p>
 <p>The result supplies:</p>
 <ul>
 <li><code>as_arrays()</code> for matrix estimators;</li>
@@ -5326,10 +5326,10 @@ Y = Y(0) + D \odot \tau.
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> simulator.simulate(streams<span class="op">=</span>core.SimulationSeeds.from_seed(<span class="dv">42</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Never set NumPy’s process-wide random seed for package simulations.</p>
 </section>
-<section id="package-boundary" class="level2" data-number="7">
-<h2 data-number="7" class="anchored" data-anchor-id="package-boundary"><span class="header-section-number">7</span> Package boundary</h2>
-<p>The package contains reusable simulation infrastructure and configured data laws. It does not contain estimator implementations, paper build systems, Monte Carlo schedulers, or cached reports. Research tutorials can call an external estimator, but the estimator does not become part of the core API.</p>
-<p>This boundary has two benefits. A DGP remains usable after an estimator library changes, and different estimators can receive exactly the same immutable panel.</p>
+<section id="what-belongs-in-this-package" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="what-belongs-in-this-package"><span class="header-section-number">7</span> What belongs in this package</h2>
+<p>The package contains reusable simulation code and ready-made designs. Estimator implementations, paper builds, experiment schedulers, and saved results stay in the analysis project. Tutorials can still call external estimators.</p>
+<p>As a result, a design still works when an estimator library changes, and different estimators can receive exactly the same read-only panel.</p>
 
 
 </section>

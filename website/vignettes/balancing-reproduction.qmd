@@ -1,13 +1,12 @@
 ---
 title: "Balancing validation snapshot"
-description: "What the stored R and Python artifacts establish, and what they do not reproduce."
+description: "Compare stored R and Python Monte Carlo results with the right uncertainty measure."
 jupyter: python3
 ---
 
-This page documents a cross-language validation snapshot for augmented
-balancing experiments. It is self-contained: the displayed results are stored
-in this repository. It does not require access to the research directories
-where the original R experiments were run.
+Stored R and Python results provide a cross-language check for augmented
+balancing experiments. Everything shown on this page is in the repository; the
+original research directories are not required.
 
 The estimator is provided by
 [crabbymetrics](https://github.com/apoorvalal/crabbymetrics). The related paper
@@ -34,7 +33,7 @@ $$
 Values within a few combined Monte Carlo standard errors are consistent with
 simulation noise.
 
-## Included artifacts
+## Included files
 
 | File | Role |
 |---|---|
@@ -44,10 +43,10 @@ simulation noise.
 | `reference/r_augmented_balancing_panel.csv` | one R-generated panel fixture |
 | `reference/r_augmented_balancing_results.csv` | estimator outputs for that fixture |
 | `reference/r_outcome_model_panel.csv` | panel used for outcome-model checks |
-| `reference/r_outcome_model_surfaces.csv` | R counterfactual surfaces |
+| `reference/r_outcome_model_surfaces.csv` | R counterfactual predictions |
 
 The original R project, its package lockfile, and its experiment scripts are
-not included. The checked-in R files are reference artifacts, not a complete R
+not included. The checked-in R files are reference data, not a complete R
 reproduction environment.
 
 ## Read the matched grid
@@ -84,7 +83,7 @@ print("median absolute standardized difference:", round(median, 3))
 
 The comparison contains 398 matched RMSE cells. The stored result shows whether
 each Python value is within three combined Monte Carlo standard errors of its R
-reference. This is evidence of aggregate distributional agreement. It is not
+reference. This shows agreement within Monte Carlo uncertainty. It is not
 proof of exact implementation identity.
 
 ## Largest discrepancies
@@ -178,14 +177,9 @@ uv run python -m website.vignettes.balancing_support.run_balancing_experiments \
 Run it only when you intend to refresh the stored Python results. The command
 does not reconstruct the absent R environment.
 
-## Interpretation boundary
+## What this check shows
 
-The snapshot establishes three limited facts:
-
-1. The stored grids have the same 398 design and estimator cells.
-2. Their differences can be evaluated relative to Monte Carlo uncertainty.
-3. The Python results can be regenerated from the included runner and public
-   estimator source.
-
-It does not establish matched random-number parity, reproduce the original R
-project from source, or validate every private analysis that used these DGPs.
+The two grids cover the same 398 design and estimator cells, and their RMSE
+differences can be judged against Monte Carlo uncertainty. The included runner
+can regenerate the Python grid. The absent R project cannot be regenerated from
+this repository, and the comparison does not use matched random draws.

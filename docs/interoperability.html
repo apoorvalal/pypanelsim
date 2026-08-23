@@ -6,9 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="Use one immutable panel with matrix, data-frame, formula, Arrow, or R estimators.">
+<meta name="description" content="Send one read-only panel to matrix, data-frame, formula, Arrow, or R estimators.">
 
-<title>Export and interoperability – pypanelsim</title>
+<title>Export to other tools – pypanelsim</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -4829,7 +4829,7 @@ height: auto;
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./assignment.html">Build a design</a></li><li class="breadcrumb-item"><a href="./interoperability.html">Export and interoperability</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./assignment.html">Build a design</a></li><li class="breadcrumb-item"><a href="./interoperability.html">Export to other tools</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -4865,7 +4865,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./architecture.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Architecture and data contract</span></a>
+ <span class="menu-text">How simulation works</span></a>
   </div>
 </li>
       </ul>
@@ -4900,7 +4900,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./interoperability.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Export and interoperability</span></a>
+ <span class="menu-text">Export to other tools</span></a>
   </div>
 </li>
       </ul>
@@ -4982,7 +4982,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./reference/primitives.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Primitive API</span></a>
+ <span class="menu-text">Building-block API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -5011,7 +5011,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./validation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Validation and provenance</span></a>
+ <span class="menu-text">Tests and sources</span></a>
   </div>
 </li>
       </ul>
@@ -5039,14 +5039,14 @@ height: auto;
 <!-- main -->
 <main class="content column-body" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./assignment.html">Build a design</a></li><li class="breadcrumb-item"><a href="./interoperability.html">Export and interoperability</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./assignment.html">Build a design</a></li><li class="breadcrumb-item"><a href="./interoperability.html">Export to other tools</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Export and interoperability</h1>
+<h1 class="title">Export to other tools</h1>
 </div>
 
 <div>
   <div class="description">
-    Use one immutable panel with matrix, data-frame, formula, Arrow, or R estimators.
+    Send one read-only panel to matrix, data-frame, formula, Arrow, or R estimators.
   </div>
 </div>
 
@@ -5063,8 +5063,8 @@ height: auto;
 </header>
 
 
-<p><code>pypanelsim</code> does not require an estimator library. It returns NumPy arrays and a dependency-free long-column mapping. Convert that mapping at the boundary of your analysis.</p>
-<div id="61546e63" class="cell" data-execution_count="1">
+<p><code>pypanelsim</code> does not require an estimator library. It returns NumPy arrays and a plain mapping of long-form columns. Convert those columns only when another tool needs a specific data-frame type.</p>
+<div id="ea5fdc06" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> designs</span>
@@ -5075,7 +5075,7 @@ height: auto;
 <section id="matrix-estimators" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="matrix-estimators"><span class="header-section-number">1</span> Matrix estimators</h2>
 <p>Use <code>as_arrays()</code> when an estimator accepts outcome and treatment matrices in <code>(unit, time)</code> order.</p>
-<div id="d81fb338" class="cell" data-execution_count="2">
+<div id="0547e6ce" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>outcome, treatment <span class="op">=</span> panel.as_arrays()</span>
@@ -5085,8 +5085,8 @@ height: auto;
 <pre><code>(200, 50) (200, 50)</code></pre>
 </div>
 </div>
-<p>Use <code>arrays()</code> when the estimator also needs untreated truth or the effect surface.</p>
-<div id="7176db06" class="cell" data-execution_count="3">
+<p>Use <code>arrays()</code> when the estimator also needs untreated outcomes or potential effects.</p>
+<div id="c78e340e" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>y, d, y0, tau <span class="op">=</span> panel.arrays(</span>
@@ -5102,7 +5102,7 @@ height: auto;
 </section>
 <section id="pandas-and-formula-estimators" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="pandas-and-formula-estimators"><span class="header-section-number">2</span> pandas and formula estimators</h2>
-<div id="b53471a7" class="cell" data-execution_count="4">
+<div id="64f1132d" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -5142,7 +5142,7 @@ height: auto;
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>table <span class="op">=</span> pa.table(panel.as_long_dict(include_annotations<span class="op">=</span><span class="va">True</span>))</span>
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>pq.write_table(table, <span class="st">&quot;simulation.parquet&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Parquet is a useful interchange format because it preserves typed columns and can be read by Python, R, Julia, DuckDB, and other systems.</p>
+<p>Parquet is useful because it preserves typed columns and can be read by Python, R, Julia, DuckDB, and other systems.</p>
 </section>
 <section id="r" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="r"><span class="header-section-number">5</span> R</h2>
@@ -5165,11 +5165,11 @@ height: auto;
 <div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fit_matrix_estimator(panel, estimator):</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    outcome, treatment <span class="op">=</span> panel.as_arrays(copy<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> estimator.fit(outcome<span class="op">=</span>outcome, treatment<span class="op">=</span>treatment)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>An adapter may reshape data or rename columns. It should not change the DGP or recompute causal truth. This boundary lets several estimators use the same panel object.</p>
+<p>An adapter may reshape data or rename columns. It should not change the simulated values or recompute known effects. Several estimators can then use the same panel.</p>
 </section>
 <section id="repeated-experiments" class="level2" data-number="7">
 <h2 data-number="7" class="anchored" data-anchor-id="repeated-experiments"><span class="header-section-number">7</span> Repeated experiments</h2>
-<div id="fbc528be" class="cell" data-execution_count="5">
+<div id="20b7c128" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>simulator <span class="op">=</span> designs.classic_factor_design(overlap<span class="op">=</span><span class="fl">0.0</span>)</span>
@@ -5198,7 +5198,7 @@ height: auto;
 4            5       1.1         40</code></pre>
 </div>
 </div>
-<p>Store small estimator summaries in the experiment project. Do not add Monte Carlo result caches to the simulation package.</p>
+<p>Store estimator summaries with the experiment that produced them, not in the simulation package.</p>
 
 
 </section>

@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="What the stored R and Python artifacts establish, and what they do not reproduce.">
+<meta name="description" content="Compare stored R and Python Monte Carlo results with the right uncertainty measure.">
 
 <title>Balancing validation snapshot – pypanelsim</title>
 <style>
@@ -5004,7 +5004,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../architecture.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Architecture and data contract</span></a>
+ <span class="menu-text">How simulation works</span></a>
   </div>
 </li>
       </ul>
@@ -5039,7 +5039,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../interoperability.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Export and interoperability</span></a>
+ <span class="menu-text">Export to other tools</span></a>
   </div>
 </li>
       </ul>
@@ -5121,7 +5121,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../reference/primitives.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Primitive API</span></a>
+ <span class="menu-text">Building-block API</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -5150,7 +5150,7 @@ height: auto;
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../validation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Validation and provenance</span></a>
+ <span class="menu-text">Tests and sources</span></a>
   </div>
 </li>
       </ul>
@@ -5166,14 +5166,14 @@ height: auto;
    
   <ul>
   <li><a href="#validation-question" id="toc-validation-question" class="nav-link active" data-scroll-target="#validation-question"><span class="header-section-number">1</span> Validation question</a></li>
-  <li><a href="#included-artifacts" id="toc-included-artifacts" class="nav-link" data-scroll-target="#included-artifacts"><span class="header-section-number">2</span> Included artifacts</a></li>
+  <li><a href="#included-files" id="toc-included-files" class="nav-link" data-scroll-target="#included-files"><span class="header-section-number">2</span> Included files</a></li>
   <li><a href="#read-the-matched-grid" id="toc-read-the-matched-grid" class="nav-link" data-scroll-target="#read-the-matched-grid"><span class="header-section-number">3</span> Read the matched grid</a></li>
   <li><a href="#main-result" id="toc-main-result" class="nav-link" data-scroll-target="#main-result"><span class="header-section-number">4</span> Main result</a></li>
   <li><a href="#largest-discrepancies" id="toc-largest-discrepancies" class="nav-link" data-scroll-target="#largest-discrepancies"><span class="header-section-number">5</span> Largest discrepancies</a></li>
   <li><a href="#visual-agreement-diagnostics" id="toc-visual-agreement-diagnostics" class="nav-link" data-scroll-target="#visual-agreement-diagnostics"><span class="header-section-number">6</span> Visual agreement diagnostics</a></li>
   <li><a href="#rebuild-the-comparison-table" id="toc-rebuild-the-comparison-table" class="nav-link" data-scroll-target="#rebuild-the-comparison-table"><span class="header-section-number">7</span> Rebuild the comparison table</a></li>
   <li><a href="#rerun-the-python-monte-carlo" id="toc-rerun-the-python-monte-carlo" class="nav-link" data-scroll-target="#rerun-the-python-monte-carlo"><span class="header-section-number">8</span> Rerun the Python Monte Carlo</a></li>
-  <li><a href="#interpretation-boundary" id="toc-interpretation-boundary" class="nav-link" data-scroll-target="#interpretation-boundary"><span class="header-section-number">9</span> Interpretation boundary</a></li>
+  <li><a href="#what-this-check-shows" id="toc-what-this-check-shows" class="nav-link" data-scroll-target="#what-this-check-shows"><span class="header-section-number">9</span> What this check shows</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/apoorvalal/pypanelsim/edit/main/website/vignettes/balancing-reproduction.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/apoorvalal/pypanelsim/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -5187,7 +5187,7 @@ height: auto;
 
 <div>
   <div class="description">
-    What the stored R and Python artifacts establish, and what they do not reproduce.
+    Compare stored R and Python Monte Carlo results with the right uncertainty measure.
   </div>
 </div>
 
@@ -5204,7 +5204,7 @@ height: auto;
 </header>
 
 
-<p>This page documents a cross-language validation snapshot for augmented balancing experiments. It is self-contained: the displayed results are stored in this repository. It does not require access to the research directories where the original R experiments were run.</p>
+<p>Stored R and Python results provide a cross-language check for augmented balancing experiments. Everything shown on this page is in the repository; the original research directories are not required.</p>
 <p>The estimator is provided by <a href="https://github.com/apoorvalal/crabbymetrics">crabbymetrics</a>. The related paper is <a href="https://apoorvalal.github.io/files/papers/augbal.pdf">Augmented Balancing Estimators of the Average Treatment Effect on the Treated in Cross-Sectional and Panel Designs</a>.</p>
 <section id="validation-question" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="validation-question"><span class="header-section-number">1</span> Validation question</h2>
@@ -5219,8 +5219,8 @@ Z_j=
 \]</span></p>
 <p>Values within a few combined Monte Carlo standard errors are consistent with simulation noise.</p>
 </section>
-<section id="included-artifacts" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="included-artifacts"><span class="header-section-number">2</span> Included artifacts</h2>
+<section id="included-files" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="included-files"><span class="header-section-number">2</span> Included files</h2>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 50%">
@@ -5259,15 +5259,15 @@ Z_j=
 </tr>
 <tr class="odd">
 <td><code>reference/r_outcome_model_surfaces.csv</code></td>
-<td>R counterfactual surfaces</td>
+<td>R counterfactual predictions</td>
 </tr>
 </tbody>
 </table>
-<p>The original R project, its package lockfile, and its experiment scripts are not included. The checked-in R files are reference artifacts, not a complete R reproduction environment.</p>
+<p>The original R project, its package lockfile, and its experiment scripts are not included. The checked-in R files are reference data, not a complete R reproduction environment.</p>
 </section>
 <section id="read-the-matched-grid" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="read-the-matched-grid"><span class="header-section-number">3</span> Read the matched grid</h2>
-<div id="a4d0ad4e" class="cell" data-execution_count="1">
+<div id="c2f6ab90" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
@@ -5296,7 +5296,7 @@ Python replications per cell: [np.int64(200)]</code></pre>
 </section>
 <section id="main-result" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="main-result"><span class="header-section-number">4</span> Main result</h2>
-<div id="138139c2" class="cell" data-execution_count="2">
+<div id="95dc10a9" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>within_three <span class="op">=</span> <span class="bu">int</span>(comparison[<span class="st">&quot;within_three_mcse&quot;</span>].<span class="bu">sum</span>())</span>
@@ -5313,11 +5313,11 @@ maximum absolute standardized difference: 3.743
 median absolute standardized difference: 0.551</code></pre>
 </div>
 </div>
-<p>The comparison contains 398 matched RMSE cells. The stored result shows whether each Python value is within three combined Monte Carlo standard errors of its R reference. This is evidence of aggregate distributional agreement. It is not proof of exact implementation identity.</p>
+<p>The comparison contains 398 matched RMSE cells. The stored result shows whether each Python value is within three combined Monte Carlo standard errors of its R reference. This shows agreement within Monte Carlo uncertainty. It is not proof of exact implementation identity.</p>
 </section>
 <section id="largest-discrepancies" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="largest-discrepancies"><span class="header-section-number">5</span> Largest discrepancies</h2>
-<div id="cfe8e2d7" class="cell" data-execution_count="3">
+<div id="2c0e0c58" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>columns <span class="op">=</span> [</span>
@@ -5415,15 +5415,9 @@ Figure 1: R and Python RMSE agreement across 398 matched simulation cells.
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--help</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Run it only when you intend to refresh the stored Python results. The command does not reconstruct the absent R environment.</p>
 </section>
-<section id="interpretation-boundary" class="level2" data-number="9">
-<h2 data-number="9" class="anchored" data-anchor-id="interpretation-boundary"><span class="header-section-number">9</span> Interpretation boundary</h2>
-<p>The snapshot establishes three limited facts:</p>
-<ol type="1">
-<li>The stored grids have the same 398 design and estimator cells.</li>
-<li>Their differences can be evaluated relative to Monte Carlo uncertainty.</li>
-<li>The Python results can be regenerated from the included runner and public estimator source.</li>
-</ol>
-<p>It does not establish matched random-number parity, reproduce the original R project from source, or validate every private analysis that used these DGPs.</p>
+<section id="what-this-check-shows" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="what-this-check-shows"><span class="header-section-number">9</span> What this check shows</h2>
+<p>The two grids cover the same 398 design and estimator cells, and their RMSE differences can be judged against Monte Carlo uncertainty. The included runner can regenerate the Python grid. The absent R project cannot be regenerated from this repository, and the comparison does not use matched random draws.</p>
 
 
 </section>
