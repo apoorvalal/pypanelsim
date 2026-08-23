@@ -1,86 +1,134 @@
 [
   {
-    "objectID": "vignettes/ftest-heterogeneity.html",
-    "href": "vignettes/ftest-heterogeneity.html",
-    "title": "F-test heterogeneity designs",
+    "objectID": "getting-started.html",
+    "href": "getting-started.html",
+    "title": "Get started",
     "section": "",
-    "text": "These designs support the public TestingInEventStudies project and the paper When can we get away with using the two-way fixed effects regression?. The package generates the null and alternative effect surfaces. It does not implement the test statistic.\nCode\nimport matplotlib.pyplot as plt\nimport numpy as np\n\nfrom pypanelsim import designs",
+    "text": "This tutorial starts with a configured design, inspects its causal truth, and then rebuilds it from basic primitives. The full page runs in a few seconds.",
     "crumbs": [
       "Home",
-      "Research tutorials",
-      "F-test heterogeneity designs"
+      "Start here",
+      "Get started"
     ]
   },
   {
-    "objectID": "vignettes/ftest-heterogeneity.html#two-different-heterogeneity-questions",
-    "href": "vignettes/ftest-heterogeneity.html#two-different-heterogeneity-questions",
-    "title": "F-test heterogeneity designs",
-    "section": "1 Two different heterogeneity questions",
-    "text": "1 Two different heterogeneity questions\nThe temporal family asks whether the effect is constant over exposure time. It uses one treatment cohort.\nThe cohort family asks whether adoption cohorts share the same event-time path. It uses three cohorts and correlated untreated errors.\n\n\nCode\nprint(\"temporal:\", designs.available_ftest_temporal_designs())\nprint(\"cohort:\", designs.available_ftest_cohort_designs())\n\n\ntemporal: ('constant', 'linear', 'concave', 'positive_then_negative', 'exponential', 'sinusoidal', 'random_walk')\ncohort: ('homogeneous', 'log_vs_linear_vs_sin', 'small_differences', 'large_differences', 'selection_on_gains', 'novelty_effects', 'activity_bias')",
+    "objectID": "getting-started.html#install-and-import",
+    "href": "getting-started.html#install-and-import",
+    "title": "Get started",
+    "section": "1 Install and import",
+    "text": "1 Install and import\nuv add \"pypanelsim @ git+https://github.com/apoorvalal/pypanelsim.git\"\n\n\nCode\nimport matplotlib.pyplot as plt\nimport numpy as np\n\nfrom pypanelsim import core, designs, primitives\n\n\nThe three names describe their roles:\n\ncore defines simulation and data contracts.\nprimitives provides reusable probability laws.\ndesigns provides configured benchmark families.",
     "crumbs": [
       "Home",
-      "Research tutorials",
-      "F-test heterogeneity designs"
+      "Start here",
+      "Get started"
     ]
   },
   {
-    "objectID": "vignettes/ftest-heterogeneity.html#temporal-alternatives",
-    "href": "vignettes/ftest-heterogeneity.html#temporal-alternatives",
-    "title": "F-test heterogeneity designs",
-    "section": "2 Temporal alternatives",
-    "text": "2 Temporal alternatives\nThe seven paths are constant, linear, concave, positive-then-negative, exponential, sinusoidal, and random walk.\n\n\nCode\ntemporal_config = designs.FTestTemporalConfig(\n    n_units=240,\n    n_periods=35,\n    adoption_period=15,\n    max_effect=1.0,\n)\n\nfor name in designs.available_ftest_temporal_designs():\n    profile = designs.ftest_temporal_profile(\n        name,\n        config=temporal_config,\n        seed=42,\n    )\n    print(name, np.round(profile[:6], 2))\n\n\nconstant [1. 1. 1. 1. 1. 1.]\nlinear [0.   0.05 0.11 0.16 0.21 0.26]\nconcave [0.05 0.09 0.13 0.17 0.2  0.24]\npositive_then_negative [0.   0.11 0.22 0.33 0.44 0.56]\nexponential [0.   0.23 0.41 0.55 0.65 0.73]\nsinusoidal [0.   0.32 0.61 0.84 0.97 1.  ]\nrandom_walk [ 0.3  -0.74  0.02  0.96 -1.   -2.3 ]\n\n\n\n\nCode\ntemporal_names = designs.available_ftest_temporal_designs()\nfigure, axes = plt.subplots(\n    2,\n    4,\n    figsize=(13, 7),\n    sharex=True,\n    constrained_layout=True,\n)\nfor axis, name in zip(axes.ravel(), temporal_names, strict=False):\n    profile = designs.ftest_temporal_profile(\n        name,\n        config=temporal_config,\n        seed=42,\n    )\n    axis.plot(np.arange(profile.size), profile, marker=\"o\", markersize=3)\n    axis.axhline(0.0, color=\"black\", linewidth=0.6)\n    axis.set_title(name.replace(\"_\", \" \"))\n    axis.set_xlabel(\"event time\")\n    axis.set_ylabel(\"effect\")\nfor axis in axes.ravel()[len(temporal_names):]:\n    axis.set_visible(False)\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: The seven single-cohort temporal effect alternatives.\n\n\n\n\n\nThe untreated outcome contains unit effects, time effects, small unit trends, and AR(1) error. The treatment path begins at adoption_period.\n\n\nCode\ntemporal_panel = designs.ftest_temporal(\n    \"positive_then_negative\",\n    config=temporal_config,\n    profile_seed=42,\n    seed=17,\n)\n\nprint(temporal_panel.shape)\nprint(round(temporal_panel.true_att, 3))\n\n\n(240, 35)\n0.25\n\n\nprofile_seed fixes the random-walk alternative itself. seed controls the panel draw. Keeping these inputs separate prevents a change in outcome noise from changing the effect profile.",
+    "objectID": "getting-started.html#run-a-configured-design",
+    "href": "getting-started.html#run-a-configured-design",
+    "title": "Get started",
+    "section": "2 Run a configured design",
+    "text": "2 Run a configured design\n\n\nCode\npanel = designs.classic_factor(overlap=1.0, seed=17)\n\nprint(\"name:\", panel.name)\nprint(\"shape:\", panel.shape)\nprint(\"treated units:\", panel.treated_units.size)\nprint(\"adoption period:\", panel.adoption_times[panel.ever_treated][0])\nprint(\"true ATT:\", round(panel.true_att, 3))\n\n\nname: classic_factor\nshape: (200, 50)\ntreated units: 40\nadoption period: 40\ntrue ATT: 1.1\n\n\nThe design has a low-rank untreated outcome and one treated cohort. The overlap argument changes the separation between treated and control factor loadings.",
     "crumbs": [
       "Home",
-      "Research tutorials",
-      "F-test heterogeneity designs"
+      "Start here",
+      "Get started"
     ]
   },
   {
-    "objectID": "vignettes/ftest-heterogeneity.html#cohort-alternatives",
-    "href": "vignettes/ftest-heterogeneity.html#cohort-alternatives",
-    "title": "F-test heterogeneity designs",
-    "section": "3 Cohort alternatives",
-    "text": "3 Cohort alternatives\nThe cohort family uses three adoption dates. Named surfaces range from a homogeneous null to large cohort differences and selection on gains.\n\n\nCode\ncohort_config = designs.FTestCohortConfig(n_units=240)\n\nfor name in designs.available_ftest_cohort_designs():\n    profiles = designs.ftest_cohort_profiles(name, config=cohort_config)\n    first_values = {\n        cohort: round(float(path[0]), 2)\n        for cohort, path in profiles.items()\n    }\n    print(name, first_values)\n\n\nhomogeneous {10: 0.0, 15: 0.0, 20: 0.0}\nlog_vs_linear_vs_sin {10: 2.0, 15: 0.69, 20: 0.84}\nsmall_differences {10: 0.0, 15: 0.0, 20: 0.0}\nlarge_differences {10: 0.0, 15: 0.0, 20: 0.0}\nselection_on_gains {10: 0.0, 15: 0.0, 20: 0.0}\nnovelty_effects {10: 2.5, 15: 2.5, 20: 2.5}\nactivity_bias {10: 2.5, 15: 0.0, 20: 0.0}\n\n\n\n\nCode\ncohort_names = designs.available_ftest_cohort_designs()\nfigure, axes = plt.subplots(\n    2,\n    4,\n    figsize=(14, 7),\n    sharex=True,\n    constrained_layout=True,\n)\nfor axis, name in zip(axes.ravel(), cohort_names, strict=False):\n    profiles = designs.ftest_cohort_profiles(name, config=cohort_config)\n    for cohort, profile in profiles.items():\n        axis.plot(\n            np.arange(profile.size),\n            profile,\n            label=f\"cohort {cohort}\",\n        )\n    axis.axhline(0.0, color=\"black\", linewidth=0.6)\n    axis.set_title(name.replace(\"_\", \" \"))\n    axis.set_xlabel(\"event time\")\n    axis.set_ylabel(\"effect\")\nfor axis in axes.ravel()[len(cohort_names):]:\n    axis.set_visible(False)\naxes.ravel()[0].legend(fontsize=7)\nplt.show()\n\n\n\n\n\n\n\n\nFigure 2: Cohort-specific paths for the seven effect-surface alternatives.\n\n\n\n\n\nRun one surface and inspect its supported cohort-event truth:\n\n\nCode\ncohort_panel = designs.ftest_cohort(\n    \"selection_on_gains\",\n    config=cohort_config,\n    seed=17,\n)\n\ntruth = cohort_panel.truth.cohort_event(event_times=(-2, -1, 0, 1, 2, 3))\nfor cohort in np.unique(truth[\"cohort\"]):\n    selected = truth[\"cohort\"] == cohort\n    print(\n        int(cohort),\n        np.round(truth[\"effect\"][selected], 2),\n        truth[\"supported\"][selected],\n    )\n\n\n10 [0.   0.   0.   0.69 1.1  1.39] [ True  True  True  True  True  True]\n15 [0.   0.   0.   0.62 0.99 1.25] [ True  True  True  True  True  True]\n20 [0.   0.   0.   0.55 0.88 1.11] [ True  True  True  True  True  True]\n\n\nPre-treatment effects are zero. An unsupported cohort-event cell has NaN effect and supported=False.",
+    "objectID": "getting-started.html#inspect-the-data-contract",
+    "href": "getting-started.html#inspect-the-data-contract",
+    "title": "Get started",
+    "section": "3 Inspect the data contract",
+    "text": "3 Inspect the data contract\n\n\nCode\nprint(panel.outcome.shape)\nprint(panel.treatment.shape)\nprint(panel.untreated_outcome.shape)\nprint(panel.effect_surface.shape)\n\nidentity_error = abs(\n    panel.outcome - panel.untreated_outcome - panel.treatment_effect\n).max()\nprint(\"largest identity error:\", identity_error)\n\n\n(200, 50)\n(200, 50)\n(200, 50)\n(200, 50)\nlargest identity error: 1.5543122344752192e-15\n\n\neffect_surface[i, t] is the effect that unit \\(i\\) would have at time \\(t\\) if treated. treatment_effect[i, t] is the realized effect and is zero when the cell is untreated.",
     "crumbs": [
       "Home",
-      "Research tutorials",
-      "F-test heterogeneity designs"
+      "Start here",
+      "Get started"
     ]
   },
   {
-    "objectID": "vignettes/ftest-heterogeneity.html#realized-panel-structure",
-    "href": "vignettes/ftest-heterogeneity.html#realized-panel-structure",
-    "title": "F-test heterogeneity designs",
-    "section": "4 Realized panel structure",
-    "text": "4 Realized panel structure\nThe temporal design has one adoption block. The cohort design has three. The outcome heatmaps also show their different untreated dependence structures.\n\n\nCode\nrealized_panels = (\n    (\"Temporal alternative\", temporal_panel),\n    (\"Cohort alternative\", cohort_panel),\n)\nfigure, axes = plt.subplots(2, 2, figsize=(13, 8), constrained_layout=True)\nfor row, (label, draw) in enumerate(realized_panels):\n    order = np.argsort(draw.adoption_times, kind=\"stable\")\n    outcome_image = axes[row, 0].matshow(\n        draw.outcome[order],\n        aspect=\"auto\",\n        cmap=\"coolwarm\",\n    )\n    axes[row, 1].matshow(\n        draw.treatment[order],\n        aspect=\"auto\",\n        cmap=\"Greys\",\n        vmin=0.0,\n        vmax=1.0,\n    )\n    axes[row, 0].set_title(f\"{label}: outcome\")\n    axes[row, 1].set_title(f\"{label}: treatment\")\n    axes[row, 0].set_ylabel(\"units, sorted by adoption\")\n    figure.colorbar(outcome_image, ax=axes[row, 0], fraction=0.03, pad=0.02)\n    for axis in axes[row]:\n        axis.set_xlabel(\"period\")\nplt.show()\n\n\n\n\n\n\n\n\nFigure 3: Observed outcomes and treatment for one temporal and one cohort-heterogeneity design.",
+    "objectID": "getting-started.html#inspect-causal-truth",
+    "href": "getting-started.html#inspect-causal-truth",
+    "title": "Get started",
+    "section": "4 Inspect causal truth",
+    "text": "4 Inspect causal truth\n\n\nCode\nevent_truth = panel.truth.event_study()\nprint(event_truth.keys())\n\nfor event_time, effect in zip(\n    event_truth[\"event_time\"][:5],\n    event_truth[\"effect\"][:5],\n    strict=True,\n):\n    print(int(event_time), round(float(effect), 3))\n\n\ndict_keys(['event_time', 'effect', 'supported_cohorts', 'target_unit_count'])\n-40 0.0\n-39 0.0\n-38 0.0\n-37 0.0\n-36 0.0\n\n\nTruth is computed from the stored effect surface. It does not depend on an estimator package.",
     "crumbs": [
       "Home",
-      "Research tutorials",
-      "F-test heterogeneity designs"
+      "Start here",
+      "Get started"
     ]
   },
   {
-    "objectID": "vignettes/ftest-heterogeneity.html#build-a-custom-cohort-surface",
-    "href": "vignettes/ftest-heterogeneity.html#build-a-custom-cohort-surface",
-    "title": "F-test heterogeneity designs",
-    "section": "5 Build a custom cohort surface",
-    "text": "5 Build a custom cohort surface\nThe configured family uses the same primitives that are available to user code. A cohort surface is a map from adoption period to an event-time array.\n\n\nCode\nfrom pypanelsim import primitives\n\nprofiles = designs.ftest_cohort_profiles(\n    \"novelty_effects\",\n    config=cohort_config,\n)\neffect_model = primitives.CohortEventTimeEffect(profiles)\n\nprint(type(effect_model).__name__)\n\n\nCohortEventTimeEffect\n\n\nPass this effect model to a custom core.PanelSimulator when the built-in untreated outcome or assignment law is not appropriate.",
+    "objectID": "getting-started.html#compose-two-way-fixed-effects-and-factors",
+    "href": "getting-started.html#compose-two-way-fixed-effects-and-factors",
+    "title": "Get started",
+    "section": "5 Compose two-way fixed effects and factors",
+    "text": "5 Compose two-way fixed effects and factors\nTwo-way fixed effects and low-rank factor models are basic untreated-outcome primitives. Combine them with SumOutcomeModel.\n\n\nCode\noutcome_model = primitives.SumOutcomeModel(\n    models=(\n        primitives.TwoWayFixedEffectsOutcome(\n            unit_effect_scale=1.0,\n            time_effect_scale=0.5,\n            noise_scale=0.2,\n        ),\n        primitives.LowRankFactorOutcome(\n            rank=2,\n            loading_scale=1.0,\n            factor_scale=0.7,\n        ),\n    ),\n    weights=(1.0, 1.0),\n)\n\nsimulator = core.PanelSimulator(\n    name=\"fixed_effects_plus_factors\",\n    dimensions=core.PanelDimensions(n_units=200, n_periods=40),\n    assignment=primitives.RandomizedSingleCohortAssignment(\n        n_treated=80,\n        adoption_period=25,\n    ),\n    outcome_model=outcome_model,\n    effect_model=primitives.LinearRampEffect(slope=0.2),\n)\n\ncomposed_panel = simulator.simulate(seed=17)\nprint(composed_panel.metadata[\"outcome\"][\"model\"])\nprint(round(composed_panel.true_att, 3))\n\n\nSumOutcomeModel\n1.6",
     "crumbs": [
       "Home",
-      "Research tutorials",
-      "F-test heterogeneity designs"
+      "Start here",
+      "Get started"
     ]
   },
   {
-    "objectID": "vignettes/ftest-heterogeneity.html#simulation-study-use",
-    "href": "vignettes/ftest-heterogeneity.html#simulation-study-use",
-    "title": "F-test heterogeneity designs",
-    "section": "6 Simulation-study use",
-    "text": "6 Simulation-study use\nA size experiment should use a homogeneous design as its null. A power experiment should vary the form and magnitude of heterogeneity. Report the exact named surface, configuration, panel seed, and any profile seed. Do not refer only to “the F-test DGP”; that phrase does not identify one probability law.",
+    "objectID": "getting-started.html#compare-the-two-panels",
+    "href": "getting-started.html#compare-the-two-panels",
+    "title": "Get started",
+    "section": "6 Compare the two panels",
+    "text": "6 Compare the two panels\nThe first panel has the configured canonical factor law. The second panel adds two-way fixed effects and a generic rank-two factor component. Sorting units by adoption time makes the treated block visible.\n\n\nCode\ncomparisons = (\n    (\"Configured classic factor\", panel),\n    (\"2WFE plus rank-two factors\", composed_panel),\n)\nfigure, axes = plt.subplots(2, 2, figsize=(12, 7), constrained_layout=True)\n\nfor row, (label, draw) in enumerate(comparisons):\n    order = np.argsort(draw.adoption_times, kind=\"stable\")\n    outcome_image = axes[row, 0].matshow(\n        draw.outcome[order],\n        aspect=\"auto\",\n        cmap=\"coolwarm\",\n    )\n    treatment_image = axes[row, 1].matshow(\n        draw.treatment[order],\n        aspect=\"auto\",\n        cmap=\"Greys\",\n        vmin=0.0,\n        vmax=1.0,\n    )\n    axes[row, 0].set_title(f\"{label}: outcome\")\n    axes[row, 1].set_title(f\"{label}: treatment\")\n    axes[row, 0].set_ylabel(\"units, sorted by adoption\")\n    figure.colorbar(outcome_image, ax=axes[row, 0], fraction=0.025, pad=0.02)\n    figure.colorbar(treatment_image, ax=axes[row, 1], fraction=0.025, pad=0.02)\n\nfor axis in axes[-1]:\n    axis.set_xlabel(\"period\")\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Observed outcomes and treatment for a configured factor design and a design composed from two-way fixed effects and low-rank factors.\n\n\n\n\n\nThe simulator calls the components in a fixed order, validates their shapes, and checks the causal identity before it returns a panel.",
     "crumbs": [
       "Home",
-      "Research tutorials",
-      "F-test heterogeneity designs"
+      "Start here",
+      "Get started"
+    ]
+  },
+  {
+    "objectID": "getting-started.html#change-one-assumption",
+    "href": "getting-started.html#change-one-assumption",
+    "title": "Get started",
+    "section": "7 Change one assumption",
+    "text": "7 Change one assumption\nReplace random assignment with selection on observed and unobserved features. The outcome law and effect law do not change.\n\n\nCode\nselected_simulator = core.PanelSimulator(\n    name=\"selected_fixed_effects_plus_factors\",\n    dimensions=core.PanelDimensions(n_units=200, n_periods=40),\n    feature_model=primitives.GaussianUnitFeatures(\n        n_observables=2,\n        n_unobservables=1,\n    ),\n    assignment=primitives.BinaryLogitAssignment(\n        adoption_period=25,\n        intercept=-0.4,\n        observable_coefficients=(0.7, -0.4),\n        unobservable_coefficients=(0.8,),\n    ),\n    outcome_model=outcome_model,\n    effect_model=primitives.LinearRampEffect(slope=0.2),\n)\n\nselected_panel = selected_simulator.simulate(seed=17)\nprint(\"treated units:\", selected_panel.treated_units.size)\nprint(\"covariates:\", selected_panel.unit_covariate_names)\n\n\ntreated units: 79\ncovariates: ('x1', 'x2')",
+    "crumbs": [
+      "Home",
+      "Start here",
+      "Get started"
+    ]
+  },
+  {
+    "objectID": "getting-started.html#export-to-an-estimator",
+    "href": "getting-started.html#export-to-an-estimator",
+    "title": "Get started",
+    "section": "8 Export to an estimator",
+    "text": "8 Export to an estimator\nMatrix estimators usually need only two arrays:\n\n\nCode\noutcome, treatment = selected_panel.as_arrays()\nprint(outcome.shape, treatment.shape)\n\n\n(200, 40) (200, 40)\n\n\nFormula and data-frame estimators need long columns:\n\n\nCode\nlong_columns = selected_panel.as_long_dict(include_annotations=True)\nprint(tuple(long_columns)[:10])\n\n\n('unit', 'time', 'outcome', 'treatment', 'untreated_outcome', 'treatment_effect', 'x1', 'x2', 'ever_treated', 'adoption_period')\n\n\nSee Export and interoperability for pandas, Polars, Arrow, and R examples.",
+    "crumbs": [
+      "Home",
+      "Start here",
+      "Get started"
+    ]
+  },
+  {
+    "objectID": "getting-started.html#apply-the-package-with-pyfixest-and-crabbymetrics",
+    "href": "getting-started.html#apply-the-package-with-pyfixest-and-crabbymetrics",
+    "title": "Get started",
+    "section": "9 Apply the package with PyFixest and crabbymetrics",
+    "text": "9 Apply the package with PyFixest and crabbymetrics\npypanelsim does not require an estimator package. The optional estimator stack is needed for this application:\nuv sync --extra docs --extra estimators\nWe compare two panels with the same randomized cohort and dynamic treatment effect. The first untreated outcome follows a two-way fixed-effects law. The second adds two interactive latent factors with different mean loadings for treated and control units.\n\n\nCode\nimport crabbymetrics as cm\nimport pandas as pd\nimport pyfixest as pf\n\napplication_adoption = 20\napplication_dimensions = core.PanelDimensions(n_units=120, n_periods=30)\napplication_assignment = primitives.RandomizedSingleCohortAssignment(\n    n_treated=24,\n    adoption_period=application_adoption,\n)\napplication_effect = primitives.LinearRampEffect(slope=0.2)\n\nadditive_application = core.PanelSimulator(\n    name=\"additive_twfe_application\",\n    dimensions=application_dimensions,\n    assignment=application_assignment,\n    outcome_model=primitives.TwoWayFixedEffectsOutcome(\n        unit_effect_scale=1.0,\n        time_effect_scale=0.5,\n        noise_scale=0.75,\n    ),\n    effect_model=application_effect,\n).simulate(seed=42)\n\ninteractive_application = core.PanelSimulator(\n    name=\"interactive_factor_application\",\n    dimensions=application_dimensions,\n    assignment=application_assignment,\n    outcome_model=primitives.SumOutcomeModel(\n        models=(\n            primitives.TwoWayFixedEffectsOutcome(\n                unit_effect_scale=1.0,\n                time_effect_scale=0.0,\n                noise_scale=0.0,\n            ),\n            primitives.LowRankFactorOutcome(\n                rank=2,\n                control_loading_mean=-0.1,\n                treated_loading_mean=0.1,\n                noise_scale=0.75,\n            ),\n        )\n    ),\n    effect_model=application_effect,\n).simulate(seed=42)\n\n\n\n9.1 PyFixest two-way fixed effects\nPyFixest consumes the long representation. The event-study regression omits event time \\(-1\\), and the static regression reports an ATT summary. Standard errors are clustered by unit.\n\n\nCode\ndef fit_pyfixest(draw):\n    frame = pd.DataFrame(dict(draw.as_long_dict()))\n    frame[\"ever_treated\"] = np.repeat(\n        draw.ever_treated,\n        draw.n_periods,\n    ).astype(int)\n    event_fit = pf.feols(\n        f\"outcome ~ i(time, ever_treated, ref={application_adoption - 1})\"\n        \" | unit + time\",\n        data=frame,\n        vcov={\"CRV1\": \"unit\"},\n    )\n    att_fit = pf.feols(\n        \"outcome ~ treatment | unit + time\",\n        data=frame,\n        vcov={\"CRV1\": \"unit\"},\n    )\n\n    event = event_fit.tidy().reset_index()\n    term_column = event.columns[0]\n    event[\"period\"] = (\n        event[term_column]\n        .astype(str)\n        .str.extract(r\"time::(-?\\d+)\")[0]\n        .astype(int)\n    )\n    event[\"event_time\"] = event[\"period\"] - application_adoption\n    event = event.rename(\n        columns={\n            \"Estimate\": \"estimate\",\n            \"2.5%\": \"lower\",\n            \"97.5%\": \"upper\",\n        }\n    )\n    event = pd.concat(\n        [\n            event[[\"event_time\", \"estimate\", \"lower\", \"upper\"]],\n            pd.DataFrame(\n                {\n                    \"event_time\": [-1],\n                    \"estimate\": [0.0],\n                    \"lower\": [0.0],\n                    \"upper\": [0.0],\n                }\n            ),\n        ],\n        ignore_index=True,\n    ).sort_values(\"event_time\")\n    att_row = att_fit.tidy().loc[\"treatment\"]\n    return {\n        \"event\": event,\n        \"att\": float(att_row[\"Estimate\"]),\n        \"att_se\": float(att_row[\"Std. Error\"]),\n    }\n\n\n\n\n9.2 crabbymetrics matrix completion\nMatrixCompletion consumes the native unit-by-period arrays. It estimates the missing treated counterfactual from the untreated cells and returns an ATT and weighted event-study path.\n\n\nCode\ndef fit_matrix_completion(draw):\n    model = cm.MatrixCompletion(\n        lambda_fraction=0.25,\n        max_iterations=2_000,\n        tolerance=1e-7,\n        svd_seed=1,\n    )\n    model.fit(\n        draw.outcome.copy(),\n        draw.treatment.copy(),\n    )\n    summary = model.summary()\n    return {\n        \"event\": pd.DataFrame(summary[\"event_study\"][\"weighted\"]),\n        \"att\": float(summary[\"att\"]),\n    }\n\n\n\n\n9.3 crabbymetrics interactive fixed effects\nInteractiveFixedEffects is a factor decomposition, not a treatment-effect estimator. Here it fits the complete donor panel. Treated-unit loadings are estimated only from pre-treatment outcomes, then extrapolated over the fitted donor factors.\n\n\nCode\ndef fit_interactive_fixed_effects(draw, *, rank):\n    outcome, _ = draw.as_arrays(copy=True)\n    donors = draw.control_units\n    treated = draw.treated_units\n    adoption = int(np.unique(draw.adoption_times[treated]).item())\n\n    model = cm.InteractiveFixedEffects(\n        rank=rank,\n        force=3,\n        factor_seed=1,\n    )\n    model.fit(outcome[donors].T)\n    decomposition = model.summary()\n    factors = np.asarray(decomposition[\"factor\"])\n    time_effects = np.asarray(decomposition[\"xi\"])\n\n    pre_design = np.column_stack(\n        [np.ones(adoption), factors[:adoption]],\n    )\n    full_design = np.column_stack(\n        [np.ones(draw.n_periods), factors],\n    )\n    treated_coefficients = np.linalg.lstsq(\n        pre_design,\n        outcome[treated, :adoption].T - time_effects[:adoption, None],\n        rcond=None,\n    )[0]\n    counterfactual = (\n        time_effects[:, None] + full_design @ treated_coefficients\n    ).T\n    estimated_effect = outcome[treated] - counterfactual\n    return {\n        \"event\": pd.DataFrame(\n            {\n                \"event_time\": np.arange(draw.n_periods) - adoption,\n                \"estimate\": estimated_effect.mean(axis=0),\n            }\n        ),\n        \"att\": float(estimated_effect[:, adoption:].mean()),\n    }\n\n\n\n\n9.4 Compare the applications\nThe interactive-fixed-effects rank is supplied by the simulation design. Rank selection is outside this small application.\n\n\nCode\napplication_results = {}\nfor label, draw, rank in (\n    (\"Additive 2WFE\", additive_application, 0),\n    (\"Interactive factors\", interactive_application, 2),\n):\n    application_results[label] = {\n        \"draw\": draw,\n        \"pyfixest\": fit_pyfixest(draw),\n        \"matrix_completion\": fit_matrix_completion(draw),\n        \"interactive_fixed_effects\": fit_interactive_fixed_effects(\n            draw,\n            rank=rank,\n        ),\n    }\n\npd.DataFrame(\n    [\n        {\n            \"design\": label,\n            \"true ATT\": result[\"draw\"].true_att,\n            \"PyFixest 2WFE\": result[\"pyfixest\"][\"att\"],\n            \"crabbymetrics matrix completion\": result[\"matrix_completion\"][\"att\"],\n            \"crabbymetrics IFE\": result[\"interactive_fixed_effects\"][\"att\"],\n        }\n        for label, result in application_results.items()\n    ]\n).set_index(\"design\").round(3)\n\n\n\n\n\n\n\n\n\ntrue ATT\nPyFixest 2WFE\ncrabbymetrics matrix completion\ncrabbymetrics IFE\n\n\ndesign\n\n\n\n\n\n\n\n\nAdditive 2WFE\n1.1\n1.080\n1.055\n1.080\n\n\nInteractive factors\n1.1\n1.265\n1.198\n1.141\n\n\n\n\n\n\n\n\n\nCode\nfigure, axes = plt.subplots(1, 2, figsize=(14, 5), constrained_layout=True)\nfor axis, (label, result) in zip(\n    axes,\n    application_results.items(),\n    strict=True,\n):\n    draw = result[\"draw\"]\n    adoption = int(np.unique(draw.adoption_times[draw.treated_units]).item())\n    truth = pd.DataFrame(\n        {\n            \"event_time\": np.arange(draw.n_periods) - adoption,\n            \"estimate\": draw.treatment_effect[draw.treated_units].mean(axis=0),\n        }\n    ).query(\"event_time &gt;= -10\")\n    pyfixest_event = result[\"pyfixest\"][\"event\"].query(\"event_time &gt;= -10\")\n    matrix_event = result[\"matrix_completion\"][\"event\"].query(\n        \"event_time &gt;= -10\"\n    )\n    ife_event = result[\"interactive_fixed_effects\"][\"event\"].query(\n        \"event_time &gt;= -10\"\n    )\n\n    axis.plot(\n        truth[\"event_time\"],\n        truth[\"estimate\"],\n        \"--\",\n        color=\"black\",\n        linewidth=2.2,\n        label=\"True effect\",\n    )\n    axis.fill_between(\n        pyfixest_event[\"event_time\"],\n        pyfixest_event[\"lower\"],\n        pyfixest_event[\"upper\"],\n        color=\"#3D5A80\",\n        alpha=0.18,\n        linewidth=0,\n        label=\"PyFixest 95% CI\",\n    )\n    axis.plot(\n        pyfixest_event[\"event_time\"],\n        pyfixest_event[\"estimate\"],\n        \"o-\",\n        color=\"#3D5A80\",\n        markersize=4,\n        label=\"PyFixest 2WFE\",\n    )\n    axis.plot(\n        matrix_event[\"event_time\"],\n        matrix_event[\"estimate\"],\n        \"s-\",\n        color=\"#E07A5F\",\n        markersize=4,\n        label=\"crabbymetrics matrix completion\",\n    )\n    axis.plot(\n        ife_event[\"event_time\"],\n        ife_event[\"estimate\"],\n        \"^-\",\n        color=\"#2A9D8F\",\n        markersize=4,\n        label=\"crabbymetrics IFE\",\n    )\n    axis.axhline(0, color=\"0.4\", linewidth=0.8)\n    axis.axvline(-0.5, color=\"0.5\", linewidth=1, linestyle=\":\")\n    axis.set_title(label)\n    axis.set_xlabel(\"event time\")\n    axis.set_ylabel(\"treatment effect\")\n    axis.legend(frameon=False, fontsize=8)\nplt.show()\n\n\n\n\n\n\n\n\nFigure 2: PyFixest and crabbymetrics applied to additive and interactive-factor panels with known causal truth.\n\n\n\n\n\nFor the additive panel, 2WFE is correctly specified. For the interactive panel, the fixed-effects regression omits the latent factors. Matrix completion and the donor-factor application use low-rank structure instead. These are illustrative seeded results, not an estimator ranking: matrix completion uses its default penalty fraction, IFE is given the design rank, and only the PyFixest curve includes sampling uncertainty.",
+    "crumbs": [
+      "Home",
+      "Start here",
+      "Get started"
+    ]
+  },
+  {
+    "objectID": "getting-started.html#generate-replications",
+    "href": "getting-started.html#generate-replications",
+    "title": "Get started",
+    "section": "10 Generate replications",
+    "text": "10 Generate replications\n\n\nCode\nreplications = list(simulator.iter_simulations(3, seed=2026))\nprint([round(item.true_att, 3) for item in replications])\n\n\n[1.6, 1.6, 1.6]\n\n\nUse named component streams when a refactor of one component must not change draws from another component:\n\n\nCode\nstreams = core.SimulationSeeds.from_seed(2026)\nstable_panel = simulator.simulate(streams=streams)\nprint(stable_panel.shape)\n\n\n(200, 40)\n\n\nYou can now choose a standard benchmark, specify an assignment mechanism, or read the research design catalog.",
+    "crumbs": [
+      "Home",
+      "Start here",
+      "Get started"
     ]
   },
   {
@@ -864,99 +912,75 @@
     ]
   },
   {
-    "objectID": "migration.html",
-    "href": "migration.html",
-    "title": "Migration guide",
+    "objectID": "validation.html",
+    "href": "validation.html",
+    "title": "Validation and provenance",
     "section": "",
-    "text": "Root-level imports still work, but new code should state each object’s role.\n# Compatibility form\nfrom pypanelsim import PanelSimulator, classic_factor\n\n# Preferred form\nfrom pypanelsim import core, designs\n\nsimulator_type = core.PanelSimulator\npanel = designs.classic_factor(seed=42)\nThe change is organizational. It does not change generated arrays.",
+    "text": "The repository uses three layers of checks.\n\n\nUnit tests check component shapes, binary and absorbing treatment, immutable arrays, effect-surface identities, event-time support, annotations, and random stream behavior.\n\n\n\nEvery named design is constructed and simulated. Tests also cover invalid configurations and public namespace aliases.\n\n\n\nThe wheel is built and installed into a fresh environment. A smoke test imports core, primitives, and designs, then creates and exports a panel.",
     "crumbs": [
       "Home",
-      "Maintenance and provenance",
-      "Migration guide"
+      "Validation",
+      "Validation and provenance"
     ]
   },
   {
-    "objectID": "migration.html#from-flat-imports-to-descriptive-namespaces",
-    "href": "migration.html#from-flat-imports-to-descriptive-namespaces",
-    "title": "Migration guide",
+    "objectID": "validation.html#validation-layers",
+    "href": "validation.html#validation-layers",
+    "title": "Validation and provenance",
     "section": "",
-    "text": "Root-level imports still work, but new code should state each object’s role.\n# Compatibility form\nfrom pypanelsim import PanelSimulator, classic_factor\n\n# Preferred form\nfrom pypanelsim import core, designs\n\nsimulator_type = core.PanelSimulator\npanel = designs.classic_factor(seed=42)\nThe change is organizational. It does not change generated arrays.",
+    "text": "The repository uses three layers of checks.\n\n\nUnit tests check component shapes, binary and absorbing treatment, immutable arrays, effect-surface identities, event-time support, annotations, and random stream behavior.\n\n\n\nEvery named design is constructed and simulated. Tests also cover invalid configurations and public namespace aliases.\n\n\n\nThe wheel is built and installed into a fresh environment. A smoke test imports core, primitives, and designs, then creates and exports a panel.",
     "crumbs": [
       "Home",
-      "Maintenance and provenance",
-      "Migration guide"
+      "Validation",
+      "Validation and provenance"
     ]
   },
   {
-    "objectID": "migration.html#from-panel_dgps",
-    "href": "migration.html#from-panel_dgps",
-    "title": "Migration guide",
-    "section": "2 From panel_dgps",
-    "text": "2 From panel_dgps\n\n\n\n\n\n\n\nPrevious\nCurrent\n\n\n\n\npanel_dgps.PanelConfig\npypanelsim.designs.CanonicalPanelConfig\n\n\npanel_dgps.PanelData\npypanelsim.core.PanelDataset\n\n\npanel_dgps.classic_factor\npypanelsim.designs.classic_factor\n\n\npanel_dgps.weak_factor\npypanelsim.designs.weak_factor\n\n\npanel_dgps.synthetic_control\npypanelsim.designs.synthetic_control\n\n\npanel_dgps.factor_synthetic\npypanelsim.designs.factor_synthetic\n\n\npanel_dgps.time_series\npypanelsim.designs.time_series\n\n\npanel_dgps.mixed_factor\npypanelsim.designs.mixed_factor\n\n\n\nPanelConfig and PanelData remain compatibility aliases at the package root.",
+    "objectID": "validation.html#standard-commands",
+    "href": "validation.html#standard-commands",
+    "title": "Validation and provenance",
+    "section": "2 Standard commands",
+    "text": "2 Standard commands\nuv sync --extra docs --extra estimators\nuv run ruff format --check src tests examples website\nuv run ruff check src tests examples website\nuv run pytest\nuv run quarto render website --execute\nuv build\nThe exact commands that pass for a release should appear in its release or CI record. This page describes the required classes of checks; it is not a live CI status badge.",
     "crumbs": [
       "Home",
-      "Maintenance and provenance",
-      "Migration guide"
+      "Validation",
+      "Validation and provenance"
     ]
   },
   {
-    "objectID": "migration.html#one-draw-migration",
-    "href": "migration.html#one-draw-migration",
-    "title": "Migration guide",
-    "section": "3 One-draw migration",
-    "text": "3 One-draw migration\n# Previous\nfrom panel_dgps import PanelConfig, classic_factor\n\nconfig = PanelConfig(n_control=80, n_treated=20, n_pre=24, n_post=6)\npanel = classic_factor(config=config, overlap=1.0, seed=10)\n# Current\nfrom pypanelsim import designs\n\nconfig = designs.CanonicalPanelConfig(\n    n_control=80,\n    n_treated=20,\n    n_pre=24,\n    n_post=6,\n)\npanel = designs.classic_factor(\n    config=config,\n    overlap=1.0,\n    seed=10,\n)\nThe extraction audit found exact equality for the canonical outcome, treatment, untreated-outcome, and realized-effect arrays when arguments and seed matched.",
+    "objectID": "validation.html#cross-language-validation",
+    "href": "validation.html#cross-language-validation",
+    "title": "Validation and provenance",
+    "section": "3 Cross-language validation",
+    "text": "3 Cross-language validation\nR and NumPy do not share seeded random streams. The balancing validation snapshot therefore compares Monte Carlo RMSE values relative to their combined Monte Carlo standard errors. It does not claim matched R and Python draws.",
     "crumbs": [
       "Home",
-      "Maintenance and provenance",
-      "Migration guide"
+      "Validation",
+      "Validation and provenance"
     ]
   },
   {
-    "objectID": "migration.html#reusable-simulators",
-    "href": "migration.html#reusable-simulators",
-    "title": "Migration guide",
-    "section": "4 Reusable simulators",
-    "text": "4 Reusable simulators\nUse a _design constructor when an experiment needs many draws:\nsimulator = designs.classic_factor_design(\n    config=config,\n    overlap=1.0,\n)\n\nfor panel in simulator.iter_simulations(200, seed=10):\n    outcome, treatment = panel.as_arrays()\niter_simulations uses child seed sequences. It does not rely on adjacent integer seeds.",
+    "objectID": "validation.html#provenance-labels",
+    "href": "validation.html#provenance-labels",
+    "title": "Validation and provenance",
+    "section": "4 Provenance labels",
+    "text": "4 Provenance labels\nResearch pages use three labels:\n\nPublic translation: a design follows a cited public repository or paper.\nWorking design: a design adapts an unpublished research specification and can change as that work develops.\nPackage benchmark: maintainers assembled the law to test software or an estimator; it is not attributed to a paper.\n\nThese labels prevent a constructor name from making a stronger provenance claim than the evidence supports.",
     "crumbs": [
       "Home",
-      "Maintenance and provenance",
-      "Migration guide"
+      "Validation",
+      "Validation and provenance"
     ]
   },
   {
-    "objectID": "migration.html#metadata-layout",
-    "href": "migration.html#metadata-layout",
-    "title": "Migration guide",
-    "section": "5 Metadata layout",
-    "text": "5 Metadata layout\nEarlier canonical metadata was flat. Current metadata is namespaced by component:\npanel.metadata[\"outcome\"]\npanel.metadata[\"assignment\"]\npanel.metadata[\"effect\"]\nFeature and time-feature metadata appear only when those components exist.",
+    "objectID": "validation.html#sources",
+    "href": "validation.html#sources",
+    "title": "Validation and provenance",
+    "section": "5 Sources",
+    "text": "5 Sources\n\nBaker dynamic effects: JFE_DID\nTWFE heterogeneity tests: repository and paper\nLarge longitudinal experiments: paper and code\nAugmented balancing: paper and estimator source\n\nThe adaptive-pooling family is a working design. The composite family is a package benchmark.",
     "crumbs": [
       "Home",
-      "Maintenance and provenance",
-      "Migration guide"
-    ]
-  },
-  {
-    "objectID": "migration.html#data-ownership",
-    "href": "migration.html#data-ownership",
-    "title": "Migration guide",
-    "section": "6 Data ownership",
-    "text": "6 Data ownership\nPanelDataset owns read-only copies. Code that intentionally mutates estimator inputs must request copies:\noutcome, treatment = panel.as_arrays(copy=True)",
-    "crumbs": [
-      "Home",
-      "Maintenance and provenance",
-      "Migration guide"
-    ]
-  },
-  {
-    "objectID": "migration.html#custom-designs",
-    "href": "migration.html#custom-designs",
-    "title": "Migration guide",
-    "section": "7 Custom designs",
-    "text": "7 Custom designs\nDo not edit a canonical generator to add a project-specific law. Compose core.PanelSimulator from primitives, or register a local factory in core.DGPRegistry. This keeps the package API small and makes the scientific assumptions explicit at the call site.",
-    "crumbs": [
-      "Home",
-      "Maintenance and provenance",
-      "Migration guide"
+      "Validation",
+      "Validation and provenance"
     ]
   },
   {
@@ -1056,95 +1080,11 @@
     ]
   },
   {
-    "objectID": "validation.html",
-    "href": "validation.html",
-    "title": "Validation and provenance",
-    "section": "",
-    "text": "The repository uses four layers of checks.\n\n\nUnit tests check component shapes, binary and absorbing treatment, immutable arrays, effect-surface identities, event-time support, annotations, and random stream behavior.\n\n\n\nEvery named design is constructed and simulated. Tests also cover invalid configurations and public namespace aliases.\n\n\n\nThe wheel is built and installed into a fresh environment. A smoke test imports core, primitives, and designs, then creates and exports a panel.\n\n\n\nThe separate dgps analysis consumes pypanelsim as a dependency. Its test suite checks that the extracted package still supports the balancing experiment runner. This does not make its estimators part of pypanelsim.",
-    "crumbs": [
-      "Home",
-      "Maintenance and provenance",
-      "Validation and provenance"
-    ]
-  },
-  {
-    "objectID": "validation.html#validation-layers",
-    "href": "validation.html#validation-layers",
-    "title": "Validation and provenance",
-    "section": "",
-    "text": "The repository uses four layers of checks.\n\n\nUnit tests check component shapes, binary and absorbing treatment, immutable arrays, effect-surface identities, event-time support, annotations, and random stream behavior.\n\n\n\nEvery named design is constructed and simulated. Tests also cover invalid configurations and public namespace aliases.\n\n\n\nThe wheel is built and installed into a fresh environment. A smoke test imports core, primitives, and designs, then creates and exports a panel.\n\n\n\nThe separate dgps analysis consumes pypanelsim as a dependency. Its test suite checks that the extracted package still supports the balancing experiment runner. This does not make its estimators part of pypanelsim.",
-    "crumbs": [
-      "Home",
-      "Maintenance and provenance",
-      "Validation and provenance"
-    ]
-  },
-  {
-    "objectID": "validation.html#standard-commands",
-    "href": "validation.html#standard-commands",
-    "title": "Validation and provenance",
-    "section": "2 Standard commands",
-    "text": "2 Standard commands\nuv sync --extra docs\nuv run ruff format --check src tests examples website\nuv run ruff check src tests examples website\nuv run pytest\nuv run quarto render website\nuv build\nThe exact commands that pass for a release should appear in its release or CI record. This page describes the required classes of checks; it is not a live CI status badge.",
-    "crumbs": [
-      "Home",
-      "Maintenance and provenance",
-      "Validation and provenance"
-    ]
-  },
-  {
-    "objectID": "validation.html#canonical-migration-parity",
-    "href": "validation.html#canonical-migration-parity",
-    "title": "Validation and provenance",
-    "section": "3 Canonical migration parity",
-    "text": "3 Canonical migration parity\nBefore the earlier embedded implementation was removed, the extraction audit loaded the old and new Python implementations together. It compared outcome, untreated_outcome, treatment, and treatment_effect with exact NumPy equality for the same small configuration and seed.\n\n\n\n\n\n\n\n\nDesign\nParameters\nExtraction result\n\n\n\n\nClassic factor\noverlap=1.0\nexact arrays\n\n\nWeak factor\noverlap=1.0\nexact arrays\n\n\nSynthetic control\nactive_share=0.25\nexact arrays\n\n\nFactor-synthetic\noverlap=1.0\nexact arrays\n\n\nStationary time series\ncoefficient=0.9, integrated=False\nexact arrays\n\n\nIntegrated time series\ncoefficient=0.2, integrated=True\nexact arrays\n\n\nMixed factor\noverlap=1.0\nexact arrays\n\n\n\nThis was a one-time Python-to-Python extraction check. Current releases rely on the repository tests and stored fixtures.",
-    "crumbs": [
-      "Home",
-      "Maintenance and provenance",
-      "Validation and provenance"
-    ]
-  },
-  {
-    "objectID": "validation.html#cross-language-validation",
-    "href": "validation.html#cross-language-validation",
-    "title": "Validation and provenance",
-    "section": "4 Cross-language validation",
-    "text": "4 Cross-language validation\nR and NumPy do not share seeded random streams. The balancing validation snapshot therefore compares Monte Carlo RMSE values relative to their combined Monte Carlo standard errors. It does not claim matched R and Python draws.",
-    "crumbs": [
-      "Home",
-      "Maintenance and provenance",
-      "Validation and provenance"
-    ]
-  },
-  {
-    "objectID": "validation.html#provenance-labels",
-    "href": "validation.html#provenance-labels",
-    "title": "Validation and provenance",
-    "section": "5 Provenance labels",
-    "text": "5 Provenance labels\nResearch pages use three labels:\n\nPublic translation: a design follows a cited public repository or paper.\nWorking design: a design adapts an unpublished research specification and can change as that work develops.\nPackage benchmark: maintainers assembled the law to test software or an estimator; it is not attributed to a paper.\n\nThese labels prevent a constructor name from making a stronger provenance claim than the evidence supports.",
-    "crumbs": [
-      "Home",
-      "Maintenance and provenance",
-      "Validation and provenance"
-    ]
-  },
-  {
-    "objectID": "validation.html#sources",
-    "href": "validation.html#sources",
-    "title": "Validation and provenance",
-    "section": "6 Sources",
-    "text": "6 Sources\n\nBaker dynamic effects: JFE_DID\nTWFE heterogeneity tests: repository and paper\nLarge longitudinal experiments: paper and code\nAugmented balancing: paper and estimator source\n\nThe adaptive-pooling family is a working design. The composite family is a package benchmark.",
-    "crumbs": [
-      "Home",
-      "Maintenance and provenance",
-      "Validation and provenance"
-    ]
-  },
-  {
     "objectID": "api.html",
     "href": "api.html",
     "title": "API map",
     "section": "",
-    "text": "New code should import one of three descriptive namespaces:\nRoot-level imports remain available for backward compatibility. They are not the preferred teaching interface.",
+    "text": "New code should import one of three descriptive namespaces:\nRoot-level imports are available as conveniences. The documentation uses the namespaced form because it states each object’s role.",
     "crumbs": [
       "Home",
       "API reference",
@@ -1180,7 +1120,7 @@
     "href": "api.html#stability-policy",
     "title": "API map",
     "section": "3 Stability policy",
-    "text": "3 Stability policy\nThe package treats core, primitives, and designs as the documented public surface. Objects imported from internal modules can change without a migration alias. Root-level exports are compatibility aliases and may be deprecated only through a documented release process.",
+    "text": "3 Stability policy\nThe package treats core, primitives, and designs as the documented public surface. Objects imported from internal modules can change. Public names follow the package’s release and deprecation policy.",
     "crumbs": [
       "Home",
       "API reference",
@@ -1824,123 +1764,87 @@
     ]
   },
   {
-    "objectID": "getting-started.html",
-    "href": "getting-started.html",
-    "title": "Get started",
+    "objectID": "vignettes/ftest-heterogeneity.html",
+    "href": "vignettes/ftest-heterogeneity.html",
+    "title": "F-test heterogeneity designs",
     "section": "",
-    "text": "This tutorial starts with a configured design, inspects its causal truth, and then rebuilds it from basic primitives. The full page runs in a few seconds.",
+    "text": "These designs support the public TestingInEventStudies project and the paper When can we get away with using the two-way fixed effects regression?. The package generates the null and alternative effect surfaces. It does not implement the test statistic.\nCode\nimport matplotlib.pyplot as plt\nimport numpy as np\n\nfrom pypanelsim import designs",
     "crumbs": [
       "Home",
-      "Start here",
-      "Get started"
+      "Research tutorials",
+      "F-test heterogeneity designs"
     ]
   },
   {
-    "objectID": "getting-started.html#install-and-import",
-    "href": "getting-started.html#install-and-import",
-    "title": "Get started",
-    "section": "1 Install and import",
-    "text": "1 Install and import\nuv add \"pypanelsim @ git+https://github.com/apoorvalal/pypanelsim.git\"\n\n\nCode\nimport matplotlib.pyplot as plt\nimport numpy as np\n\nfrom pypanelsim import core, designs, primitives\n\n\nThe three names describe their roles:\n\ncore defines simulation and data contracts.\nprimitives provides reusable probability laws.\ndesigns provides configured benchmark families.",
+    "objectID": "vignettes/ftest-heterogeneity.html#two-different-heterogeneity-questions",
+    "href": "vignettes/ftest-heterogeneity.html#two-different-heterogeneity-questions",
+    "title": "F-test heterogeneity designs",
+    "section": "1 Two different heterogeneity questions",
+    "text": "1 Two different heterogeneity questions\nThe temporal family asks whether the effect is constant over exposure time. It uses one treatment cohort.\nThe cohort family asks whether adoption cohorts share the same event-time path. It uses three cohorts and correlated untreated errors.\n\n\nCode\nprint(\"temporal:\", designs.available_ftest_temporal_designs())\nprint(\"cohort:\", designs.available_ftest_cohort_designs())\n\n\ntemporal: ('constant', 'linear', 'concave', 'positive_then_negative', 'exponential', 'sinusoidal', 'random_walk')\ncohort: ('homogeneous', 'log_vs_linear_vs_sin', 'small_differences', 'large_differences', 'selection_on_gains', 'novelty_effects', 'activity_bias')",
     "crumbs": [
       "Home",
-      "Start here",
-      "Get started"
+      "Research tutorials",
+      "F-test heterogeneity designs"
     ]
   },
   {
-    "objectID": "getting-started.html#run-a-configured-design",
-    "href": "getting-started.html#run-a-configured-design",
-    "title": "Get started",
-    "section": "2 Run a configured design",
-    "text": "2 Run a configured design\n\n\nCode\npanel = designs.classic_factor(overlap=1.0, seed=17)\n\nprint(\"name:\", panel.name)\nprint(\"shape:\", panel.shape)\nprint(\"treated units:\", panel.treated_units.size)\nprint(\"adoption period:\", panel.adoption_times[panel.ever_treated][0])\nprint(\"true ATT:\", round(panel.true_att, 3))\n\n\nname: classic_factor\nshape: (200, 50)\ntreated units: 40\nadoption period: 40\ntrue ATT: 1.1\n\n\nThe design has a low-rank untreated outcome and one treated cohort. The overlap argument changes the separation between treated and control factor loadings.",
+    "objectID": "vignettes/ftest-heterogeneity.html#temporal-alternatives",
+    "href": "vignettes/ftest-heterogeneity.html#temporal-alternatives",
+    "title": "F-test heterogeneity designs",
+    "section": "2 Temporal alternatives",
+    "text": "2 Temporal alternatives\nThe seven paths are constant, linear, concave, positive-then-negative, exponential, sinusoidal, and random walk.\n\n\nCode\ntemporal_config = designs.FTestTemporalConfig(\n    n_units=240,\n    n_periods=35,\n    adoption_period=15,\n    max_effect=1.0,\n)\n\nfor name in designs.available_ftest_temporal_designs():\n    profile = designs.ftest_temporal_profile(\n        name,\n        config=temporal_config,\n        seed=42,\n    )\n    print(name, np.round(profile[:6], 2))\n\n\nconstant [1. 1. 1. 1. 1. 1.]\nlinear [0.   0.05 0.11 0.16 0.21 0.26]\nconcave [0.05 0.09 0.13 0.17 0.2  0.24]\npositive_then_negative [0.   0.11 0.22 0.33 0.44 0.56]\nexponential [0.   0.23 0.41 0.55 0.65 0.73]\nsinusoidal [0.   0.32 0.61 0.84 0.97 1.  ]\nrandom_walk [ 0.3  -0.74  0.02  0.96 -1.   -2.3 ]\n\n\n\n\nCode\ntemporal_names = designs.available_ftest_temporal_designs()\nfigure, axes = plt.subplots(\n    2,\n    4,\n    figsize=(13, 7),\n    sharex=True,\n    constrained_layout=True,\n)\nfor axis, name in zip(axes.ravel(), temporal_names, strict=False):\n    profile = designs.ftest_temporal_profile(\n        name,\n        config=temporal_config,\n        seed=42,\n    )\n    axis.plot(np.arange(profile.size), profile, marker=\"o\", markersize=3)\n    axis.axhline(0.0, color=\"black\", linewidth=0.6)\n    axis.set_title(name.replace(\"_\", \" \"))\n    axis.set_xlabel(\"event time\")\n    axis.set_ylabel(\"effect\")\nfor axis in axes.ravel()[len(temporal_names):]:\n    axis.set_visible(False)\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: The seven single-cohort temporal effect alternatives.\n\n\n\n\n\nThe untreated outcome contains unit effects, time effects, small unit trends, and AR(1) error. The treatment path begins at adoption_period.\n\n\nCode\ntemporal_panel = designs.ftest_temporal(\n    \"positive_then_negative\",\n    config=temporal_config,\n    profile_seed=42,\n    seed=17,\n)\n\nprint(temporal_panel.shape)\nprint(round(temporal_panel.true_att, 3))\n\n\n(240, 35)\n0.25\n\n\nprofile_seed fixes the random-walk alternative itself. seed controls the panel draw. Keeping these inputs separate prevents a change in outcome noise from changing the effect profile.",
     "crumbs": [
       "Home",
-      "Start here",
-      "Get started"
+      "Research tutorials",
+      "F-test heterogeneity designs"
     ]
   },
   {
-    "objectID": "getting-started.html#inspect-the-data-contract",
-    "href": "getting-started.html#inspect-the-data-contract",
-    "title": "Get started",
-    "section": "3 Inspect the data contract",
-    "text": "3 Inspect the data contract\n\n\nCode\nprint(panel.outcome.shape)\nprint(panel.treatment.shape)\nprint(panel.untreated_outcome.shape)\nprint(panel.effect_surface.shape)\n\nidentity_error = abs(\n    panel.outcome - panel.untreated_outcome - panel.treatment_effect\n).max()\nprint(\"largest identity error:\", identity_error)\n\n\n(200, 50)\n(200, 50)\n(200, 50)\n(200, 50)\nlargest identity error: 1.5543122344752192e-15\n\n\neffect_surface[i, t] is the effect that unit \\(i\\) would have at time \\(t\\) if treated. treatment_effect[i, t] is the realized effect and is zero when the cell is untreated.",
+    "objectID": "vignettes/ftest-heterogeneity.html#cohort-alternatives",
+    "href": "vignettes/ftest-heterogeneity.html#cohort-alternatives",
+    "title": "F-test heterogeneity designs",
+    "section": "3 Cohort alternatives",
+    "text": "3 Cohort alternatives\nThe cohort family uses three adoption dates. Named surfaces range from a homogeneous null to large cohort differences and selection on gains.\n\n\nCode\ncohort_config = designs.FTestCohortConfig(n_units=240)\n\nfor name in designs.available_ftest_cohort_designs():\n    profiles = designs.ftest_cohort_profiles(name, config=cohort_config)\n    first_values = {\n        cohort: round(float(path[0]), 2)\n        for cohort, path in profiles.items()\n    }\n    print(name, first_values)\n\n\nhomogeneous {10: 0.0, 15: 0.0, 20: 0.0}\nlog_vs_linear_vs_sin {10: 2.0, 15: 0.69, 20: 0.84}\nsmall_differences {10: 0.0, 15: 0.0, 20: 0.0}\nlarge_differences {10: 0.0, 15: 0.0, 20: 0.0}\nselection_on_gains {10: 0.0, 15: 0.0, 20: 0.0}\nnovelty_effects {10: 2.5, 15: 2.5, 20: 2.5}\nactivity_bias {10: 2.5, 15: 0.0, 20: 0.0}\n\n\n\n\nCode\ncohort_names = designs.available_ftest_cohort_designs()\nfigure, axes = plt.subplots(\n    2,\n    4,\n    figsize=(14, 7),\n    sharex=True,\n    constrained_layout=True,\n)\nfor axis, name in zip(axes.ravel(), cohort_names, strict=False):\n    profiles = designs.ftest_cohort_profiles(name, config=cohort_config)\n    for cohort, profile in profiles.items():\n        axis.plot(\n            np.arange(profile.size),\n            profile,\n            label=f\"cohort {cohort}\",\n        )\n    axis.axhline(0.0, color=\"black\", linewidth=0.6)\n    axis.set_title(name.replace(\"_\", \" \"))\n    axis.set_xlabel(\"event time\")\n    axis.set_ylabel(\"effect\")\nfor axis in axes.ravel()[len(cohort_names):]:\n    axis.set_visible(False)\naxes.ravel()[0].legend(fontsize=7)\nplt.show()\n\n\n\n\n\n\n\n\nFigure 2: Cohort-specific paths for the seven effect-surface alternatives.\n\n\n\n\n\nRun one surface and inspect its supported cohort-event truth:\n\n\nCode\ncohort_panel = designs.ftest_cohort(\n    \"selection_on_gains\",\n    config=cohort_config,\n    seed=17,\n)\n\ntruth = cohort_panel.truth.cohort_event(event_times=(-2, -1, 0, 1, 2, 3))\nfor cohort in np.unique(truth[\"cohort\"]):\n    selected = truth[\"cohort\"] == cohort\n    print(\n        int(cohort),\n        np.round(truth[\"effect\"][selected], 2),\n        truth[\"supported\"][selected],\n    )\n\n\n10 [0.   0.   0.   0.69 1.1  1.39] [ True  True  True  True  True  True]\n15 [0.   0.   0.   0.62 0.99 1.25] [ True  True  True  True  True  True]\n20 [0.   0.   0.   0.55 0.88 1.11] [ True  True  True  True  True  True]\n\n\nPre-treatment effects are zero. An unsupported cohort-event cell has NaN effect and supported=False.",
     "crumbs": [
       "Home",
-      "Start here",
-      "Get started"
+      "Research tutorials",
+      "F-test heterogeneity designs"
     ]
   },
   {
-    "objectID": "getting-started.html#inspect-causal-truth",
-    "href": "getting-started.html#inspect-causal-truth",
-    "title": "Get started",
-    "section": "4 Inspect causal truth",
-    "text": "4 Inspect causal truth\n\n\nCode\nevent_truth = panel.truth.event_study()\nprint(event_truth.keys())\n\nfor event_time, effect in zip(\n    event_truth[\"event_time\"][:5],\n    event_truth[\"effect\"][:5],\n    strict=True,\n):\n    print(int(event_time), round(float(effect), 3))\n\n\ndict_keys(['event_time', 'effect', 'supported_cohorts', 'target_unit_count'])\n-40 0.0\n-39 0.0\n-38 0.0\n-37 0.0\n-36 0.0\n\n\nTruth is computed from the stored effect surface. It does not depend on an estimator package.",
+    "objectID": "vignettes/ftest-heterogeneity.html#realized-panel-structure",
+    "href": "vignettes/ftest-heterogeneity.html#realized-panel-structure",
+    "title": "F-test heterogeneity designs",
+    "section": "4 Realized panel structure",
+    "text": "4 Realized panel structure\nThe temporal design has one adoption block. The cohort design has three. The outcome heatmaps also show their different untreated dependence structures.\n\n\nCode\nrealized_panels = (\n    (\"Temporal alternative\", temporal_panel),\n    (\"Cohort alternative\", cohort_panel),\n)\nfigure, axes = plt.subplots(2, 2, figsize=(13, 8), constrained_layout=True)\nfor row, (label, draw) in enumerate(realized_panels):\n    order = np.argsort(draw.adoption_times, kind=\"stable\")\n    outcome_image = axes[row, 0].matshow(\n        draw.outcome[order],\n        aspect=\"auto\",\n        cmap=\"coolwarm\",\n    )\n    axes[row, 1].matshow(\n        draw.treatment[order],\n        aspect=\"auto\",\n        cmap=\"Greys\",\n        vmin=0.0,\n        vmax=1.0,\n    )\n    axes[row, 0].set_title(f\"{label}: outcome\")\n    axes[row, 1].set_title(f\"{label}: treatment\")\n    axes[row, 0].set_ylabel(\"units, sorted by adoption\")\n    figure.colorbar(outcome_image, ax=axes[row, 0], fraction=0.03, pad=0.02)\n    for axis in axes[row]:\n        axis.set_xlabel(\"period\")\nplt.show()\n\n\n\n\n\n\n\n\nFigure 3: Observed outcomes and treatment for one temporal and one cohort-heterogeneity design.",
     "crumbs": [
       "Home",
-      "Start here",
-      "Get started"
+      "Research tutorials",
+      "F-test heterogeneity designs"
     ]
   },
   {
-    "objectID": "getting-started.html#compose-two-way-fixed-effects-and-factors",
-    "href": "getting-started.html#compose-two-way-fixed-effects-and-factors",
-    "title": "Get started",
-    "section": "5 Compose two-way fixed effects and factors",
-    "text": "5 Compose two-way fixed effects and factors\nTwo-way fixed effects and low-rank factor models are basic untreated-outcome primitives. Combine them with SumOutcomeModel.\n\n\nCode\noutcome_model = primitives.SumOutcomeModel(\n    models=(\n        primitives.TwoWayFixedEffectsOutcome(\n            unit_effect_scale=1.0,\n            time_effect_scale=0.5,\n            noise_scale=0.2,\n        ),\n        primitives.LowRankFactorOutcome(\n            rank=2,\n            loading_scale=1.0,\n            factor_scale=0.7,\n        ),\n    ),\n    weights=(1.0, 1.0),\n)\n\nsimulator = core.PanelSimulator(\n    name=\"fixed_effects_plus_factors\",\n    dimensions=core.PanelDimensions(n_units=200, n_periods=40),\n    assignment=primitives.RandomizedSingleCohortAssignment(\n        n_treated=80,\n        adoption_period=25,\n    ),\n    outcome_model=outcome_model,\n    effect_model=primitives.LinearRampEffect(slope=0.2),\n)\n\ncomposed_panel = simulator.simulate(seed=17)\nprint(composed_panel.metadata[\"outcome\"][\"model\"])\nprint(round(composed_panel.true_att, 3))\n\n\nSumOutcomeModel\n1.6",
+    "objectID": "vignettes/ftest-heterogeneity.html#build-a-custom-cohort-surface",
+    "href": "vignettes/ftest-heterogeneity.html#build-a-custom-cohort-surface",
+    "title": "F-test heterogeneity designs",
+    "section": "5 Build a custom cohort surface",
+    "text": "5 Build a custom cohort surface\nThe configured family uses the same primitives that are available to user code. A cohort surface is a map from adoption period to an event-time array.\n\n\nCode\nfrom pypanelsim import primitives\n\nprofiles = designs.ftest_cohort_profiles(\n    \"novelty_effects\",\n    config=cohort_config,\n)\neffect_model = primitives.CohortEventTimeEffect(profiles)\n\nprint(type(effect_model).__name__)\n\n\nCohortEventTimeEffect\n\n\nPass this effect model to a custom core.PanelSimulator when the built-in untreated outcome or assignment law is not appropriate.",
     "crumbs": [
       "Home",
-      "Start here",
-      "Get started"
+      "Research tutorials",
+      "F-test heterogeneity designs"
     ]
   },
   {
-    "objectID": "getting-started.html#compare-the-two-panels",
-    "href": "getting-started.html#compare-the-two-panels",
-    "title": "Get started",
-    "section": "6 Compare the two panels",
-    "text": "6 Compare the two panels\nThe first panel has the configured canonical factor law. The second panel adds two-way fixed effects and a generic rank-two factor component. Sorting units by adoption time makes the treated block visible.\n\n\nCode\ncomparisons = (\n    (\"Configured classic factor\", panel),\n    (\"2WFE plus rank-two factors\", composed_panel),\n)\nfigure, axes = plt.subplots(2, 2, figsize=(12, 7), constrained_layout=True)\n\nfor row, (label, draw) in enumerate(comparisons):\n    order = np.argsort(draw.adoption_times, kind=\"stable\")\n    outcome_image = axes[row, 0].matshow(\n        draw.outcome[order],\n        aspect=\"auto\",\n        cmap=\"coolwarm\",\n    )\n    treatment_image = axes[row, 1].matshow(\n        draw.treatment[order],\n        aspect=\"auto\",\n        cmap=\"Greys\",\n        vmin=0.0,\n        vmax=1.0,\n    )\n    axes[row, 0].set_title(f\"{label}: outcome\")\n    axes[row, 1].set_title(f\"{label}: treatment\")\n    axes[row, 0].set_ylabel(\"units, sorted by adoption\")\n    figure.colorbar(outcome_image, ax=axes[row, 0], fraction=0.025, pad=0.02)\n    figure.colorbar(treatment_image, ax=axes[row, 1], fraction=0.025, pad=0.02)\n\nfor axis in axes[-1]:\n    axis.set_xlabel(\"period\")\nplt.show()\n\n\n\n\n\n\n\n\nFigure 1: Observed outcomes and treatment for a configured factor design and a design composed from two-way fixed effects and low-rank factors.\n\n\n\n\n\nThe simulator calls the components in a fixed order, validates their shapes, and checks the causal identity before it returns a panel.",
+    "objectID": "vignettes/ftest-heterogeneity.html#simulation-study-use",
+    "href": "vignettes/ftest-heterogeneity.html#simulation-study-use",
+    "title": "F-test heterogeneity designs",
+    "section": "6 Simulation-study use",
+    "text": "6 Simulation-study use\nA size experiment should use a homogeneous design as its null. A power experiment should vary the form and magnitude of heterogeneity. Report the exact named surface, configuration, panel seed, and any profile seed. Do not refer only to “the F-test DGP”; that phrase does not identify one probability law.",
     "crumbs": [
       "Home",
-      "Start here",
-      "Get started"
-    ]
-  },
-  {
-    "objectID": "getting-started.html#change-one-assumption",
-    "href": "getting-started.html#change-one-assumption",
-    "title": "Get started",
-    "section": "7 Change one assumption",
-    "text": "7 Change one assumption\nReplace random assignment with selection on observed and unobserved features. The outcome law and effect law do not change.\n\n\nCode\nselected_simulator = core.PanelSimulator(\n    name=\"selected_fixed_effects_plus_factors\",\n    dimensions=core.PanelDimensions(n_units=200, n_periods=40),\n    feature_model=primitives.GaussianUnitFeatures(\n        n_observables=2,\n        n_unobservables=1,\n    ),\n    assignment=primitives.BinaryLogitAssignment(\n        adoption_period=25,\n        intercept=-0.4,\n        observable_coefficients=(0.7, -0.4),\n        unobservable_coefficients=(0.8,),\n    ),\n    outcome_model=outcome_model,\n    effect_model=primitives.LinearRampEffect(slope=0.2),\n)\n\nselected_panel = selected_simulator.simulate(seed=17)\nprint(\"treated units:\", selected_panel.treated_units.size)\nprint(\"covariates:\", selected_panel.unit_covariate_names)\n\n\ntreated units: 79\ncovariates: ('x1', 'x2')",
-    "crumbs": [
-      "Home",
-      "Start here",
-      "Get started"
-    ]
-  },
-  {
-    "objectID": "getting-started.html#export-to-an-estimator",
-    "href": "getting-started.html#export-to-an-estimator",
-    "title": "Get started",
-    "section": "8 Export to an estimator",
-    "text": "8 Export to an estimator\nMatrix estimators usually need only two arrays:\n\n\nCode\noutcome, treatment = selected_panel.as_arrays()\nprint(outcome.shape, treatment.shape)\n\n\n(200, 40) (200, 40)\n\n\nFormula and data-frame estimators need long columns:\n\n\nCode\nlong_columns = selected_panel.as_long_dict(include_annotations=True)\nprint(tuple(long_columns)[:10])\n\n\n('unit', 'time', 'outcome', 'treatment', 'untreated_outcome', 'treatment_effect', 'x1', 'x2', 'ever_treated', 'adoption_period')\n\n\nSee Export and interoperability for pandas, Polars, Arrow, and R examples.",
-    "crumbs": [
-      "Home",
-      "Start here",
-      "Get started"
-    ]
-  },
-  {
-    "objectID": "getting-started.html#generate-replications",
-    "href": "getting-started.html#generate-replications",
-    "title": "Get started",
-    "section": "9 Generate replications",
-    "text": "9 Generate replications\n\n\nCode\nreplications = list(simulator.iter_simulations(3, seed=2026))\nprint([round(item.true_att, 3) for item in replications])\n\n\n[1.6, 1.6, 1.6]\n\n\nUse named component streams when a refactor of one component must not change draws from another component:\n\n\nCode\nstreams = core.SimulationSeeds.from_seed(2026)\nstable_panel = simulator.simulate(streams=streams)\nprint(stable_panel.shape)\n\n\n(200, 40)\n\n\nYou can now choose a standard benchmark, specify an assignment mechanism, or read the research design catalog.",
-    "crumbs": [
-      "Home",
-      "Start here",
-      "Get started"
+      "Research tutorials",
+      "F-test heterogeneity designs"
     ]
   }
 ]

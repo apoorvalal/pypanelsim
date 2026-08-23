@@ -207,6 +207,325 @@ print(tuple(long_columns)[:10])
 See [Export and interoperability](interoperability.qmd) for pandas, Polars,
 Arrow, and R examples.
 
+## Apply the package with PyFixest and crabbymetrics
+
+`pypanelsim` does not require an estimator package. The optional estimator
+stack is needed for this application:
+
+```bash
+uv sync --extra docs --extra estimators
+```
+
+We compare two panels with the same randomized cohort and dynamic treatment
+effect. The first untreated outcome follows a two-way fixed-effects law. The
+second adds two interactive latent factors with different mean loadings for
+treated and control units.
+
+```{python}
+import crabbymetrics as cm
+import pandas as pd
+import pyfixest as pf
+
+application_adoption = 20
+application_dimensions = core.PanelDimensions(n_units=120, n_periods=30)
+application_assignment = primitives.RandomizedSingleCohortAssignment(
+    n_treated=24,
+    adoption_period=application_adoption,
+)
+application_effect = primitives.LinearRampEffect(slope=0.2)
+
+additive_application = core.PanelSimulator(
+    name="additive_twfe_application",
+    dimensions=application_dimensions,
+    assignment=application_assignment,
+    outcome_model=primitives.TwoWayFixedEffectsOutcome(
+        unit_effect_scale=1.0,
+        time_effect_scale=0.5,
+        noise_scale=0.75,
+    ),
+    effect_model=application_effect,
+).simulate(seed=42)
+
+interactive_application = core.PanelSimulator(
+    name="interactive_factor_application",
+    dimensions=application_dimensions,
+    assignment=application_assignment,
+    outcome_model=primitives.SumOutcomeModel(
+        models=(
+            primitives.TwoWayFixedEffectsOutcome(
+                unit_effect_scale=1.0,
+                time_effect_scale=0.0,
+                noise_scale=0.0,
+            ),
+            primitives.LowRankFactorOutcome(
+                rank=2,
+                control_loading_mean=-0.1,
+                treated_loading_mean=0.1,
+                noise_scale=0.75,
+            ),
+        )
+    ),
+    effect_model=application_effect,
+).simulate(seed=42)
+```
+
+### PyFixest two-way fixed effects
+
+PyFixest consumes the long representation. The event-study regression omits
+event time $-1$, and the static regression reports an ATT summary. Standard
+errors are clustered by unit.
+
+```{python}
+def fit_pyfixest(draw):
+    frame = pd.DataFrame(dict(draw.as_long_dict()))
+    frame["ever_treated"] = np.repeat(
+        draw.ever_treated,
+        draw.n_periods,
+    ).astype(int)
+    event_fit = pf.feols(
+        f"outcome ~ i(time, ever_treated, ref={application_adoption - 1})"
+        " | unit + time",
+        data=frame,
+        vcov={"CRV1": "unit"},
+    )
+    att_fit = pf.feols(
+        "outcome ~ treatment | unit + time",
+        data=frame,
+        vcov={"CRV1": "unit"},
+    )
+
+    event = event_fit.tidy().reset_index()
+    term_column = event.columns[0]
+    event["period"] = (
+        event[term_column]
+        .astype(str)
+        .str.extract(r"time::(-?\d+)")[0]
+        .astype(int)
+    )
+    event["event_time"] = event["period"] - application_adoption
+    event = event.rename(
+        columns={
+            "Estimate": "estimate",
+            "2.5%": "lower",
+            "97.5%": "upper",
+        }
+    )
+    event = pd.concat(
+        [
+            event[["event_time", "estimate", "lower", "upper"]],
+            pd.DataFrame(
+                {
+                    "event_time": [-1],
+                    "estimate": [0.0],
+                    "lower": [0.0],
+                    "upper": [0.0],
+                }
+            ),
+        ],
+        ignore_index=True,
+    ).sort_values("event_time")
+    att_row = att_fit.tidy().loc["treatment"]
+    return {
+        "event": event,
+        "att": float(att_row["Estimate"]),
+        "att_se": float(att_row["Std. Error"]),
+    }
+```
+
+### crabbymetrics matrix completion
+
+`MatrixCompletion` consumes the native unit-by-period arrays. It estimates the
+missing treated counterfactual from the untreated cells and returns an ATT and
+weighted event-study path.
+
+```{python}
+def fit_matrix_completion(draw):
+    model = cm.MatrixCompletion(
+        lambda_fraction=0.25,
+        max_iterations=2_000,
+        tolerance=1e-7,
+        svd_seed=1,
+    )
+    model.fit(
+        draw.outcome.copy(),
+        draw.treatment.copy(),
+    )
+    summary = model.summary()
+    return {
+        "event": pd.DataFrame(summary["event_study"]["weighted"]),
+        "att": float(summary["att"]),
+    }
+```
+
+### crabbymetrics interactive fixed effects
+
+`InteractiveFixedEffects` is a factor decomposition, not a treatment-effect
+estimator. Here it fits the complete donor panel. Treated-unit loadings are
+estimated only from pre-treatment outcomes, then extrapolated over the fitted
+donor factors.
+
+```{python}
+def fit_interactive_fixed_effects(draw, *, rank):
+    outcome, _ = draw.as_arrays(copy=True)
+    donors = draw.control_units
+    treated = draw.treated_units
+    adoption = int(np.unique(draw.adoption_times[treated]).item())
+
+    model = cm.InteractiveFixedEffects(
+        rank=rank,
+        force=3,
+        factor_seed=1,
+    )
+    model.fit(outcome[donors].T)
+    decomposition = model.summary()
+    factors = np.asarray(decomposition["factor"])
+    time_effects = np.asarray(decomposition["xi"])
+
+    pre_design = np.column_stack(
+        [np.ones(adoption), factors[:adoption]],
+    )
+    full_design = np.column_stack(
+        [np.ones(draw.n_periods), factors],
+    )
+    treated_coefficients = np.linalg.lstsq(
+        pre_design,
+        outcome[treated, :adoption].T - time_effects[:adoption, None],
+        rcond=None,
+    )[0]
+    counterfactual = (
+        time_effects[:, None] + full_design @ treated_coefficients
+    ).T
+    estimated_effect = outcome[treated] - counterfactual
+    return {
+        "event": pd.DataFrame(
+            {
+                "event_time": np.arange(draw.n_periods) - adoption,
+                "estimate": estimated_effect.mean(axis=0),
+            }
+        ),
+        "att": float(estimated_effect[:, adoption:].mean()),
+    }
+```
+
+### Compare the applications
+
+The interactive-fixed-effects rank is supplied by the simulation design. Rank
+selection is outside this small application.
+
+```{python}
+application_results = {}
+for label, draw, rank in (
+    ("Additive 2WFE", additive_application, 0),
+    ("Interactive factors", interactive_application, 2),
+):
+    application_results[label] = {
+        "draw": draw,
+        "pyfixest": fit_pyfixest(draw),
+        "matrix_completion": fit_matrix_completion(draw),
+        "interactive_fixed_effects": fit_interactive_fixed_effects(
+            draw,
+            rank=rank,
+        ),
+    }
+
+pd.DataFrame(
+    [
+        {
+            "design": label,
+            "true ATT": result["draw"].true_att,
+            "PyFixest 2WFE": result["pyfixest"]["att"],
+            "crabbymetrics matrix completion": result["matrix_completion"]["att"],
+            "crabbymetrics IFE": result["interactive_fixed_effects"]["att"],
+        }
+        for label, result in application_results.items()
+    ]
+).set_index("design").round(3)
+```
+
+```{python}
+#| label: fig-estimator-applications
+#| fig-cap: "PyFixest and crabbymetrics applied to additive and interactive-factor panels with known causal truth."
+#| fig-alt: "Two event-study charts compare the true effect path with PyFixest two-way fixed effects, crabbymetrics matrix completion, and crabbymetrics interactive fixed effects."
+
+figure, axes = plt.subplots(1, 2, figsize=(14, 5), constrained_layout=True)
+for axis, (label, result) in zip(
+    axes,
+    application_results.items(),
+    strict=True,
+):
+    draw = result["draw"]
+    adoption = int(np.unique(draw.adoption_times[draw.treated_units]).item())
+    truth = pd.DataFrame(
+        {
+            "event_time": np.arange(draw.n_periods) - adoption,
+            "estimate": draw.treatment_effect[draw.treated_units].mean(axis=0),
+        }
+    ).query("event_time >= -10")
+    pyfixest_event = result["pyfixest"]["event"].query("event_time >= -10")
+    matrix_event = result["matrix_completion"]["event"].query(
+        "event_time >= -10"
+    )
+    ife_event = result["interactive_fixed_effects"]["event"].query(
+        "event_time >= -10"
+    )
+
+    axis.plot(
+        truth["event_time"],
+        truth["estimate"],
+        "--",
+        color="black",
+        linewidth=2.2,
+        label="True effect",
+    )
+    axis.fill_between(
+        pyfixest_event["event_time"],
+        pyfixest_event["lower"],
+        pyfixest_event["upper"],
+        color="#3D5A80",
+        alpha=0.18,
+        linewidth=0,
+        label="PyFixest 95% CI",
+    )
+    axis.plot(
+        pyfixest_event["event_time"],
+        pyfixest_event["estimate"],
+        "o-",
+        color="#3D5A80",
+        markersize=4,
+        label="PyFixest 2WFE",
+    )
+    axis.plot(
+        matrix_event["event_time"],
+        matrix_event["estimate"],
+        "s-",
+        color="#E07A5F",
+        markersize=4,
+        label="crabbymetrics matrix completion",
+    )
+    axis.plot(
+        ife_event["event_time"],
+        ife_event["estimate"],
+        "^-",
+        color="#2A9D8F",
+        markersize=4,
+        label="crabbymetrics IFE",
+    )
+    axis.axhline(0, color="0.4", linewidth=0.8)
+    axis.axvline(-0.5, color="0.5", linewidth=1, linestyle=":")
+    axis.set_title(label)
+    axis.set_xlabel("event time")
+    axis.set_ylabel("treatment effect")
+    axis.legend(frameon=False, fontsize=8)
+plt.show()
+```
+
+For the additive panel, 2WFE is correctly specified. For the interactive panel,
+the fixed-effects regression omits the latent factors. Matrix completion and
+the donor-factor application use low-rank structure instead. These are
+illustrative seeded results, not an estimator ranking: matrix completion uses
+its default penalty fraction, IFE is given the design rank, and only the
+PyFixest curve includes sampling uncertainty.
+
 ## Generate replications
 
 ```{python}

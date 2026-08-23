@@ -5002,7 +5002,7 @@ height: auto;
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
- <span class="menu-text">Maintenance and provenance</span></a>
+ <span class="menu-text">Validation</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -5012,12 +5012,6 @@ height: auto;
   <div class="sidebar-item-container"> 
   <a href="./validation.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Validation and provenance</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./migration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Migration guide</span></a>
   </div>
 </li>
       </ul>
@@ -5068,7 +5062,7 @@ height: auto;
 
 <p>New code should import one of three descriptive namespaces:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> core, designs, primitives</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Root-level imports remain available for backward compatibility. They are not the preferred teaching interface.</p>
+<p>Root-level imports are available as conveniences. The documentation uses the namespaced form because it states each object’s role.</p>
 <section id="by-task" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="by-task"><span class="header-section-number">1</span> By task</h2>
 <table class="caption-top table">
@@ -5132,7 +5126,7 @@ height: auto;
 </section>
 <section id="stability-policy" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="stability-policy"><span class="header-section-number">3</span> Stability policy</h2>
-<p>The package treats <code>core</code>, <code>primitives</code>, and <code>designs</code> as the documented public surface. Objects imported from internal modules can change without a migration alias. Root-level exports are compatibility aliases and may be deprecated only through a documented release process.</p>
+<p>The package treats <code>core</code>, <code>primitives</code>, and <code>designs</code> as the documented public surface. Objects imported from internal modules can change. Public names follow the package’s release and deprecation policy.</p>
 </section>
 <section id="error-conventions" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="error-conventions"><span class="header-section-number">4</span> Error conventions</h2>

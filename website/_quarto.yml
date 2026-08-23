@@ -24,7 +24,6 @@ project:
     - reference/designs.qmd
     - reference/registry.qmd
     - validation.md
-    - migration.md
 
 website:
   title: "pypanelsim"
@@ -83,10 +82,9 @@ website:
           - reference/primitives.qmd
           - reference/designs.qmd
           - reference/registry.qmd
-      - section: "Maintenance and provenance"
+      - section: "Validation"
         contents:
           - validation.md
-          - migration.md
 
 format:
   html:

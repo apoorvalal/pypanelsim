@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://apoorvalal.github.io/pypanelsim/vignettes/ftest-heterogeneity.html</loc>
-    <lastmod>2026-08-23T20:22:24.218Z</lastmod>
+    <loc>https://apoorvalal.github.io/pypanelsim/getting-started.html</loc>
+    <lastmod>2026-08-23T20:39:49.870Z</lastmod>
   </url>
   <url>
     <loc>https://apoorvalal.github.io/pypanelsim/assignment.html</loc>
@@ -37,20 +37,16 @@
     <lastmod>2026-08-23T17:47:35.434Z</lastmod>
   </url>
   <url>
-    <loc>https://apoorvalal.github.io/pypanelsim/migration.html</loc>
-    <lastmod>2026-08-23T17:48:01.166Z</lastmod>
+    <loc>https://apoorvalal.github.io/pypanelsim/validation.html</loc>
+    <lastmod>2026-08-23T20:36:23.460Z</lastmod>
   </url>
   <url>
     <loc>https://apoorvalal.github.io/pypanelsim/architecture.html</loc>
     <lastmod>2026-08-23T17:41:55.833Z</lastmod>
   </url>
   <url>
-    <loc>https://apoorvalal.github.io/pypanelsim/validation.html</loc>
-    <lastmod>2026-08-23T17:50:08.703Z</lastmod>
-  </url>
-  <url>
     <loc>https://apoorvalal.github.io/pypanelsim/api.html</loc>
-    <lastmod>2026-08-23T17:46:04.163Z</lastmod>
+    <lastmod>2026-08-23T20:36:23.461Z</lastmod>
   </url>
   <url>
     <loc>https://apoorvalal.github.io/pypanelsim/reference/registry.html</loc>
@@ -81,7 +77,7 @@
     <lastmod>2026-08-23T17:46:24.879Z</lastmod>
   </url>
   <url>
-    <loc>https://apoorvalal.github.io/pypanelsim/getting-started.html</loc>
-    <lastmod>2026-08-23T20:22:24.215Z</lastmod>
+    <loc>https://apoorvalal.github.io/pypanelsim/vignettes/ftest-heterogeneity.html</loc>
+    <lastmod>2026-08-23T20:22:24.218Z</lastmod>
   </url>
 </urlset>

@@ -9,8 +9,8 @@ New code should import one of three descriptive namespaces:
 from pypanelsim import core, designs, primitives
 ```
 
-Root-level imports remain available for backward compatibility. They are not
-the preferred teaching interface.
+Root-level imports are available as conveniences. The documentation uses the
+namespaced form because it states each object's role.
 
 ## By task
 
@@ -40,9 +40,8 @@ runs one draw and returns a `PanelDataset`.
 ## Stability policy
 
 The package treats `core`, `primitives`, and `designs` as the documented public
-surface. Objects imported from internal modules can change without a migration
-alias. Root-level exports are compatibility aliases and may be deprecated only
-through a documented release process.
+surface. Objects imported from internal modules can change. Public names follow
+the package's release and deprecation policy.
 
 ## Error conventions
 

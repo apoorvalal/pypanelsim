@@ -5,7 +5,7 @@ description: "What package checks establish and how research translations are cl
 
 ## Validation layers
 
-The repository uses four layers of checks.
+The repository uses three layers of checks.
 
 ### Contract tests
 
@@ -23,46 +23,20 @@ configurations and public namespace aliases.
 The wheel is built and installed into a fresh environment. A smoke test imports
 `core`, `primitives`, and `designs`, then creates and exports a panel.
 
-### Downstream tests
-
-The separate `dgps` analysis consumes `pypanelsim` as a dependency. Its test
-suite checks that the extracted package still supports the balancing experiment
-runner. This does not make its estimators part of `pypanelsim`.
-
 ## Standard commands
 
 ```bash
-uv sync --extra docs
+uv sync --extra docs --extra estimators
 uv run ruff format --check src tests examples website
 uv run ruff check src tests examples website
 uv run pytest
-uv run quarto render website
+uv run quarto render website --execute
 uv build
 ```
 
 The exact commands that pass for a release should appear in its release or CI
 record. This page describes the required classes of checks; it is not a live CI
 status badge.
-
-## Canonical migration parity
-
-Before the earlier embedded implementation was removed, the extraction audit
-loaded the old and new Python implementations together. It compared
-`outcome`, `untreated_outcome`, `treatment`, and `treatment_effect` with exact
-NumPy equality for the same small configuration and seed.
-
-| Design | Parameters | Extraction result |
-|---|---|---|
-| Classic factor | `overlap=1.0` | exact arrays |
-| Weak factor | `overlap=1.0` | exact arrays |
-| Synthetic control | `active_share=0.25` | exact arrays |
-| Factor-synthetic | `overlap=1.0` | exact arrays |
-| Stationary time series | `coefficient=0.9`, `integrated=False` | exact arrays |
-| Integrated time series | `coefficient=0.2`, `integrated=True` | exact arrays |
-| Mixed factor | `overlap=1.0` | exact arrays |
-
-This was a one-time Python-to-Python extraction check. Current releases rely on
-the repository tests and stored fixtures.
 
 ## Cross-language validation
 
