@@ -5221,13 +5221,10 @@ height: auto;
 <h2 data-number="1" class="anchored" data-anchor-id="install-and-import"><span class="header-section-number">1</span> Install and import</h2>
 <div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> add <span class="st">&quot;pypanelsim @ git+https://github.com/apoorvalal/pypanelsim.git&quot;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div id="cb6108b8" class="cell" data-execution_count="1">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> core, designs, primitives</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 <p>The three modules have distinct jobs:</p>
 <ul>
@@ -5239,8 +5236,6 @@ height: auto;
 <section id="run-a-ready-made-design" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="run-a-ready-made-design"><span class="header-section-number">2</span> Run a ready-made design</h2>
 <div id="9434a592" class="cell" data-execution_count="2">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> designs.classic_factor(overlap<span class="op">=</span><span class="fl">1.0</span>, seed<span class="op">=</span><span class="dv">17</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;name:&quot;</span>, panel.name)</span>
@@ -5248,7 +5243,6 @@ height: auto;
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;treated units:&quot;</span>, panel.treated_units.size)</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;adoption period:&quot;</span>, panel.adoption_times[panel.ever_treated][<span class="dv">0</span>])</span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;true ATT:&quot;</span>, <span class="bu">round</span>(panel.true_att, <span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>name: classic_factor
 shape: (200, 50)
@@ -5262,8 +5256,6 @@ true ATT: 1.1</code></pre>
 <section id="inspect-the-result" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="inspect-the-result"><span class="header-section-number">3</span> Inspect the result</h2>
 <div id="6c169795" class="cell" data-execution_count="3">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(panel.outcome.shape)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(panel.treatment.shape)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(panel.untreated_outcome.shape)</span>
@@ -5273,7 +5265,6 @@ true ATT: 1.1</code></pre>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    panel.outcome <span class="op">-</span> panel.untreated_outcome <span class="op">-</span> panel.treatment_effect</span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>).<span class="bu">max</span>()</span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;largest identity error:&quot;</span>, identity_error)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(200, 50)
 (200, 50)
@@ -5287,8 +5278,6 @@ largest identity error: 1.5543122344752192e-15</code></pre>
 <section id="inspect-known-effects" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="inspect-known-effects"><span class="header-section-number">4</span> Inspect known effects</h2>
 <div id="04f46239" class="cell" data-execution_count="4">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>event_truth <span class="op">=</span> panel.truth.event_study()</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(event_truth.keys())</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -5298,7 +5287,6 @@ largest identity error: 1.5543122344752192e-15</code></pre>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    strict<span class="op">=</span><span class="va">True</span>,</span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>):</span>
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="bu">int</span>(event_time), <span class="bu">round</span>(<span class="bu">float</span>(effect), <span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>dict_keys([&#39;event_time&#39;, &#39;effect&#39;, &#39;supported_cohorts&#39;, &#39;target_unit_count&#39;])
 -40 0.0
@@ -5314,8 +5302,6 @@ largest identity error: 1.5543122344752192e-15</code></pre>
 <h2 data-number="5" class="anchored" data-anchor-id="compose-two-way-fixed-effects-and-factors"><span class="header-section-number">5</span> Compose two-way fixed effects and factors</h2>
 <p>Two-way fixed effects and low-rank factors are reusable outcome models. Combine them with <code>SumOutcomeModel</code>.</p>
 <div id="7f5c7087" class="cell" data-execution_count="5">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>outcome_model <span class="op">=</span> primitives.SumOutcomeModel(</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    models<span class="op">=</span>(</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>        primitives.TwoWayFixedEffectsOutcome(</span>
@@ -5346,7 +5332,6 @@ largest identity error: 1.5543122344752192e-15</code></pre>
 <span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>composed_panel <span class="op">=</span> simulator.simulate(seed<span class="op">=</span><span class="dv">17</span>)</span>
 <span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(composed_panel.metadata[<span class="st">&quot;outcome&quot;</span>][<span class="st">&quot;model&quot;</span>])</span>
 <span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(composed_panel.true_att, <span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>SumOutcomeModel
 1.6</code></pre>
@@ -5357,8 +5342,6 @@ largest identity error: 1.5543122344752192e-15</code></pre>
 <h2 data-number="6" class="anchored" data-anchor-id="compare-the-two-panels"><span class="header-section-number">6</span> Compare the two panels</h2>
 <p>The first panel uses a ready-made one-factor design. The second combines two-way fixed effects with two latent factors. Sorting units by adoption time makes the treated block visible.</p>
 <div id="cell-fig-getting-started-panels" class="cell" data-execution_count="6">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>comparisons <span class="op">=</span> (</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    (<span class="st">&quot;Ready-made classic factor&quot;</span>, panel),</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    (<span class="st">&quot;2WFE plus rank-two factors&quot;</span>, composed_panel),</span>
@@ -5388,7 +5371,6 @@ largest identity error: 1.5543122344752192e-15</code></pre>
 <span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> axis <span class="kw">in</span> axes[<span class="op">-</span><span class="dv">1</span>]:</span>
 <span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>    axis.set_xlabel(<span class="st">&quot;period&quot;</span>)</span>
 <span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-display">
 <div id="fig-getting-started-panels" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Four heatmaps compare outcomes and treatment in a ready-made factor panel and a panel made from two-way fixed effects plus rank-two factors.">
 <figure class="quarto-float quarto-float-fig figure">
@@ -5408,8 +5390,6 @@ Figure 1: Observed outcomes and treatment for a ready-made factor design and a 
 <h2 data-number="7" class="anchored" data-anchor-id="change-one-assumption"><span class="header-section-number">7</span> Change one assumption</h2>
 <p>Replace random assignment with selection on observed and unobserved features. The outcome and treatment-effect models do not change.</p>
 <div id="2fdfcb3b" class="cell" data-execution_count="7">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>selected_simulator <span class="op">=</span> core.PanelSimulator(</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">&quot;selected_fixed_effects_plus_factors&quot;</span>,</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    dimensions<span class="op">=</span>core.PanelDimensions(n_units<span class="op">=</span><span class="dv">200</span>, n_periods<span class="op">=</span><span class="dv">40</span>),</span>
@@ -5430,7 +5410,6 @@ Figure 1: Observed outcomes and treatment for a ready-made factor design and a 
 <span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>selected_panel <span class="op">=</span> selected_simulator.simulate(seed<span class="op">=</span><span class="dv">17</span>)</span>
 <span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;treated units:&quot;</span>, selected_panel.treated_units.size)</span>
 <span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;covariates:&quot;</span>, selected_panel.unit_covariate_names)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>treated units: 79
 covariates: (&#39;x1&#39;, &#39;x2&#39;)</code></pre>
@@ -5441,22 +5420,16 @@ covariates: (&#39;x1&#39;, &#39;x2&#39;)</code></pre>
 <h2 data-number="8" class="anchored" data-anchor-id="export-to-an-estimator"><span class="header-section-number">8</span> Export to an estimator</h2>
 <p>Matrix estimators usually need only two arrays:</p>
 <div id="17b38dbb" class="cell" data-execution_count="8">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>outcome, treatment <span class="op">=</span> selected_panel.as_arrays()</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(outcome.shape, treatment.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(200, 40) (200, 40)</code></pre>
 </div>
 </div>
 <p>Formula and data-frame estimators need long columns:</p>
 <div id="3ce12bf6" class="cell" data-execution_count="9">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>long_columns <span class="op">=</span> selected_panel.as_long_dict(include_annotations<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">tuple</span>(long_columns)[:<span class="dv">10</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(&#39;unit&#39;, &#39;time&#39;, &#39;outcome&#39;, &#39;treatment&#39;, &#39;untreated_outcome&#39;, &#39;treatment_effect&#39;, &#39;x1&#39;, &#39;x2&#39;, &#39;ever_treated&#39;, &#39;adoption_period&#39;)</code></pre>
 </div>
@@ -5469,8 +5442,6 @@ covariates: (&#39;x1&#39;, &#39;x2&#39;)</code></pre>
 <div class="sourceCode" id="cb18"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> sync <span class="at">--extra</span> docs <span class="at">--extra</span> estimators</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>We compare two panels with the same randomized cohort and dynamic treatment effect. The first untreated outcome follows a two-way fixed-effects model. The second adds two interactive latent factors with different mean loadings for treated and control units.</p>
 <div id="19b8833d" class="cell" data-execution_count="10">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> crabbymetrics <span class="im">as</span> cm</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pyfixest <span class="im">as</span> pf</span>
@@ -5516,14 +5487,11 @@ covariates: (&#39;x1&#39;, &#39;x2&#39;)</code></pre>
 <span id="cb19-43"><a href="#cb19-43" aria-hidden="true" tabindex="-1"></a>    ),</span>
 <span id="cb19-44"><a href="#cb19-44" aria-hidden="true" tabindex="-1"></a>    effect_model<span class="op">=</span>application_effect,</span>
 <span id="cb19-45"><a href="#cb19-45" aria-hidden="true" tabindex="-1"></a>).simulate(seed<span class="op">=</span><span class="dv">42</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 <section id="pyfixest-two-way-fixed-effects" class="level3" data-number="9.1">
 <h3 data-number="9.1" class="anchored" data-anchor-id="pyfixest-two-way-fixed-effects"><span class="header-section-number">9.1</span> PyFixest two-way fixed effects</h3>
 <p>PyFixest consumes the long representation. The event-study regression omits event time <span class="math inline">\(-1\)</span>, and the static regression reports an ATT summary. Standard errors are clustered by unit.</p>
 <div id="09211a25" class="cell" data-execution_count="11">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fit_pyfixest(draw):</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    frame <span class="op">=</span> pd.DataFrame(<span class="bu">dict</span>(draw.as_long_dict()))</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    frame[<span class="st">&quot;ever_treated&quot;</span>] <span class="op">=</span> np.repeat(</span>
@@ -5578,15 +5546,12 @@ covariates: (&#39;x1&#39;, &#39;x2&#39;)</code></pre>
 <span id="cb20-52"><a href="#cb20-52" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;att&quot;</span>: <span class="bu">float</span>(att_row[<span class="st">&quot;Estimate&quot;</span>]),</span>
 <span id="cb20-53"><a href="#cb20-53" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;att_se&quot;</span>: <span class="bu">float</span>(att_row[<span class="st">&quot;Std. Error&quot;</span>]),</span>
 <span id="cb20-54"><a href="#cb20-54" aria-hidden="true" tabindex="-1"></a>    }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 </section>
 <section id="crabbymetrics-matrix-completion" class="level3" data-number="9.2">
 <h3 data-number="9.2" class="anchored" data-anchor-id="crabbymetrics-matrix-completion"><span class="header-section-number">9.2</span> crabbymetrics matrix completion</h3>
 <p><code>MatrixCompletion</code> consumes the native unit-by-period arrays. It estimates the missing treated counterfactual from the untreated cells and returns an ATT and weighted event-study path.</p>
 <div id="f6d083a1" class="cell" data-execution_count="12">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fit_matrix_completion(draw):</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> cm.MatrixCompletion(</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>        lambda_fraction<span class="op">=</span><span class="fl">0.25</span>,</span>
@@ -5603,15 +5568,12 @@ covariates: (&#39;x1&#39;, &#39;x2&#39;)</code></pre>
 <span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;event&quot;</span>: pd.DataFrame(summary[<span class="st">&quot;event_study&quot;</span>][<span class="st">&quot;weighted&quot;</span>]),</span>
 <span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;att&quot;</span>: <span class="bu">float</span>(summary[<span class="st">&quot;att&quot;</span>]),</span>
 <span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>    }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 </section>
 <section id="crabbymetrics-interactive-fixed-effects" class="level3" data-number="9.3">
 <h3 data-number="9.3" class="anchored" data-anchor-id="crabbymetrics-interactive-fixed-effects"><span class="header-section-number">9.3</span> crabbymetrics interactive fixed effects</h3>
 <p><code>InteractiveFixedEffects</code> is a factor decomposition, not a treatment-effect estimator. Here it fits the complete donor panel. Treated-unit loadings are estimated only from pre-treatment outcomes, then extrapolated over the fitted donor factors.</p>
 <div id="1690e169" class="cell" data-execution_count="13">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fit_interactive_fixed_effects(draw, <span class="op">*</span>, rank):</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    outcome, _ <span class="op">=</span> draw.as_arrays(copy<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    donors <span class="op">=</span> draw.control_units</span>
@@ -5652,15 +5614,12 @@ covariates: (&#39;x1&#39;, &#39;x2&#39;)</code></pre>
 <span id="cb22-38"><a href="#cb22-38" aria-hidden="true" tabindex="-1"></a>        ),</span>
 <span id="cb22-39"><a href="#cb22-39" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;att&quot;</span>: <span class="bu">float</span>(estimated_effect[:, adoption:].mean()),</span>
 <span id="cb22-40"><a href="#cb22-40" aria-hidden="true" tabindex="-1"></a>    }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 </section>
 <section id="compare-the-estimates" class="level3" data-number="9.4">
 <h3 data-number="9.4" class="anchored" data-anchor-id="compare-the-estimates"><span class="header-section-number">9.4</span> Compare the estimates</h3>
 <p>The simulation supplies the rank used by interactive fixed effects. This example does not estimate the rank.</p>
 <div id="4b43561f" class="cell" data-execution_count="14">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>application_results <span class="op">=</span> {}</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> label, draw, rank <span class="kw">in</span> (</span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    (<span class="st">&quot;Additive 2WFE&quot;</span>, additive_application, <span class="dv">0</span>),</span>
@@ -5688,7 +5647,6 @@ covariates: (&#39;x1&#39;, &#39;x2&#39;)</code></pre>
 <span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> label, result <span class="kw">in</span> application_results.items()</span>
 <span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>    ]</span>
 <span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a>).set_index(<span class="st">&quot;design&quot;</span>).<span class="bu">round</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-display" data-execution_count="14">
 <div>
 
@@ -5732,8 +5690,6 @@ covariates: (&#39;x1&#39;, &#39;x2&#39;)</code></pre>
 </div>
 </div>
 <div id="cell-fig-estimator-applications" class="cell" data-execution_count="15">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>figure, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">5</span>), constrained_layout<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> axis, (label, result) <span class="kw">in</span> <span class="bu">zip</span>(</span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    axes,</span>
@@ -5804,7 +5760,6 @@ covariates: (&#39;x1&#39;, &#39;x2&#39;)</code></pre>
 <span id="cb24-68"><a href="#cb24-68" aria-hidden="true" tabindex="-1"></a>    axis.set_ylabel(<span class="st">&quot;treatment effect&quot;</span>)</span>
 <span id="cb24-69"><a href="#cb24-69" aria-hidden="true" tabindex="-1"></a>    axis.legend(frameon<span class="op">=</span><span class="va">False</span>, fontsize<span class="op">=</span><span class="dv">8</span>)</span>
 <span id="cb24-70"><a href="#cb24-70" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-display">
 <div id="fig-estimator-applications" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Two event-study charts compare the true effect path with PyFixest two-way fixed effects, crabbymetrics matrix completion, and crabbymetrics interactive fixed effects.">
 <figure class="quarto-float quarto-float-fig figure">
@@ -5824,23 +5779,17 @@ Figure 2: PyFixest and crabbymetrics applied to additive and interactive-factor
 <section id="generate-replications" class="level2" data-number="10">
 <h2 data-number="10" class="anchored" data-anchor-id="generate-replications"><span class="header-section-number">10</span> Generate replications</h2>
 <div id="d8d251cc" class="cell" data-execution_count="16">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>replications <span class="op">=</span> <span class="bu">list</span>(simulator.iter_simulations(<span class="dv">3</span>, seed<span class="op">=</span><span class="dv">2026</span>))</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>([<span class="bu">round</span>(item.true_att, <span class="dv">3</span>) <span class="cf">for</span> item <span class="kw">in</span> replications])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1.6, 1.6, 1.6]</code></pre>
 </div>
 </div>
 <p>Use named component streams when a refactor of one component must not change draws from another component:</p>
 <div id="fb3603aa" class="cell" data-execution_count="17">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>streams <span class="op">=</span> core.SimulationSeeds.from_seed(<span class="dv">2026</span>)</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>stable_panel <span class="op">=</span> simulator.simulate(streams<span class="op">=</span>streams)</span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(stable_panel.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(200, 40)</code></pre>
 </div>

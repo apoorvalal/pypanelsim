@@ -5064,24 +5064,18 @@ height: auto;
 
 <p>The designs follow the public <a href="https://github.com/apoorvalal/TestingInEventStudies">TestingInEventStudies</a> project and the paper <a href="https://arxiv.org/abs/2503.05125">When can we get away with using the two-way fixed effects regression?</a>. The package generates null and alternative effect patterns; the test statistic belongs in the analysis code.</p>
 <div id="c1156232" class="cell" data-execution_count="1">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> designs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 <section id="two-different-heterogeneity-questions" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="two-different-heterogeneity-questions"><span class="header-section-number">1</span> Two different heterogeneity questions</h2>
 <p>The temporal family asks whether the effect is constant over exposure time. It uses one treatment cohort.</p>
 <p>The cohort family asks whether adoption cohorts share the same event-time path. It uses three cohorts and correlated untreated errors.</p>
 <div id="c480cf1b" class="cell" data-execution_count="2">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;temporal:&quot;</span>, designs.available_ftest_temporal_designs())</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;cohort:&quot;</span>, designs.available_ftest_cohort_designs())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>temporal: (&#39;constant&#39;, &#39;linear&#39;, &#39;concave&#39;, &#39;positive_then_negative&#39;, &#39;exponential&#39;, &#39;sinusoidal&#39;, &#39;random_walk&#39;)
 cohort: (&#39;homogeneous&#39;, &#39;log_vs_linear_vs_sin&#39;, &#39;small_differences&#39;, &#39;large_differences&#39;, &#39;selection_on_gains&#39;, &#39;novelty_effects&#39;, &#39;activity_bias&#39;)</code></pre>
@@ -5092,8 +5086,6 @@ cohort: (&#39;homogeneous&#39;, &#39;log_vs_linear_vs_sin&#39;, &#39;small_diffe
 <h2 data-number="2" class="anchored" data-anchor-id="temporal-alternatives"><span class="header-section-number">2</span> Temporal alternatives</h2>
 <p>The seven paths are constant, linear, concave, positive-then-negative, exponential, sinusoidal, and random walk.</p>
 <div id="205d545c" class="cell" data-execution_count="3">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>temporal_config <span class="op">=</span> designs.FTestTemporalConfig(</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    n_units<span class="op">=</span><span class="dv">240</span>,</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    n_periods<span class="op">=</span><span class="dv">35</span>,</span>
@@ -5108,7 +5100,6 @@ cohort: (&#39;homogeneous&#39;, &#39;log_vs_linear_vs_sin&#39;, &#39;small_diffe
 <span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        seed<span class="op">=</span><span class="dv">42</span>,</span>
 <span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(name, np.<span class="bu">round</span>(profile[:<span class="dv">6</span>], <span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>constant [1. 1. 1. 1. 1. 1.]
 linear [0.   0.05 0.11 0.16 0.21 0.26]
@@ -5120,8 +5111,6 @@ random_walk [ 0.3  -0.74  0.02  0.96 -1.   -2.3 ]</code></pre>
 </div>
 </div>
 <div id="cell-fig-ftest-temporal-profiles" class="cell" data-execution_count="4">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>temporal_names <span class="op">=</span> designs.available_ftest_temporal_designs()</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>figure, axes <span class="op">=</span> plt.subplots(</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>,</span>
@@ -5144,7 +5133,6 @@ random_walk [ 0.3  -0.74  0.02  0.96 -1.   -2.3 ]</code></pre>
 <span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> axis <span class="kw">in</span> axes.ravel()[<span class="bu">len</span>(temporal_names):]:</span>
 <span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    axis.set_visible(<span class="va">False</span>)</span>
 <span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-display">
 <div id="fig-ftest-temporal-profiles" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Seven small line charts show constant, linear, plateau, hump, delayed, sign-changing, and fading temporal effect paths.">
 <figure class="quarto-float quarto-float-fig figure">
@@ -5160,8 +5148,6 @@ Figure 1: The seven single-cohort temporal effect alternatives.
 </div>
 <p>The untreated outcome contains unit effects, time effects, small unit trends, and AR(1) error. The treatment path begins at <code>adoption_period</code>.</p>
 <div id="a9d80507" class="cell" data-execution_count="5">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>temporal_panel <span class="op">=</span> designs.ftest_temporal(</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;positive_then_negative&quot;</span>,</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    config<span class="op">=</span>temporal_config,</span>
@@ -5171,7 +5157,6 @@ Figure 1: The seven single-cohort temporal effect alternatives.
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(temporal_panel.shape)</span>
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(temporal_panel.true_att, <span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(240, 35)
 0.25</code></pre>
@@ -5183,8 +5168,6 @@ Figure 1: The seven single-cohort temporal effect alternatives.
 <h2 data-number="3" class="anchored" data-anchor-id="cohort-alternatives"><span class="header-section-number">3</span> Cohort alternatives</h2>
 <p>The cohort family uses three adoption dates. Named alternatives range from a homogeneous null to large cohort differences and selection on gains.</p>
 <div id="aa8d9dcf" class="cell" data-execution_count="6">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>cohort_config <span class="op">=</span> designs.FTestCohortConfig(n_units<span class="op">=</span><span class="dv">240</span>)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> designs.available_ftest_cohort_designs():</span>
@@ -5194,7 +5177,6 @@ Figure 1: The seven single-cohort temporal effect alternatives.
 <span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> cohort, path <span class="kw">in</span> profiles.items()</span>
 <span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    }</span>
 <span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(name, first_values)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>homogeneous {10: 0.0, 15: 0.0, 20: 0.0}
 log_vs_linear_vs_sin {10: 2.0, 15: 0.69, 20: 0.84}
@@ -5206,8 +5188,6 @@ activity_bias {10: 2.5, 15: 0.0, 20: 0.0}</code></pre>
 </div>
 </div>
 <div id="cell-fig-ftest-cohort-profiles" class="cell" data-execution_count="7">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>cohort_names <span class="op">=</span> designs.available_ftest_cohort_designs()</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>figure, axes <span class="op">=</span> plt.subplots(</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>,</span>
@@ -5232,7 +5212,6 @@ activity_bias {10: 2.5, 15: 0.0, 20: 0.0}</code></pre>
 <span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>    axis.set_visible(<span class="va">False</span>)</span>
 <span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>axes.ravel()[<span class="dv">0</span>].legend(fontsize<span class="op">=</span><span class="dv">7</span>)</span>
 <span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-display">
 <div id="fig-ftest-cohort-profiles" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Seven small line charts compare cohort-specific effect paths under the F-test heterogeneity alternatives.">
 <figure class="quarto-float quarto-float-fig figure">
@@ -5248,8 +5227,6 @@ Figure 2: Cohort-specific paths for the seven effect-pattern alternatives.
 </div>
 <p>Run one alternative and inspect the supported cohort-event cells:</p>
 <div id="d4124af5" class="cell" data-execution_count="8">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>cohort_panel <span class="op">=</span> designs.ftest_cohort(</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;selection_on_gains&quot;</span>,</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    config<span class="op">=</span>cohort_config,</span>
@@ -5264,7 +5241,6 @@ Figure 2: Cohort-specific paths for the seven effect-pattern alternatives.
 <span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>        np.<span class="bu">round</span>(truth[<span class="st">&quot;effect&quot;</span>][selected], <span class="dv">2</span>),</span>
 <span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>        truth[<span class="st">&quot;supported&quot;</span>][selected],</span>
 <span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>10 [0.   0.   0.   0.69 1.1  1.39] [ True  True  True  True  True  True]
 15 [0.   0.   0.   0.62 0.99 1.25] [ True  True  True  True  True  True]
@@ -5277,8 +5253,6 @@ Figure 2: Cohort-specific paths for the seven effect-pattern alternatives.
 <h2 data-number="4" class="anchored" data-anchor-id="realized-panel-structure"><span class="header-section-number">4</span> Realized panel structure</h2>
 <p>The temporal design has one adoption block. The cohort design has three. The outcome heatmaps also show their different untreated dependence structures.</p>
 <div id="cell-fig-ftest-realized-panels" class="cell" data-execution_count="9">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>realized_panels <span class="op">=</span> (</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    (<span class="st">&quot;Temporal alternative&quot;</span>, temporal_panel),</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    (<span class="st">&quot;Cohort alternative&quot;</span>, cohort_panel),</span>
@@ -5305,7 +5279,6 @@ Figure 2: Cohort-specific paths for the seven effect-pattern alternatives.
 <span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> axis <span class="kw">in</span> axes[row]:</span>
 <span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>        axis.set_xlabel(<span class="st">&quot;period&quot;</span>)</span>
 <span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-display">
 <div id="fig-ftest-realized-panels" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Four heatmaps show observed outcomes and treatment for one temporal-effect alternative and one cohort-heterogeneity alternative.">
 <figure class="quarto-float quarto-float-fig figure">
@@ -5324,8 +5297,6 @@ Figure 3: Observed outcomes and treatment for one temporal and one cohort-heter
 <h2 data-number="5" class="anchored" data-anchor-id="build-custom-cohort-effects"><span class="header-section-number">5</span> Build custom cohort effects</h2>
 <p>The built-in family uses the same classes available to user code. Cohort effects are specified as a map from adoption period to an event-time array.</p>
 <div id="c89a09e6" class="cell" data-execution_count="10">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> primitives</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>profiles <span class="op">=</span> designs.ftest_cohort_profiles(</span>
@@ -5335,7 +5306,6 @@ Figure 3: Observed outcomes and treatment for one temporal and one cohort-heter
 <span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>effect_model <span class="op">=</span> primitives.CohortEventTimeEffect(profiles)</span>
 <span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">type</span>(effect_model).<span class="va">__name__</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>CohortEventTimeEffect</code></pre>
 </div>

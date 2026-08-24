@@ -5263,8 +5263,6 @@ height: auto;
 <h2 data-number="2" class="anchored" data-anchor-id="common-simulation-components"><span class="header-section-number">2</span> Common simulation components</h2>
 <p>The examples below share the same features, untreated outcomes, and treatment effects. Only assignment changes.</p>
 <div id="bfb15d6f" class="cell" data-execution_count="1">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -5301,15 +5299,12 @@ height: auto;
 <span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>        outcome_model<span class="op">=</span>outcome,</span>
 <span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>        effect_model<span class="op">=</span>effect,</span>
 <span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 </section>
 <section id="randomized-assignment" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="randomized-assignment"><span class="header-section-number">3</span> Randomized assignment</h2>
 <p>One cohort starts treatment in period 30:</p>
 <div id="5133dc58" class="cell" data-execution_count="2">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>randomized <span class="op">=</span> make_simulator(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;randomized_single_cohort&quot;</span>,</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    primitives.RandomizedSingleCohortAssignment(</span>
@@ -5320,7 +5315,6 @@ height: auto;
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(randomized.treated_units.size)</span>
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(randomized.adoption_times[randomized.ever_treated][:<span class="dv">5</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>96
 [30 30 30 30 30]</code></pre>
@@ -5328,8 +5322,6 @@ height: auto;
 </div>
 <p>For staggered adoption, give one size for each adoption period:</p>
 <div id="738d37ac" class="cell" data-execution_count="3">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>staggered <span class="op">=</span> make_simulator(</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;randomized_staggered&quot;</span>,</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    primitives.RandomizedStaggeredAdoption(</span>
@@ -5339,7 +5331,6 @@ height: auto;
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>).simulate(seed<span class="op">=</span><span class="dv">42</span>)</span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">sorted</span>(<span class="bu">set</span>(staggered.adoption_times[staggered.ever_treated])))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[np.int64(24), np.int64(30), np.int64(36)]</code></pre>
 </div>
@@ -5356,8 +5347,6 @@ P(A_i=1 \mid X_i,U_i)
 \]</span></p>
 <p>Here <span class="math inline">\(X_i\)</span> is observable to the estimator and <span class="math inline">\(U_i\)</span> is latent.</p>
 <div id="2c21ffa4" class="cell" data-execution_count="4">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>selected <span class="op">=</span> make_simulator(</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;selected_single_cohort&quot;</span>,</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    primitives.BinaryLogitAssignment(</span>
@@ -5370,7 +5359,6 @@ P(A_i=1 \mid X_i,U_i)
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(selected.treated_units.size)</span>
 <span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(selected.unit_covariate_names)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>111
 (&#39;x1&#39;, &#39;x2&#39;)</code></pre>
@@ -5382,8 +5370,6 @@ P(A_i=1 \mid X_i,U_i)
 <h2 data-number="5" class="anchored" data-anchor-id="multiple-adoption-categories"><span class="header-section-number">5</span> Multiple adoption categories</h2>
 <p><code>GeneralizedPropensityAssignment</code> assigns each unit to never treated or to one of several adoption periods. Its logits compare each treated category with the never-treated reference category.</p>
 <div id="20379446" class="cell" data-execution_count="5">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>multi <span class="op">=</span> make_simulator(</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;selected_staggered&quot;</span>,</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    primitives.GeneralizedPropensityAssignment(</span>
@@ -5399,7 +5385,6 @@ P(A_i=1 \mid X_i,U_i)
 <span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>).simulate(seed<span class="op">=</span><span class="dv">42</span>)</span>
 <span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">sorted</span>(<span class="bu">set</span>(multi.adoption_times[multi.ever_treated])))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[np.int64(24), np.int64(30), np.int64(36)]</code></pre>
 </div>
@@ -5410,8 +5395,6 @@ P(A_i=1 \mid X_i,U_i)
 <h2 data-number="6" class="anchored" data-anchor-id="visual-comparison"><span class="header-section-number">6</span> Visual comparison</h2>
 <p>The following panels use the same feature and outcome models. Their treatment patterns differ because assignment changes.</p>
 <div id="cell-fig-assignment-comparison" class="cell" data-execution_count="6">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>assignment_panels <span class="op">=</span> {</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Randomized cohort&quot;</span>: randomized,</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Randomized staggered&quot;</span>: staggered,</span>
@@ -5442,7 +5425,6 @@ P(A_i=1 \mid X_i,U_i)
 <span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> axis <span class="kw">in</span> axes[row]:</span>
 <span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>        axis.set_xlabel(<span class="st">&quot;period&quot;</span>)</span>
 <span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-display">
 <div id="fig-assignment-comparison" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Four pairs of heatmaps compare outcomes and treatment under randomized, observed selection, latent selection, and staggered assignment.">
 <figure class="quarto-float quarto-float-fig figure">
@@ -5461,8 +5443,6 @@ Figure 1: A common outcome model under randomized, selected, and staggered trea
 <h2 data-number="7" class="anchored" data-anchor-id="unit-time-effect-heterogeneity"><span class="header-section-number">7</span> Unit-time effect heterogeneity</h2>
 <p>An effect callable receives the same observed, latent, and time features as the other components. It returns the potential effect for every cell. The simulator sets the realized effect to zero outside treated cells.</p>
 <div id="fb088021" class="cell" data-execution_count="7">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>heterogeneous_simulator <span class="op">=</span> core.PanelSimulator(</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">&quot;heterogeneous_effects&quot;</span>,</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    dimensions<span class="op">=</span>dimensions,</span>
@@ -5484,11 +5464,8 @@ Figure 1: A common outcome model under randomized, selected, and staggered trea
 <span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>    ),</span>
 <span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>heterogeneous_panel <span class="op">=</span> heterogeneous_simulator.simulate(seed<span class="op">=</span><span class="dv">42</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 <div id="cell-fig-heterogeneous-effects" class="cell" data-execution_count="8">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>order <span class="op">=</span> np.argsort(heterogeneous_panel.effect_surface.mean(axis<span class="op">=</span><span class="dv">1</span>), kind<span class="op">=</span><span class="st">&quot;stable&quot;</span>)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>figure, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="fl">4.5</span>), constrained_layout<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>plot_panels <span class="op">=</span> (</span>
@@ -5519,7 +5496,6 @@ Figure 1: A common outcome model under randomized, selected, and staggered trea
 <span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>    figure.colorbar(image, ax<span class="op">=</span>axis, fraction<span class="op">=</span><span class="fl">0.035</span>, pad<span class="op">=</span><span class="fl">0.02</span>)</span>
 <span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">&quot;units, sorted by mean effect&quot;</span>)</span>
 <span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-display">
 <div id="fig-heterogeneous-effects" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Three heatmaps show observed outcomes, treatment, and realized heterogeneous effects after sorting units by average effect.">
 <figure class="quarto-float quarto-float-fig figure">
@@ -5538,11 +5514,8 @@ Figure 2: Observed outcomes, treatment, and the realized heterogeneous effect.
 <h2 data-number="8" class="anchored" data-anchor-id="assignment-metadata"><span class="header-section-number">8</span> Assignment metadata</h2>
 <p>Every simulated panel records the assignment class and its draw metadata:</p>
 <div id="e78d912d" class="cell" data-execution_count="9">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(selected.metadata[<span class="st">&quot;assignment&quot;</span>][<span class="st">&quot;model&quot;</span>])</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(selected.unit_annotations.keys())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>BinaryLogitAssignment
 dict_keys([&#39;ever_treated&#39;, &#39;adoption_period&#39;])</code></pre>

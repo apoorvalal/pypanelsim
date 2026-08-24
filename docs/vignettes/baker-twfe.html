@@ -5240,8 +5240,6 @@ Y_{it}(0)=\alpha_i+\gamma_t+\varepsilon_{it}.
 \tau_{it}=s_g(t-g+1), \qquad t\ge g.
 \]</span></p>
 <div id="6998e54f" class="cell" data-execution_count="1">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -5252,7 +5250,6 @@ Y_{it}(0)=\alpha_i+\gamma_t+\varepsilon_{it}.
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(panel.shape)</span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(panel.truth.att_by_cohort())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(1000, 36)
 {&#39;cohort&#39;: array([ 9, 18, 27]), &#39;att&#39;: array([1.4  , 0.475, 0.05 ]), &#39;unit_count&#39;: array([353, 357, 290]), &#39;treated_cell_count&#39;: array([9531, 6426, 2610])}</code></pre>
@@ -5260,8 +5257,6 @@ Y_{it}(0)=\alpha_i+\gamma_t+\varepsilon_{it}.
 </div>
 <p>The outcome matrix contains the state and year effects, while the treatment matrix shows the three adoption cohorts.</p>
 <div id="cell-fig-baker-panel" class="cell" data-execution_count="2">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>order <span class="op">=</span> np.argsort(panel.adoption_times, kind<span class="op">=</span><span class="st">&quot;stable&quot;</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>figure, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">13</span>, <span class="dv">5</span>), constrained_layout<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>outcome_image <span class="op">=</span> axes[<span class="dv">0</span>].matshow(</span>
@@ -5284,7 +5279,6 @@ Y_{it}(0)=\alpha_i+\gamma_t+\varepsilon_{it}.
 <span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>figure.colorbar(outcome_image, ax<span class="op">=</span>axes[<span class="dv">0</span>], fraction<span class="op">=</span><span class="fl">0.035</span>, pad<span class="op">=</span><span class="fl">0.02</span>)</span>
 <span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>figure.colorbar(treatment_image, ax<span class="op">=</span>axes[<span class="dv">1</span>], fraction<span class="op">=</span><span class="fl">0.035</span>, pad<span class="op">=</span><span class="fl">0.02</span>)</span>
 <span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-display">
 <div id="fig-baker-panel" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Two heatmaps show observed outcomes and staggered treatment after sorting units by adoption cohort.">
 <figure class="quarto-float quarto-float-fig figure">
@@ -5303,10 +5297,7 @@ Figure 1: Observed outcomes and staggered treatment in Baker’s dynamic-effect
 <h2 data-number="2" class="anchored" data-anchor-id="the-causal-target"><span class="header-section-number">2</span> The causal target</h2>
 <p>The treated-cell ATT gives each observed treated cell equal weight:</p>
 <div id="2c8d6e1a" class="cell" data-execution_count="3">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;true treated-cell ATT:&quot;</span>, <span class="bu">round</span>(panel.true_att, <span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>true treated-cell ATT: 0.8901</code></pre>
 </div>
@@ -5327,8 +5318,6 @@ Figure 1: Observed outcomes and staggered treatment in Baker’s dynamic-effect
 {\sum_{it}\widetilde D_{it}^2}.
 \]</span></p>
 <div id="4d43d90c" class="cell" data-execution_count="4">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> double_demean(values):</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>        values</span>
@@ -5344,7 +5333,6 @@ Figure 1: Observed outcomes and staggered treatment in Baker’s dynamic-effect
 <span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;TWFE coefficient:&quot;</span>, <span class="bu">round</span>(twfe, <span class="dv">4</span>))</span>
 <span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;true treated-cell ATT:&quot;</span>, <span class="bu">round</span>(panel.true_att, <span class="dv">4</span>))</span>
 <span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;difference:&quot;</span>, <span class="bu">round</span>(twfe <span class="op">-</span> panel.true_att, <span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>TWFE coefficient: -0.2034
 true treated-cell ATT: 0.8901
@@ -5356,15 +5344,12 @@ difference: -1.0935</code></pre>
 <section id="inspect-cohort-event-effects" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="inspect-cohort-event-effects"><span class="header-section-number">4</span> Inspect cohort-event effects</h2>
 <div id="0e1595e6" class="cell" data-execution_count="5">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>cohort_truth <span class="op">=</span> panel.truth.cohort_event(event_times<span class="op">=</span><span class="bu">range</span>(<span class="dv">0</span>, <span class="dv">8</span>))</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> cohort <span class="kw">in</span> np.unique(cohort_truth[<span class="st">&quot;cohort&quot;</span>]):</span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    selected <span class="op">=</span> cohort_truth[<span class="st">&quot;cohort&quot;</span>] <span class="op">==</span> cohort</span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    effects <span class="op">=</span> cohort_truth[<span class="st">&quot;effect&quot;</span>][selected]</span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="bu">int</span>(cohort), np.<span class="bu">round</span>(effects, <span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>9 [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8]
 18 [0.05 0.1  0.15 0.2  0.25 0.3  0.35 0.4 ]
@@ -5372,8 +5357,6 @@ difference: -1.0935</code></pre>
 </div>
 </div>
 <div id="cell-fig-baker-cohort-paths" class="cell" data-execution_count="6">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>figure, axis <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="dv">5</span>), constrained_layout<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> cohort <span class="kw">in</span> np.unique(cohort_truth[<span class="st">&quot;cohort&quot;</span>]):</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    selected <span class="op">=</span> cohort_truth[<span class="st">&quot;cohort&quot;</span>] <span class="op">==</span> cohort</span>
@@ -5388,7 +5371,6 @@ difference: -1.0935</code></pre>
 <span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>axis.set_ylabel(<span class="st">&quot;true effect&quot;</span>)</span>
 <span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>axis.legend(title<span class="op">=</span><span class="st">&quot;adoption year&quot;</span>)</span>
 <span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-display">
 <div id="fig-baker-cohort-paths" class="quarto-float quarto-figure quarto-figure-center anchored" alt="A line chart shows a distinct true event-time treatment-effect path for each adoption cohort.">
 <figure class="quarto-float quarto-float-fig figure">
@@ -5408,8 +5390,6 @@ Figure 2: True treatment-effect paths by adoption cohort.
 <h2 data-number="5" class="anchored" data-anchor-id="isolate-design-from-noise"><span class="header-section-number">5</span> Isolate design from noise</h2>
 <p>Set <code>noise_scale=0</code> to remove sampling noise while keeping the same assignment and effect structure:</p>
 <div id="20bde9e6" class="cell" data-execution_count="7">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>noiseless <span class="op">=</span> designs.BakerPanelConfig(n_units<span class="op">=</span><span class="dv">200</span>, noise_scale<span class="op">=</span><span class="fl">0.0</span>)</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>noiseless_panel <span class="op">=</span> designs.baker(config<span class="op">=</span>noiseless, seed<span class="op">=</span><span class="dv">42</span>)</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -5419,7 +5399,6 @@ Figure 2: True treatment-effect paths by adoption cohort.
 <span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;noiseless TWFE:&quot;</span>, <span class="bu">round</span>(noiseless_twfe, <span class="dv">4</span>))</span>
 <span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;noiseless ATT:&quot;</span>, <span class="bu">round</span>(noiseless_panel.true_att, <span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>noiseless TWFE: -0.2213
 noiseless ATT: 0.9363</code></pre>

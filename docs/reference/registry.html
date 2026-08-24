@@ -5061,8 +5061,6 @@ height: auto;
 
 <p>Most code should call an explicit design constructor. Use <code>DGPRegistry</code> when an experiment reads design names from configuration or a separate project keeps its own design catalog.</p>
 <div id="18becb04" class="cell" data-execution_count="1">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> inspect</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> core, designs</span>
@@ -5070,7 +5068,6 @@ height: auto;
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.signature(core.DGPRegistry))</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> (<span class="st">&quot;register&quot;</span>, <span class="st">&quot;create&quot;</span>, <span class="st">&quot;names&quot;</span>):</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(name, inspect.signature(<span class="bu">getattr</span>(core.DGPRegistry, name)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>() -&gt; &#39;None&#39;
 register (self, name: &#39;str&#39;, factory: &#39;SimulatorFactory&#39;, *, replace: &#39;bool&#39; = False) -&gt; &#39;None&#39;
@@ -5082,8 +5079,6 @@ names (self) -&gt; &#39;tuple[str, ...]&#39;</code></pre>
 <h2 data-number="1" class="anchored" data-anchor-id="register-a-factory"><span class="header-section-number">1</span> Register a factory</h2>
 <p>A factory must return a <code>PanelSimulator</code>.</p>
 <div id="f8a07c3e" class="cell" data-execution_count="2">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>registry <span class="op">=</span> core.DGPRegistry()</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> classic_small(<span class="op">*</span>, overlap<span class="op">=</span><span class="fl">0.0</span>):</span>
@@ -5100,7 +5095,6 @@ names (self) -&gt; &#39;tuple[str, ...]&#39;</code></pre>
 <span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>registry.register(<span class="st">&quot;classic_small&quot;</span>, classic_small)</span>
 <span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(registry.names())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(&#39;classic_small&#39;,)</code></pre>
 </div>
@@ -5110,14 +5104,11 @@ names (self) -&gt; &#39;tuple[str, ...]&#39;</code></pre>
 <section id="create-and-simulate" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="create-and-simulate"><span class="header-section-number">2</span> Create and simulate</h2>
 <div id="f9db4c9b" class="cell" data-execution_count="3">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>simulator <span class="op">=</span> registry.create(<span class="st">&quot;classic_small&quot;</span>, overlap<span class="op">=</span><span class="fl">1.0</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> simulator.simulate(seed<span class="op">=</span><span class="dv">42</span>)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(simulator.name)</span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(panel.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>classic_factor
 (80, 32)</code></pre>

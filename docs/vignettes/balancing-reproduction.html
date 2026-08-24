@@ -5268,8 +5268,6 @@ Z_j=
 <section id="read-the-matched-grid" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="read-the-matched-grid"><span class="header-section-number">3</span> Read the matched grid</h2>
 <div id="c2f6ab90" class="cell" data-execution_count="1">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -5285,7 +5283,6 @@ Z_j=
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>).<span class="bu">any</span>())</span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;R replications per cell:&quot;</span>, <span class="bu">sorted</span>(comparison[<span class="st">&quot;n_r&quot;</span>].unique()))</span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;Python replications per cell:&quot;</span>, <span class="bu">sorted</span>(comparison[<span class="st">&quot;n_python&quot;</span>].unique()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>matched cells: 398
 all keys unique: True
@@ -5297,8 +5294,6 @@ Python replications per cell: [np.int64(200)]</code></pre>
 <section id="main-result" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="main-result"><span class="header-section-number">4</span> Main result</h2>
 <div id="95dc10a9" class="cell" data-execution_count="2">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>within_three <span class="op">=</span> <span class="bu">int</span>(comparison[<span class="st">&quot;within_three_mcse&quot;</span>].<span class="bu">sum</span>())</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>maximum <span class="op">=</span> comparison[<span class="st">&quot;standardized_difference&quot;</span>].<span class="bu">abs</span>().<span class="bu">max</span>()</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>median <span class="op">=</span> comparison[<span class="st">&quot;standardized_difference&quot;</span>].<span class="bu">abs</span>().median()</span>
@@ -5306,7 +5301,6 @@ Python replications per cell: [np.int64(200)]</code></pre>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;cells within three combined MCSE:&quot;</span>, within_three)</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;maximum absolute standardized difference:&quot;</span>, <span class="bu">round</span>(maximum, <span class="dv">3</span>))</span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;median absolute standardized difference:&quot;</span>, <span class="bu">round</span>(median, <span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>cells within three combined MCSE: 390
 maximum absolute standardized difference: 3.743
@@ -5318,8 +5312,6 @@ median absolute standardized difference: 0.551</code></pre>
 <section id="largest-discrepancies" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="largest-discrepancies"><span class="header-section-number">5</span> Largest discrepancies</h2>
 <div id="2c0e0c58" class="cell" data-execution_count="3">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>columns <span class="op">=</span> [</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;family&quot;</span>,</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;setting&quot;</span>,</span>
@@ -5335,7 +5327,6 @@ median absolute standardized difference: 0.551</code></pre>
 <span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    columns,</span>
 <span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>]</span>
 <span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(largest.to_string(index<span class="op">=</span><span class="va">False</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>        family          setting                               frame outcome   r_rmse  python_rmse  standardized_difference
 classic_factor       NN=200;a=1          aug-d-balance (individual) MCPanel 1.529474     1.698057                 3.743088
@@ -5353,8 +5344,6 @@ classic_factor       NN=200;a=1            aug-d-balance (residual) MCPanel 2.24
 <h2 data-number="6" class="anchored" data-anchor-id="visual-agreement-diagnostics"><span class="header-section-number">6</span> Visual agreement diagnostics</h2>
 <p>The left panel compares RMSE values directly. The right panel shows differences in units of their combined Monte Carlo standard error.</p>
 <div id="cell-fig-balancing-agreement" class="cell" data-execution_count="4">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>figure, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">13</span>, <span class="dv">5</span>), constrained_layout<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>families <span class="op">=</span> <span class="bu">sorted</span>(comparison[<span class="st">&quot;family&quot;</span>].unique())</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> family <span class="kw">in</span> families:</span>
@@ -5385,7 +5374,6 @@ classic_factor       NN=200;a=1            aug-d-balance (residual) MCPanel 2.24
 <span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_ylabel(<span class="st">&quot;matched cells&quot;</span>)</span>
 <span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">&quot;Difference relative to combined MCSE&quot;</span>)</span>
 <span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-display">
 <div id="fig-balancing-agreement" class="quarto-float quarto-figure quarto-figure-center anchored" alt="A scatter plot compares R and Python RMSE values by design family, and a histogram shows standardized differences.">
 <figure class="quarto-float quarto-float-fig figure">

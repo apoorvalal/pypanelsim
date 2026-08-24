@@ -5208,8 +5208,6 @@ height: auto;
 
 
 <div id="e95190f4" class="cell" data-execution_count="1">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> inspect</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> primitives</span>
@@ -5218,19 +5216,15 @@ height: auto;
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> name <span class="kw">in</span> names:</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        value <span class="op">=</span> <span class="bu">getattr</span>(primitives, name)</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span>name<span class="sc">}{</span>inspect<span class="sc">.</span>signature(value)<span class="sc">}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 <section id="unit-features" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="unit-features"><span class="header-section-number">1</span> Unit features</h2>
 <div id="279c3a84" class="cell" data-execution_count="2">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>show((</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;GaussianUnitFeatures&quot;</span>,</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;CorrelatedGaussianFeatures&quot;</span>,</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;LatentGradientFeatures&quot;</span>,</span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>GaussianUnitFeatures(n_observables: &#39;int&#39; = 2, n_unobservables: &#39;int&#39; = 2) -&gt; None
 CorrelatedGaussianFeatures(n_features: &#39;int&#39; = 10, correlation: &#39;float&#39; = 0.5, covariance: &#39;Sequence[Sequence[float]] | None&#39; = None, transform: &#39;FeatureTransform | None&#39; = None, estimator_uses_raw: &#39;bool&#39; = True, name_prefix: &#39;str&#39; = &#39;x&#39;) -&gt; None
@@ -5269,10 +5263,7 @@ LatentGradientFeatures(location_start: &#39;float&#39; = -0.5, location_stop: &#
 <section id="time-features" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="time-features"><span class="header-section-number">2</span> Time features</h2>
 <div id="b5b53e39" class="cell" data-execution_count="3">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>show((<span class="st">&quot;GaussianTimeFeatures&quot;</span>,))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>GaussianTimeFeatures(n_features: &#39;int&#39; = 1) -&gt; None</code></pre>
 </div>
@@ -5282,8 +5273,6 @@ LatentGradientFeatures(location_start: &#39;float&#39; = -0.5, location_stop: &#
 <section id="assignment-models" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="assignment-models"><span class="header-section-number">3</span> Assignment models</h2>
 <div id="f4edbe58" class="cell" data-execution_count="4">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>show((</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;SingleCohortAssignment&quot;</span>,</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;RandomizedSingleCohortAssignment&quot;</span>,</span>
@@ -5293,7 +5282,6 @@ LatentGradientFeatures(location_start: &#39;float&#39; = -0.5, location_stop: &#
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;SparseLogitAssignment&quot;</span>,</span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;GeneralizedPropensityAssignment&quot;</span>,</span>
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>SingleCohortAssignment(n_treated: &#39;int&#39; = 40, adoption_period: &#39;int&#39; = 40, treated_units: &#39;tuple[int, ...] | None&#39; = None) -&gt; None
 RandomizedSingleCohortAssignment(n_treated: &#39;int&#39;, adoption_period: &#39;int&#39;, eligible_units: &#39;Sequence[int] | None&#39; = None) -&gt; None
@@ -5359,8 +5347,6 @@ GeneralizedPropensityAssignment(adoption_periods: &#39;Sequence[int]&#39;, inter
 <section id="untreated-outcome-models" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="untreated-outcome-models"><span class="header-section-number">4</span> Untreated-outcome models</h2>
 <div id="a66821bc" class="cell" data-execution_count="5">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>show((</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;TwoWayFixedEffectsOutcome&quot;</span>,</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;AdditiveFactorOutcome&quot;</span>,</span>
@@ -5376,7 +5362,6 @@ GeneralizedPropensityAssignment(adoption_periods: &#39;Sequence[int]&#39;, inter
 <span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;SumOutcomeModel&quot;</span>,</span>
 <span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;CallableOutcomeModel&quot;</span>,</span>
 <span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>TwoWayFixedEffectsOutcome(unit_effect_scale: &#39;float&#39; = 1.0, time_effect_scale: &#39;float&#39; = 1.0, noise_scale: &#39;float&#39; = 0.0) -&gt; None
 AdditiveFactorOutcome(unit_effect_scale: &#39;float&#39; = 1.0, time_effect_scale: &#39;float&#39; = 1.0, noise_scale: &#39;float&#39; = 0.0) -&gt; None
@@ -5465,8 +5450,6 @@ CallableOutcomeModel(function: &#39;OutcomeCallable&#39;, name: &#39;str&#39; = 
 <p><code>LinearFeatureOutcome.source</code> is <code>observables</code> or <code>unobservables</code>. <code>level_coefficients</code> affect the level. <code>trend_coefficients</code> multiply the time index. Set <code>center_time=True</code> to center that index.</p>
 <p><code>SumOutcomeModel</code> is the main composition tool:</p>
 <div id="f33e3a5a" class="cell" data-execution_count="6">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>combined <span class="op">=</span> primitives.SumOutcomeModel(</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    models<span class="op">=</span>(</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>        primitives.TwoWayFixedEffectsOutcome(noise_scale<span class="op">=</span><span class="fl">0.2</span>),</span>
@@ -5475,7 +5458,6 @@ CallableOutcomeModel(function: &#39;OutcomeCallable&#39;, name: &#39;str&#39; = 
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    weights<span class="op">=</span>(<span class="fl">1.0</span>, <span class="fl">0.5</span>),</span>
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(combined)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>SumOutcomeModel(models=(TwoWayFixedEffectsOutcome(unit_effect_scale=1.0, time_effect_scale=1.0, noise_scale=0.2), LowRankFactorOutcome(rank=2, loading_scale=1.0, factor_scale=1.0, noise_scale=0.0, distribution=&#39;normal&#39;, loading_mean=0.0, control_loading_mean=None, treated_loading_mean=None)), weights=(1.0, 0.5))</code></pre>
 </div>
@@ -5485,8 +5467,6 @@ CallableOutcomeModel(function: &#39;OutcomeCallable&#39;, name: &#39;str&#39; = 
 <section id="treatment-effect-models" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="treatment-effect-models"><span class="header-section-number">5</span> Treatment-effect models</h2>
 <div id="6c9f4723" class="cell" data-execution_count="7">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>show((</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ConstantEffect&quot;</span>,</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;LinearRampEffect&quot;</span>,</span>
@@ -5498,7 +5478,6 @@ CallableOutcomeModel(function: &#39;OutcomeCallable&#39;, name: &#39;str&#39; = 
 <span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;CallableUnitEffect&quot;</span>,</span>
 <span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;CallableEffect&quot;</span>,</span>
 <span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>ConstantEffect(value: &#39;float&#39; = 1.0) -&gt; None
 LinearRampEffect(slope: &#39;float&#39; = 0.2) -&gt; None
@@ -5566,8 +5545,6 @@ CallableEffect(function: &#39;EffectCallable&#39;, name: &#39;str&#39; = &#39;ca
 <section id="profile-helpers" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="profile-helpers"><span class="header-section-number">6</span> Profile helpers</h2>
 <div id="2fe341c8" class="cell" data-execution_count="8">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>show((</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;constant_profile&quot;</span>,</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;linear_profile&quot;</span>,</span>
@@ -5576,7 +5553,6 @@ CallableEffect(function: &#39;EffectCallable&#39;, name: &#39;str&#39; = &#39;ca
 <span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;hump_profile&quot;</span>,</span>
 <span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;sinusoidal_profile&quot;</span>,</span>
 <span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>constant_profile(event_time: &#39;np.ndarray&#39;, *, value: &#39;float&#39; = 1.0) -&gt; &#39;np.ndarray&#39;
 linear_profile(event_time: &#39;np.ndarray&#39;, *, slope: &#39;float&#39; = 0.2) -&gt; &#39;np.ndarray&#39;

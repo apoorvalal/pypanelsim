@@ -5066,13 +5066,10 @@ height: auto;
 
 <p>The catalog links each design to the question it studies and to a public source when one exists. It also marks designs from ongoing work and designs made only to test the package.</p>
 <div id="99cda03f" class="cell" data-execution_count="1">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> designs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 <section id="at-a-glance" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="at-a-glance"><span class="header-section-number">1</span> At a glance</h2>
@@ -5135,14 +5132,11 @@ height: auto;
 <h2 data-number="2" class="anchored" data-anchor-id="baker-dynamic-effects"><span class="header-section-number">2</span> Baker dynamic effects</h2>
 <p>Baker’s design shows why a two-way fixed-effects coefficient can differ from the average effect when cohorts adopt at different times and their effects grow at different rates. States enter one of three cohorts, untreated outcomes contain state and year effects, and each cohort has its own linear effect path. The simulation records cohort-event effects and the treated-cell ATT.</p>
 <div id="838bf2c9" class="cell" data-execution_count="2">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>baker_panel <span class="op">=</span> designs.baker(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    config<span class="op">=</span>designs.BakerPanelConfig(n_units<span class="op">=</span><span class="dv">200</span>),</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    seed<span class="op">=</span><span class="dv">42</span>,</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(baker_panel.shape, <span class="bu">round</span>(baker_panel.true_att, <span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(200, 36) 0.936</code></pre>
 </div>
@@ -5153,8 +5147,6 @@ height: auto;
 <h2 data-number="3" class="anchored" data-anchor-id="f-test-heterogeneity-designs"><span class="header-section-number">3</span> F-test heterogeneity designs</h2>
 <p>The F-test designs ask whether a joint test can distinguish a common effect path from temporal or cohort heterogeneity. The temporal family has one adoption date and seven paths. The cohort family has three adoption cohorts and seven patterns of cohort differences. Untreated outcomes include fixed effects, trends, periodic components, and correlated errors.</p>
 <div id="68003de3" class="cell" data-execution_count="3">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(designs.available_ftest_temporal_designs())</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(designs.available_ftest_cohort_designs())</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -5164,7 +5156,6 @@ height: auto;
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    seed<span class="op">=</span><span class="dv">42</span>,</span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(ftest_panel.truth.att_by_cohort()[<span class="st">&quot;att&quot;</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(&#39;constant&#39;, &#39;linear&#39;, &#39;concave&#39;, &#39;positive_then_negative&#39;, &#39;exponential&#39;, &#39;sinusoidal&#39;, &#39;random_walk&#39;)
 (&#39;homogeneous&#39;, &#39;log_vs_linear_vs_sin&#39;, &#39;small_differences&#39;, &#39;large_differences&#39;, &#39;selection_on_gains&#39;, &#39;novelty_effects&#39;, &#39;activity_bias&#39;)
@@ -5177,8 +5168,6 @@ height: auto;
 <h2 data-number="4" class="anchored" data-anchor-id="adaptive-partial-pooling"><span class="header-section-number">4</span> Adaptive partial pooling</h2>
 <p>The adaptive-pooling designs ask which cohorts have similar enough event-time paths to pool and which comparisons lack calendar-time support. Nine adoption cohorts receive paths ranging from complete homogeneity to cohort-specific signed shapes. Untreated outcomes combine fixed effects, periodic time effects, and errors correlated across units and time.</p>
 <div id="1dd57d7e" class="cell" data-execution_count="4">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(designs.available_lepskii_designs())</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>lepskii_panel <span class="op">=</span> designs.lepskii(</span>
@@ -5188,7 +5177,6 @@ height: auto;
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>cells <span class="op">=</span> lepskii_panel.truth.cohort_event(event_times<span class="op">=</span>(<span class="op">-</span><span class="dv">2</span>, <span class="op">-</span><span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>))</span>
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cells.keys())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(&#39;complete_homogeneity&#39;, &#39;common_path&#39;, &#39;cohort_only_blocks&#39;, &#39;time_only_blocks&#39;, &#39;tensor_blocks&#39;, &#39;early_late_split&#39;, &#39;three_epoch&#39;, &#39;smooth_dose_gradient&#39;, &#39;response_timing&#39;, &#39;local_window_shock&#39;, &#39;log_shark_sin&#39;, &#39;no_pool_unique_signatures&#39;, &#39;no_pool_unique_peaks&#39;, &#39;no_pool_signed_paths&#39;)
 dict_keys([&#39;cohort&#39;, &#39;event_time&#39;, &#39;calendar_time&#39;, &#39;cohort_size&#39;, &#39;supported&#39;, &#39;effect&#39;])</code></pre>
@@ -5200,8 +5188,6 @@ dict_keys([&#39;cohort&#39;, &#39;event_time&#39;, &#39;calendar_time&#39;, &#39
 <h2 data-number="5" class="anchored" data-anchor-id="conditional-and-latent-trends"><span class="header-section-number">5</span> Conditional and latent trends</h2>
 <p>The ATT-DML designs ask whether an estimator recovers the ATT when unconditional parallel trends fail but a conditional or latent version holds. Five variants cover linear and nonlinear conditional trends, stable and unstable latent trends, and clustered ARMA outcomes.</p>
 <div id="8c181e1b" class="cell" data-execution_count="5">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(designs.available_att_dml_designs())</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>conditional_panel <span class="op">=</span> designs.att_dml(</span>
@@ -5210,7 +5196,6 @@ dict_keys([&#39;cohort&#39;, &#39;event_time&#39;, &#39;calendar_time&#39;, &#39
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    seed<span class="op">=</span><span class="dv">42</span>,</span>
 <span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(conditional_panel.unit_covariate_names[:<span class="dv">5</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(&#39;conditional_parallel_trends&#39;, &#39;conditional_parallel_trends_nonlinear&#39;, &#39;latent_parallel&#39;, &#39;latent_nonparallel&#39;, &#39;clustered_arma&#39;)
 (&#39;x1&#39;, &#39;x2&#39;, &#39;x3&#39;, &#39;x4&#39;, &#39;x5&#39;)</code></pre>
@@ -5222,15 +5207,12 @@ dict_keys([&#39;cohort&#39;, &#39;event_time&#39;, &#39;calendar_time&#39;, &#39
 <h2 data-number="6" class="anchored" data-anchor-id="large-panel-regression-summaries"><span class="header-section-number">6</span> Large-panel regression summaries</h2>
 <p>The large-panel designs ask whether small regression summaries preserve the treatment-effect information in a large experiment. The main version combines fixed effects, unit trends, serially correlated errors, and a configurable effect path. The Anscombe variants keep selected summaries similar while changing unit, time, or cohort-time structure.</p>
 <div id="62d65bce" class="cell" data-execution_count="6">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>compression_panel <span class="op">=</span> designs.regression_compression(</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    config<span class="op">=</span>designs.RegressionCompressionConfig(n_units<span class="op">=</span><span class="dv">400</span>),</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    seed<span class="op">=</span><span class="dv">42</span>,</span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(compression_panel.shape)</span>
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(designs.available_anscombe_designs())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(400, 35)
 (&#39;zero&#39;, &#39;unit&#39;, &#39;time&#39;, &#39;cohort_time&#39;)</code></pre>
@@ -5242,14 +5224,11 @@ dict_keys([&#39;cohort&#39;, &#39;event_time&#39;, &#39;calendar_time&#39;, &#39
 <h2 data-number="7" class="anchored" data-anchor-id="composite-panel-benchmark"><span class="header-section-number">7</span> Composite panel benchmark</h2>
 <p>The composite design tests an estimator when untreated outcomes mix fixed effects, factors, time-series persistence, and sparse donor structure.</p>
 <div id="a417dd0c" class="cell" data-execution_count="7">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>composite_panel <span class="op">=</span> designs.gsynth_composite(</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    config<span class="op">=</span>designs.GSynthCompositeConfig(n_control<span class="op">=</span><span class="dv">80</span>, n_treated<span class="op">=</span><span class="dv">20</span>),</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    seed<span class="op">=</span><span class="dv">42</span>,</span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(composite_panel.metadata[<span class="st">&quot;outcome&quot;</span>][<span class="st">&quot;model&quot;</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>SumOutcomeModel</code></pre>
 </div>
@@ -5260,8 +5239,6 @@ dict_keys([&#39;cohort&#39;, &#39;event_time&#39;, &#39;calendar_time&#39;, &#39
 <h2 data-number="8" class="anchored" data-anchor-id="one-draw-from-each-family"><span class="header-section-number">8</span> One draw from each family</h2>
 <p>The gallery is descriptive, not an estimator comparison. Units are sorted by adoption time so treatment timing and untreated structure can be read together.</p>
 <div id="cell-fig-research-design-gallery" class="cell" data-execution_count="8">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>gallery <span class="op">=</span> {</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Baker dynamic effects&quot;</span>: baker_panel,</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;F-test cohort effects&quot;</span>: ftest_panel,</span>
@@ -5280,7 +5257,6 @@ dict_keys([&#39;cohort&#39;, &#39;event_time&#39;, &#39;calendar_time&#39;, &#39
 <span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    axis.set_ylabel(<span class="st">&quot;units, sorted by adoption&quot;</span>)</span>
 <span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    figure.colorbar(image, ax<span class="op">=</span>axis, fraction<span class="op">=</span><span class="fl">0.035</span>, pad<span class="op">=</span><span class="fl">0.02</span>)</span>
 <span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-display">
 <div id="fig-research-design-gallery" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Six heatmaps compare observed outcome structure across the Baker, F-test, Lepskii, conditional-trend, large-panel, and composite design families.">
 <figure class="quarto-float quarto-float-fig figure">

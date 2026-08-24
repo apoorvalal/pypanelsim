@@ -5076,8 +5076,6 @@ height: auto;
 <li>Gaussian observation noise.</li>
 </ul>
 <div id="c4ebddec" class="cell" data-execution_count="1">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -5093,19 +5091,15 @@ height: auto;
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(designs.available_canonical_designs())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(&#39;classic_factor&#39;, &#39;factor_synthetic&#39;, &#39;mixed_factor&#39;, &#39;synthetic_control&#39;, &#39;time_series&#39;, &#39;weak_factor&#39;)</code></pre>
 </div>
 </div>
 <p>All direct functions return a <code>PanelDataset</code>. Add <code>_design</code> to obtain a reusable <code>PanelSimulator</code>.</p>
 <div id="e0a603c7" class="cell" data-execution_count="2">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> designs.classic_factor(overlap<span class="op">=</span><span class="fl">1.0</span>, config<span class="op">=</span>config, seed<span class="op">=</span><span class="dv">42</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>simulator <span class="op">=</span> designs.classic_factor_design(overlap<span class="op">=</span><span class="fl">1.0</span>, config<span class="op">=</span>config)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(panel.shape, simulator.name)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(200, 50) classic_factor</code></pre>
 </div>
@@ -5165,8 +5159,6 @@ height: auto;
 <h2 data-number="3" class="anchored" data-anchor-id="factor-overlap"><span class="header-section-number">3</span> Factor overlap</h2>
 <p>In the factor designs, <code>overlap=0</code> gives treated and control units similar loading distributions. Larger values separate those distributions.</p>
 <div id="64bcb950" class="cell" data-execution_count="3">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>overlap_panels <span class="op">=</span> {</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    value: designs.classic_factor(overlap<span class="op">=</span>value, seed<span class="op">=</span><span class="dv">110</span>)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> value <span class="kw">in</span> (<span class="fl">0.0</span>, <span class="fl">1.0</span>)</span>
@@ -5175,7 +5167,6 @@ height: auto;
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> value, item <span class="kw">in</span> overlap_panels.items():</span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    outcome_metadata <span class="op">=</span> item.metadata[<span class="st">&quot;outcome&quot;</span>]</span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(value, outcome_metadata[<span class="st">&quot;model&quot;</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>0.0 ClassicFactorOutcome
 1.0 ClassicFactorOutcome</code></pre>
@@ -5187,14 +5178,11 @@ height: auto;
 <h2 data-number="4" class="anchored" data-anchor-id="synthetic-control-sparsity"><span class="header-section-number">4</span> Synthetic-control sparsity</h2>
 <p><code>active_share</code> is the share of controls with nonzero donor weights for each treated unit.</p>
 <div id="0202a264" class="cell" data-execution_count="4">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>sparse <span class="op">=</span> designs.synthetic_control(active_share<span class="op">=</span><span class="fl">0.1</span>, seed<span class="op">=</span><span class="dv">140</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>dense <span class="op">=</span> designs.synthetic_control(active_share<span class="op">=</span><span class="fl">0.5</span>, seed<span class="op">=</span><span class="dv">140</span>)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(sparse.metadata[<span class="st">&quot;outcome&quot;</span>][<span class="st">&quot;active_share&quot;</span>])</span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dense.metadata[<span class="st">&quot;outcome&quot;</span>][<span class="st">&quot;active_share&quot;</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>0.1
 0.5</code></pre>
@@ -5206,8 +5194,6 @@ height: auto;
 <h2 data-number="5" class="anchored" data-anchor-id="temporal-persistence"><span class="header-section-number">5</span> Temporal persistence</h2>
 <p><code>time_series</code> supports stationary AR(1) paths and integrated ARIMA(1,1,0) paths. <code>coefficient</code> controls persistence.</p>
 <div id="f7188cfe" class="cell" data-execution_count="5">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>stationary <span class="op">=</span> designs.time_series(</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    coefficient<span class="op">=</span><span class="fl">0.9</span>,</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    integrated<span class="op">=</span><span class="va">False</span>,</span>
@@ -5221,7 +5207,6 @@ height: auto;
 <span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(stationary.metadata[<span class="st">&quot;outcome&quot;</span>][<span class="st">&quot;integrated&quot;</span>])</span>
 <span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(integrated.metadata[<span class="st">&quot;outcome&quot;</span>][<span class="st">&quot;integrated&quot;</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>False
 True</code></pre>
@@ -5232,8 +5217,6 @@ True</code></pre>
 <h2 data-number="6" class="anchored" data-anchor-id="change-the-sample-not-the-model"><span class="header-section-number">6</span> Change the sample, not the model</h2>
 <p>Pass one configuration to several constructors. This keeps sample dimensions, treatment timing, effects, and noise variance aligned.</p>
 <div id="04950628" class="cell" data-execution_count="6">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>small <span class="op">=</span> designs.CanonicalPanelConfig(</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    n_control<span class="op">=</span><span class="dv">60</span>,</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    n_treated<span class="op">=</span><span class="dv">20</span>,</span>
@@ -5248,7 +5231,6 @@ True</code></pre>
 <span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>({name: item.shape <span class="cf">for</span> name, item <span class="kw">in</span> panels.items()})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>{&#39;classic&#39;: (80, 32), &#39;weak&#39;: (80, 32), &#39;time&#39;: (80, 32)}</code></pre>
 </div>
@@ -5258,8 +5240,6 @@ True</code></pre>
 <h2 data-number="7" class="anchored" data-anchor-id="use-the-dispatcher"><span class="header-section-number">7</span> Use the dispatcher</h2>
 <p>Use a named dispatcher when design names come from a configuration file:</p>
 <div id="0b2d245a" class="cell" data-execution_count="7">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>simulator <span class="op">=</span> designs.make_canonical(</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;time_series&quot;</span>,</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    coefficient<span class="op">=</span><span class="fl">0.5</span>,</span>
@@ -5267,7 +5247,6 @@ True</code></pre>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    config<span class="op">=</span>small,</span>
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(simulator.simulate(seed<span class="op">=</span><span class="dv">7</span>).shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(80, 32)</code></pre>
 </div>
@@ -5278,8 +5257,6 @@ True</code></pre>
 <h2 data-number="8" class="anchored" data-anchor-id="visual-catalog"><span class="header-section-number">8</span> Visual catalog</h2>
 <p>Each row below compares two variants of one untreated-outcome family. Treatment timing and effects remain the same.</p>
 <div class="cell" data-execution_count="8">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>visual_config <span class="op">=</span> designs.CanonicalPanelConfig(</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    n_control<span class="op">=</span><span class="dv">60</span>,</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    n_treated<span class="op">=</span><span class="dv">20</span>,</span>
@@ -5337,7 +5314,6 @@ True</code></pre>
 <span id="cb15-55"><a href="#cb15-55" aria-hidden="true" tabindex="-1"></a>            axis.set_xlabel(<span class="st">&quot;period&quot;</span>)</span>
 <span id="cb15-56"><a href="#cb15-56" aria-hidden="true" tabindex="-1"></a>    figure.suptitle(family)</span>
 <span id="cb15-57"><a href="#cb15-57" aria-hidden="true" tabindex="-1"></a>    plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div id="fig-canonical-catalog" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="8">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-canonical-catalog-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">

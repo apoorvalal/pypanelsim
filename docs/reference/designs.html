@@ -5065,8 +5065,6 @@ height: auto;
 
 
 <div id="f7d696c8" class="cell" data-execution_count="1">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> inspect</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> designs</span>
@@ -5075,13 +5073,10 @@ height: auto;
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> name <span class="kw">in</span> names:</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        value <span class="op">=</span> <span class="bu">getattr</span>(designs, name)</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span>name<span class="sc">}{</span>inspect<span class="sc">.</span>signature(value)<span class="sc">}</span><span class="ss">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 <section id="canonical-benchmarks" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="canonical-benchmarks"><span class="header-section-number">1</span> Canonical benchmarks</h2>
 <div id="9a70cc41" class="cell" data-execution_count="2">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>show((</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;CanonicalPanelConfig&quot;</span>,</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;classic_factor_design&quot;</span>,</span>
@@ -5093,7 +5088,6 @@ height: auto;
 <span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;make_canonical&quot;</span>,</span>
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;available_canonical_designs&quot;</span>,</span>
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>CanonicalPanelConfig(n_control: &#39;int&#39; = 160, n_treated: &#39;int&#39; = 40, n_pre: &#39;int&#39; = 40, n_post: &#39;int&#39; = 10, effect_slope: &#39;float&#39; = 0.2, noise_variance: &#39;float&#39; = 0.36) -&gt; None
 classic_factor_design(*, overlap: &#39;float&#39; = 0.0, config: &#39;CanonicalPanelConfig | None&#39; = None) -&gt; &#39;PanelSimulator&#39;
@@ -5112,10 +5106,7 @@ available_canonical_designs() -&gt; &#39;tuple[str, ...]&#39;</code></pre>
 <section id="baker-design" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="baker-design"><span class="header-section-number">2</span> Baker design</h2>
 <div id="7a491f66" class="cell" data-execution_count="3">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>show((<span class="st">&quot;BakerPanelConfig&quot;</span>, <span class="st">&quot;baker_design&quot;</span>, <span class="st">&quot;baker&quot;</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>BakerPanelConfig(n_units: &#39;int&#39; = 1000, start_year: &#39;int&#39; = 1980, end_year: &#39;int&#39; = 2015, adoption_years: &#39;tuple[int, ...]&#39; = (1989, 1998, 2007), cohort_state_counts: &#39;tuple[int, ...]&#39; = (17, 18, 15), cohort_effect_slopes: &#39;tuple[float, ...]&#39; = (0.1, 0.05, 0.01), effect_scale: &#39;float&#39; = 1.0, unit_effect_scale: &#39;float&#39; = 1.0, time_effect_scale: &#39;float&#39; = 0.2, noise_scale: &#39;float&#39; = 0.5) -&gt; None
 baker_design(config: &#39;BakerPanelConfig | None&#39; = None) -&gt; &#39;PanelSimulator&#39;
@@ -5127,8 +5118,6 @@ baker(*, config: &#39;BakerPanelConfig | None&#39; = None, seed: &#39;int | np.r
 <section id="f-test-designs" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="f-test-designs"><span class="header-section-number">3</span> F-test designs</h2>
 <div id="4b491158" class="cell" data-execution_count="4">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>show((</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;FTestTemporalConfig&quot;</span>,</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;FTestCohortConfig&quot;</span>,</span>
@@ -5141,7 +5130,6 @@ baker(*, config: &#39;BakerPanelConfig | None&#39; = None, seed: &#39;int | np.r
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;available_ftest_temporal_designs&quot;</span>,</span>
 <span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;available_ftest_cohort_designs&quot;</span>,</span>
 <span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>FTestTemporalConfig(n_units: &#39;int&#39; = 1000, n_periods: &#39;int&#39; = 35, adoption_period: &#39;int&#39; = 15, n_treated: &#39;int | None&#39; = None, max_effect: &#39;float&#39; = 1.0, unit_effect_scale: &#39;float&#39; = 5.0, time_effect_scale: &#39;float&#39; = 2.0, unit_trend_scale: &#39;float&#39; = 0.01, noise_scale: &#39;float&#39; = 2.0, error_rho: &#39;float&#39; = 0.7) -&gt; None
 FTestCohortConfig(n_units: &#39;int&#39; = 1000, n_periods: &#39;int&#39; = 30, adoption_periods: &#39;tuple[int, int, int]&#39; = (10, 15, 20), cohort_shares: &#39;tuple[float, float, float]&#39; = (0.125, 0.25, 0.125), unit_effect_scale: &#39;float&#39; = 2.0, time_effect_scale: &#39;float&#39; = 1.0, noise_scale: &#39;float&#39; = 1.0, unit_error_rho: &#39;float&#39; = 0.8, time_error_rho: &#39;float&#39; = 0.2, periodic_time_effects: &#39;tuple[float, ...]&#39; = (-0.1, 0.1, 0.0, 0.0, 0.1, 0.5, 0.5)) -&gt; None
@@ -5160,8 +5148,6 @@ available_ftest_cohort_designs() -&gt; &#39;tuple[str, ...]&#39;</code></pre>
 <section id="adaptive-pooling-designs" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="adaptive-pooling-designs"><span class="header-section-number">4</span> Adaptive pooling designs</h2>
 <div id="094a5c36" class="cell" data-execution_count="5">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>show((</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;LepskiiPanelConfig&quot;</span>,</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;lepskii_profiles&quot;</span>,</span>
@@ -5169,7 +5155,6 @@ available_ftest_cohort_designs() -&gt; &#39;tuple[str, ...]&#39;</code></pre>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;lepskii&quot;</span>,</span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;available_lepskii_designs&quot;</span>,</span>
 <span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>LepskiiPanelConfig(n_units: &#39;int&#39; = 1200, n_periods: &#39;int&#39; = 36, adoption_periods: &#39;tuple[int, ...]&#39; = (8, 10, 12, 14, 16, 18, 20, 22, 24), cohort_shares: &#39;tuple[float, ...]&#39; = (0.05, 0.07, 0.09, 0.12, 0.14, 0.13, 0.1, 0.07, 0.05), unit_effect_scale: &#39;float&#39; = 2.0, time_effect_scale: &#39;float&#39; = 1.0, noise_scale: &#39;float&#39; = 1.0, unit_error_rho: &#39;float&#39; = 0.8, time_error_rho: &#39;float&#39; = 0.2, periodic_time_effects: &#39;tuple[float, ...]&#39; = (-0.1, 0.1, 0.0, 0.0, 0.1, 0.5, 0.5)) -&gt; None
 lepskii_profiles(name: &#39;str&#39;, *, config: &#39;LepskiiPanelConfig | None&#39; = None) -&gt; &#39;Mapping[int, np.ndarray]&#39;
@@ -5183,8 +5168,6 @@ available_lepskii_designs() -&gt; &#39;tuple[str, ...]&#39;</code></pre>
 <section id="conditional-and-latent-trend-designs" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="conditional-and-latent-trend-designs"><span class="header-section-number">5</span> Conditional and latent trend designs</h2>
 <div id="359512cb" class="cell" data-execution_count="6">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>show((</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ATTDMConditionalConfig&quot;</span>,</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ATTDMLatentConfig&quot;</span>,</span>
@@ -5193,7 +5176,6 @@ available_lepskii_designs() -&gt; &#39;tuple[str, ...]&#39;</code></pre>
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;att_dml&quot;</span>,</span>
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;available_att_dml_designs&quot;</span>,</span>
 <span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>ATTDMConditionalConfig(n_units: &#39;int&#39; = 2000, n_features: &#39;int&#39; = 20, n_active: &#39;int&#39; = 5, treatment_effect: &#39;float&#39; = 3.0, treatment_effect_noise_scale: &#39;float&#39; = 0.3, trend_strength: &#39;float&#39; = 0.0, nonlinear: &#39;bool&#39; = False, treated_baseline_shift: &#39;bool&#39; = False) -&gt; None
 ATTDMLatentConfig(n_units: &#39;int&#39; = 1000, n_periods: &#39;int&#39; = 7, noise_scale: &#39;float&#39; = 0.1, treatment_effect: &#39;float&#39; = 0.0, unconfounded_assignment: &#39;bool&#39; = False) -&gt; None
@@ -5235,8 +5217,6 @@ available_att_dml_designs() -&gt; &#39;tuple[str, ...]&#39;</code></pre>
 <section id="regression-compression-designs" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="regression-compression-designs"><span class="header-section-number">6</span> Regression-compression designs</h2>
 <div id="62c120a5" class="cell" data-execution_count="7">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>show((</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;RegressionCompressionConfig&quot;</span>,</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;regression_compression_design&quot;</span>,</span>
@@ -5246,7 +5226,6 @@ available_att_dml_designs() -&gt; &#39;tuple[str, ...]&#39;</code></pre>
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;anscombe&quot;</span>,</span>
 <span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;available_anscombe_designs&quot;</span>,</span>
 <span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>RegressionCompressionConfig(n_units: &#39;int&#39; = 1000, n_periods: &#39;int&#39; = 35, adoption_period: &#39;int&#39; = 15, n_treated: &#39;int | None&#39; = None, effect_profile: &#39;str&#39; = &#39;concave&#39;, max_effect: &#39;float&#39; = 1.0, heterogeneous_effects: &#39;bool&#39; = False, unit_effect_scale: &#39;float&#39; = 5.0, time_effect_scale: &#39;float&#39; = 2.0, unit_trend_scale: &#39;float&#39; = 0.01, error_scale: &#39;float&#39; = 2.0, error_rho: &#39;float&#39; = 0.7) -&gt; None
 regression_compression_design(*, config: &#39;RegressionCompressionConfig | None&#39; = None) -&gt; &#39;PanelSimulator&#39;
@@ -5262,14 +5241,11 @@ available_anscombe_designs() -&gt; &#39;tuple[str, ...]&#39;</code></pre>
 <section id="composite-benchmark" class="level2" data-number="7">
 <h2 data-number="7" class="anchored" data-anchor-id="composite-benchmark"><span class="header-section-number">7</span> Composite benchmark</h2>
 <div id="f6e72f2d" class="cell" data-execution_count="8">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>show((</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;GSynthCompositeConfig&quot;</span>,</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;gsynth_composite_design&quot;</span>,</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;gsynth_composite&quot;</span>,</span>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>GSynthCompositeConfig(n_control: &#39;int&#39; = 160, n_treated: &#39;int&#39; = 40, n_pre: &#39;int&#39; = 40, n_post: &#39;int&#39; = 10, factor_weight: &#39;float&#39; = 0.25, time_series_weight: &#39;float&#39; = 0.25, synthetic_weight: &#39;float&#39; = 0.25, fixed_effect_weight: &#39;float&#39; = 0.25, factor_rank: &#39;int&#39; = 2, ar_coefficient: &#39;float&#39; = 0.5, effect_slope: &#39;float&#39; = 0.2, noise_scale: &#39;float&#39; = 0.6) -&gt; None
 gsynth_composite_design(*, config: &#39;GSynthCompositeConfig | None&#39; = None) -&gt; &#39;PanelSimulator&#39;

@@ -5204,15 +5204,12 @@ height: auto;
 <p>The ATT-DML examples vary the information needed to make untreated trends comparable. Some use observed features, some use latent structure, and one adds clustered serial dependence.</p>
 <p>The related public paper is <a href="https://apoorvalal.github.io/files/papers/augbal.pdf">Augmented Balancing Estimators of the Average Treatment Effect on the Treated in Cross-Sectional and Panel Designs</a>.</p>
 <div id="321916e9" class="cell" data-execution_count="1">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> designs</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(designs.available_att_dml_designs())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(&#39;conditional_parallel_trends&#39;, &#39;conditional_parallel_trends_nonlinear&#39;, &#39;latent_parallel&#39;, &#39;latent_nonparallel&#39;, &#39;clustered_arma&#39;)</code></pre>
 </div>
@@ -5266,8 +5263,6 @@ height: auto;
 <h2 data-number="2" class="anchored" data-anchor-id="conditional-parallel-trends"><span class="header-section-number">2</span> Conditional parallel trends</h2>
 <p>The conditional designs have two periods and high-dimensional unit features. Assignment uses a sparse feature index. Untreated trends use the same features.</p>
 <div id="2e6f3396" class="cell" data-execution_count="2">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>conditional_config <span class="op">=</span> designs.ATTDMConditionalConfig(</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    n_units<span class="op">=</span><span class="dv">600</span>,</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    n_features<span class="op">=</span><span class="dv">20</span>,</span>
@@ -5289,7 +5284,6 @@ height: auto;
 <span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(linear.shape, nonlinear.shape)</span>
 <span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(linear.unit_covariate_names[:<span class="dv">5</span>])</span>
 <span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(linear.true_att, <span class="dv">3</span>), <span class="bu">round</span>(nonlinear.true_att, <span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(600, 2) (600, 2)
 (&#39;x1&#39;, &#39;x2&#39;, &#39;x3&#39;, &#39;x4&#39;, &#39;x5&#39;)
@@ -5302,8 +5296,6 @@ height: auto;
 <h2 data-number="3" class="anchored" data-anchor-id="diagnose-trend-imbalance"><span class="header-section-number">3</span> Diagnose trend imbalance</h2>
 <p>For a two-period panel, each unit’s observed change is <span class="math inline">\(\Delta Y_i=Y_{i1}-Y_{i0}\)</span>. Compare changes by treatment status before fitting an adjusted estimator.</p>
 <div id="1f5ed414" class="cell" data-execution_count="3">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> change_gap(panel):</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    changes <span class="op">=</span> np.diff(panel.outcome, axis<span class="op">=</span><span class="dv">1</span>).ravel()</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    treated <span class="op">=</span> panel.ever_treated</span>
@@ -5311,7 +5303,6 @@ height: auto;
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;linear raw change gap:&quot;</span>, <span class="bu">round</span>(change_gap(linear), <span class="dv">3</span>))</span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;nonlinear raw change gap:&quot;</span>, <span class="bu">round</span>(change_gap(nonlinear), <span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>linear raw change gap: 3.033
 nonlinear raw change gap: 3.339</code></pre>
@@ -5319,8 +5310,6 @@ nonlinear raw change gap: 3.339</code></pre>
 </div>
 <p>The figure plots each unit’s outcome change against its first observed feature. The nonlinear design changes the conditional shape, not only the mean gap.</p>
 <div id="cell-fig-conditional-trends" class="cell" data-execution_count="4">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>figure, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">5</span>), constrained_layout<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> axis, (label, draw) <span class="kw">in</span> <span class="bu">zip</span>(</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    axes,</span>
@@ -5349,7 +5338,6 @@ nonlinear raw change gap: 3.339</code></pre>
 <span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    axis.set_title(label)</span>
 <span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].legend()</span>
 <span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-display">
 <div id="fig-conditional-trends" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Two scatter plots compare a linear feature-outcome-change relationship with a nonlinear relationship.">
 <figure class="quarto-float quarto-float-fig figure">
@@ -5369,8 +5357,6 @@ Figure 1: Observed feature-outcome-change relationships under linear and nonlin
 <h2 data-number="4" class="anchored" data-anchor-id="latent-parallel-and-nonparallel-trends"><span class="header-section-number">4</span> Latent parallel and nonparallel trends</h2>
 <p>The latent designs have seven periods. The stable variant preserves a latent comparison structure. The nonparallel variant changes it over time.</p>
 <div id="ad83e609" class="cell" data-execution_count="5">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>latent_config <span class="op">=</span> designs.ATTDMLatentConfig(</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    n_units<span class="op">=</span><span class="dv">400</span>,</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    n_periods<span class="op">=</span><span class="dv">7</span>,</span>
@@ -5383,7 +5369,6 @@ Figure 1: Observed feature-outcome-change relationships under linear and nonlin
 <span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(stable.shape, unstable.shape)</span>
 <span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(stable.metadata[<span class="st">&quot;outcome&quot;</span>][<span class="st">&quot;model&quot;</span>])</span>
 <span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(unstable.metadata[<span class="st">&quot;outcome&quot;</span>][<span class="st">&quot;model&quot;</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(400, 7) (400, 7)
 LatentSelectionOutcome
@@ -5396,8 +5381,6 @@ LatentSelectionOutcome</code></pre>
 <h2 data-number="5" class="anchored" data-anchor-id="clustered-arma-panels"><span class="header-section-number">5</span> Clustered ARMA panels</h2>
 <p>The clustered design adds group-specific trends and serially correlated error. Treatment can start at one common date or follow a staggered pattern.</p>
 <div id="d6b79c77" class="cell" data-execution_count="6">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>clustered_config <span class="op">=</span> designs.ATTDMClusteredConfig(</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    n_units<span class="op">=</span><span class="dv">60</span>,</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    n_periods<span class="op">=</span><span class="dv">40</span>,</span>
@@ -5415,7 +5398,6 @@ LatentSelectionOutcome</code></pre>
 <span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(clustered.shape)</span>
 <span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(clustered.unit_annotations.keys())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(60, 40)
 dict_keys([&#39;ever_treated&#39;, &#39;adoption_period&#39;])</code></pre>

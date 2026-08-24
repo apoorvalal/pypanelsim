@@ -5210,20 +5210,14 @@ height: auto;
 
 
 <div id="7a1b1480" class="cell" data-execution_count="1">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> inspect</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> core</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 <section id="paneldimensions" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="paneldimensions"><span class="header-section-number">1</span> <code>PanelDimensions</code></h2>
 <div id="4f7fc69a" class="cell" data-execution_count="2">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.signature(core.PanelDimensions))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(n_units: &#39;int&#39; = 200, n_periods: &#39;int&#39; = 50) -&gt; None</code></pre>
 </div>
@@ -5264,11 +5258,8 @@ height: auto;
 </tbody>
 </table>
 <div id="2ad70c90" class="cell" data-execution_count="3">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> (<span class="st">&quot;ComponentDraw&quot;</span>, <span class="st">&quot;UnitFeatureDraw&quot;</span>, <span class="st">&quot;TimeFeatureDraw&quot;</span>):</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(name, inspect.signature(<span class="bu">getattr</span>(core, name)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>ComponentDraw (values: &#39;FloatMatrix&#39;, metadata: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;) -&gt; None
 UnitFeatureDraw (observables: &#39;FloatMatrix&#39;, unobservables: &#39;FloatMatrix&#39;, metadata: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;, estimator_observables: &#39;FloatMatrix | None&#39; = None, unit_annotations: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;) -&gt; None
@@ -5282,11 +5273,8 @@ TimeFeatureDraw (values: &#39;FloatMatrix&#39;, metadata: &#39;Mapping[str, Any]
 <p><code>AssignmentContext</code> contains dimensions, observed features, latent features, and feature metadata.</p>
 <p><code>SimulationContext</code> adds the treatment matrix and optional time features. It is passed to outcome and effect models.</p>
 <div id="591bb948" class="cell" data-execution_count="4">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.signature(core.AssignmentContext))</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.signature(core.SimulationContext))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(dimensions: &#39;PanelDimensions&#39;, observables: &#39;FloatMatrix | None&#39; = None, unobservables: &#39;FloatMatrix | None&#39; = None, feature_metadata: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;) -&gt; None
 (dimensions: &#39;PanelDimensions&#39;, treatment: &#39;FloatMatrix&#39;, observables: &#39;FloatMatrix | None&#39; = None, unobservables: &#39;FloatMatrix | None&#39; = None, feature_metadata: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;, time_features: &#39;FloatMatrix | None&#39; = None, time_feature_metadata: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;) -&gt; None</code></pre>
@@ -5341,12 +5329,9 @@ TimeFeatureDraw (values: &#39;FloatMatrix&#39;, metadata: &#39;Mapping[str, Any]
 <section id="panelsimulator" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="panelsimulator"><span class="header-section-number">5</span> <code>PanelSimulator</code></h2>
 <div id="734d7a3c" class="cell" data-execution_count="5">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.signature(core.PanelSimulator))</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;simulate&quot;</span>, inspect.signature(core.PanelSimulator.simulate))</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;iter_simulations&quot;</span>, inspect.signature(core.PanelSimulator.iter_simulations))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(name: &#39;str&#39;, dimensions: &#39;PanelDimensions&#39;, assignment: &#39;AssignmentModel&#39;, outcome_model: &#39;OutcomeModel&#39;, effect_model: &#39;EffectModel | EffectCallable&#39;, feature_model: &#39;UnitFeatureModel | None&#39; = None, time_feature_model: &#39;TimeFeatureModel | None&#39; = None, unit_ids: &#39;Sequence[Any] | None&#39; = None, time_ids: &#39;Sequence[Any] | None&#39; = None, unit_annotations: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;, time_annotations: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;) -&gt; None
 simulate (self, *, seed: &#39;int | np.random.SeedSequence | None&#39; = None, rng: &#39;np.random.Generator | None&#39; = None, streams: &#39;SimulationSeeds | None&#39; = None) -&gt; &#39;PanelDataset&#39;
@@ -5367,11 +5352,8 @@ iter_simulations (self, replications: &#39;int&#39;, *, seed: &#39;int | np.rand
 <section id="simulationseeds" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="simulationseeds"><span class="header-section-number">6</span> <code>SimulationSeeds</code></h2>
 <div id="a433b9a8" class="cell" data-execution_count="6">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.signature(core.SimulationSeeds))</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.signature(core.SimulationSeeds.from_seed))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(features: &#39;SeedInput&#39; = None, assignment: &#39;SeedInput&#39; = None, time_features: &#39;SeedInput&#39; = None, outcome: &#39;SeedInput&#39; = None, effect: &#39;SeedInput&#39; = None) -&gt; None
 (seed: &#39;int | np.random.SeedSequence&#39;) -&gt; &#39;SimulationSeeds&#39;</code></pre>
@@ -5382,10 +5364,7 @@ iter_simulations (self, replications: &#39;int&#39;, *, seed: &#39;int | np.rand
 <section id="resolve_rng" class="level2" data-number="7">
 <h2 data-number="7" class="anchored" data-anchor-id="resolve_rng"><span class="header-section-number">7</span> <code>resolve_rng</code></h2>
 <div id="751c0a0f" class="cell" data-execution_count="7">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.signature(core.resolve_rng))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(*, seed: &#39;int | np.random.SeedSequence | None&#39; = None, rng: &#39;np.random.Generator | None&#39; = None) -&gt; &#39;np.random.Generator&#39;</code></pre>
 </div>
@@ -5395,10 +5374,7 @@ iter_simulations (self, replications: &#39;int&#39;, *, seed: &#39;int | np.rand
 <section id="paneldataset" class="level2" data-number="8">
 <h2 data-number="8" class="anchored" data-anchor-id="paneldataset"><span class="header-section-number">8</span> <code>PanelDataset</code></h2>
 <div id="9f12dbbf" class="cell" data-execution_count="8">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inspect.signature(core.PanelDataset))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(outcome: &#39;FloatMatrix&#39;, treatment: &#39;FloatMatrix&#39;, untreated_outcome: &#39;FloatMatrix&#39;, treatment_effect: &#39;FloatMatrix&#39;, name: &#39;str&#39;, unit_ids: &#39;NDArray[Any] | None&#39; = None, time_ids: &#39;NDArray[Any] | None&#39; = None, metadata: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;, unit_covariates: &#39;FloatMatrix | None&#39; = None, unit_covariate_names: &#39;Sequence[str] | None&#39; = None, effect_surface: &#39;FloatMatrix | None&#39; = None, unit_annotations: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;, time_annotations: &#39;Mapping[str, Any]&#39; = &lt;factory&gt;) -&gt; None</code></pre>
 </div>
@@ -5489,11 +5465,8 @@ iter_simulations (self, replications: &#39;int&#39;, *, seed: &#39;int | np.rand
 <section id="conversion-methods" class="level3" data-number="8.3">
 <h3 data-number="8.3" class="anchored" data-anchor-id="conversion-methods"><span class="header-section-number">8.3</span> Conversion methods</h3>
 <div id="02bd4918" class="cell" data-execution_count="9">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> (<span class="st">&quot;as_arrays&quot;</span>, <span class="st">&quot;arrays&quot;</span>, <span class="st">&quot;as_long_dict&quot;</span>):</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(name, inspect.signature(<span class="bu">getattr</span>(core.PanelDataset, name)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>as_arrays (self, *, copy: &#39;bool&#39; = False) -&gt; &#39;tuple[FloatMatrix, FloatMatrix]&#39;
 arrays (self, fields: &#39;Sequence[str]&#39;, *, copy: &#39;bool&#39; = False) -&gt; &#39;tuple[FloatMatrix, ...]&#39;
@@ -5506,11 +5479,8 @@ as_long_dict (self, *, copy: &#39;bool&#39; = False, include_effect_surface: &#3
 <section id="paneltruth" class="level2" data-number="9">
 <h2 data-number="9" class="anchored" data-anchor-id="paneltruth"><span class="header-section-number">9</span> <code>PanelTruth</code></h2>
 <div id="f9a9e7aa" class="cell" data-execution_count="10">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> (<span class="st">&quot;cohort_event&quot;</span>, <span class="st">&quot;event_study&quot;</span>, <span class="st">&quot;att_by_cohort&quot;</span>):</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(name, inspect.signature(<span class="bu">getattr</span>(core.PanelTruth, name)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>cohort_event (self, event_times: &#39;Any | None&#39; = None) -&gt; &#39;MappingProxyType[str, NDArray[Any]]&#39;
 event_study (self, event_times: &#39;Any | None&#39; = None, *, weighting: &#39;str&#39; = &#39;cohort_size&#39;) -&gt; &#39;MappingProxyType[str, NDArray[Any]]&#39;

@@ -5211,8 +5211,6 @@ Y(0)
 <p>where <span class="math inline">\(Y_F\)</span> is a low-rank factor component, <span class="math inline">\(Y_T\)</span> is a persistent time-series component, <span class="math inline">\(Y_S\)</span> has sparse synthetic-control donor structure, and <span class="math inline">\(Y_A\)</span> is an additive two-way fixed-effects component.</p>
 <p>The weights are explicit configuration fields. They need not sum to one, but a sum of one makes their relative scale easier to interpret.</p>
 <div id="75de2810" class="cell" data-execution_count="1">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -5236,7 +5234,6 @@ Y(0)
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> designs.gsynth_composite(config<span class="op">=</span>config, seed<span class="op">=</span><span class="dv">42</span>)</span>
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(panel.shape)</span>
 <span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(panel.true_att, <span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(200, 50)
 1.1</code></pre>
@@ -5246,12 +5243,9 @@ Y(0)
 <section id="check-component-metadata" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="check-component-metadata"><span class="header-section-number">2</span> Check component metadata</h2>
 <div id="34b6db7c" class="cell" data-execution_count="2">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>outcome_metadata <span class="op">=</span> panel.metadata[<span class="st">&quot;outcome&quot;</span>]</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(outcome_metadata[<span class="st">&quot;model&quot;</span>])</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(outcome_metadata.keys())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>SumOutcomeModel
 dict_keys([&#39;model&#39;, &#39;kind&#39;, &#39;components&#39;])</code></pre>
@@ -5263,8 +5257,6 @@ dict_keys([&#39;model&#39;, &#39;kind&#39;, &#39;components&#39;])</code></pre>
 <h2 data-number="3" class="anchored" data-anchor-id="vary-one-component-at-a-time"><span class="header-section-number">3</span> Vary one component at a time</h2>
 <p>Use ablations before interpreting a result from the full mixture.</p>
 <div id="0928e4de" class="cell" data-execution_count="3">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>factor_only <span class="op">=</span> designs.GSynthCompositeConfig(</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    n_control<span class="op">=</span><span class="dv">80</span>,</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    n_treated<span class="op">=</span><span class="dv">20</span>,</span>
@@ -5290,14 +5282,11 @@ dict_keys([&#39;model&#39;, &#39;kind&#39;, &#39;components&#39;])</code></pre>
 <span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(factor_panel.shape, fixed_effect_panel.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(100, 50) (100, 50)</code></pre>
 </div>
 </div>
 <div id="cell-fig-composite-ablation" class="cell" data-execution_count="4">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ablation_panels <span class="op">=</span> (</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    (<span class="st">&quot;Full composite&quot;</span>, panel),</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    (<span class="st">&quot;Factor only&quot;</span>, factor_panel),</span>
@@ -5312,7 +5301,6 @@ dict_keys([&#39;model&#39;, &#39;kind&#39;, &#39;components&#39;])</code></pre>
 <span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    axis.set_ylabel(<span class="st">&quot;units, sorted by adoption&quot;</span>)</span>
 <span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    figure.colorbar(image, ax<span class="op">=</span>axis, fraction<span class="op">=</span><span class="fl">0.04</span>, pad<span class="op">=</span><span class="fl">0.02</span>)</span>
 <span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-display">
 <div id="fig-composite-ablation" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Three heatmaps compare the full composite panel with factor-only and two-way-fixed-effects-only ablations.">
 <figure class="quarto-float quarto-float-fig figure">

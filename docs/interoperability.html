@@ -5065,35 +5065,26 @@ height: auto;
 
 <p><code>pypanelsim</code> does not require an estimator library. It returns NumPy arrays and a plain mapping of long-form columns. Convert those columns only when another tool needs a specific data-frame type.</p>
 <div id="ea5fdc06" class="cell" data-execution_count="1">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> designs</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> designs.classic_factor(overlap<span class="op">=</span><span class="fl">0.0</span>, seed<span class="op">=</span><span class="dv">91</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 <section id="matrix-estimators" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="matrix-estimators"><span class="header-section-number">1</span> Matrix estimators</h2>
 <p>Use <code>as_arrays()</code> when an estimator accepts outcome and treatment matrices in <code>(unit, time)</code> order.</p>
 <div id="0547e6ce" class="cell" data-execution_count="2">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>outcome, treatment <span class="op">=</span> panel.as_arrays()</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(outcome.shape, treatment.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(200, 50) (200, 50)</code></pre>
 </div>
 </div>
 <p>Use <code>arrays()</code> when the estimator also needs untreated outcomes or potential effects.</p>
 <div id="c78e340e" class="cell" data-execution_count="3">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>y, d, y0, tau <span class="op">=</span> panel.arrays(</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    (<span class="st">&quot;outcome&quot;</span>, <span class="st">&quot;treatment&quot;</span>, <span class="st">&quot;untreated_outcome&quot;</span>, <span class="st">&quot;effect_surface&quot;</span>)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(y.shape, d.shape, y0.shape, tau.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(200, 50) (200, 50) (200, 50) (200, 50)</code></pre>
 </div>
@@ -5103,8 +5094,6 @@ height: auto;
 <section id="pandas-and-formula-estimators" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="pandas-and-formula-estimators"><span class="header-section-number">2</span> pandas and formula estimators</h2>
 <div id="64f1132d" class="cell" data-execution_count="4">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>frame <span class="op">=</span> pd.DataFrame(</span>
@@ -5116,7 +5105,6 @@ height: auto;
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(frame.columns.tolist())</span>
 <span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(frame.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[0]
 (9, 1)</code></pre>
@@ -5170,8 +5158,6 @@ height: auto;
 <section id="repeated-experiments" class="level2" data-number="7">
 <h2 data-number="7" class="anchored" data-anchor-id="repeated-experiments"><span class="header-section-number">7</span> Repeated experiments</h2>
 <div id="20b7c128" class="cell" data-execution_count="5">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>simulator <span class="op">=</span> designs.classic_factor_design(overlap<span class="op">=</span><span class="fl">0.0</span>)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>records <span class="op">=</span> []</span>
@@ -5188,7 +5174,6 @@ height: auto;
 <span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(pd.DataFrame(records))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>   replication  true_att  n_treated
 0            1       1.1         40

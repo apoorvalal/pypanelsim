@@ -5216,8 +5216,6 @@ height: auto;
 <section id="run-a-design" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="run-a-design"><span class="header-section-number">2</span> Run a design</h2>
 <div id="0a3c0df1" class="cell" data-execution_count="1">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> designs</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> designs.classic_factor(overlap<span class="op">=</span><span class="fl">1.0</span>, seed<span class="op">=</span><span class="dv">42</span>)</span>
@@ -5225,7 +5223,6 @@ height: auto;
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;shape:&quot;</span>, panel.shape)</span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;treated units:&quot;</span>, panel.treated_units.size)</span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;true ATT:&quot;</span>, <span class="bu">round</span>(panel.true_att, <span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>shape: (200, 50)
 treated units: 40
@@ -5241,8 +5238,6 @@ Y_{it} = Y_{it}(0) + D_{it}\tau_{it}.
 <section id="build-a-design" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="build-a-design"><span class="header-section-number">3</span> Build a design</h2>
 <div id="98925551" class="cell" data-execution_count="2">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> core, primitives</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>simulator <span class="op">=</span> core.PanelSimulator(</span>
@@ -5263,7 +5258,6 @@ Y_{it} = Y_{it}(0) + D_{it}\tau_{it}.
 <span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>custom_panel <span class="op">=</span> simulator.simulate(seed<span class="op">=</span><span class="dv">42</span>)</span>
 <span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(custom_panel.metadata[<span class="st">&quot;outcome&quot;</span>][<span class="st">&quot;model&quot;</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>SumOutcomeModel</code></pre>
 </div>

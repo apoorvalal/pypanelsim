@@ -5213,15 +5213,12 @@ height: auto;
 </ol>
 <p>Pooling can reduce variance when cohort paths are similar. It can add bias when they differ. No amount of pooling creates a missing calendar-time observation.</p>
 <div id="5e8de016" class="cell" data-execution_count="1">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pypanelsim <span class="im">import</span> designs</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(designs.available_lepskii_designs())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(&#39;complete_homogeneity&#39;, &#39;common_path&#39;, &#39;cohort_only_blocks&#39;, &#39;time_only_blocks&#39;, &#39;tensor_blocks&#39;, &#39;early_late_split&#39;, &#39;three_epoch&#39;, &#39;smooth_dose_gradient&#39;, &#39;response_timing&#39;, &#39;local_window_shock&#39;, &#39;log_shark_sin&#39;, &#39;no_pool_unique_signatures&#39;, &#39;no_pool_unique_peaks&#39;, &#39;no_pool_signed_paths&#39;)</code></pre>
 </div>
@@ -5243,8 +5240,6 @@ height: auto;
 <section id="compare-pooling-structures" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="compare-pooling-structures"><span class="header-section-number">3</span> Compare pooling structures</h2>
 <div id="106c5263" class="cell" data-execution_count="2">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>config <span class="op">=</span> designs.LepskiiPanelConfig(n_units<span class="op">=</span><span class="dv">360</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name <span class="kw">in</span> (</span>
@@ -5255,7 +5250,6 @@ height: auto;
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    profiles <span class="op">=</span> designs.lepskii_profiles(name, config<span class="op">=</span>config)</span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    first_cohort <span class="op">=</span> <span class="bu">min</span>(profiles)</span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(name, np.<span class="bu">round</span>(profiles[first_cohort][:<span class="dv">6</span>], <span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>complete_homogeneity [1.4 1.4 1.4 1.4 1.4 1.4]
 tensor_blocks [0.45 0.45 0.45 0.45 2.5  2.5 ]
@@ -5267,8 +5261,6 @@ no_pool_signed_paths [0.   0.4  0.71 0.95 1.14 1.28]</code></pre>
 <section id="run-a-tensor-block-design" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="run-a-tensor-block-design"><span class="header-section-number">4</span> Run a tensor-block design</h2>
 <div id="4844efe8" class="cell" data-execution_count="3">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>panel <span class="op">=</span> designs.lepskii(</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;tensor_blocks&quot;</span>,</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    config<span class="op">=</span>config,</span>
@@ -5278,7 +5270,6 @@ no_pool_signed_paths [0.   0.4  0.71 0.95 1.14 1.28]</code></pre>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(panel.shape)</span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(np.unique(panel.adoption_times[panel.ever_treated]))</span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">round</span>(panel.true_att, <span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>(360, 36)
 [ 8 10 12 14 16 18 20 22 24]
@@ -5290,8 +5281,6 @@ no_pool_signed_paths [0.   0.4  0.71 0.95 1.14 1.28]</code></pre>
 <h2 data-number="5" class="anchored" data-anchor-id="cohort-paths-and-calendar-support"><span class="header-section-number">5</span> Cohort paths and calendar support</h2>
 <p>The left panel shows the tensor-block effect paths. The right panel shows which cohort-event cells lie inside the observed calendar.</p>
 <div id="cell-fig-lepskii-paths-support" class="cell" data-execution_count="4">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>profiles <span class="op">=</span> designs.lepskii_profiles(<span class="st">&quot;tensor_blocks&quot;</span>, config<span class="op">=</span>config)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>event_grid <span class="op">=</span> np.arange(<span class="op">-</span><span class="dv">12</span>, <span class="dv">22</span>)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>truth_grid <span class="op">=</span> panel.truth.cohort_event(event_times<span class="op">=</span>event_grid)</span>
@@ -5320,7 +5309,6 @@ no_pool_signed_paths [0.   0.4  0.71 0.95 1.14 1.28]</code></pre>
 <span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_ylabel(<span class="st">&quot;adoption cohort&quot;</span>)</span>
 <span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">&quot;Supported cohort-event cells&quot;</span>)</span>
 <span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-display">
 <div id="fig-lepskii-paths-support" class="quarto-float quarto-figure quarto-figure-center anchored" alt="A line chart shows cohort effect paths, and a heatmap shows the cohort-by-calendar-time support mask for the tensor-block design.">
 <figure class="quarto-float quarto-float-fig figure">
@@ -5339,8 +5327,6 @@ Figure 1: Cohort effect paths and the calendar-time support mask for a tensor-b
 <h2 data-number="6" class="anchored" data-anchor-id="track-support-explicitly"><span class="header-section-number">6</span> Track support explicitly</h2>
 <p>For cohort <span class="math inline">\(g\)</span> and event time <span class="math inline">\(e\)</span>, the calendar period is <span class="math inline">\(t=g+e\)</span>. The cell is supported only when <span class="math inline">\(0\le t&lt;T\)</span>.</p>
 <div id="a8445e08" class="cell" data-execution_count="5">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>cells <span class="op">=</span> panel.truth.cohort_event(event_times<span class="op">=</span>(<span class="op">-</span><span class="dv">12</span>, <span class="op">-</span><span class="dv">4</span>, <span class="dv">0</span>, <span class="dv">4</span>, <span class="dv">12</span>, <span class="dv">20</span>))</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> cohort <span class="kw">in</span> np.unique(cells[<span class="st">&quot;cohort&quot;</span>]):</span>
@@ -5353,7 +5339,6 @@ Figure 1: Cohort effect paths and the calendar-time support mask for a tensor-b
 <span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;support&quot;</span>,</span>
 <span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        cells[<span class="st">&quot;supported&quot;</span>][selected],</span>
 <span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>cohort 8 events [-12  -4   0   4  12  20] support [False  True  True  True  True  True]
 cohort 10 events [-12  -4   0   4  12  20] support [False  True  True  True  True  True]
@@ -5372,8 +5357,6 @@ cohort 24 events [-12  -4   0   4  12  20] support [ True  True  True  True Fals
 <h2 data-number="7" class="anchored" data-anchor-id="define-the-event-time-target"><span class="header-section-number">7</span> Define the event-time target</h2>
 <p>At a fixed event time, different cohorts can contribute because of calendar support. The target population therefore changes with event time.</p>
 <div id="152cfc63" class="cell" data-execution_count="6">
-<details class="code-fold">
-<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>size_weighted <span class="op">=</span> panel.truth.event_study(</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    event_times<span class="op">=</span><span class="bu">range</span>(<span class="op">-</span><span class="dv">4</span>, <span class="dv">13</span>),</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    weighting<span class="op">=</span><span class="st">&quot;cohort_size&quot;</span>,</span>
@@ -5390,7 +5373,6 @@ cohort 24 events [-12  -4   0   4  12  20] support [ True  True  True  True Fals
 <span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>        <span class="bu">round</span>(<span class="bu">float</span>(equal_cohort[<span class="st">&quot;effect&quot;</span>][index]), <span class="dv">3</span>),</span>
 <span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>        <span class="bu">int</span>(size_weighted[<span class="st">&quot;supported_cohorts&quot;</span>][index]),</span>
 <span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>-4 0.0 0.0 9
 0 0.45 0.45 9
