@@ -187,6 +187,7 @@ Assignment outputs must be finite, binary, and have full panel shape. Assignment
 
 ### Untreated outcomes
 
+- `EmpiricalPanelOutcome`: a supplied empirical unit-by-time signal plus either iid Gaussian cell noise or a supplied positive-semidefinite time covariance. It is the standard primitive for semi-synthetic panels and does not normalize, impute, or smooth the input.
 - `TwoWayFixedEffectsOutcome` and `AdditiveFactorOutcome`: additive unit effects, time effects, and optional noise.
 - `LowRankFactorOutcome`: configurable rank-k interactive fixed effects.
 - `LinearFeatureOutcome`: feature-dependent levels and unit trends.
@@ -253,6 +254,8 @@ Some designs translate published or public research code, some adapt ongoing wor
 - `examples/`: small custom-component and estimator-interoperability examples.
 - `website/`: Quarto source files and executable tutorials.
 - `docs/`: generated GitHub Pages output; do not edit it by hand.
+
+The semi-synthetic tutorial at `website/vignettes/semi-synthetic-panels.qmd` shows how to turn an empirical matrix or fitted empirical signal into a complete `PanelDataset` and pass its unit-by-time outcome matrix to `mtgpax`.
 
 ## Extending the library
 

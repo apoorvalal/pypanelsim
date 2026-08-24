@@ -12,6 +12,7 @@ def test_core_namespace_exposes_simulation_contract() -> None:
 
 
 def test_primitives_namespace_exposes_probability_laws() -> None:
+    assert primitives.EmpiricalPanelOutcome is pypanelsim.EmpiricalPanelOutcome
     assert primitives.TwoWayFixedEffectsOutcome is pypanelsim.TwoWayFixedEffectsOutcome
     assert primitives.LowRankFactorOutcome is pypanelsim.LowRankFactorOutcome
     assert primitives.RandomizedSingleCohortAssignment is (

@@ -12,6 +12,7 @@ project:
     - canonical-designs.qmd
     - research-designs.qmd
     - interoperability.qmd
+    - vignettes/semi-synthetic-panels.qmd
     - vignettes/baker-twfe.qmd
     - vignettes/ftest-heterogeneity.qmd
     - vignettes/support-aware-event-studies.qmd
@@ -71,6 +72,7 @@ website:
           - interoperability.qmd
       - section: "Research tutorials"
         contents:
+          - vignettes/semi-synthetic-panels.qmd
           - vignettes/baker-twfe.qmd
           - vignettes/ftest-heterogeneity.qmd
           - vignettes/support-aware-event-studies.qmd

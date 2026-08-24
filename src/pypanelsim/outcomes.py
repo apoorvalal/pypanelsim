@@ -6,6 +6,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 
 import numpy as np
+from numpy.typing import ArrayLike
 
 from .components import AdditiveFactorOutcome, ComponentDraw, SimulationContext
 
@@ -24,6 +25,101 @@ def _coefficient_vector(
     if not np.all(np.isfinite(coefficients)):
         raise ValueError(f"{name} must contain only finite values")
     return coefficients
+
+
+def _readonly_panel_matrix(value: ArrayLike, *, name: str) -> np.ndarray:
+    matrix = np.array(value, dtype=float, copy=True)
+    if matrix.ndim != 2 or 0 in matrix.shape:
+        raise ValueError(f"{name} must be a non-empty two-dimensional array")
+    if not np.all(np.isfinite(matrix)):
+        raise ValueError(f"{name} must contain only finite values")
+    matrix.setflags(write=False)
+    return matrix
+
+
+@dataclass(frozen=True, slots=True)
+class EmpiricalPanelOutcome:
+    """Use a fixed empirical panel as the untreated signal and add Gaussian noise.
+
+    ``baseline`` uses the package-wide ``(unit, time)`` layout. Set
+    ``noise_scale`` for independent Gaussian cell noise, or provide a complete
+    positive-semidefinite ``noise_covariance`` to draw one correlated time path
+    per unit. The two noise specifications are mutually exclusive.
+
+    This component deliberately does not normalize, impute, smooth, or
+    low-rank-project the supplied panel. Those scientific choices remain
+    explicit preprocessing steps in the analysis that owns the data.
+    """
+
+    baseline: ArrayLike
+    noise_scale: float = 0.0
+    noise_covariance: ArrayLike | None = None
+    source: str | None = None
+
+    def __post_init__(self) -> None:
+        baseline = _readonly_panel_matrix(self.baseline, name="baseline")
+        _finite_nonnegative("noise_scale", self.noise_scale)
+        if self.source is not None and (
+            not isinstance(self.source, str) or not self.source.strip()
+        ):
+            raise ValueError("source must be a non-empty string when provided")
+
+        covariance = None
+        if self.noise_covariance is not None:
+            if self.noise_scale != 0.0:
+                raise ValueError("provide noise_scale or noise_covariance, not both")
+            covariance = _readonly_panel_matrix(
+                self.noise_covariance,
+                name="noise_covariance",
+            )
+            expected = (baseline.shape[1], baseline.shape[1])
+            if covariance.shape != expected:
+                raise ValueError(f"noise_covariance must have shape {expected}")
+            if not np.allclose(covariance, covariance.T, rtol=1e-10, atol=1e-12):
+                raise ValueError("noise_covariance must be symmetric")
+            eigenvalues = np.linalg.eigvalsh(covariance)
+            tolerance = 1e-10 * max(1.0, float(np.max(np.abs(eigenvalues))))
+            if float(np.min(eigenvalues)) < -tolerance:
+                raise ValueError("noise_covariance must be positive semidefinite")
+
+        object.__setattr__(self, "baseline", baseline)
+        object.__setattr__(self, "noise_covariance", covariance)
+
+    def generate(
+        self, context: SimulationContext, rng: np.random.Generator
+    ) -> ComponentDraw:
+        expected = (context.dimensions.n_units, context.dimensions.n_periods)
+        if self.baseline.shape != expected:
+            raise ValueError(f"baseline must have shape {expected}")
+
+        if self.noise_covariance is not None:
+            errors = rng.multivariate_normal(
+                mean=np.zeros(context.dimensions.n_periods),
+                cov=self.noise_covariance,
+                size=context.dimensions.n_units,
+                check_valid="raise",
+                tol=1e-10,
+            )
+            noise_model = "correlated_gaussian"
+        elif self.noise_scale > 0.0:
+            errors = rng.normal(scale=self.noise_scale, size=expected)
+            noise_model = "iid_gaussian"
+        else:
+            errors = np.zeros(expected, dtype=float)
+            noise_model = "none"
+
+        return ComponentDraw(
+            self.baseline + errors,
+            {
+                "kind": "empirical_panel",
+                "source": self.source,
+                "baseline": self.baseline,
+                "errors": errors,
+                "noise_model": noise_model,
+                "noise_scale": self.noise_scale,
+                "noise_covariance": self.noise_covariance,
+            },
+        )
 
 
 @dataclass(frozen=True, slots=True)

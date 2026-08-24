@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add `EmpiricalPanelOutcome` for semi-synthetic designs built from a supplied
+  unit-by-time signal with either iid or correlated Gaussian noise.
 - Add explicit `TwoWayFixedEffectsOutcome` and generic rank-$k$
   `LowRankFactorOutcome` primitives and use both in the getting-started guide.
 - Add correlated and transformed Gaussian features, feature-linear outcomes,

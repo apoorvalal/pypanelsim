@@ -4,6 +4,7 @@ from pypanelsim import (
     ARMAErrorOutcome,
     ClusteredTrendOutcome,
     CorrelatedGaussianFeatures,
+    EmpiricalPanelOutcome,
     GaussianUnitFeatures,
     LowRankFactorOutcome,
     PanelDimensions,
@@ -18,6 +19,96 @@ from pypanelsim import (
     att_dml_nonlinear_basis,
 )
 from pypanelsim.components import CallableOutcomeModel, ConstantEffect
+
+
+def test_empirical_panel_outcome_preserves_baseline_and_adds_iid_noise() -> None:
+    baseline = np.arange(24, dtype=float).reshape(4, 6)
+    model = EmpiricalPanelOutcome(
+        baseline,
+        noise_scale=0.2,
+        source="illustrative panel",
+    )
+    baseline[:] = -99.0
+    context = SimulationContext(PanelDimensions(4, 6), np.zeros((4, 6)))
+
+    draw = model.generate(context, np.random.default_rng(42))
+    expected_errors = np.random.default_rng(42).normal(scale=0.2, size=(4, 6))
+
+    np.testing.assert_allclose(draw.values, model.baseline + expected_errors)
+    np.testing.assert_array_equal(draw.metadata["errors"], expected_errors)
+    assert draw.metadata["noise_model"] == "iid_gaussian"
+    assert draw.metadata["source"] == "illustrative panel"
+    assert model.baseline.flags.writeable is False
+
+
+def test_empirical_panel_outcome_supports_correlated_time_noise() -> None:
+    baseline = np.zeros((3, 4))
+    covariance = 0.25 * 0.6 ** np.abs(np.subtract.outer(np.arange(4), np.arange(4)))
+    model = EmpiricalPanelOutcome(baseline, noise_covariance=covariance)
+    context = SimulationContext(PanelDimensions(3, 4), np.zeros((3, 4)))
+
+    draw = model.generate(context, np.random.default_rng(17))
+    expected = np.random.default_rng(17).multivariate_normal(
+        np.zeros(4),
+        covariance,
+        size=3,
+        check_valid="raise",
+        tol=1e-10,
+    )
+
+    np.testing.assert_allclose(draw.values, expected)
+    assert draw.metadata["noise_model"] == "correlated_gaussian"
+    np.testing.assert_array_equal(draw.metadata["noise_covariance"], covariance)
+
+
+def test_empirical_panel_outcome_validates_inputs_and_dimensions() -> None:
+    with np.testing.assert_raises_regex(ValueError, "two-dimensional"):
+        EmpiricalPanelOutcome(np.ones(4))
+    with np.testing.assert_raises_regex(ValueError, "not both"):
+        EmpiricalPanelOutcome(
+            np.ones((2, 3)), noise_scale=0.1, noise_covariance=np.eye(3)
+        )
+    with np.testing.assert_raises_regex(ValueError, "shape"):
+        EmpiricalPanelOutcome(np.ones((2, 3)), noise_covariance=np.eye(2))
+    with np.testing.assert_raises_regex(ValueError, "symmetric"):
+        EmpiricalPanelOutcome(
+            np.ones((2, 2)),
+            noise_covariance=np.array([[1.0, 0.5], [0.0, 1.0]]),
+        )
+    with np.testing.assert_raises_regex(ValueError, "positive semidefinite"):
+        EmpiricalPanelOutcome(
+            np.ones((2, 2)),
+            noise_covariance=np.array([[1.0, 2.0], [2.0, 1.0]]),
+        )
+
+    model = EmpiricalPanelOutcome(np.ones((2, 3)))
+    context = SimulationContext(PanelDimensions(3, 3), np.zeros((3, 3)))
+    with np.testing.assert_raises_regex(ValueError, "baseline must have shape"):
+        model.generate(context, np.random.default_rng(1))
+
+
+def test_empirical_panel_outcome_composes_with_assignment_and_known_effects() -> None:
+    baseline = np.arange(40, dtype=float).reshape(5, 8) / 10.0
+    simulator = PanelSimulator(
+        name="semi_synthetic",
+        dimensions=PanelDimensions(*baseline.shape),
+        assignment=RandomizedSingleCohortAssignment(1, 5),
+        outcome_model=EmpiricalPanelOutcome(baseline, noise_scale=0.1),
+        effect_model=ConstantEffect(0.75),
+    )
+
+    panel = simulator.simulate(streams=SimulationSeeds.from_seed(29))
+
+    np.testing.assert_allclose(
+        panel.untreated_outcome,
+        panel.metadata["outcome"]["baseline"] + panel.metadata["outcome"]["errors"],
+    )
+    np.testing.assert_allclose(
+        panel.outcome,
+        panel.untreated_outcome + panel.treatment_effect,
+    )
+    assert panel.true_att == 0.75
+    assert panel.metadata["outcome"]["model"] == "EmpiricalPanelOutcome"
 
 
 def test_correlated_features_keep_raw_estimator_covariates() -> None:

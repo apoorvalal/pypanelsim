@@ -111,6 +111,7 @@ from .ftest import (
 from .outcomes import (
     ARMAErrorOutcome,
     ClusteredTrendOutcome,
+    EmpiricalPanelOutcome,
     LatentSelectionOutcome,
     LinearFeatureOutcome,
     LowRankFactorOutcome,
@@ -165,6 +166,7 @@ __all__ = [
     "CorrelatedGaussianFeatures",
     "DGPRegistry",
     "EffectModel",
+    "EmpiricalPanelOutcome",
     "EventTimeProfileEffect",
     "FTestCohortConfig",
     "FTestTemporalConfig",

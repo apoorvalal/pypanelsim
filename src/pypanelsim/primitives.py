@@ -27,6 +27,7 @@ from .features import (
 from .outcomes import (
     ARMAErrorOutcome,
     ClusteredTrendOutcome,
+    EmpiricalPanelOutcome,
     LatentSelectionOutcome,
     LinearFeatureOutcome,
     LowRankFactorOutcome,
@@ -60,6 +61,7 @@ __all__ = [
     "CohortEventTimeEffect",
     "ConstantEffect",
     "CorrelatedGaussianFeatures",
+    "EmpiricalPanelOutcome",
     "EventTimeProfileEffect",
     "GaussianCellEffect",
     "GaussianTimeFeatures",

@@ -1,0 +1,205 @@
+---
+title: "Semi-synthetic panels from empirical data"
+description: "Treat an empirical outcome matrix as the untreated signal, inject auditable noise, assign treatment, and fit a matrix estimator such as mtgpax."
+jupyter: python3
+---
+
+A semi-synthetic panel keeps an empirical unit-by-time pattern while making the
+counterfactual and treatment effect known. This is useful for estimator
+comparisons that should inherit realistic levels, trends, factor structure, and
+serial dependence without treating an observed post-treatment outcome as
+ground truth.
+
+`EmpiricalPanelOutcome` represents
+
+$$
+Y_{it}(0) = B_{it} + \varepsilon_{it},
+$$
+
+where $B$ is a supplied empirical matrix or a signal fitted to that matrix. The
+component supports iid Gaussian cell noise or a complete time covariance shared
+across independent unit-level noise paths. Assignment and treatment effects
+remain separate pypanelsim components.
+
+## A complete semi-synthetic design
+
+This small baseline stands in for a cleaned empirical panel. Rows are units and
+columns are periods, as required throughout pypanelsim.
+
+```{python}
+import numpy as np
+import pandas as pd
+
+from pypanelsim import core, primitives
+
+n_units = 12
+n_periods = 24
+period = np.arange(n_periods, dtype=float)
+unit_position = np.linspace(-1.0, 1.0, n_units)
+
+baseline = (
+    0.4 * unit_position[:, None]
+    + (1.0 + 0.3 * unit_position[:, None]) * np.sin(period[None, :] / 4.0)
+    + 0.03 * unit_position[:, None] * period[None, :]
+)
+
+rho = 0.65
+noise_covariance = 0.08**2 * rho ** np.abs(
+    np.subtract.outer(np.arange(n_periods), np.arange(n_periods))
+)
+adoption_period = 16
+
+simulator = core.PanelSimulator(
+    name="empirical_signal_example",
+    dimensions=core.PanelDimensions(*baseline.shape),
+    assignment=primitives.RandomizedSingleCohortAssignment(
+        n_treated=1,
+        adoption_period=adoption_period,
+    ),
+    outcome_model=primitives.EmpiricalPanelOutcome(
+        baseline,
+        noise_covariance=noise_covariance,
+        source="illustrative cleaned panel",
+    ),
+    effect_model=primitives.ConstantEffect(1.25),
+    unit_ids=[f"unit_{index:02d}" for index in range(n_units)],
+    time_ids=np.arange(2000, 2000 + n_periods),
+)
+
+panel = simulator.simulate(streams=core.SimulationSeeds.from_seed(42))
+print(panel.shape, panel.treated_units, panel.true_att)
+```
+
+The result retains the empirical signal, realized noise, treatment matrix,
+untreated potential outcome, complete effect surface, and observed outcome.
+
+```{python}
+outcome_metadata = panel.metadata["outcome"]
+np.testing.assert_allclose(
+    panel.untreated_outcome,
+    outcome_metadata["baseline"] + outcome_metadata["errors"],
+)
+np.testing.assert_allclose(
+    panel.outcome,
+    panel.untreated_outcome + panel.treatment_effect,
+)
+
+pd.DataFrame(
+    {
+        "quantity": ["noise model", "source", "true ATT", "treated cells"],
+        "value": [
+            outcome_metadata["noise_model"],
+            outcome_metadata["source"],
+            panel.true_att,
+            int(panel.counterfactual_target_mask.sum()),
+        ],
+    }
+)
+```
+
+Noise is part of $Y(0)$, not the treatment effect. This distinction matters:
+changing the outcome-noise seed changes the observed untreated surface but does
+not change the known effect surface.
+
+## Loading an empirical panel
+
+The package accepts the matrix and does not own data acquisition or cleaning.
+For a long Penn World Table extract, an analysis can make the transformation
+explicit:
+
+```python
+frame = pd.read_csv("penn_world_table_extract.csv")
+wide = (
+    frame.pivot(index="countrycode", columns="year", values="log_gdp")
+    .sort_index(axis=0)
+    .sort_index(axis=1)
+)
+
+# Resolve missing values according to the research design before construction.
+if wide.isna().any().any():
+    raise ValueError("the empirical panel must be complete")
+
+baseline = wide.to_numpy(dtype=float)
+unit_ids = wide.index.to_numpy()
+time_ids = wide.columns.to_numpy()
+```
+
+Centering, scaling, logging, winsorizing, and imputation are scientific choices,
+so `EmpiricalPanelOutcome` never applies them implicitly.
+
+## Using a fitted empirical signal
+
+The input can be the raw matrix, but it can also be a fitted signal. The TROP
+semi-synthetic study of Athey, Imbens, Qu, and Viviano uses a rank-four
+approximation of each empirical panel and calibrates autocorrelated noise from
+the residuals. A generic rank-$r$ construction is:
+
+```python
+u, singular_values, vt = np.linalg.svd(baseline, full_matrices=False)
+rank = 4
+signal = (u[:, :rank] * singular_values[:rank]) @ vt[:rank]
+residuals = baseline - signal
+
+# This sample covariance is one transparent option. The TROP archive instead
+# fits an AR(2) law to the residuals and constructs its implied covariance.
+noise_covariance = np.cov(residuals, rowvar=False, bias=True)
+
+outcome_model = primitives.EmpiricalPanelOutcome(
+    signal,
+    noise_covariance=noise_covariance,
+    source="PWT rank-4 signal",
+)
+```
+
+Any supplied covariance must be finite, symmetric, positive semidefinite, and
+have shape `(n_periods, n_periods)`. If serial dependence is not required, use
+`noise_scale` instead. Set neither argument for a deterministic empirical
+baseline. For non-Gaussian or resampled residual noise, combine a deterministic
+`EmpiricalPanelOutcome` with a custom outcome component through
+`SumOutcomeModel`.
+
+## Passing the draw to mtgpax
+
+`mtgpax` and pypanelsim both use `(unit, time)` outcome matrices. The handoff is
+therefore direct; no reshape or adapter is needed:
+
+```python
+from mtgpax import MTGPCausalEstimator
+
+model = MTGPCausalEstimator(
+    rank=4,
+    num_steps=500,
+    learning_rate=0.02,
+    seed=42,
+)
+fit = model.fit(
+    panel.outcome,
+    treated_units=panel.treated_units.tolist(),
+    treatment_time=adoption_period,
+)
+
+target = panel.counterfactual_target_mask
+counterfactual_rmse = np.sqrt(
+    np.mean((fit.counterfactual_mean[target] - panel.untreated_outcome[target]) ** 2)
+)
+effect_rmse = np.sqrt(
+    np.mean((fit.effect_mean[target] - panel.effect_surface[target]) ** 2)
+)
+```
+
+Keep repeated estimation, tuning, and result storage in the mtgpax analysis.
+Keep the reusable data-generating contract in pypanelsim. This lets several
+estimators receive byte-for-byte identical panels while the simulation retains
+the counterfactual and effect truth needed to score them.
+
+## Reproducibility rules
+
+- Save the empirical-data version and every preprocessing choice.
+- Record whether `baseline` is raw data or a fitted signal.
+- Save the covariance estimator and its parameters.
+- Use `SimulationSeeds` when assignment, outcome noise, and treatment effects
+  must remain independently reproducible.
+- Treat empirical unit and time labels as `unit_ids` and `time_ids`; do not
+  encode them only through row order.
+- Never fit or calibrate the baseline with treated post-treatment outcomes when
+  the scientific design forbids using them.

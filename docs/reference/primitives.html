@@ -5059,6 +5059,12 @@ height: auto;
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../vignettes/semi-synthetic-panels.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Semi-synthetic panels from empirical data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../vignettes/baker-twfe.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Baker’s dynamic-effects example</span></a>
   </div>
@@ -5354,21 +5360,23 @@ GeneralizedPropensityAssignment(adoption_periods: &#39;Sequence[int]&#39;, inter
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>show((</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;TwoWayFixedEffectsOutcome&quot;</span>,</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;AdditiveFactorOutcome&quot;</span>,</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;LowRankFactorOutcome&quot;</span>,</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;LinearFeatureOutcome&quot;</span>,</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;UnitTrendOutcome&quot;</span>,</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;UnitPositionOutcome&quot;</span>,</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;PeriodicTimeOutcome&quot;</span>,</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ARMAErrorOutcome&quot;</span>,</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;RandomARMAErrorOutcome&quot;</span>,</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ClusteredTrendOutcome&quot;</span>,</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;LatentSelectionOutcome&quot;</span>,</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;SumOutcomeModel&quot;</span>,</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;CallableOutcomeModel&quot;</span>,</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;EmpiricalPanelOutcome&quot;</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;LowRankFactorOutcome&quot;</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;LinearFeatureOutcome&quot;</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;UnitTrendOutcome&quot;</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;UnitPositionOutcome&quot;</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;PeriodicTimeOutcome&quot;</span>,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ARMAErrorOutcome&quot;</span>,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;RandomARMAErrorOutcome&quot;</span>,</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ClusteredTrendOutcome&quot;</span>,</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;LatentSelectionOutcome&quot;</span>,</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;SumOutcomeModel&quot;</span>,</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;CallableOutcomeModel&quot;</span>,</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>TwoWayFixedEffectsOutcome(unit_effect_scale: &#39;float&#39; = 1.0, time_effect_scale: &#39;float&#39; = 1.0, noise_scale: &#39;float&#39; = 0.0) -&gt; None
 AdditiveFactorOutcome(unit_effect_scale: &#39;float&#39; = 1.0, time_effect_scale: &#39;float&#39; = 1.0, noise_scale: &#39;float&#39; = 0.0) -&gt; None
+EmpiricalPanelOutcome(baseline: &#39;ArrayLike&#39;, noise_scale: &#39;float&#39; = 0.0, noise_covariance: &#39;ArrayLike | None&#39; = None, source: &#39;str | None&#39; = None) -&gt; None
 LowRankFactorOutcome(rank: &#39;int&#39; = 2, loading_scale: &#39;float&#39; = 1.0, factor_scale: &#39;float&#39; = 1.0, noise_scale: &#39;float&#39; = 0.0, distribution: &#39;str&#39; = &#39;normal&#39;, loading_mean: &#39;float&#39; = 0.0, control_loading_mean: &#39;float | None&#39; = None, treated_loading_mean: &#39;float | None&#39; = None) -&gt; None
 LinearFeatureOutcome(level_coefficients: &#39;Sequence[float]&#39; = (), trend_coefficients: &#39;Sequence[float]&#39; = (), source: &#39;str&#39; = &#39;observables&#39;, noise_scale: &#39;float&#39; = 0.0, center_time: &#39;bool&#39; = False) -&gt; None
 UnitTrendOutcome(scale: &#39;float&#39; = 1.0, center_time: &#39;bool&#39; = False) -&gt; None
@@ -5405,46 +5413,50 @@ CallableOutcomeModel(function: &#39;OutcomeCallable&#39;, name: &#39;str&#39; = 
 <td>compatibility form of additive unit and time factors</td>
 </tr>
 <tr class="odd">
+<td><code>EmpiricalPanelOutcome</code></td>
+<td>supplied unit-by-time signal plus iid or correlated Gaussian noise</td>
+</tr>
+<tr class="even">
 <td><code>LowRankFactorOutcome</code></td>
 <td><span class="math inline">\(\lambda_i&#39;f_t+\varepsilon_{it}\)</span></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>LinearFeatureOutcome</code></td>
 <td>feature-dependent level and linear trend</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>UnitTrendOutcome</code></td>
 <td>random or supplied unit-specific slopes</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>UnitPositionOutcome</code></td>
 <td>smooth outcomes over latent unit position</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>PeriodicTimeOutcome</code></td>
 <td>shared sine and cosine time terms</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>ARMAErrorOutcome</code></td>
 <td>fixed AR and MA coefficients</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>RandomARMAErrorOutcome</code></td>
 <td>unit-specific random ARMA coefficients</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>ClusteredTrendOutcome</code></td>
 <td>cluster-specific linear trends</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>LatentSelectionOutcome</code></td>
 <td>outcomes linked to latent selection</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>SumOutcomeModel</code></td>
 <td>weighted sum of outcome components</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>CallableOutcomeModel</code></td>
 <td>adapter for a compatible Python callable</td>
 </tr>
@@ -5452,6 +5464,7 @@ CallableOutcomeModel(function: &#39;OutcomeCallable&#39;, name: &#39;str&#39; = 
 </table>
 <p><code>LowRankFactorOutcome.rank</code> is the factor rank. <code>loading_scale</code> and <code>factor_scale</code> set factor scales. Separate control and treated loading means can create limited factor overlap.</p>
 <p><code>LinearFeatureOutcome.source</code> is <code>observables</code> or <code>unobservables</code>. <code>level_coefficients</code> affect the level. <code>trend_coefficients</code> multiply the time index. Set <code>center_time=True</code> to center that index.</p>
+<p><code>EmpiricalPanelOutcome</code> is the data-backed semi-synthetic primitive. It copies and freezes the supplied <code>(unit, time)</code> baseline. Use <code>noise_scale</code> for iid Gaussian cell noise or <code>noise_covariance</code> for one correlated Gaussian time path per unit. The component does not silently normalize, impute, or smooth data; do those steps before construction. See <a href="../vignettes/semi-synthetic-panels.html">Semi-synthetic panels from empirical data</a> for a complete design and an <code>mtgpax</code> handoff.</p>
 <p><code>SumOutcomeModel</code> is the main composition tool:</p>
 <div id="f33e3a5a" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>combined <span class="op">=</span> primitives.SumOutcomeModel(</span>

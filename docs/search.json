@@ -568,7 +568,7 @@
     "href": "vignettes/conditional-trends.html#conditional-parallel-trends",
     "title": "Conditional and latent trends",
     "section": "2 Conditional parallel trends",
-    "text": "2 Conditional parallel trends\nThe conditional designs have two periods and high-dimensional unit features. Assignment uses a sparse feature index. Untreated trends use the same features.\n\nconditional_config = designs.ATTDMConditionalConfig(\n    n_units=600,\n    n_features=20,\n    n_active=5,\n    treatment_effect=3.0,\n)\n\nlinear = designs.att_dml(\n    \"conditional_parallel_trends\",\n    config=conditional_config,\n    seed=42,\n)\nnonlinear = designs.att_dml(\n    \"conditional_parallel_trends_nonlinear\",\n    config=conditional_config,\n    seed=42,\n)\n\nprint(linear.shape, nonlinear.shape)\nprint(linear.unit_covariate_names[:5])\nprint(round(linear.true_att, 3), round(nonlinear.true_att, 3))\n\n(600, 2) (600, 2)\n('x1', 'x2', 'x3', 'x4', 'x5')\n3.015 2.98\n\n\nThe nonlinear variant uses transformed covariates to generate outcomes while estimators receive the raw features. It tests nonlinear adjustment without changing the ATT target.",
+    "text": "2 Conditional parallel trends\nThe conditional designs have two periods and high-dimensional unit features. Assignment uses a sparse feature index. Untreated trends use the same features.\n\nconditional_config = designs.ATTDMConditionalConfig(\n    n_units=600,\n    n_features=20,\n    n_active=5,\n    treatment_effect=3.0,\n)\n\nlinear = designs.att_dml(\n    \"conditional_parallel_trends\",\n    config=conditional_config,\n    seed=42,\n)\nnonlinear = designs.att_dml(\n    \"conditional_parallel_trends_nonlinear\",\n    config=conditional_config,\n    seed=42,\n)\n\nprint(linear.shape, nonlinear.shape)\nprint(linear.unit_covariate_names[:5])\nprint(round(linear.true_att, 3), round(nonlinear.true_att, 3))\n\n(600, 2) (600, 2)\n('x1', 'x2', 'x3', 'x4', 'x5')\n3.039 2.976\n\n\nThe nonlinear variant uses transformed covariates to generate outcomes while estimators receive the raw features. It tests nonlinear adjustment without changing the ATT target.",
     "crumbs": [
       "Home",
       "Research tutorials",
@@ -580,7 +580,7 @@
     "href": "vignettes/conditional-trends.html#diagnose-trend-imbalance",
     "title": "Conditional and latent trends",
     "section": "3 Diagnose trend imbalance",
-    "text": "3 Diagnose trend imbalance\nFor a two-period panel, each unit’s observed change is \\(\\Delta Y_i=Y_{i1}-Y_{i0}\\). Compare changes by treatment status before fitting an adjusted estimator.\n\ndef change_gap(panel):\n    changes = np.diff(panel.outcome, axis=1).ravel()\n    treated = panel.ever_treated\n    return float(changes[treated].mean() - changes[~treated].mean())\n\nprint(\"linear raw change gap:\", round(change_gap(linear), 3))\nprint(\"nonlinear raw change gap:\", round(change_gap(nonlinear), 3))\n\nlinear raw change gap: 3.033\nnonlinear raw change gap: 3.339\n\n\nThe figure plots each unit’s outcome change against its first observed feature. The nonlinear design changes the conditional shape, not only the mean gap.\n\nfigure, axes = plt.subplots(1, 2, figsize=(12, 5), constrained_layout=True)\nfor axis, (label, draw) in zip(\n    axes,\n    ((\"Linear conditional trend\", linear), (\"Nonlinear conditional trend\", nonlinear)),\n    strict=True,\n):\n    changes = np.diff(draw.outcome, axis=1).ravel()\n    x1 = draw.unit_covariates[:, 0]\n    axis.scatter(\n        x1[~draw.ever_treated],\n        changes[~draw.ever_treated],\n        s=10,\n        alpha=0.45,\n        label=\"control\",\n    )\n    axis.scatter(\n        x1[draw.ever_treated],\n        changes[draw.ever_treated],\n        s=10,\n        alpha=0.45,\n        label=\"treated\",\n    )\n    axis.axhline(0.0, color=\"black\", linewidth=0.7)\n    axis.set_xlabel(\"first observed feature\")\n    axis.set_ylabel(\"outcome change\")\n    axis.set_title(label)\naxes[0].legend()\nplt.show()\n\n\n\n\n\n\n\nFigure 1: Observed feature-outcome-change relationships under linear and nonlinear conditional trends.\n\n\n\n\n\nA raw gap is expected because the assumption is conditional, not unconditional.",
+    "text": "3 Diagnose trend imbalance\nFor a two-period panel, each unit’s observed change is \\(\\Delta Y_i=Y_{i1}-Y_{i0}\\). Compare changes by treatment status before fitting an adjusted estimator.\n\ndef change_gap(panel):\n    changes = np.diff(panel.outcome, axis=1).ravel()\n    treated = panel.ever_treated\n    return float(changes[treated].mean() - changes[~treated].mean())\n\nprint(\"linear raw change gap:\", round(change_gap(linear), 3))\nprint(\"nonlinear raw change gap:\", round(change_gap(nonlinear), 3))\n\nlinear raw change gap: 3.09\nnonlinear raw change gap: 3.642\n\n\nThe figure plots each unit’s outcome change against its first observed feature. The nonlinear design changes the conditional shape, not only the mean gap.\n\nfigure, axes = plt.subplots(1, 2, figsize=(12, 5), constrained_layout=True)\nfor axis, (label, draw) in zip(\n    axes,\n    ((\"Linear conditional trend\", linear), (\"Nonlinear conditional trend\", nonlinear)),\n    strict=True,\n):\n    changes = np.diff(draw.outcome, axis=1).ravel()\n    x1 = draw.unit_covariates[:, 0]\n    axis.scatter(\n        x1[~draw.ever_treated],\n        changes[~draw.ever_treated],\n        s=10,\n        alpha=0.45,\n        label=\"control\",\n    )\n    axis.scatter(\n        x1[draw.ever_treated],\n        changes[draw.ever_treated],\n        s=10,\n        alpha=0.45,\n        label=\"treated\",\n    )\n    axis.axhline(0.0, color=\"black\", linewidth=0.7)\n    axis.set_xlabel(\"first observed feature\")\n    axis.set_ylabel(\"outcome change\")\n    axis.set_title(label)\naxes[0].legend()\nplt.show()\n\n\n\n\n\n\n\nFigure 1: Observed feature-outcome-change relationships under linear and nonlinear conditional trends.\n\n\n\n\n\nA raw gap is expected because the assumption is conditional, not unconditional.",
     "crumbs": [
       "Home",
       "Research tutorials",
@@ -760,7 +760,7 @@
     "href": "interoperability.html#matrix-estimators",
     "title": "Export to other tools",
     "section": "1 Matrix estimators",
-    "text": "1 Matrix estimators\nUse as_arrays() when an estimator accepts outcome and treatment matrices in (unit, time) order.\n\noutcome, treatment = panel.as_arrays()\nprint(outcome.shape, treatment.shape)\n\n(200, 50) (200, 50)\n\n\nUse arrays() when the estimator also needs untreated outcomes or potential effects.\n\ny, d, y0, tau = panel.arrays(\n    (\"outcome\", \"treatment\", \"untreated_outcome\", \"effect_surface\")\n)\nprint(y.shape, d.shape, y0.shape, tau.shape)\n\n(200, 50) (200, 50) (200, 50) (200, 50)\n\n\nThe returned arrays are read-only unless copy=True is requested.",
+    "text": "1 Matrix estimators\nUse as_arrays() when an estimator accepts outcome and treatment matrices in (unit, time) order.\n\noutcome, treatment = panel.as_arrays()\nprint(outcome.shape, treatment.shape)\n\n(200, 50) (200, 50)\n\n\nUse arrays() when the estimator also needs untreated outcomes or potential effects.\n\ny, d, y0, tau = panel.arrays(\n    (\"outcome\", \"treatment\", \"untreated_outcome\", \"effect_surface\")\n)\nprint(y.shape, d.shape, y0.shape, tau.shape)\n\n(200, 50) (200, 50) (200, 50) (200, 50)\n\n\nThe returned arrays are read-only unless copy=True is requested.\nmtgpax accepts the same matrix layout. The semi-synthetic panel tutorial starts from a fixed empirical signal, injects auditable noise, assigns treatment, and passes the resulting outcome directly to MTGPCausalEstimator.",
     "crumbs": [
       "Home",
       "Build a design",
@@ -840,147 +840,135 @@
     ]
   },
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Synthetic panels with visible assumptions",
+    "objectID": "vignettes/semi-synthetic-panels.html",
+    "href": "vignettes/semi-synthetic-panels.html",
+    "title": "Semi-synthetic panels from empirical data",
     "section": "",
-    "text": "pypanelsim generates synthetic panel data for causal and forecasting experiments. It keeps four parts of a data-generating process separate: features, treatment assignment, untreated outcomes, and treatment effects.\nThis separation answers the questions that matter in a simulation study:",
+    "text": "A semi-synthetic panel keeps an empirical unit-by-time pattern while making the counterfactual and treatment effect known. This is useful for estimator comparisons that should inherit realistic levels, trends, factor structure, and serial dependence without treating an observed post-treatment outcome as ground truth.\nEmpiricalPanelOutcome represents\n\\[\nY_{it}(0) = B_{it} + \\varepsilon_{it},\n\\]\nwhere \\(B\\) is a supplied empirical matrix or a signal fitted to that matrix. The component supports iid Gaussian cell noise or a complete time covariance shared across independent unit-level noise paths. Assignment and treatment effects remain separate pypanelsim components.",
     "crumbs": [
       "Home",
-      "Start here",
-      "Synthetic panels with visible assumptions"
+      "Research tutorials",
+      "Semi-synthetic panels from empirical data"
     ]
   },
   {
-    "objectID": "index.html#install",
-    "href": "index.html#install",
-    "title": "Synthetic panels with visible assumptions",
-    "section": "1 Install",
-    "text": "1 Install\nuv add \"pypanelsim @ git+https://github.com/apoorvalal/pypanelsim.git\"\nPython 3.10 or later is required.",
+    "objectID": "vignettes/semi-synthetic-panels.html#a-complete-semi-synthetic-design",
+    "href": "vignettes/semi-synthetic-panels.html#a-complete-semi-synthetic-design",
+    "title": "Semi-synthetic panels from empirical data",
+    "section": "1 A complete semi-synthetic design",
+    "text": "1 A complete semi-synthetic design\nThis small baseline stands in for a cleaned empirical panel. Rows are units and columns are periods, as required throughout pypanelsim.\n\nimport numpy as np\nimport pandas as pd\n\nfrom pypanelsim import core, primitives\n\nn_units = 12\nn_periods = 24\nperiod = np.arange(n_periods, dtype=float)\nunit_position = np.linspace(-1.0, 1.0, n_units)\n\nbaseline = (\n    0.4 * unit_position[:, None]\n    + (1.0 + 0.3 * unit_position[:, None]) * np.sin(period[None, :] / 4.0)\n    + 0.03 * unit_position[:, None] * period[None, :]\n)\n\nrho = 0.65\nnoise_covariance = 0.08**2 * rho ** np.abs(\n    np.subtract.outer(np.arange(n_periods), np.arange(n_periods))\n)\nadoption_period = 16\n\nsimulator = core.PanelSimulator(\n    name=\"empirical_signal_example\",\n    dimensions=core.PanelDimensions(*baseline.shape),\n    assignment=primitives.RandomizedSingleCohortAssignment(\n        n_treated=1,\n        adoption_period=adoption_period,\n    ),\n    outcome_model=primitives.EmpiricalPanelOutcome(\n        baseline,\n        noise_covariance=noise_covariance,\n        source=\"illustrative cleaned panel\",\n    ),\n    effect_model=primitives.ConstantEffect(1.25),\n    unit_ids=[f\"unit_{index:02d}\" for index in range(n_units)],\n    time_ids=np.arange(2000, 2000 + n_periods),\n)\n\npanel = simulator.simulate(streams=core.SimulationSeeds.from_seed(42))\nprint(panel.shape, panel.treated_units, panel.true_att)\n\n(12, 24) [0] 1.25\n\n\nThe result retains the empirical signal, realized noise, treatment matrix, untreated potential outcome, complete effect surface, and observed outcome.\n\noutcome_metadata = panel.metadata[\"outcome\"]\nnp.testing.assert_allclose(\n    panel.untreated_outcome,\n    outcome_metadata[\"baseline\"] + outcome_metadata[\"errors\"],\n)\nnp.testing.assert_allclose(\n    panel.outcome,\n    panel.untreated_outcome + panel.treatment_effect,\n)\n\npd.DataFrame(\n    {\n        \"quantity\": [\"noise model\", \"source\", \"true ATT\", \"treated cells\"],\n        \"value\": [\n            outcome_metadata[\"noise_model\"],\n            outcome_metadata[\"source\"],\n            panel.true_att,\n            int(panel.counterfactual_target_mask.sum()),\n        ],\n    }\n)\n\n\n\n\n\n\n\n\nquantity\nvalue\n\n\n\n\n0\nnoise model\ncorrelated_gaussian\n\n\n1\nsource\nillustrative cleaned panel\n\n\n2\ntrue ATT\n1.25\n\n\n3\ntreated cells\n8\n\n\n\n\n\n\n\nNoise is part of \\(Y(0)\\), not the treatment effect. This distinction matters: changing the outcome-noise seed changes the observed untreated surface but does not change the known effect surface.",
     "crumbs": [
       "Home",
-      "Start here",
-      "Synthetic panels with visible assumptions"
+      "Research tutorials",
+      "Semi-synthetic panels from empirical data"
     ]
   },
   {
-    "objectID": "index.html#run-a-design",
-    "href": "index.html#run-a-design",
-    "title": "Synthetic panels with visible assumptions",
-    "section": "2 Run a design",
-    "text": "2 Run a design\n\nfrom pypanelsim import designs\n\npanel = designs.classic_factor(overlap=1.0, seed=42)\n\nprint(\"shape:\", panel.shape)\nprint(\"treated units:\", panel.treated_units.size)\nprint(\"true ATT:\", round(panel.true_att, 3))\n\nshape: (200, 50)\ntreated units: 40\ntrue ATT: 1.1\n\n\nThe result is a validated PanelDataset. Its main identity is\n\\[\nY_{it} = Y_{it}(0) + D_{it}\\tau_{it}.\n\\]\nThe result stores all three terms. It also stores \\(\\tau_{it}\\) for every cell, including cells that were not treated.",
+    "objectID": "vignettes/semi-synthetic-panels.html#loading-an-empirical-panel",
+    "href": "vignettes/semi-synthetic-panels.html#loading-an-empirical-panel",
+    "title": "Semi-synthetic panels from empirical data",
+    "section": "2 Loading an empirical panel",
+    "text": "2 Loading an empirical panel\nThe package accepts the matrix and does not own data acquisition or cleaning. For a long Penn World Table extract, an analysis can make the transformation explicit:\nframe = pd.read_csv(\"penn_world_table_extract.csv\")\nwide = (\n    frame.pivot(index=\"countrycode\", columns=\"year\", values=\"log_gdp\")\n    .sort_index(axis=0)\n    .sort_index(axis=1)\n)\n\n# Resolve missing values according to the research design before construction.\nif wide.isna().any().any():\n    raise ValueError(\"the empirical panel must be complete\")\n\nbaseline = wide.to_numpy(dtype=float)\nunit_ids = wide.index.to_numpy()\ntime_ids = wide.columns.to_numpy()\nCentering, scaling, logging, winsorizing, and imputation are scientific choices, so EmpiricalPanelOutcome never applies them implicitly.",
     "crumbs": [
       "Home",
-      "Start here",
-      "Synthetic panels with visible assumptions"
+      "Research tutorials",
+      "Semi-synthetic panels from empirical data"
     ]
   },
   {
-    "objectID": "index.html#build-a-design",
-    "href": "index.html#build-a-design",
-    "title": "Synthetic panels with visible assumptions",
-    "section": "3 Build a design",
-    "text": "3 Build a design\n\nfrom pypanelsim import core, primitives\n\nsimulator = core.PanelSimulator(\n    name=\"fixed_effects_plus_factors\",\n    dimensions=core.PanelDimensions(n_units=200, n_periods=40),\n    assignment=primitives.RandomizedSingleCohortAssignment(\n        n_treated=80,\n        adoption_period=25,\n    ),\n    outcome_model=primitives.SumOutcomeModel(\n        models=(\n            primitives.TwoWayFixedEffectsOutcome(noise_scale=0.2),\n            primitives.LowRankFactorOutcome(rank=2, factor_scale=0.7),\n        )\n    ),\n    effect_model=primitives.LinearRampEffect(slope=0.2),\n)\n\ncustom_panel = simulator.simulate(seed=42)\nprint(custom_panel.metadata[\"outcome\"][\"model\"])\n\nSumOutcomeModel\n\n\nThis is the main way to build a simulation. Two-way fixed effects and low-rank factors are ordinary outcome models, so they can be combined with other components.",
+    "objectID": "vignettes/semi-synthetic-panels.html#using-a-fitted-empirical-signal",
+    "href": "vignettes/semi-synthetic-panels.html#using-a-fitted-empirical-signal",
+    "title": "Semi-synthetic panels from empirical data",
+    "section": "3 Using a fitted empirical signal",
+    "text": "3 Using a fitted empirical signal\nThe input can be the raw matrix, but it can also be a fitted signal. The TROP semi-synthetic study of Athey, Imbens, Qu, and Viviano uses a rank-four approximation of each empirical panel and calibrates autocorrelated noise from the residuals. A generic rank-\\(r\\) construction is:\nu, singular_values, vt = np.linalg.svd(baseline, full_matrices=False)\nrank = 4\nsignal = (u[:, :rank] * singular_values[:rank]) @ vt[:rank]\nresiduals = baseline - signal\n\n# This sample covariance is one transparent option. The TROP archive instead\n# fits an AR(2) law to the residuals and constructs its implied covariance.\nnoise_covariance = np.cov(residuals, rowvar=False, bias=True)\n\noutcome_model = primitives.EmpiricalPanelOutcome(\n    signal,\n    noise_covariance=noise_covariance,\n    source=\"PWT rank-4 signal\",\n)\nAny supplied covariance must be finite, symmetric, positive semidefinite, and have shape (n_periods, n_periods). If serial dependence is not required, use noise_scale instead. Set neither argument for a deterministic empirical baseline. For non-Gaussian or resampled residual noise, combine a deterministic EmpiricalPanelOutcome with a custom outcome component through SumOutcomeModel.",
     "crumbs": [
       "Home",
-      "Start here",
-      "Synthetic panels with visible assumptions"
+      "Research tutorials",
+      "Semi-synthetic panels from empirical data"
     ]
   },
   {
-    "objectID": "index.html#choose-the-next-page",
-    "href": "index.html#choose-the-next-page",
-    "title": "Synthetic panels with visible assumptions",
-    "section": "4 Choose the next page",
-    "text": "4 Choose the next page\n\n\n\nGoal\nPage\n\n\n\n\nRun and inspect one simulation\nGet started\n\n\nUnderstand how a simulation runs\nHow simulation works\n\n\nSpecify who receives treatment\nAssignment\n\n\nSelect a standard benchmark\nDesign catalog\n\n\nSelect a research-motivated design\nResearch designs\n\n\nSend data to an estimator\nExport to other tools\n\n\nFind a class or function\nAPI map",
+    "objectID": "vignettes/semi-synthetic-panels.html#passing-the-draw-to-mtgpax",
+    "href": "vignettes/semi-synthetic-panels.html#passing-the-draw-to-mtgpax",
+    "title": "Semi-synthetic panels from empirical data",
+    "section": "4 Passing the draw to mtgpax",
+    "text": "4 Passing the draw to mtgpax\nmtgpax and pypanelsim both use (unit, time) outcome matrices. The handoff is therefore direct; no reshape or adapter is needed:\nfrom mtgpax import MTGPCausalEstimator\n\nmodel = MTGPCausalEstimator(\n    rank=4,\n    num_steps=500,\n    learning_rate=0.02,\n    seed=42,\n)\nfit = model.fit(\n    panel.outcome,\n    treated_units=panel.treated_units.tolist(),\n    treatment_time=adoption_period,\n)\n\ntarget = panel.counterfactual_target_mask\ncounterfactual_rmse = np.sqrt(\n    np.mean((fit.counterfactual_mean[target] - panel.untreated_outcome[target]) ** 2)\n)\neffect_rmse = np.sqrt(\n    np.mean((fit.effect_mean[target] - panel.effect_surface[target]) ** 2)\n)\nKeep repeated estimation, tuning, and result storage in the mtgpax analysis. Keep the reusable data-generating contract in pypanelsim. This lets several estimators receive byte-for-byte identical panels while the simulation retains the counterfactual and effect truth needed to score them.",
     "crumbs": [
       "Home",
-      "Start here",
-      "Synthetic panels with visible assumptions"
+      "Research tutorials",
+      "Semi-synthetic panels from empirical data"
     ]
   },
   {
-    "objectID": "index.html#what-the-package-includes",
-    "href": "index.html#what-the-package-includes",
-    "title": "Synthetic panels with visible assumptions",
-    "section": "5 What the package includes",
-    "text": "5 What the package includes\npypanelsim provides simulation components, known causal effects, checked output, and export helpers. Estimators, experiment runners, saved results, and paper builds belong in the analysis that uses the package. The same simulated panel can therefore be passed to any estimator library.",
+    "objectID": "vignettes/semi-synthetic-panels.html#reproducibility-rules",
+    "href": "vignettes/semi-synthetic-panels.html#reproducibility-rules",
+    "title": "Semi-synthetic panels from empirical data",
+    "section": "5 Reproducibility rules",
+    "text": "5 Reproducibility rules\n\nSave the empirical-data version and every preprocessing choice.\nRecord whether baseline is raw data or a fitted signal.\nSave the covariance estimator and its parameters.\nUse SimulationSeeds when assignment, outcome noise, and treatment effects must remain independently reproducible.\nTreat empirical unit and time labels as unit_ids and time_ids; do not encode them only through row order.\nNever fit or calibrate the baseline with treated post-treatment outcomes when the scientific design forbids using them.",
     "crumbs": [
       "Home",
-      "Start here",
-      "Synthetic panels with visible assumptions"
+      "Research tutorials",
+      "Semi-synthetic panels from empirical data"
     ]
   },
   {
-    "objectID": "validation.html",
-    "href": "validation.html",
-    "title": "Tests and sources",
+    "objectID": "api.html",
+    "href": "api.html",
+    "title": "API map",
     "section": "",
-    "text": "The repository checks three things.\n\n\nUnit tests check component shapes, binary and absorbing treatment, immutable arrays, treatment-effect identities, event-time support, annotations, and random stream behavior.\n\n\n\nEvery named design is constructed and simulated. Tests also cover invalid configurations and public imports.\n\n\n\nThe wheel is built and installed into a fresh environment. A smoke test imports core, primitives, and designs, then creates and exports a panel.",
+    "text": "Most code starts with one of three modules:\nRoot-level imports also work. The documentation keeps the module name because it shows what each object does.",
     "crumbs": [
       "Home",
-      "Validation",
-      "Tests and sources"
+      "API reference",
+      "API map"
     ]
   },
   {
-    "objectID": "validation.html#automated-checks",
-    "href": "validation.html#automated-checks",
-    "title": "Tests and sources",
-    "section": "",
-    "text": "The repository checks three things.\n\n\nUnit tests check component shapes, binary and absorbing treatment, immutable arrays, treatment-effect identities, event-time support, annotations, and random stream behavior.\n\n\n\nEvery named design is constructed and simulated. Tests also cover invalid configurations and public imports.\n\n\n\nThe wheel is built and installed into a fresh environment. A smoke test imports core, primitives, and designs, then creates and exports a panel.",
+    "objectID": "api.html#by-task",
+    "href": "api.html#by-task",
+    "title": "API map",
+    "section": "1 By task",
+    "text": "1 By task\n\n\n\nTask\nStart with\nReference\n\n\n\n\nDefine dimensions and compose a simulation\ncore.PanelSimulator\nCore\n\n\nInspect arrays, identifiers, annotations, and known effects\ncore.PanelDataset\nCore\n\n\nMake randomness stable by component\ncore.SimulationSeeds\nCore\n\n\nChoose a feature or assignment model\nprimitives\nBuilding blocks\n\n\nChoose an untreated-outcome model\nprimitives\nBuilding blocks\n\n\nChoose a treatment-effect model\nprimitives\nBuilding blocks\n\n\nRun a ready-made design\ndesigns\nDesigns\n\n\nRegister local design factories\ncore.DGPRegistry\nRegistry",
     "crumbs": [
       "Home",
-      "Validation",
-      "Tests and sources"
+      "API reference",
+      "API map"
     ]
   },
   {
-    "objectID": "validation.html#standard-commands",
-    "href": "validation.html#standard-commands",
-    "title": "Tests and sources",
-    "section": "2 Standard commands",
-    "text": "2 Standard commands\nuv sync --extra docs --extra estimators\nuv run ruff format --check src tests examples website\nuv run ruff check src tests examples website\nuv run pytest\nuv run quarto render website --execute\nuv build\nRelease notes or CI should record the exact commands that passed.",
+    "objectID": "api.html#constructor-and-direct-draw-convention",
+    "href": "api.html#constructor-and-direct-draw-convention",
+    "title": "API map",
+    "section": "2 Constructor and direct-draw convention",
+    "text": "2 Constructor and direct-draw convention\nReady-made families use two related functions:\nsimulator = designs.baker_design()\npanel = designs.baker(seed=42)\nThe _design function returns a reusable PanelSimulator. The shorter function runs one draw and returns a PanelDataset.",
     "crumbs": [
       "Home",
-      "Validation",
-      "Tests and sources"
+      "API reference",
+      "API map"
     ]
   },
   {
-    "objectID": "validation.html#r-and-python-comparison",
-    "href": "validation.html#r-and-python-comparison",
-    "title": "Tests and sources",
-    "section": "3 R and Python comparison",
-    "text": "3 R and Python comparison\nR and NumPy do not share seeded random streams. The balancing validation snapshot therefore compares Monte Carlo RMSE values relative to their combined Monte Carlo standard errors. It does not claim matched R and Python draws.",
+    "objectID": "api.html#supported-imports",
+    "href": "api.html#supported-imports",
+    "title": "API map",
+    "section": "3 Supported imports",
+    "text": "3 Supported imports\ncore, primitives, and designs form the documented public API. Objects imported from internal modules can change. Public names follow the package’s release and deprecation policy.",
     "crumbs": [
       "Home",
-      "Validation",
-      "Tests and sources"
+      "API reference",
+      "API map"
     ]
   },
   {
-    "objectID": "validation.html#design-sources",
-    "href": "validation.html#design-sources",
-    "title": "Tests and sources",
-    "section": "4 Design sources",
-    "text": "4 Design sources\nSome designs follow public code or a paper. Others adapt ongoing work, and the composite design was made only to test the package. Each page states the origin next to the relevant source.",
+    "objectID": "api.html#error-conventions",
+    "href": "api.html#error-conventions",
+    "title": "API map",
+    "section": "4 Error conventions",
+    "text": "4 Error conventions\nConstructors validate configuration values at creation. Simulation validates drawn matrix shapes, finite values, binary treatment, and the causal identity. Errors identify the failed field or component. A component should not silently turn an invalid probability model into a valid one.",
     "crumbs": [
       "Home",
-      "Validation",
-      "Tests and sources"
-    ]
-  },
-  {
-    "objectID": "validation.html#sources",
-    "href": "validation.html#sources",
-    "title": "Tests and sources",
-    "section": "5 Sources",
-    "text": "5 Sources\n\nBaker dynamic effects: JFE_DID\nTWFE heterogeneity tests: repository and paper\nLarge longitudinal experiments: paper and code\nAugmented balancing: paper and estimator source\n\nThe adaptive-pooling family is a working design. The composite family is a package benchmark.",
-    "crumbs": [
-      "Home",
-      "Validation",
-      "Tests and sources"
+      "API reference",
+      "API map"
     ]
   },
   {
@@ -1080,63 +1068,147 @@
     ]
   },
   {
-    "objectID": "api.html",
-    "href": "api.html",
-    "title": "API map",
+    "objectID": "validation.html",
+    "href": "validation.html",
+    "title": "Tests and sources",
     "section": "",
-    "text": "Most code starts with one of three modules:\nRoot-level imports also work. The documentation keeps the module name because it shows what each object does.",
+    "text": "The repository checks three things.\n\n\nUnit tests check component shapes, binary and absorbing treatment, immutable arrays, treatment-effect identities, event-time support, annotations, and random stream behavior.\n\n\n\nEvery named design is constructed and simulated. Tests also cover invalid configurations and public imports.\n\n\n\nThe wheel is built and installed into a fresh environment. A smoke test imports core, primitives, and designs, then creates and exports a panel.",
     "crumbs": [
       "Home",
-      "API reference",
-      "API map"
+      "Validation",
+      "Tests and sources"
     ]
   },
   {
-    "objectID": "api.html#by-task",
-    "href": "api.html#by-task",
-    "title": "API map",
-    "section": "1 By task",
-    "text": "1 By task\n\n\n\nTask\nStart with\nReference\n\n\n\n\nDefine dimensions and compose a simulation\ncore.PanelSimulator\nCore\n\n\nInspect arrays, identifiers, annotations, and known effects\ncore.PanelDataset\nCore\n\n\nMake randomness stable by component\ncore.SimulationSeeds\nCore\n\n\nChoose a feature or assignment model\nprimitives\nBuilding blocks\n\n\nChoose an untreated-outcome model\nprimitives\nBuilding blocks\n\n\nChoose a treatment-effect model\nprimitives\nBuilding blocks\n\n\nRun a ready-made design\ndesigns\nDesigns\n\n\nRegister local design factories\ncore.DGPRegistry\nRegistry",
+    "objectID": "validation.html#automated-checks",
+    "href": "validation.html#automated-checks",
+    "title": "Tests and sources",
+    "section": "",
+    "text": "The repository checks three things.\n\n\nUnit tests check component shapes, binary and absorbing treatment, immutable arrays, treatment-effect identities, event-time support, annotations, and random stream behavior.\n\n\n\nEvery named design is constructed and simulated. Tests also cover invalid configurations and public imports.\n\n\n\nThe wheel is built and installed into a fresh environment. A smoke test imports core, primitives, and designs, then creates and exports a panel.",
     "crumbs": [
       "Home",
-      "API reference",
-      "API map"
+      "Validation",
+      "Tests and sources"
     ]
   },
   {
-    "objectID": "api.html#constructor-and-direct-draw-convention",
-    "href": "api.html#constructor-and-direct-draw-convention",
-    "title": "API map",
-    "section": "2 Constructor and direct-draw convention",
-    "text": "2 Constructor and direct-draw convention\nReady-made families use two related functions:\nsimulator = designs.baker_design()\npanel = designs.baker(seed=42)\nThe _design function returns a reusable PanelSimulator. The shorter function runs one draw and returns a PanelDataset.",
+    "objectID": "validation.html#standard-commands",
+    "href": "validation.html#standard-commands",
+    "title": "Tests and sources",
+    "section": "2 Standard commands",
+    "text": "2 Standard commands\nuv sync --extra docs --extra estimators\nuv run ruff format --check src tests examples website\nuv run ruff check src tests examples website\nuv run pytest\nuv run quarto render website --execute\nuv build\nRelease notes or CI should record the exact commands that passed.",
     "crumbs": [
       "Home",
-      "API reference",
-      "API map"
+      "Validation",
+      "Tests and sources"
     ]
   },
   {
-    "objectID": "api.html#supported-imports",
-    "href": "api.html#supported-imports",
-    "title": "API map",
-    "section": "3 Supported imports",
-    "text": "3 Supported imports\ncore, primitives, and designs form the documented public API. Objects imported from internal modules can change. Public names follow the package’s release and deprecation policy.",
+    "objectID": "validation.html#r-and-python-comparison",
+    "href": "validation.html#r-and-python-comparison",
+    "title": "Tests and sources",
+    "section": "3 R and Python comparison",
+    "text": "3 R and Python comparison\nR and NumPy do not share seeded random streams. The balancing validation snapshot therefore compares Monte Carlo RMSE values relative to their combined Monte Carlo standard errors. It does not claim matched R and Python draws.",
     "crumbs": [
       "Home",
-      "API reference",
-      "API map"
+      "Validation",
+      "Tests and sources"
     ]
   },
   {
-    "objectID": "api.html#error-conventions",
-    "href": "api.html#error-conventions",
-    "title": "API map",
-    "section": "4 Error conventions",
-    "text": "4 Error conventions\nConstructors validate configuration values at creation. Simulation validates drawn matrix shapes, finite values, binary treatment, and the causal identity. Errors identify the failed field or component. A component should not silently turn an invalid probability model into a valid one.",
+    "objectID": "validation.html#design-sources",
+    "href": "validation.html#design-sources",
+    "title": "Tests and sources",
+    "section": "4 Design sources",
+    "text": "4 Design sources\nSome designs follow public code or a paper. Others adapt ongoing work, and the composite design was made only to test the package. Each page states the origin next to the relevant source.",
     "crumbs": [
       "Home",
-      "API reference",
-      "API map"
+      "Validation",
+      "Tests and sources"
+    ]
+  },
+  {
+    "objectID": "validation.html#sources",
+    "href": "validation.html#sources",
+    "title": "Tests and sources",
+    "section": "5 Sources",
+    "text": "5 Sources\n\nBaker dynamic effects: JFE_DID\nTWFE heterogeneity tests: repository and paper\nLarge longitudinal experiments: paper and code\nAugmented balancing: paper and estimator source\n\nThe adaptive-pooling family is a working design. The composite family is a package benchmark.",
+    "crumbs": [
+      "Home",
+      "Validation",
+      "Tests and sources"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Synthetic panels with visible assumptions",
+    "section": "",
+    "text": "pypanelsim generates synthetic panel data for causal and forecasting experiments. It keeps four parts of a data-generating process separate: features, treatment assignment, untreated outcomes, and treatment effects.\nThis separation answers the questions that matter in a simulation study:",
+    "crumbs": [
+      "Home",
+      "Start here",
+      "Synthetic panels with visible assumptions"
+    ]
+  },
+  {
+    "objectID": "index.html#install",
+    "href": "index.html#install",
+    "title": "Synthetic panels with visible assumptions",
+    "section": "1 Install",
+    "text": "1 Install\nuv add \"pypanelsim @ git+https://github.com/apoorvalal/pypanelsim.git\"\nPython 3.10 or later is required.",
+    "crumbs": [
+      "Home",
+      "Start here",
+      "Synthetic panels with visible assumptions"
+    ]
+  },
+  {
+    "objectID": "index.html#run-a-design",
+    "href": "index.html#run-a-design",
+    "title": "Synthetic panels with visible assumptions",
+    "section": "2 Run a design",
+    "text": "2 Run a design\n\nfrom pypanelsim import designs\n\npanel = designs.classic_factor(overlap=1.0, seed=42)\n\nprint(\"shape:\", panel.shape)\nprint(\"treated units:\", panel.treated_units.size)\nprint(\"true ATT:\", round(panel.true_att, 3))\n\nshape: (200, 50)\ntreated units: 40\ntrue ATT: 1.1\n\n\nThe result is a validated PanelDataset. Its main identity is\n\\[\nY_{it} = Y_{it}(0) + D_{it}\\tau_{it}.\n\\]\nThe result stores all three terms. It also stores \\(\\tau_{it}\\) for every cell, including cells that were not treated.",
+    "crumbs": [
+      "Home",
+      "Start here",
+      "Synthetic panels with visible assumptions"
+    ]
+  },
+  {
+    "objectID": "index.html#build-a-design",
+    "href": "index.html#build-a-design",
+    "title": "Synthetic panels with visible assumptions",
+    "section": "3 Build a design",
+    "text": "3 Build a design\n\nfrom pypanelsim import core, primitives\n\nsimulator = core.PanelSimulator(\n    name=\"fixed_effects_plus_factors\",\n    dimensions=core.PanelDimensions(n_units=200, n_periods=40),\n    assignment=primitives.RandomizedSingleCohortAssignment(\n        n_treated=80,\n        adoption_period=25,\n    ),\n    outcome_model=primitives.SumOutcomeModel(\n        models=(\n            primitives.TwoWayFixedEffectsOutcome(noise_scale=0.2),\n            primitives.LowRankFactorOutcome(rank=2, factor_scale=0.7),\n        )\n    ),\n    effect_model=primitives.LinearRampEffect(slope=0.2),\n)\n\ncustom_panel = simulator.simulate(seed=42)\nprint(custom_panel.metadata[\"outcome\"][\"model\"])\n\nSumOutcomeModel\n\n\nThis is the main way to build a simulation. Two-way fixed effects and low-rank factors are ordinary outcome models, so they can be combined with other components.",
+    "crumbs": [
+      "Home",
+      "Start here",
+      "Synthetic panels with visible assumptions"
+    ]
+  },
+  {
+    "objectID": "index.html#choose-the-next-page",
+    "href": "index.html#choose-the-next-page",
+    "title": "Synthetic panels with visible assumptions",
+    "section": "4 Choose the next page",
+    "text": "4 Choose the next page\n\n\n\nGoal\nPage\n\n\n\n\nRun and inspect one simulation\nGet started\n\n\nUnderstand how a simulation runs\nHow simulation works\n\n\nSpecify who receives treatment\nAssignment\n\n\nSelect a standard benchmark\nDesign catalog\n\n\nSelect a research-motivated design\nResearch designs\n\n\nSend data to an estimator\nExport to other tools\n\n\nFind a class or function\nAPI map",
+    "crumbs": [
+      "Home",
+      "Start here",
+      "Synthetic panels with visible assumptions"
+    ]
+  },
+  {
+    "objectID": "index.html#what-the-package-includes",
+    "href": "index.html#what-the-package-includes",
+    "title": "Synthetic panels with visible assumptions",
+    "section": "5 What the package includes",
+    "text": "5 What the package includes\npypanelsim provides simulation components, known causal effects, checked output, and export helpers. Estimators, experiment runners, saved results, and paper builds belong in the analysis that uses the package. The same simulated panel can therefore be passed to any estimator library.",
+    "crumbs": [
+      "Home",
+      "Start here",
+      "Synthetic panels with visible assumptions"
     ]
   },
   {
@@ -1420,7 +1492,7 @@
     "href": "reference/primitives.html#untreated-outcome-models",
     "title": "Building-block API",
     "section": "4 Untreated-outcome models",
-    "text": "4 Untreated-outcome models\n\nshow((\n    \"TwoWayFixedEffectsOutcome\",\n    \"AdditiveFactorOutcome\",\n    \"LowRankFactorOutcome\",\n    \"LinearFeatureOutcome\",\n    \"UnitTrendOutcome\",\n    \"UnitPositionOutcome\",\n    \"PeriodicTimeOutcome\",\n    \"ARMAErrorOutcome\",\n    \"RandomARMAErrorOutcome\",\n    \"ClusteredTrendOutcome\",\n    \"LatentSelectionOutcome\",\n    \"SumOutcomeModel\",\n    \"CallableOutcomeModel\",\n))\n\nTwoWayFixedEffectsOutcome(unit_effect_scale: 'float' = 1.0, time_effect_scale: 'float' = 1.0, noise_scale: 'float' = 0.0) -&gt; None\nAdditiveFactorOutcome(unit_effect_scale: 'float' = 1.0, time_effect_scale: 'float' = 1.0, noise_scale: 'float' = 0.0) -&gt; None\nLowRankFactorOutcome(rank: 'int' = 2, loading_scale: 'float' = 1.0, factor_scale: 'float' = 1.0, noise_scale: 'float' = 0.0, distribution: 'str' = 'normal', loading_mean: 'float' = 0.0, control_loading_mean: 'float | None' = None, treated_loading_mean: 'float | None' = None) -&gt; None\nLinearFeatureOutcome(level_coefficients: 'Sequence[float]' = (), trend_coefficients: 'Sequence[float]' = (), source: 'str' = 'observables', noise_scale: 'float' = 0.0, center_time: 'bool' = False) -&gt; None\nUnitTrendOutcome(scale: 'float' = 1.0, center_time: 'bool' = False) -&gt; None\nUnitPositionOutcome(location_start: 'float' = 0.0, location_stop: 'float' = 2.0, scale: 'float' = 1.0) -&gt; None\nPeriodicTimeOutcome(pattern: 'Sequence[float]' = (-0.1, 0.1, 0.0, 0.0, 0.1, 0.5, 0.5), scale: 'float' = 1.0) -&gt; None\nARMAErrorOutcome(ar_coefficients: 'Sequence[float]' = (0.7,), ma_coefficients: 'Sequence[float]' = (), innovation_scale: 'float' = 1.0, burn_in: 'int' = 100) -&gt; None\nRandomARMAErrorOutcome(max_ar_order: 'int' = 2, max_ma_order: 'int' = 2, ar_bound: 'float' = 0.5, ma_bound: 'float' = 0.5, innovation_scale: 'float' = 1.0, burn_in: 'int' = 100) -&gt; None\nClusteredTrendOutcome(n_clusters: 'int' = 5, slope_scale: 'float' = 1.0, within_cluster_scale: 'float' = 0.0, center_distribution: 'str' = 'normal', center_time: 'bool' = False) -&gt; None\nLatentSelectionOutcome(stable: 'bool' = False, noise_scale: 'float' = 0.1, trend_loading_bounds: 'tuple[float, float]' = (0.1, 0.5)) -&gt; None\nSumOutcomeModel(models: 'Sequence[OutcomeModel]', weights: 'Sequence[float] | None' = None) -&gt; None\nCallableOutcomeModel(function: 'OutcomeCallable', name: 'str' = 'callable_outcome') -&gt; None\n\n\n\n4.1 Models\n\n\n\n\n\n\n\nClass\nUntreated structure\n\n\n\n\nTwoWayFixedEffectsOutcome\n\\(\\alpha_i+\\gamma_t+\\varepsilon_{it}\\)\n\n\nAdditiveFactorOutcome\ncompatibility form of additive unit and time factors\n\n\nLowRankFactorOutcome\n\\(\\lambda_i'f_t+\\varepsilon_{it}\\)\n\n\nLinearFeatureOutcome\nfeature-dependent level and linear trend\n\n\nUnitTrendOutcome\nrandom or supplied unit-specific slopes\n\n\nUnitPositionOutcome\nsmooth outcomes over latent unit position\n\n\nPeriodicTimeOutcome\nshared sine and cosine time terms\n\n\nARMAErrorOutcome\nfixed AR and MA coefficients\n\n\nRandomARMAErrorOutcome\nunit-specific random ARMA coefficients\n\n\nClusteredTrendOutcome\ncluster-specific linear trends\n\n\nLatentSelectionOutcome\noutcomes linked to latent selection\n\n\nSumOutcomeModel\nweighted sum of outcome components\n\n\nCallableOutcomeModel\nadapter for a compatible Python callable\n\n\n\nLowRankFactorOutcome.rank is the factor rank. loading_scale and factor_scale set factor scales. Separate control and treated loading means can create limited factor overlap.\nLinearFeatureOutcome.source is observables or unobservables. level_coefficients affect the level. trend_coefficients multiply the time index. Set center_time=True to center that index.\nSumOutcomeModel is the main composition tool:\n\ncombined = primitives.SumOutcomeModel(\n    models=(\n        primitives.TwoWayFixedEffectsOutcome(noise_scale=0.2),\n        primitives.LowRankFactorOutcome(rank=2),\n    ),\n    weights=(1.0, 0.5),\n)\nprint(combined)\n\nSumOutcomeModel(models=(TwoWayFixedEffectsOutcome(unit_effect_scale=1.0, time_effect_scale=1.0, noise_scale=0.2), LowRankFactorOutcome(rank=2, loading_scale=1.0, factor_scale=1.0, noise_scale=0.0, distribution='normal', loading_mean=0.0, control_loading_mean=None, treated_loading_mean=None)), weights=(1.0, 0.5))",
+    "text": "4 Untreated-outcome models\n\nshow((\n    \"TwoWayFixedEffectsOutcome\",\n    \"AdditiveFactorOutcome\",\n    \"EmpiricalPanelOutcome\",\n    \"LowRankFactorOutcome\",\n    \"LinearFeatureOutcome\",\n    \"UnitTrendOutcome\",\n    \"UnitPositionOutcome\",\n    \"PeriodicTimeOutcome\",\n    \"ARMAErrorOutcome\",\n    \"RandomARMAErrorOutcome\",\n    \"ClusteredTrendOutcome\",\n    \"LatentSelectionOutcome\",\n    \"SumOutcomeModel\",\n    \"CallableOutcomeModel\",\n))\n\nTwoWayFixedEffectsOutcome(unit_effect_scale: 'float' = 1.0, time_effect_scale: 'float' = 1.0, noise_scale: 'float' = 0.0) -&gt; None\nAdditiveFactorOutcome(unit_effect_scale: 'float' = 1.0, time_effect_scale: 'float' = 1.0, noise_scale: 'float' = 0.0) -&gt; None\nEmpiricalPanelOutcome(baseline: 'ArrayLike', noise_scale: 'float' = 0.0, noise_covariance: 'ArrayLike | None' = None, source: 'str | None' = None) -&gt; None\nLowRankFactorOutcome(rank: 'int' = 2, loading_scale: 'float' = 1.0, factor_scale: 'float' = 1.0, noise_scale: 'float' = 0.0, distribution: 'str' = 'normal', loading_mean: 'float' = 0.0, control_loading_mean: 'float | None' = None, treated_loading_mean: 'float | None' = None) -&gt; None\nLinearFeatureOutcome(level_coefficients: 'Sequence[float]' = (), trend_coefficients: 'Sequence[float]' = (), source: 'str' = 'observables', noise_scale: 'float' = 0.0, center_time: 'bool' = False) -&gt; None\nUnitTrendOutcome(scale: 'float' = 1.0, center_time: 'bool' = False) -&gt; None\nUnitPositionOutcome(location_start: 'float' = 0.0, location_stop: 'float' = 2.0, scale: 'float' = 1.0) -&gt; None\nPeriodicTimeOutcome(pattern: 'Sequence[float]' = (-0.1, 0.1, 0.0, 0.0, 0.1, 0.5, 0.5), scale: 'float' = 1.0) -&gt; None\nARMAErrorOutcome(ar_coefficients: 'Sequence[float]' = (0.7,), ma_coefficients: 'Sequence[float]' = (), innovation_scale: 'float' = 1.0, burn_in: 'int' = 100) -&gt; None\nRandomARMAErrorOutcome(max_ar_order: 'int' = 2, max_ma_order: 'int' = 2, ar_bound: 'float' = 0.5, ma_bound: 'float' = 0.5, innovation_scale: 'float' = 1.0, burn_in: 'int' = 100) -&gt; None\nClusteredTrendOutcome(n_clusters: 'int' = 5, slope_scale: 'float' = 1.0, within_cluster_scale: 'float' = 0.0, center_distribution: 'str' = 'normal', center_time: 'bool' = False) -&gt; None\nLatentSelectionOutcome(stable: 'bool' = False, noise_scale: 'float' = 0.1, trend_loading_bounds: 'tuple[float, float]' = (0.1, 0.5)) -&gt; None\nSumOutcomeModel(models: 'Sequence[OutcomeModel]', weights: 'Sequence[float] | None' = None) -&gt; None\nCallableOutcomeModel(function: 'OutcomeCallable', name: 'str' = 'callable_outcome') -&gt; None\n\n\n\n4.1 Models\n\n\n\n\n\n\n\nClass\nUntreated structure\n\n\n\n\nTwoWayFixedEffectsOutcome\n\\(\\alpha_i+\\gamma_t+\\varepsilon_{it}\\)\n\n\nAdditiveFactorOutcome\ncompatibility form of additive unit and time factors\n\n\nEmpiricalPanelOutcome\nsupplied unit-by-time signal plus iid or correlated Gaussian noise\n\n\nLowRankFactorOutcome\n\\(\\lambda_i'f_t+\\varepsilon_{it}\\)\n\n\nLinearFeatureOutcome\nfeature-dependent level and linear trend\n\n\nUnitTrendOutcome\nrandom or supplied unit-specific slopes\n\n\nUnitPositionOutcome\nsmooth outcomes over latent unit position\n\n\nPeriodicTimeOutcome\nshared sine and cosine time terms\n\n\nARMAErrorOutcome\nfixed AR and MA coefficients\n\n\nRandomARMAErrorOutcome\nunit-specific random ARMA coefficients\n\n\nClusteredTrendOutcome\ncluster-specific linear trends\n\n\nLatentSelectionOutcome\noutcomes linked to latent selection\n\n\nSumOutcomeModel\nweighted sum of outcome components\n\n\nCallableOutcomeModel\nadapter for a compatible Python callable\n\n\n\nLowRankFactorOutcome.rank is the factor rank. loading_scale and factor_scale set factor scales. Separate control and treated loading means can create limited factor overlap.\nLinearFeatureOutcome.source is observables or unobservables. level_coefficients affect the level. trend_coefficients multiply the time index. Set center_time=True to center that index.\nEmpiricalPanelOutcome is the data-backed semi-synthetic primitive. It copies and freezes the supplied (unit, time) baseline. Use noise_scale for iid Gaussian cell noise or noise_covariance for one correlated Gaussian time path per unit. The component does not silently normalize, impute, or smooth data; do those steps before construction. See Semi-synthetic panels from empirical data for a complete design and an mtgpax handoff.\nSumOutcomeModel is the main composition tool:\n\ncombined = primitives.SumOutcomeModel(\n    models=(\n        primitives.TwoWayFixedEffectsOutcome(noise_scale=0.2),\n        primitives.LowRankFactorOutcome(rank=2),\n    ),\n    weights=(1.0, 0.5),\n)\nprint(combined)\n\nSumOutcomeModel(models=(TwoWayFixedEffectsOutcome(unit_effect_scale=1.0, time_effect_scale=1.0, noise_scale=0.2), LowRankFactorOutcome(rank=2, loading_scale=1.0, factor_scale=1.0, noise_scale=0.0, distribution='normal', loading_mean=0.0, control_loading_mean=None, treated_loading_mean=None)), weights=(1.0, 0.5))",
     "crumbs": [
       "Home",
       "API reference",

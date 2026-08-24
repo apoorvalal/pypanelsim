@@ -36,6 +36,11 @@ print(y.shape, d.shape, y0.shape, tau.shape)
 
 The returned arrays are read-only unless `copy=True` is requested.
 
+`mtgpax` accepts the same matrix layout. The [semi-synthetic panel
+tutorial](vignettes/semi-synthetic-panels.qmd) starts from a fixed empirical
+signal, injects auditable noise, assigns treatment, and passes the resulting
+outcome directly to `MTGPCausalEstimator`.
+
 ## pandas and formula estimators
 
 ```{python}

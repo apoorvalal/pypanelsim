@@ -87,6 +87,7 @@ logit. Coefficient dimensions must match the corresponding feature counts.
 show((
     "TwoWayFixedEffectsOutcome",
     "AdditiveFactorOutcome",
+    "EmpiricalPanelOutcome",
     "LowRankFactorOutcome",
     "LinearFeatureOutcome",
     "UnitTrendOutcome",
@@ -107,6 +108,7 @@ show((
 |---|---|
 | `TwoWayFixedEffectsOutcome` | $\alpha_i+\gamma_t+\varepsilon_{it}$ |
 | `AdditiveFactorOutcome` | compatibility form of additive unit and time factors |
+| `EmpiricalPanelOutcome` | supplied unit-by-time signal plus iid or correlated Gaussian noise |
 | `LowRankFactorOutcome` | $\lambda_i'f_t+\varepsilon_{it}$ |
 | `LinearFeatureOutcome` | feature-dependent level and linear trend |
 | `UnitTrendOutcome` | random or supplied unit-specific slopes |
@@ -126,6 +128,14 @@ create limited factor overlap.
 `LinearFeatureOutcome.source` is `observables` or `unobservables`.
 `level_coefficients` affect the level. `trend_coefficients` multiply the time
 index. Set `center_time=True` to center that index.
+
+`EmpiricalPanelOutcome` is the data-backed semi-synthetic primitive. It copies
+and freezes the supplied `(unit, time)` baseline. Use `noise_scale` for iid
+Gaussian cell noise or `noise_covariance` for one correlated Gaussian time path
+per unit. The component does not silently normalize, impute, or smooth data; do
+those steps before construction. See [Semi-synthetic panels from empirical
+data](../vignettes/semi-synthetic-panels.qmd) for a complete design and an
+`mtgpax` handoff.
 
 `SumOutcomeModel` is the main composition tool:
 
