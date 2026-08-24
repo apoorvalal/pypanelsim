@@ -3,6 +3,7 @@ project:
   output-dir: ../docs
   resources:
     - .nojekyll
+    - llms.txt
   render:
     - index.qmd
     - getting-started.qmd
@@ -48,6 +49,8 @@ website:
         text: Export
       - href: api.qmd
         text: API
+      - href: llms.txt
+        text: LLM guide
     right:
       - icon: github
         href: "https://github.com/apoorvalal/pypanelsim"

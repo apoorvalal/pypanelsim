@@ -1,0 +1,398 @@
+# pypanelsim
+
+> `pypanelsim` is a composable, estimator-neutral Python library for generating synthetic panel data with explicit treatment assignment, untreated potential outcomes, treatment-effect surfaces, and known causal truth.
+
+The package requires Python 3.10 or later. Its core runtime dependencies are NumPy and Matplotlib. Estimator libraries are optional and deliberately excluded from the simulation layer.
+
+## Primary links
+
+- [Documentation](https://apoorvalal.github.io/pypanelsim/): tutorials, design catalog, architecture, validation, and API reference.
+- [Get started](https://apoorvalal.github.io/pypanelsim/getting-started.html): simulate, inspect, modify, export, and estimate from a panel.
+- [Architecture](https://apoorvalal.github.io/pypanelsim/architecture.html): execution order, matrix conventions, random streams, and extension points.
+- [API map](https://apoorvalal.github.io/pypanelsim/api.html): public classes and functions organized by task.
+- [Core API](https://apoorvalal.github.io/pypanelsim/reference/core.html): simulator, contexts, immutable data, truth, and random streams.
+- [Building-block API](https://apoorvalal.github.io/pypanelsim/reference/primitives.html): feature, assignment, outcome, and effect primitives.
+- [Design API](https://apoorvalal.github.io/pypanelsim/reference/designs.html): configured benchmark and research families.
+- [Research designs](https://apoorvalal.github.io/pypanelsim/research-designs.html): scientific purpose and provenance of each design family.
+- [Interoperability](https://apoorvalal.github.io/pypanelsim/interoperability.html): NumPy, pandas, Polars, Arrow, R, and estimator adapters.
+- [Tests and sources](https://apoorvalal.github.io/pypanelsim/validation.html): validation scope, standard commands, and research sources.
+- [Source repository](https://github.com/apoorvalal/pypanelsim): package, tests, examples, documentation sources, and issue tracker.
+
+## What the library models
+
+Every simulation separates four scientific choices:
+
+1. Which observed and latent features exist?
+2. Which units receive treatment, and when?
+3. What untreated potential outcomes would occur?
+4. What treatment-effect surface applies to the panel?
+
+This separation is the main design principle. Assignment, untreated outcomes, and treatment effects are independently replaceable components. A change to one part of a data-generating process should not require rewriting the others.
+
+All panel matrices use `(unit, time)` order and therefore have shape `(n_units, n_periods)`. The stored causal decomposition is:
+
+- `outcome`: observed outcomes, `Y`;
+- `treatment`: binary treatment state, `D`;
+- `untreated_outcome`: untreated potential outcomes, `Y(0)`;
+- `effect_surface`: the cell-level effect that would apply under treatment, `tau`;
+- `treatment_effect`: the realized effect, `D * tau`.
+
+The simulator enforces `outcome = untreated_outcome + treatment_effect` and `treatment_effect = treatment * effect_surface`.
+
+## Public API organization
+
+Prefer descriptive module imports:
+
+```python
+from pypanelsim import core, designs, primitives
+```
+
+The three documented public namespaces are:
+
+- `pypanelsim.core`: data contracts and orchestration. This includes `PanelDimensions`, component contexts and protocols, `PanelSimulator`, `PanelDataset`, `PanelTruth`, `SimulationSeeds`, and `DGPRegistry`.
+- `pypanelsim.primitives`: reusable probability laws and adapters for features, treatment assignment, untreated outcomes, and treatment effects.
+- `pypanelsim.designs`: configured benchmark and research families, including their configuration dataclasses, reusable simulator constructors, direct-draw functions, and catalogs.
+
+Root-level imports remain available for compatibility. New documentation should use the descriptive namespaces because `core.PanelSimulator`, `primitives.LowRankFactorOutcome`, and `designs.baker` communicate their roles.
+
+Internal modules may change without the same compatibility guarantees. Public additions must be exported through the appropriate namespace and, when compatibility requires it, through `pypanelsim.__init__`.
+
+## Simulation pipeline
+
+`core.PanelSimulator.simulate` evaluates a design in this order:
+
+1. Resolve either one shared NumPy generator or five named component generators.
+2. Run the optional unit-feature model.
+3. Build an `AssignmentContext` from dimensions and realized unit features.
+4. Run the assignment model to produce the treatment matrix.
+5. Run the optional time-feature model.
+6. Build a `SimulationContext` containing dimensions, treatment, unit features, and time features.
+7. Run the untreated-outcome model.
+8. Run the treatment-effect model.
+9. Validate component matrices and the causal identities.
+10. Merge annotations and metadata into an immutable `PanelDataset`.
+
+Later components can use earlier draws. Assignment can depend on observed and latent unit features. Untreated outcomes and treatment effects can depend on features, treatment timing, and shared time features. These dependencies remain explicit in component signatures.
+
+## Core contracts
+
+### Dimensions and draw objects
+
+`core.PanelDimensions(n_units, n_periods)` validates a positive rectangular panel.
+
+Components return small immutable dataclasses:
+
+- `core.ComponentDraw(values, metadata)` for assignment, outcome, and effect matrices;
+- `core.UnitFeatureDraw(observables, unobservables, metadata, estimator_observables, unit_annotations)` for unit features;
+- `core.TimeFeatureDraw(values, metadata, time_annotations)` for time features.
+
+`ComponentDraw.values` must be a finite `(n_units, n_periods)` matrix when used for assignment, outcomes, or effects. Metadata should contain latent draws and scientific parameters needed to audit the simulation.
+
+### Contexts
+
+`core.AssignmentContext` exposes:
+
+- `dimensions`;
+- observed unit features;
+- latent unit features;
+- feature metadata.
+
+`core.SimulationContext` additionally exposes:
+
+- the realized binary treatment matrix;
+- optional time features and their metadata;
+- `ever_treated`, `treated_units`, and `control_units`;
+- `is_absorbing` and `adoption_times` for absorbing treatment paths.
+
+Never-treated units use `n_periods` as their adoption-time sentinel.
+
+### Structural protocols
+
+The component protocols use structural typing. A custom component does not inherit from a package base class; it implements the required method:
+
+- `UnitFeatureModel.generate(dimensions, rng) -> UnitFeatureDraw`;
+- `AssignmentModel.assign(context, rng) -> ComponentDraw`;
+- `TimeFeatureModel.generate(dimensions, rng) -> TimeFeatureDraw`;
+- `OutcomeModel.generate(context, rng) -> ComponentDraw`;
+- `EffectModel.generate(context, rng) -> ComponentDraw`.
+
+The supplied `rng` is a `numpy.random.Generator`. Components must use it instead of NumPy's process-wide random state.
+
+## Data and truth contracts
+
+`core.PanelDataset` owns copies of all arrays and marks them read-only. Nested metadata, unit annotations, and time annotations are also frozen. This prevents estimator code from mutating the simulation or its latent truth.
+
+Important properties and methods are:
+
+- `shape`, `n_units`, and `n_periods`;
+- `ever_treated`, `treated_units`, and `control_units`;
+- `is_absorbing` and `adoption_times`;
+- `true_att`, the mean realized effect over treated cells;
+- `as_arrays()` for matrix estimators;
+- `arrays(fields)` for selected stored matrices;
+- `as_long_dict()` for data-frame, formula, Arrow, or R workflows;
+- `truth`, a `PanelTruth` view.
+
+`PanelTruth` derives targets from the realized adoption schedule and effect matrix:
+
+- `cohort_event(event_times)` returns supported cohort-by-event-time cells;
+- `event_study(event_times, weighting=...)` aggregates with cohort-size or equal-cohort weights;
+- `att_by_cohort()` returns cohort ATT values and treated-cell counts.
+
+Truth methods that use adoption timing require absorbing treatment and at least one treated cohort. Unsupported cohort-event cells remain explicit rather than being silently converted to zero.
+
+`as_long_dict()` always provides `unit`, `time`, `outcome`, `treatment`, `untreated_outcome`, and `treatment_effect`. Estimator-visible unit covariates are added automatically. Potential effects and axis annotations are opt-in through `include_effect_surface=True` and `include_annotations=True`.
+
+## Randomness and reproducibility
+
+`simulator.simulate(seed=42)` uses one shared generator in pipeline order. This mode is simple and preserves exact legacy draw order.
+
+`core.SimulationSeeds.from_seed(42)` creates independent named streams for:
+
+- `features`;
+- `assignment`;
+- `time_features`;
+- `outcome`;
+- `effect`.
+
+Use named streams when adding or changing one component must not perturb draws in another component. Pass exactly one of `seed`, `rng`, or `streams`.
+
+`PanelSimulator.iter_simulations(replications, seed=...)` spawns independent child seed sequences and yields immutable panels. Monte Carlo runners and persisted estimator results belong in the downstream analysis, not in this package.
+
+Changes to a canonical probability law or its shared-stream draw order require a versioned regression test and a changelog entry.
+
+## Included primitives
+
+### Unit and time features
+
+- `GaussianUnitFeatures`: independent observed and latent Gaussian columns.
+- `CorrelatedGaussianFeatures`: correlated Gaussian observed features, optional nonlinear transformation, and a separate estimator-visible representation.
+- `LatentGradientFeatures`: one latent factor with a position-dependent mean.
+- `GaussianTimeFeatures`: shared Gaussian time-feature columns.
+- `att_dml_nonlinear_basis`: the deterministic nonlinear expansion used by the ATT-DML design.
+
+`UnitFeatureDraw.estimator_observables` can differ from `observables`. Assignment and outcome models see `observables`; `PanelDataset.unit_covariates` exposes `estimator_observables`. This supports deliberate nuisance-model misspecification while retaining the true transformed features in component metadata.
+
+### Assignment
+
+- `SingleCohortAssignment`: deterministic absorbing treatment, defaulting to the last `n_treated` unit positions unless explicit positions are supplied.
+- `RandomizedSingleCohortAssignment`: fixed-size sampling without replacement, optionally from eligible unit positions.
+- `StaggeredAdoption`: a fixed map from unit position to adoption period.
+- `RandomizedStaggeredAdoption`: randomized fixed cohort sizes over adoption periods.
+- `BinaryLogitAssignment`: one treatment cohort with observed and latent logit predictors.
+- `SparseLogitAssignment`: one cohort with randomly selected sparse observed-feature coefficients.
+- `GeneralizedPropensityAssignment`: multinomial-logit adoption categories plus a never-treated baseline.
+
+Assignment outputs must be finite, binary, and have full panel shape. Assignment metadata should record probabilities, selected categories, cohort membership, or other latent draws needed to verify the law.
+
+### Untreated outcomes
+
+- `TwoWayFixedEffectsOutcome` and `AdditiveFactorOutcome`: additive unit effects, time effects, and optional noise.
+- `LowRankFactorOutcome`: configurable rank-k interactive fixed effects.
+- `LinearFeatureOutcome`: feature-dependent levels and unit trends.
+- `UnitTrendOutcome` and `UnitPositionOutcome`: unit-specific trend or level structure.
+- `PeriodicTimeOutcome`: a repeated deterministic time pattern.
+- `ARMAErrorOutcome` and `RandomARMAErrorOutcome`: serially correlated unit paths; the random variant draws one shared ARMA specification per component draw.
+- `ClusteredTrendOutcome`: latent groups with common trend slopes.
+- `LatentSelectionOutcome`: the latent-factor outcome law used by ATT-DML designs.
+- `SumOutcomeModel`: weighted composition of multiple outcome models.
+- `CallableOutcomeModel`: adapter for a plain compatible Python callable.
+
+### Treatment effects
+
+- `ConstantEffect`: one effect level.
+- `LinearRampEffect`: a linear exposure-time path.
+- `CohortEventTimeEffect`: one complete post-adoption path per cohort.
+- `EventTimeProfileEffect`: a callable event-time profile with optional unit multipliers.
+- `GaussianCellEffect`: independent cell heterogeneity.
+- `RandomUnitEffect`: one time-constant draw per unit.
+- `RandomWalkEffect`: one shared stochastic event-time path.
+- `CallableEffect`: adapter for a scalar, unit vector, time vector, or full unit-by-time surface.
+
+An effect component should calculate the complete potential `effect_surface`, return realized values equal to `effect_surface * context.treatment`, and include `effect_surface` in metadata. The simulator rejects nonzero realized effects outside treated cells or a mismatch between the surface and realized effects.
+
+## Ready-made design families
+
+Every public family follows a two-function convention:
+
+- `family_design(...) -> PanelSimulator` returns a reusable design;
+- `family(..., seed=...) -> PanelDataset` returns one draw.
+
+The families are:
+
+- canonical panel benchmarks: classic factor, weak factor, sparse synthetic control, factor-synthetic mixture, stationary or integrated time series, and mixed factors;
+- Baker staggered-adoption dynamic effects;
+- F-test temporal and cohort heterogeneity suites;
+- Lepskii many-cohort adaptive-pooling designs;
+- ATT-DML conditional, latent, and clustered-trend designs;
+- regression-compression and longitudinal Anscombe designs;
+- the `gsynth_composite` package stress test.
+
+Named suites expose `available_*_designs()` helpers. Families with meaningful parameter groups use frozen configuration dataclasses that validate scientific inputs before simulation.
+
+Some designs translate published or public research code, some adapt ongoing work, and `gsynth_composite` is only a package benchmark. Preserve that distinction in names, docstrings, tests, and documentation.
+
+## Source tree
+
+- `src/pypanelsim/components.py`: contexts, protocols, draw types, and widely reused primitives.
+- `src/pypanelsim/simulator.py`: RNG handling, pipeline orchestration, validation, metadata, and annotations.
+- `src/pypanelsim/data.py`: immutable `PanelDataset` and export helpers.
+- `src/pypanelsim/truth.py`: support-aware causal targets.
+- `src/pypanelsim/registry.py`: lightweight design-factory registry.
+- `src/pypanelsim/features.py`: additional feature generators and transforms.
+- `src/pypanelsim/assignments.py`: additional assignment laws.
+- `src/pypanelsim/outcomes.py`: additional untreated-outcome laws.
+- `src/pypanelsim/profiles.py`: event-time profiles and effect components.
+- `src/pypanelsim/canonical.py`: canonical balancing benchmark laws and registry.
+- `src/pypanelsim/baker.py`: Baker state-cohort design.
+- `src/pypanelsim/ftest.py`: F-test temporal and cohort suites.
+- `src/pypanelsim/designs/`: ATT-DML, Lepskii, regression-compression, Anscombe, and composite families.
+- `src/pypanelsim/core.py`, `primitives.py`, and `designs/__init__.py`: public namespace definitions.
+- `src/pypanelsim/__init__.py`: compatibility exports and package version.
+- `tests/`: behavioral, probability-law, public-namespace, and regression tests.
+- `examples/`: small custom-component and estimator-interoperability examples.
+- `website/`: Quarto source files and executable tutorials.
+- `docs/`: generated GitHub Pages output; do not edit it by hand.
+
+## Extending the library
+
+### Add a project-local component
+
+For a component used only in one analysis, define a dataclass next to that analysis and satisfy the appropriate structural protocol. This is the smallest extension surface.
+
+```python
+from dataclasses import dataclass
+
+import numpy as np
+
+from pypanelsim import core
+
+
+@dataclass(frozen=True, slots=True)
+class QuadraticTrendOutcome:
+    scale: float = 0.01
+
+    def generate(
+        self,
+        context: core.SimulationContext,
+        rng: np.random.Generator,
+    ) -> core.ComponentDraw:
+        slopes = rng.normal(scale=self.scale, size=context.dimensions.n_units)
+        time = np.arange(context.dimensions.n_periods, dtype=float)
+        values = slopes[:, None] * time[None, :] ** 2
+        return core.ComponentDraw(
+            values,
+            {"kind": "quadratic_trend", "slopes": slopes},
+        )
+```
+
+Compose it with existing primitives through `core.PanelSimulator`. No registration or inheritance is required.
+
+### Add a reusable primitive
+
+1. Put the implementation in the role-specific module: `features.py`, `assignments.py`, `outcomes.py`, or `profiles.py`. Use `components.py` only for contracts and primitives that are central to composition.
+2. Prefer a frozen, slotted dataclass with constructor validation in `__post_init__`.
+3. Accept the simulator-provided NumPy generator. Never use global random state.
+4. Return the complete required shape and finite values.
+5. Store latent draws and scientific parameters in metadata.
+6. For effects, store a complete `effect_surface` and return only its treated realization.
+7. Export the class from `pypanelsim.primitives` and add a compatibility root export when appropriate.
+8. Add tests for valid output, seeded reproducibility, invalid inputs, and any exact probability-law identity.
+9. Add the primitive to `website/reference/primitives.qmd` and to a tutorial when users need a worked example.
+10. Add a concise changelog entry.
+
+### Add a public design family
+
+1. Decide whether the design belongs in an existing family module or warrants a focused module under `src/pypanelsim/designs/`.
+2. Represent grouped parameters with a frozen configuration dataclass. Validate dimensions, probabilities, ordering, scales, and category alignment during construction.
+3. Compose existing primitives where possible. Add a new primitive only when the probability law is reusable outside the design.
+4. Provide `name_design(...)->PanelSimulator` and `name(...)->PanelDataset` functions.
+5. For named variants, provide `available_name_designs()` and reject unknown names with an error that lists valid choices.
+6. Export the configuration and functions from `pypanelsim.designs`; preserve root compatibility if the family is part of the public package API.
+7. Add tests that simulate every named variant, check the declared treatment and effect laws, verify seeded draws, and reject invalid configurations.
+8. Document the scientific question, treatment timing, known truth, and provenance. State explicitly whether the implementation reproduces a public source, adapts ongoing work, or is only a package benchmark.
+9. Add the page to `website/_quarto.yml` when creating a new documentation source.
+10. Add a changelog entry. If a canonical law or draw order changes, add a versioned regression test.
+
+### Add a private design catalog
+
+Use `core.DGPRegistry` when a downstream experiment selects simulator factories by name:
+
+```python
+from pypanelsim import core
+
+EXPERIMENTS = core.DGPRegistry()
+EXPERIMENTS.register("main_null", make_main_null)
+EXPERIMENTS.register("main_power", make_main_power)
+panel = EXPERIMENTS.create("main_power").simulate(seed=42)
+```
+
+Registry names begin with a lowercase letter and contain only lowercase letters, digits, and underscores. Keep paper-specific registries in the analysis unless the designs are broadly reusable and documented.
+
+## Testing requirements
+
+At minimum, a new component or design should test:
+
+- constructor validation and actionable errors;
+- exact output shape and finite values;
+- binary treatment and intended adoption behavior;
+- zero realized effects outside treated cells;
+- `treatment_effect = treatment * effect_surface`;
+- `outcome = untreated_outcome + treatment_effect`;
+- same-seed reproducibility and different-seed variation where stochastic;
+- named-stream isolation when component edits should not alter other draws;
+- metadata needed to verify the scientific law;
+- public namespace exports;
+- every name returned by a design catalog;
+- known formulas, cohort sizes, support, or regression fixtures for canonical designs.
+
+Run the repository checks from the root:
+
+```bash
+uv sync --locked --extra docs --extra estimators
+uv run ruff format --check .
+uv run ruff check .
+uv run pytest
+uv build
+uv run quarto render website --execute
+```
+
+Estimator-dependent tests are optional when their extra is not installed. The full documentation environment includes the estimator extra because executable tutorials call PyFixest and crabbymetrics.
+
+## Documentation and deployment
+
+Documentation is a Quarto website:
+
+- edit sources under `website/`;
+- never hand-edit generated files under `docs/`;
+- list executable pages in `project.render` inside `website/_quarto.yml`;
+- add user-facing pages to the navbar or sidebar where appropriate;
+- add static files such as `llms.txt` to `project.resources`;
+- render from the repository root with `uv run quarto render website --execute`;
+- inspect generated links and content under `docs/`;
+- commit both source changes and rendered `docs/` output.
+
+The live site is served by GitHub Pages from the repository's generated `docs/` directory. Pushing a verified `main` commit updates the site. After deployment, verify the exact live URL rather than relying only on the local render.
+
+## Boundaries
+
+- Keep estimators, Monte Carlo scheduling, saved results, and paper builds outside `src/pypanelsim`.
+- Keep panel arrays in `(unit, time)` order throughout the simulation layer.
+- Do not hide assignment or outcome assumptions in estimator adapters.
+- Do not use global NumPy random state.
+- Do not mutate returned panels or metadata.
+- Do not silently extrapolate event-study truth beyond supported cohort-period cells.
+- Do not describe a package benchmark as a published-paper reproduction.
+- Do not edit generated documentation in `docs/` directly.
+- Do not add every local research experiment to the public design catalog; use a downstream registry when reuse is limited.
+
+## Package metadata
+
+- Package: `pypanelsim`
+- Current source version: `0.1.0`
+- Python: `>=3.10`
+- Build backend: Hatchling
+- Environment and lockfile: uv
+- License: MIT
+- Repository: https://github.com/apoorvalal/pypanelsim
+- Documentation: https://apoorvalal.github.io/pypanelsim/
